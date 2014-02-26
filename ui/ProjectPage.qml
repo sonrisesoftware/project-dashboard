@@ -20,6 +20,7 @@ import Ubuntu.Components 0.1
 import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
 import "../backend"
+import "../backend/plugins"
 import "../ubuntu-ui-extras"
 
 Page {
@@ -45,8 +46,9 @@ Page {
     }
 
     ListView {
+        id: listView
         anchors.fill: parent
-        model: project.plugins
+        model: project.enabledPlugins
         spacing: units.gu(2)
         header: Item {
             width: parent.width
@@ -58,27 +60,26 @@ Page {
             height: units.gu(2)
         }
 
-        delegate: UbuntuShape {
+        delegate: Loader {
             anchors {
                 left: parent.left
                 right: parent.right
                 margins: units.gu(2)
             }
-            color: Qt.rgba(0,0,0,0.2)
-            height: units.gu(15)
-            radius: "medium"
-
-            Label {
-                anchors.centerIn: parent
-                text: child.get("name")
-            }
-
-            Document {
-                id: child
-                parent: project.document
-                docId: modelData
-            }
+            source: Qt.resolvedUrl("../backend/plugins/" + modelData + ".qml")
         }
+    }
+
+    Scrollbar {
+        flickableItem: listView
+    }
+
+    Label {
+        anchors.centerIn: parent
+        fontSize: "large"
+        opacity: 0.5
+        text: "No plugins enabled"
+        visible: listView.count === 0
     }
 
     tools: ToolbarItems {

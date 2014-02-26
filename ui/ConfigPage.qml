@@ -45,17 +45,26 @@ Page {
 
         ListItem.Standard {
             text: i18n.tr("Notes")
-            control: Switch {}
+            control: Switch {
+                checked: project.plugins.notes
+                onCheckedChanged: project.enabledPlugin("notes", checked)
+            }
         }
 
         ListItem.Standard {
             text: i18n.tr("To Do")
-            control: Switch {}
+            control: Switch {
+                checked: project.plugins.todo
+                onCheckedChanged: project.enabledPlugin("todo", checked)
+            }
         }
 
         ListItem.Standard {
             text: i18n.tr("Drawings")
-            control: Switch {}
+            control: Switch {
+                checked: project.plugins.drawings
+                onCheckedChanged: project.enabledPlugin("drawings", checked)
+            }
         }
 
         ListItem.Header {
@@ -64,12 +73,18 @@ Page {
 
         ListItem.Standard {
             text: i18n.tr("GitHub")
-            control: Switch {}
+            control: Switch {
+                checked: project.plugins.github
+                onCheckedChanged: project.enabledPlugin("github", checked)
+            }
         }
 
         ListItem.Standard {
             text: i18n.tr("Launchpad")
-            control: Switch {}
+            control: Switch {
+                checked: project.plugins.launchpad
+                onCheckedChanged: project.enabledPlugin("launchpad", checked)
+            }
         }
     }
 }

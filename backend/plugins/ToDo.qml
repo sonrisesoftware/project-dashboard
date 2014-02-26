@@ -19,46 +19,36 @@ import QtQuick 2.0
 import Ubuntu.Components 0.1
 import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
-import "../ubuntu-ui-extras"
+import ".."
+import "../../components"
 
-Object {
-    id: project
+Plugin {
+    id: root
 
-    property int docId: -1
+    title: "To Do"
+    iconSource: "list"
+    //unread: true
 
-    property string name: doc.get("name", "")
-    onNameChanged: name = doc.sync("name", name)
-
-    property alias document: doc
-
-    property var plugins: doc.get("plugins", {
-        "todo": true,
-        "notes": false,
-        "drawings": false,
-        "github": true,
-        "launchpad": false
-    })
-
-    function enabledPlugin(name, state) {
-        plugins[name] = state
-        plugins = plugins
-        doc.set("plugins", plugins)
+    ListItem.Header {
+        text: "Upcoming Tasks"
     }
 
-    property var enabledPlugins: {
-        var list = []
-
-        if (plugins.github) { list.push("GitHubIssues"); list.push("GitHubPullRequests") }
-        if (plugins.todo) list.push("ToDo")
-
-        return list
+    ToDoListItem {
     }
 
-    Document {
-        id: doc
-        docId: project.docId
-        parent: backend.document
+    ToDoListItem {
+        showDivider: false
     }
 
-    function newPlugin() {doc.newDoc({"name": "TEst"})}
+//    Item {
+//        width: parent.width
+//        height: units.gu(6)
+
+//        Label {
+//            anchors.centerIn: parent
+//            font.pixelSize: units.gu(2)
+//            opacity: 0.5
+//            text: "No upcoming tasks"
+//        }
+//    }
 }
