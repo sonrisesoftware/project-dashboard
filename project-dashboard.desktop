@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=project-dashboard
+Exec=/usr/bin/qmlscene $@ /usr/share/project-dashboard/project-dashboard.qml
+Icon=qmlscene
+Terminal=false
+Type=Application
+X-Ubuntu-Touch=true

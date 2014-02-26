@@ -1,0 +1,15 @@
+{
+    "architecture": "all",
+    "description": "description of project-dashboard",
+    "framework": "ubuntu-sdk-13.10",
+    "hooks": {
+        "project-dashboard": {
+            "apparmor": "project-dashboard.json",
+            "desktop": "project-dashboard.desktop"
+        }
+    },
+    "maintainer": "Michael Spencer <sonrisesoftware@gmail.com>",
+    "name": "com.ubuntu.developer.mdspencer.project-dashboard",
+    "title": "project-dashboard",
+    "version": "0.1"
+}
