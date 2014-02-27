@@ -4,10 +4,13 @@ before_install:
 
 install:
 - sudo add-apt-repository -y ppa:ubuntu-sdk-team/ppa
+- sudo apt-add-repository -y ppa:autopilot/ppa
 - sudo apt-get update && sudo apt-get -y install ubuntu-sdk
-- sudo apt-get -y install qtdeclarative5-test-plugin qtdeclarative5-u1db1.0 qtdeclarative5-friends0.2 pep8 pyflakes
+- sudo apt-get install -y autopilot
+- sudo apt-get -y install qtdeclarative5-test-plugin qtdeclarative5-u1db1.0 pep8 pyflakes
 - git clone https://github.com/iBeliever/ubuntu-ui-extras.git
 
 script:
 - make check
 - make python_check
+- make autopilot
