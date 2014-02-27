@@ -21,34 +21,90 @@ import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
 import ".."
 import "../../components"
+import "../../ubuntu-ui-extras/listutils.js" as List
+import "../../ubuntu-ui-extras/dateutils.js" as DateUtils
+import "../../ubuntu-ui-extras"
 
 Plugin {
     id: root
 
-    title: "To Do"
+    title: "Tasks"
     iconSource: "list"
     //unread: true
 
+    onClicked: pageStack.push(todoPage)
+
+    property alias tasks: doc.children
+    unread: tasks.length > 0
+
+    Document {
+        id: doc
+        docId: root.project.pluginDocId["todo"]
+        parent: root.project.document
+    }
+
     ListItem.Header {
         text: "Upcoming Tasks"
+        visible: tasks.length > 0
     }
 
-    ToDoListItem {
+    Repeater {
+        id: repeater
+        model: tasks
+        delegate: ToDoListItem {
+            docId: modelData
+            show: task.get("dueDate", "") !== "" && isDueThisWeek(new Date(task.get("dueDate", "")))
+            tasks: doc
+
+            Document {
+                id: task
+                docId: modelData
+                parent: doc
+            }
+        }
     }
 
-    ToDoListItem {
+    ListItem.Standard {
+        enabled: false
+        visible: tasks.length === 0
+        text: "No upcoming tasks"
+    }
+
+    ListItem.Standard {
+        text: "View all tasks"
+        progression: true
         showDivider: false
+        onClicked: pageStack.push(todoPage)
     }
 
-//    Item {
-//        width: parent.width
-//        height: units.gu(6)
+    Component {
+        id: todoPage
 
-//        Label {
-//            anchors.centerIn: parent
-//            font.pixelSize: units.gu(2)
-//            opacity: 0.5
-//            text: "No upcoming tasks"
-//        }
-//    }
+        Page {
+            title: i18n.tr("Tasks")
+
+            ListView {
+                id: repeater
+                anchors.fill: parent
+                model: tasks
+                delegate: ToDoListItem {
+                    docId: modelData
+                    tasks: doc
+
+                    Document {
+                        id: task
+                        docId: modelData
+                        parent: doc
+                    }
+                }
+            }
+        }
+    }
+
+    function isDueThisWeek(dueDate) {
+        var date = new Date()
+        date.setDate(date.getDate() + 7)
+
+        return DateUtils.dateIsBeforeOrSame(dueDate, date)
+    }
 }

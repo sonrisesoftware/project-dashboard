@@ -20,12 +20,20 @@ import Ubuntu.Components 0.1
 import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
 import "../ubuntu-ui-extras"
+import "../ubuntu-ui-extras/dateutils.js" as DateUtils
 
 ListItem.Empty {
 
     id: root
 
-    property var task
+    property int docId
+    property Document tasks
+
+    Document {
+        id: doc
+        docId: root.docId
+        parent: tasks
+    }
 
     height: opacity === 0 ? 0 : implicitHeight
 
@@ -73,7 +81,7 @@ ListItem.Empty {
 
             width: parent.width
             elide: Text.ElideRight
-            text: "Title"//task.name
+            text: doc.get("name", "")
 
             //font.bold: task.priority !== "low"
             color: selected ? UbuntuColors.orange : /*task.priority === "low" ? */Theme.palette.selected.backgroundText/* : priorityColor(task.priority)*/
@@ -88,9 +96,35 @@ ListItem.Empty {
             color:  Theme.palette.normal.backgroundText
             fontSize: "small"
             //font.italic: true
-            text: "Subtitle"//task.subText
+            text: doc.get("dueDate", "") === "" ? "" : "Due " + DateUtils.formattedDate(new Date(doc.get("dueDate", "")))
             visible: text !== ""
             elide: Text.ElideRight
+        }
+    }
+
+    onClicked: PopupUtils.open(editPopover, root)
+
+    Component {
+        id: editPopover
+
+        Popover {
+            Column {
+                id: column
+                width: parent.width
+                ListItem.SingleControl {
+                    control: TextField {
+                        text: doc.get("name")
+                        width: parent.width - units.gu(4)
+                    }
+                    showDivider: false
+                }
+
+                ListItem.Divider {}
+
+                ListItem.Standard {
+                    text: "Delete"
+                }
+            }
         }
     }
 }

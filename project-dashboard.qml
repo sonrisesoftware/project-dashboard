@@ -41,10 +41,11 @@ MainView {
 
     backgroundColor: Qt.rgba(0.3,0.3,0.3,1)
 
-    width: units.gu(50)
+    width: units.gu(100)
     height: units.gu(75)
 
     property bool wideAspect: width > units.gu(80)
+    property bool extraWideAspect: width > units.gu(150)
     property alias pageStack: pageStack
 
     PageStack {
@@ -55,7 +56,14 @@ MainView {
             visible: false
         }
 
-        Component.onCompleted: pageStack.push(projectsPage)
+        Component.onCompleted: {
+            pageStack.push(projectsPage)
+
+            if (settings.get("githubToken", "") === "")
+                pageStack.push(Qt.resolvedUrl("backend/services/OAuthPage.qml"))
+            else
+                print(settings.get("githubToken", ""))
+        }
     }
 
     Backend {
@@ -65,6 +73,12 @@ MainView {
     Database {
         id: db
         path: "project-dashboard.db"
+    }
+
+    Document {
+        id: settings
+        docId: 1
+        parent: db.document
     }
 
     function getIcon(name) {

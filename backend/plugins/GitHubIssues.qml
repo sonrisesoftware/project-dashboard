@@ -21,23 +21,55 @@ import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
 import ".."
 import "../../components"
+import "../services"
+import "../../ubuntu-ui-extras"
 
 Plugin {
     id: root
 
     title: "GitHub Issues"
     iconSource: "bug"
+    unread: issues.length > 0
 
     ListItem.Header {
-        text: "New Issues"
+        text: "Recent Issues"
+        visible: issues.length > 0
+    }
+
+    property var issues: doc.get("issues", [])
+
+    onProjectChanged: github.getIssues(root.project.services.github, function(response) {
+        print("GitHub Results:", response)
+        doc.set("issues", JSON.parse(response))
+    })
+
+    Document {
+        id: doc
+        docId: root.project.pluginDocId["githubIssues"]
+        parent: root.project.document
+    }
+
+    Repeater {
+        model: Math.min(issues.length, 4)
+        delegate: ListItem.Standard {
+            property var modelData: issues[index]
+            text: "<b>#" + modelData.number + "</b> - " + modelData.title
+        }
     }
 
     ListItem.Standard {
-        text: "<b>#1</b> - Projects can't be deleted"
+        enabled: false
+        visible: issues.length === 0
+        text: "No open issues"
     }
 
     ListItem.Standard {
-        text: "<b>#2</b> - Plugins can't be enabled or disabled"
+        text: "View all issues"
+        progression: true
         showDivider: false
+    }
+
+    GitHub {
+        id: github
     }
 }

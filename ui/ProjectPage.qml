@@ -40,38 +40,54 @@ Page {
 
     ]
 
+    flickable: project.enabledPlugins.length === 0 ? null : flickable
+
     Project {
         id: project
         docId: modelData
     }
 
-    ListView {
-        id: listView
+    Flickable {
+        id: flickable
         anchors.fill: parent
-        model: project.enabledPlugins
-        spacing: units.gu(2)
-        header: Item {
-            width: parent.width
-            height: units.gu(2)
-        }
+        contentHeight: contents.height
+        contentWidth: width
 
-        footer: Item {
+        Item {
+            id: contents
             width: parent.width
-            height: units.gu(2)
-        }
+            height: column.contentHeight + units.gu(2)
 
-        delegate: Loader {
-            anchors {
-                left: parent.left
-                right: parent.right
-                margins: units.gu(2)
+            ColumnFlow {
+                id: column
+                width: parent.width - units.gu(2)
+                height: contentHeight
+                anchors.centerIn: parent
+                model: project.enabledPlugins
+                columns: extraWideAspect ? 3 : wideAspect ? 2 : 1
+                //spacing: units.gu(2)
+                delegate: Item {
+                    width: parent.width
+                    height: loader.height + units.gu(2)
+                    Loader {
+                        id: loader
+                        anchors.centerIn: parent
+                        width: parent.width - units.gu(2)
+                        source: Qt.resolvedUrl("../backend/plugins/" + modelData + ".qml")
+                        onLoaded: {
+                            item.project = project
+                            column.reEvalColumns()
+                        }
+
+                        onHeightChanged: column.reEvalColumns()
+                    }
+                }
             }
-            source: Qt.resolvedUrl("../backend/plugins/" + modelData + ".qml")
         }
     }
 
     Scrollbar {
-        flickableItem: listView
+        flickableItem: flickable
     }
 
     Label {
@@ -79,10 +95,15 @@ Page {
         fontSize: "large"
         opacity: 0.5
         text: "No plugins enabled"
-        visible: listView.count === 0
+        visible: project.enabledPlugins.length === 0
     }
 
     tools: ToolbarItems {
+        opened: wideAspect
+        locked: wideAspect
+
+        onLockedChanged: opened = locked
+
         ToolbarButton {
             action: configAction
         }

@@ -34,21 +34,39 @@ Object {
     property var plugins: doc.get("plugins", {
         "todo": true,
         "notes": false,
-        "drawings": false,
-        "github": true,
-        "launchpad": false
+        "drawings": false
     })
 
+    property var services: doc.get("services", {
+        "github": "",
+        "launchpad": ""
+    })
+
+    property var pluginDocId: {
+        "todo": 0,
+        "notes": 1,
+        "drawings": 2,
+        "githubIssues": 3,
+        "githubPullRequests": 4,
+        "launchpad": 5
+    }
+
     function enabledPlugin(name, state) {
-        plugins[name] = state
-        plugins = plugins
-        doc.set("plugins", plugins)
+        if (plugins.hasOwnProperty(name)) {
+            plugins[name] = state
+            plugins = plugins
+            doc.set("plugins", plugins)
+        } else {
+            services[name] = state
+            services = services
+            doc.set("services", services)
+        }
     }
 
     property var enabledPlugins: {
         var list = []
 
-        if (plugins.github) { list.push("GitHubIssues"); list.push("GitHubPullRequests") }
+        if (services.github) { list.push("GitHubIssues"); list.push("GitHubPullRequests") }
         if (plugins.todo) list.push("ToDo")
 
         return list

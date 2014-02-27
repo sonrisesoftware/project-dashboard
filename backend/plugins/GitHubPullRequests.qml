@@ -21,22 +21,56 @@ import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
 import ".."
 import "../../components"
+import "../services"
+import "../../ubuntu-ui-extras"
 
 Plugin {
     id: root
 
     title: "GitHub Pull Requests"
     iconSource: "code-fork"
+    unread: issues.length > 0
 
-    Item {
-        width: parent.width
-        height: units.gu(6)
+    ListItem.Header {
+        text: "Recent Pull Requests"
+        visible: issues.length > 0
+    }
 
-        Label {
-            anchors.centerIn: parent
-            font.pixelSize: units.gu(2)
-            opacity: 0.5
-            text: "No open pull requests"
+    property var issues: doc.get("pullRequests", [])
+
+    onProjectChanged: github.getPullRequests(root.project.services.github, function(response) {
+        print("GitHub Results:", response)
+        doc.set("pullRequests", JSON.parse(response))
+    })
+
+    Document {
+        id: doc
+        docId: root.project.pluginDocId["githubPullRequests"]
+        parent: root.project.document
+    }
+
+    Repeater {
+        model: Math.min(issues.length, 4)
+        delegate: ListItem.Subtitled {
+            property var modelData: issues[index]
+            text: "<b>#" + modelData.number + "</b> - " + modelData.title
+            subText: new Date(modelData.created_at).toDateString()
         }
+    }
+
+    ListItem.Standard {
+        enabled: false
+        visible: issues.length === 0
+        text: "No open pull requests"
+    }
+
+    ListItem.Standard {
+        text: "View all issues"
+        progression: true
+        showDivider: false
+    }
+
+    GitHub {
+        id: github
     }
 }

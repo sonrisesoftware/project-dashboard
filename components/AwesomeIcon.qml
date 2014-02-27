@@ -25,8 +25,8 @@ Item {
     property alias color: text.color
     property alias size: text.font.pixelSize
 
-    width: text.width
-    height: text.height
+    width: Math.max(text.width, text.height)
+    height: width
 
     property bool shadow: false
 

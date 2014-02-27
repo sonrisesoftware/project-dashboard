@@ -32,11 +32,15 @@ UbuntuShape {
     property alias iconSource: iconImage.name
     property bool unread
 
+    //opacity: unread ? 1 : 0.5
+
     height: titleLabel.height + units.gu(3) + column.height
 
     default property alias contents: column.data
 
     signal clicked()
+
+    property Project project
 
     Item {
         id: titleItem
@@ -89,7 +93,7 @@ UbuntuShape {
                     margins: units.gu(2)
                     topMargin: units.gu(1.5)
                 }
-                color: unread ? "#33bbff" : Theme.palette.normal.baseText
+                //color: unread ? "#77ddff" : Theme.palette.normal.baseText
             }
         }
     }

@@ -20,6 +20,7 @@ import Ubuntu.Components 0.1
 import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
 import "../backend"
+import "../ubuntu-ui-extras"
 
 Page {
     id: page
@@ -52,7 +53,7 @@ Page {
         }
 
         ListItem.Standard {
-            text: i18n.tr("To Do")
+            text: i18n.tr("Tasks")
             control: Switch {
                 checked: project.plugins.todo
                 onCheckedChanged: project.enabledPlugin("todo", checked)
@@ -72,19 +73,122 @@ Page {
         }
 
         ListItem.Standard {
-            text: i18n.tr("GitHub")
+            Column {
+                spacing: units.gu(0.1)
+
+                anchors {
+                    verticalCenter: parent.verticalCenter
+                    left: parent.left
+                    leftMargin: units.gu(2)
+                    rightMargin: units.gu(1)
+                    right: parent.right
+                }
+
+                Label {
+                    width: parent.width
+                    elide: Text.ElideRight
+                    text: "GitHub"
+                }
+
+                Label {
+                    width: parent.width
+
+                    height: visible ? implicitHeight: 0
+                    color:  Theme.palette.normal.backgroundText
+                    fontSize: "small"
+                    //font.italic: true
+                    text: project.services.github === "" ? "" : "Connected to " + project.services.github
+                    visible: text !== ""
+                    elide: Text.ElideRight
+                }
+            }
             control: Switch {
-                checked: project.plugins.github
-                onCheckedChanged: project.enabledPlugin("github", checked)
+                checked: project.services.github !== ""
+                onCheckedChanged: {
+                    if (checked) {
+                        if (project.services.github === "")
+                            PopupUtils.open(githubDialog, page)
+                    } else {
+                        project.enabledPlugin("github", "")
+                    }
+                    checked = Qt.binding(function() { return project.services.github !== ""})
+                }
             }
         }
 
         ListItem.Standard {
-            text: i18n.tr("Launchpad")
-            control: Switch {
-                checked: project.plugins.launchpad
-                onCheckedChanged: project.enabledPlugin("launchpad", checked)
+            Column {
+
+                spacing: units.gu(0.1)
+
+                anchors {
+                    verticalCenter: parent.verticalCenter
+                    left: parent.left
+                    leftMargin: units.gu(2)
+                    rightMargin: units.gu(1)
+                    right: parent.right
+                }
+
+                Label {
+
+                    width: parent.width
+                    elide: Text.ElideRight
+                    text: "Launchpad"
+                }
+
+                Label {
+                    width: parent.width
+
+                    height: visible ? implicitHeight: 0
+                    color:  Theme.palette.normal.backgroundText
+                    fontSize: "small"
+                    //font.italic: true
+                    text: project.services.launchpad === "" ? "" : "Connected to " + project.services.launchpad
+                    visible: text !== ""
+                    elide: Text.ElideRight
+                }
             }
+            control: Switch {
+                checked: project.services.launchpad !== ""
+                onCheckedChanged: {
+                    if (checked) {
+                        if (project.services.launchpad === "")
+                            PopupUtils.open(launchpadDialog, page)
+                    } else {
+                        project.enabledPlugin("launchpad", "")
+                    }
+                    checked = Qt.binding(function() { return project.services.launchpad !== ""})
+                }
+            }
+        }
+    }
+
+    tools: ToolbarItems {
+        opened: wideAspect
+        locked: wideAspect
+
+        onLockedChanged: opened = locked
+    }
+
+    Component {
+        id: githubDialog
+
+        InputDialog {
+            title: i18n.tr("Connect to GitHub")
+            text: i18n.tr("Enter the name of repository on GitHub you would like to add to your project")
+            placeholderText: i18n.tr("owner/repo")
+            onAccepted: project.enabledPlugin("github", value)
+        }
+    }
+
+    Component {
+        id: launchpadDialog
+
+        InputDialog {
+            title: i18n.tr("Connect to Launchpad")
+            text: i18n.tr("Enter the name of repository on Launchpad you would like to add to your project")
+            placeholderText: i18n.tr("name")
+            onAccepted: project.enabledPlugin("launchpad", value)
         }
     }
 }
