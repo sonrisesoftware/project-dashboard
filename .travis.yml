@@ -1,0 +1,5 @@
+install:
+- sudo apt-get install qtdeclarative5-test-plugin
+
+script:
+- make check autopilot

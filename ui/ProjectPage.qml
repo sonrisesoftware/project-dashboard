@@ -82,6 +82,12 @@ Page {
                         onHeightChanged: column.reEvalColumns()
                     }
                 }
+
+                Timer {
+                    interval: 2
+                    running: true
+                    onTriggered: column.reEvalColumns()
+                }
             }
         }
     }
