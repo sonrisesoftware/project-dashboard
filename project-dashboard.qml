@@ -17,6 +17,7 @@
  */
 import QtQuick 2.0
 import Ubuntu.Components 0.1
+import Ubuntu.Components.Popups 0.1
 import "components"
 import "ui"
 import "backend"
@@ -97,6 +98,8 @@ MainView {
 
     GitHub {
         id: github
+
+        onAccessRevoked: accessRevokedDialog.show()
     }
 
     property var githubToken: settings.get("githubToken", "")
@@ -118,5 +121,27 @@ MainView {
     function renderMarkdown(text) {
         var converter = new Markdown.Markdown.Converter();
         return converter.makeHtml(text)
+    }
+
+    Dialog {
+        id: accessRevokedDialog
+
+        title: i18n.tr("GitHub Access Revoked")
+        text: i18n.tr("You will no longer be able to access any projects on GitHub. Go to Settings to re-enable GitHub integration.")
+
+        Button {
+            text: i18n.tr("Ok")
+            onTriggered: {
+                accessRevokedDialog.hide()
+            }
+        }
+
+        Button {
+            text: i18n.tr("Open Settings")
+            onTriggered: {
+                accessRevokedDialog.hide()
+                pageStack.push(Qt.resolvedUrl("ui/SettingsPage.qml"))
+            }
+        }
     }
 }

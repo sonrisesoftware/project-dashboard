@@ -28,6 +28,8 @@ Object {
     property string github: "https://api.github.com"
     property string user: settings.get("githubUser", "")
 
+    signal accessRevoked
+
     onOauthChanged: {
         if (oauth !== "") {
             get("/user", userLoaded)
@@ -40,9 +42,11 @@ Object {
 
         if (json.hasOwnProperty("message") && json.message === "Bad credentials") {
             settings.set("githubToken", "")
+            settings.set("githubUser", "")
+            accessRevoked()
+        } else {
+            settings.set("githubUser", json.login)
         }
-
-        settings.set("githubUser", json.login)
     }
 
     function get(request, callback) {
