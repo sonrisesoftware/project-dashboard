@@ -36,7 +36,13 @@ Object {
 
     function userLoaded(response) {
         print("User:", response)
-        settings.set("githubUser", JSON.parse(response).login)
+        var json = JSON.parse(response)
+
+        if (json.hasOwnProperty("message") && json.message === "Bad credentials") {
+            settings.set("githubToken", "")
+        }
+
+        settings.set("githubUser", json.login)
     }
 
     function get(request, callback) {
