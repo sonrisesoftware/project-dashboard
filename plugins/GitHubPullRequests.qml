@@ -65,13 +65,10 @@ Plugin {
         showDivider: false
     }
 
-    GitHub {
-        id: github
-        repo:  root.project.services.github
+    property string repo:  root.project.services.github
 
-        onRepoChanged: github.getPullRequests(function(response) {
-            print("GitHub Results:", response)
-            doc.set("pullRequests", JSON.parse(response))
-        })
-    }
+    onRepoChanged: github.getPullRequests(repo, function(response) {
+        print("GitHub Results:", response)
+        doc.set("pullRequests", JSON.parse(response))
+    })
 }

@@ -73,6 +73,11 @@ Page {
 
         ToolbarButton {
             action: newProjectAction
+            width: units.gu(8)
+        }
+
+        ToolbarButton {
+            action: settingsAction
         }
     }
 

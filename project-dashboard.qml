@@ -20,6 +20,7 @@ import Ubuntu.Components 0.1
 import "components"
 import "ui"
 import "backend"
+import "backend/services"
 import "ubuntu-ui-extras"
 import Friends 0.2
 import "Markdown.Converter.js" as Markdown
@@ -51,6 +52,15 @@ MainView {
     property bool extraWideAspect: width > units.gu(150)
     property alias pageStack: pageStack
 
+    actions: [
+        Action {
+            id: settingsAction
+            text: i18n.tr("Settings")
+            iconSource: getIcon("settings")
+            onTriggered: pageStack.push(Qt.resolvedUrl("ui/SettingsPage.qml"))
+        }
+    ]
+
     PageStack {
         id: pageStack
 
@@ -63,11 +73,6 @@ MainView {
 
         Component.onCompleted: {
             pageStack.push(projectsPage)
-
-            if (settings.get("githubToken", "") === "")
-                pageStack.push(Qt.resolvedUrl("backend/services/OAuthPage.qml"))
-            else
-                print(settings.get("githubToken", ""))
         }
     }
 
@@ -89,6 +94,12 @@ MainView {
         docId: 1
         parent: db.document
     }
+
+    GitHub {
+        id: github
+    }
+
+    property var githubToken: settings.get("githubToken", "")
 
     function getIcon(name) {
         var root = "icons/"

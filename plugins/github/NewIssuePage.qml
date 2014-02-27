@@ -26,7 +26,7 @@ Page {
 
     title: i18n.tr("New Issue")
 
-    property GitHub github
+    property string repo
 
     TextField {
         id: nameField
@@ -71,7 +71,7 @@ Page {
 
             onTriggered: {
                 busyDialog.show()
-                request = github.newIssue(nameField.text, descriptionField.text, function(response){
+                request = github.newIssue(repo, nameField.text, descriptionField.text, function(response) {
                     busyDialog.hide()
                     pageStack.pop()
                 })

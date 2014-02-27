@@ -40,7 +40,7 @@ Plugin {
 
     action: Action {
         text: i18n.tr("New Issue")
-        onTriggered: pageStack.push(Qt.resolvedUrl("github/NewIssuePage.qml"), {github: github })
+        onTriggered: pageStack.push(Qt.resolvedUrl("github/NewIssuePage.qml"), {repo: repo})
     }
 
     property var issues: doc.get("issues", [])
@@ -73,17 +73,12 @@ Plugin {
         onTriggered: pageStack.push(issuesPage)
     }
 
-    GitHub {
-        id: github
-        repo:  root.project.services.github
+    property string repo:  root.project.services.github
 
-        onRepoChanged: github.getIssues(function(response) {
-            print("GitHub Results:", response)
-            doc.set("issues", JSON.parse(response))
-        })
-
-
-    }
+    onRepoChanged: github.getIssues(repo, function(response) {
+        print("GitHub Results:", response)
+        doc.set("issues", JSON.parse(response))
+    })
 
     Component {
         id: issuesPage
@@ -95,7 +90,7 @@ Plugin {
                 id: newIssueAction
                 iconSource: getIcon("add")
                 text: i18n.tr("New Issue")
-                onTriggered: pageStack.push(Qt.resolvedUrl("github/NewIssuePage.qml"), {github: github })
+                onTriggered: pageStack.push(Qt.resolvedUrl("github/NewIssuePage.qml"), {repo: repo})
             }
 
             ListView {

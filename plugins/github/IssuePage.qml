@@ -124,9 +124,44 @@ Page {
                 text: i18n.tr("Labels")
             }
 
+            Repeater {
+                model: issue.labels
+                delegate: ListItem.Standard {
+                    Label {
+                        anchors {
+                            left: parent.left
+                            leftMargin: units.gu(2)
+                            verticalCenter: parent.verticalCenter
+                        }
+
+                        text: modelData.name
+                        color: "#" + modelData.color
+                    }
+                }
+            }
+
             ListItem.Standard {
                 enabled: false
                 text: i18n.tr("None yet")
+                visible: issue.labels.length === 0
+            }
+
+            ListItem.Header {
+                text: i18n.tr("Milestone")
+            }
+
+            ListItem.Standard {
+                text: issue.milestone ? issue.milestone : i18n.tr("No milestone")
+                enabled: issue.milestone
+            }
+
+            ListItem.Header {
+                text: i18n.tr("Assigned To")
+            }
+
+            ListItem.Standard {
+                text: issue.assignee ? issue.assignee.login : i18n.tr("No one assigned")
+                enabled: issue.assignee
             }
         }
     }

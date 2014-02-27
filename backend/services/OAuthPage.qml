@@ -5,7 +5,7 @@ import QtWebKit 3.0
 Page {
     id: webPage
 
-    title: webView.url//i18n.tr("GitHub Access")
+    title: i18n.tr("GitHub Access")
 
     property string token: ""
     property string firstGet: "?access_token=" + token
@@ -53,5 +53,32 @@ Page {
                 xhr.send();
             }
         }
+    }
+
+    Column {
+        id: column
+        anchors.centerIn: parent
+        visible: webView.loading
+        spacing: units.gu(1)
+
+        ActivityIndicator {
+            running: column.visible
+            implicitHeight: units.gu(5)
+            implicitWidth: implicitHeight
+            anchors.horizontalCenter: parent.horizontalCenter
+        }
+
+        Label {
+            anchors.horizontalCenter: parent.horizontalCenter
+            fontSize: "large"
+            text: i18n.tr("Loading (%1%)").arg(webView.loadProgress)
+        }
+    }
+
+    tools: ToolbarItems {
+        opened: wideAspect
+        locked: wideAspect
+
+        onLockedChanged: opened = locked
     }
 }

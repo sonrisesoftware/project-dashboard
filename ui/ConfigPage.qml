@@ -73,8 +73,10 @@ Page {
         }
 
         ListItem.Standard {
+            enabled: github.oauth !== ""
             Column {
                 spacing: units.gu(0.1)
+                opacity: parent.enabled ? 1 :0.5
 
                 anchors {
                     verticalCenter: parent.verticalCenter
@@ -117,8 +119,9 @@ Page {
         }
 
         ListItem.Standard {
+            enabled: false
             Column {
-
+                opacity: parent.enabled ? 1 :0.5
                 spacing: units.gu(0.1)
 
                 anchors {
@@ -177,7 +180,9 @@ Page {
             title: i18n.tr("Connect to GitHub")
             text: i18n.tr("Enter the name of repository on GitHub you would like to add to your project")
             placeholderText: i18n.tr("owner/repo")
-            onAccepted: project.enabledPlugin("github", value)
+            onAccepted: {
+                project.enabledPlugin("github", value)
+            }
         }
     }
 

@@ -26,17 +26,32 @@ Object {
 
     property string oauth:settings.get("githubToken", "")
     property string github: "https://api.github.com"
-    property string repo
+    property string user: settings.get("githubUser", "")
 
-    function getIssues(callback) {
+    onOauthChanged: {
+        if (oauth !== "") {
+            get("/user", userLoaded)
+        }
+    }
+
+    function userLoaded(response) {
+        print("User:", response)
+        settings.set("githubUser", JSON.parse(response).login)
+    }
+
+    function get(request, callback) {
+        return Http.get(github + request, ["access_token=" + oauth], callback)
+    }
+
+    function getIssues(repo, callback) {
         return Http.get(github + "/repos/" + repo + "/issues", ["access_token=" + oauth], callback)
     }
 
-    function newIssue(title, description, callback) {
+    function newIssue(repo, title, description, callback) {
         return Http.post(github + "/repos/" + repo + "/issues", ["access_token=" + oauth], callback, undefined, JSON.stringify({ "title": title, "description": description }))
     }
 
-    function getPullRequests(callback) {
+    function getPullRequests(repo, callback) {
         return Http.get(github + "/repos/" + repo + "/pulls", ["access_token=" + oauth], callback)
     }
 }
