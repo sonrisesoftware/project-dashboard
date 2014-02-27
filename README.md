@@ -1,6 +1,8 @@
 Project Dashboard
 =================
 
+**Continuous Integration results:** [![Build Status](https://travis-ci.org/iBeliever/project-dashboard.png?branch=master)](https://travis-ci.org/iBeliever/project-dashboard)
+
 Manage everything about your projects in one app
 
 Developed by Michael Spencer

@@ -26,6 +26,7 @@ Page {
     id: page
     
     title: i18n.tr("Projects")
+    objectName: "projectsPage"
 
     actions: [
         Action {

@@ -17,5 +17,9 @@ autopilot:
 check:
 	qmltestrunner -input tests/unit
 
+python_check:
+	pep8 tests/autopilot/project_dashboard/
+	pyflakes tests/autopilot/project_dashboard/
+
 run:
 	/usr/bin/qmlscene $@ project-dashboard.qml

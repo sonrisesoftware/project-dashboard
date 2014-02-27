@@ -6,6 +6,9 @@ install:
 - sudo add-apt-repository -y ppa:ubuntu-sdk-team/ppa
 - sudo apt-get update && sudo apt-get -y install ubuntu-sdk
 - sudo apt-get -y install qtdeclarative5-test-plugin
+- git clone https://github.com/iBeliever/ubuntu-ui-extras.git
 
 script:
-- make check autopilot
+- make check
+- make python_check
+- make autopilot

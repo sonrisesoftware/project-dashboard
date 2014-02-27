@@ -3,7 +3,7 @@
 """Ubuntu Touch App autopilot tests."""
 
 import os
-import subprocess
+#import subprocess
 
 from autopilot import input, platform
 from autopilot.matchers import Eventually

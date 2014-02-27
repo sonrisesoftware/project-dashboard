@@ -1,7 +1,8 @@
 import QtQuick 2.0
 import QtTest 1.0
 import Ubuntu.Components 0.1
-import "../../components"
+import "../../backend"
+import "../../ubuntu-ui-extras"
 
 // See more details @ http://qt-project.org/doc/qt-5.0/qtquick/qml-testcase.html
 
@@ -10,8 +11,12 @@ import "../../components"
 
 Item {
     // The objects
-    HelloComponent {
-        id: objectUnderTest
+    Backend {
+        id: backend
+    }
+
+    Database {
+        id: db
     }
 
     TestCase {
@@ -19,7 +24,7 @@ Item {
 
         function init() {
             console.debug(">> init");
-            compare("",objectUnderTest.text,"text was not empty on init");
+            compare(backend.projects.length,0,"No projects should exist beforehand");
             console.debug("<< init");
         }
 
@@ -38,12 +43,11 @@ Item {
             console.debug("<< cleanupTestCase");
         }
 
-        function test_canReadAndWriteText() {
+        function test_createProject() {
             var expected = "Hello World";
 
-            objectUnderTest.text = expected;
-
-            compare(expected,objectUnderTest.text,"expected did not equal result");
+            backend.newProject(expected)
+            compare(backend.projects.length,1, "Project was not created correctly")
         }
     }
 }
