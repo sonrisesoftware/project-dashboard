@@ -19,10 +19,10 @@ import QtQuick 2.0
 import Ubuntu.Components 0.1
 import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
-import ".."
-import "../../components"
-import "../services"
-import "../../ubuntu-ui-extras"
+import "../backend"
+import "../components"
+import "../backend/services"
+import "../ubuntu-ui-extras"
 
 Plugin {
     id: root
@@ -37,11 +37,6 @@ Plugin {
     }
 
     property var issues: doc.get("pullRequests", [])
-
-    onProjectChanged: github.getPullRequests(root.project.services.github, function(response) {
-        print("GitHub Results:", response)
-        doc.set("pullRequests", JSON.parse(response))
-    })
 
     Document {
         id: doc
@@ -72,5 +67,11 @@ Plugin {
 
     GitHub {
         id: github
+        repo:  root.project.services.github
+
+        onRepoChanged: github.getPullRequests(function(response) {
+            print("GitHub Results:", response)
+            doc.set("pullRequests", JSON.parse(response))
+        })
     }
 }

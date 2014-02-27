@@ -20,7 +20,6 @@ import Ubuntu.Components 0.1
 import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
 import "../backend"
-import "../backend/plugins"
 import "../ubuntu-ui-extras"
 
 Page {
@@ -73,7 +72,7 @@ Page {
                         id: loader
                         anchors.centerIn: parent
                         width: parent.width - units.gu(2)
-                        source: Qt.resolvedUrl("../backend/plugins/" + modelData + ".qml")
+                        source: Qt.resolvedUrl("../plugins/" + modelData + ".qml")
                         onLoaded: {
                             item.project = project
                             column.reEvalColumns()

@@ -41,6 +41,7 @@ UbuntuShape {
     signal clicked()
 
     property Project project
+    property alias action: actionButton.action
 
     Item {
         id: titleItem
@@ -94,6 +95,17 @@ UbuntuShape {
                     topMargin: units.gu(1.5)
                 }
                 //color: unread ? "#77ddff" : Theme.palette.normal.baseText
+            }
+
+            Button {
+                id: actionButton
+                visible: action
+                height: units.gu(4)
+                anchors {
+                    right: parent.right
+                    margins: units.gu(1)
+                    verticalCenter: titleLabel.verticalCenter
+                }
             }
         }
     }

@@ -19,10 +19,10 @@ import QtQuick 2.0
 import Ubuntu.Components 0.1
 import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
-import ".."
-import "../../components"
-import "../services"
-import "../../ubuntu-ui-extras"
+import "../backend"
+import "../components"
+import "../backend/services"
+import "../ubuntu-ui-extras"
 
 Plugin {
     id: root
@@ -36,12 +36,12 @@ Plugin {
         visible: issues.length > 0
     }
 
-    property var issues: doc.get("issues", [])
+    action: Action {
+        text: i18n.tr("New Issue")
+        onTriggered: pageStack.push(Qt.resolvedUrl("github/NewIssuePage.qml"), {github: github })
+    }
 
-    onProjectChanged: github.getIssues(root.project.services.github, function(response) {
-        print("GitHub Results:", response)
-        doc.set("issues", JSON.parse(response))
-    })
+    property var issues: doc.get("issues", [])
 
     Document {
         id: doc
@@ -54,6 +54,7 @@ Plugin {
         delegate: ListItem.Standard {
             property var modelData: issues[index]
             text: "<b>#" + modelData.number + "</b> - " + modelData.title
+            onClicked: pageStack.push(Qt.resolvedUrl("github/IssuePage.qml"), {issue: modelData})
         }
     }
 
@@ -71,5 +72,13 @@ Plugin {
 
     GitHub {
         id: github
+        repo:  root.project.services.github
+
+        onRepoChanged: github.getIssues(function(response) {
+            print("GitHub Results:", response)
+            doc.set("issues", JSON.parse(response))
+        })
+
+
     }
 }

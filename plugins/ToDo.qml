@@ -19,11 +19,11 @@ import QtQuick 2.0
 import Ubuntu.Components 0.1
 import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
-import ".."
-import "../../components"
-import "../../ubuntu-ui-extras/listutils.js" as List
-import "../../ubuntu-ui-extras/dateutils.js" as DateUtils
-import "../../ubuntu-ui-extras"
+import "../backend"
+import "../components"
+import "../ubuntu-ui-extras/listutils.js" as List
+import "../ubuntu-ui-extras/dateutils.js" as DateUtils
+import "../ubuntu-ui-extras"
 
 Plugin {
     id: root

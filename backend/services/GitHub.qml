@@ -26,12 +26,17 @@ Object {
 
     property string oauth:settings.get("githubToken", "")
     property string github: "https://api.github.com"
+    property string repo
 
-    function getIssues(repo, callback) {
-        Http.get(github + "/repos/" + repo + "/issues", ["access_token=" + oauth], callback)
+    function getIssues(callback) {
+        return Http.get(github + "/repos/" + repo + "/issues", ["access_token=" + oauth], callback)
     }
 
-    function getPullRequests(repo, callback) {
-        Http.get(github + "/repos/" + repo + "/pulls", ["access_token=" + oauth], callback)
+    function newIssue(title, description, callback) {
+        return Http.post(github + "/repos/" + repo + "/issues", ["access_token=" + oauth], callback, undefined, JSON.stringify({ "title": title, "description": description }))
+    }
+
+    function getPullRequests(callback) {
+        return Http.get(github + "/repos/" + repo + "/pulls", ["access_token=" + oauth], callback)
     }
 }

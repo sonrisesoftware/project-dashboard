@@ -21,6 +21,8 @@ import "components"
 import "ui"
 import "backend"
 import "ubuntu-ui-extras"
+import Friends 0.2
+import "Markdown.Converter.js" as Markdown
 
 /*!
     \brief MainView with a Label and Button elements.
@@ -66,6 +68,10 @@ MainView {
         }
     }
 
+    FriendsUtils {
+        id: friendsUtils
+    }
+
     Backend {
         id: backend
     }
@@ -93,5 +99,10 @@ MainView {
             name = root + name
 
         return Qt.resolvedUrl(name)
+    }
+
+    function renderMarkdown(text) {
+        var converter = new Markdown.Markdown.Converter();
+        return converter.makeHtml(text)
     }
 }
