@@ -31,6 +31,8 @@ Plugin {
     iconSource: "bug"
     unread: issues.length > 0
 
+    onClicked: pageStack.push(issuesPage)
+
     ListItem.Header {
         text: "Recent Issues"
         visible: issues.length > 0
@@ -68,6 +70,7 @@ Plugin {
         text: "View all issues"
         progression: true
         showDivider: false
+        onTriggered: pageStack.push(issuesPage)
     }
 
     GitHub {
@@ -80,5 +83,40 @@ Plugin {
         })
 
 
+    }
+
+    Component {
+        id: issuesPage
+
+        Page {
+            title: i18n.tr("Issues")
+
+            Action {
+                id: newIssueAction
+                iconSource: getIcon("add")
+                text: i18n.tr("New Issue")
+                onTriggered: pageStack.push(Qt.resolvedUrl("github/NewIssuePage.qml"), {github: github })
+            }
+
+            ListView {
+                id: listView
+                anchors.fill: parent
+                model: issues.length
+                delegate: ListItem.Standard {
+                    property var modelData: issues[index]
+                    text: "<b>#" + modelData.number + "</b> - " + modelData.title
+                    onClicked: pageStack.push(Qt.resolvedUrl("github/IssuePage.qml"), {issue: modelData})
+                }
+            }
+
+            tools: ToolbarItems {
+                opened: wideAspect
+                locked: wideAspect
+
+                onLockedChanged: opened = locked
+
+                ToolbarButton { action: newIssueAction }
+            }
+        }
     }
 }

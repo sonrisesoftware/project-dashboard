@@ -19,6 +19,7 @@ import QtQuick 2.0
 import Ubuntu.Components 0.1
 import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
+import "../../ubuntu-ui-extras"
 
 Page {
     id: page
@@ -41,9 +42,17 @@ Page {
         }
     ]
 
+    flickable: sidebar.expanded ? null : mainFlickable
+
     Flickable {
-        anchors.fill: parent
-        anchors.margins: units.gu(2)
+        id: mainFlickable
+        anchors {
+            margins: units.gu(2)
+            left: parent.left
+            right: sidebar.left
+            top: parent.top
+            bottom: parent.bottom
+        }
 
         contentHeight: column.height
         contentWidth: width
@@ -100,6 +109,24 @@ Page {
                     text: issue.hasOwnProperty("body") ? issue.body : ""//textArea.text
                     font: textArea.font
                 }
+            }
+        }
+    }
+
+    Sidebar {
+        id: sidebar
+        mode: "right"
+        expanded: wideAspect
+
+        Column {
+            width: parent.width
+            ListItem.Header {
+                text: i18n.tr("Labels")
+            }
+
+            ListItem.Standard {
+                enabled: false
+                text: i18n.tr("None yet")
             }
         }
     }
