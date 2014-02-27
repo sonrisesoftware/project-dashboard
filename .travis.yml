@@ -1,4 +1,6 @@
 install:
+- sudo add-apt-repository ppa:ubuntu-sdk-team/ppa
+- sudo apt-get update && sudo apt-get install ubuntu-sdk
 - sudo apt-get install qtdeclarative5-test-plugin
 
 script:

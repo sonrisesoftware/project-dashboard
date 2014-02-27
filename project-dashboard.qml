@@ -29,6 +29,7 @@ import "Markdown.Converter.js" as Markdown
 */
 
 MainView {
+    id: root
     // objectName for functional testing purposes (autopilot-qt5)
     objectName: "mainView"
 
@@ -57,6 +58,8 @@ MainView {
             id: projectsPage
             visible: false
         }
+
+        anchors.bottomMargin: wideAspect ? -root.toolbar.triggerSize : 0
 
         Component.onCompleted: {
             pageStack.push(projectsPage)
