@@ -67,10 +67,14 @@ Plugin {
 
     property string repo:  project.serviceValue("github")
 
-    onRepoChanged: github.getPullRequests(repo, function(response) {
-        if (response === -1)
-            error(i18n.tr("Connection Error"), i18n.tr("Unable to download list of pull requests. Check your connection and/or firewall settings."))
-        print("GitHub Results:", response)
-        doc.set("pullRequests", JSON.parse(response))
-    })
+    onRepoChanged: {
+        loading = true
+        github.getPullRequests(repo, function(response) {
+            loading = false
+            if (response === -1)
+                error(i18n.tr("Connection Error"), i18n.tr("Unable to download list of pull requests. Check your connection and/or firewall settings."))
+            print("GitHub Results:", response)
+            doc.set("pullRequests", JSON.parse(response))
+        })
+    }
 }

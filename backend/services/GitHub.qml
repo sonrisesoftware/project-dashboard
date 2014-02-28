@@ -70,7 +70,7 @@ Service {
     }
 
     function newIssue(repo, title, description, callback) {
-        return Http.post(github + "/repos/" + repo + "/issues", ["access_token=" + oauth], callback, undefined, JSON.stringify({ "title": title, "description": description }))
+        return Http.post(github + "/repos/" + repo + "/issues", ["access_token=" + oauth], callback, undefined, {"Accept":"application/vnd.github.v3+json"}, JSON.stringify({ "title": title, "description": description }))
     }
 
     function getPullRequests(repo, callback) {
