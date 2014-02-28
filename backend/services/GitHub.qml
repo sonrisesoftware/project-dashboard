@@ -28,9 +28,10 @@ Service {
 
     name: "github"
     type: ["GitHubIssues", "GitHubPullRequests"]
-    title: "GitHub"
+    title: i18n.tr("GitHub")
     docId: 3
     authenticationStatus: oauth === "" ? "" : i18n.tr("Logged in as %1").arg(user)
+    disabledMessage: i18n.tr("To connect to a GitHub project, please authenticate to GitHub from Settings")
 
     enabled: oauth !== ""
 
@@ -59,6 +60,8 @@ Service {
     }
 
     function get(request, callback) {
+        if (oauth === "")
+            return undefined
         return Http.get(github + request, ["access_token=" + oauth], callback)
     }
 
