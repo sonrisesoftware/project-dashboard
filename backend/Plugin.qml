@@ -31,6 +31,7 @@ UbuntuShape {
     property alias title: titleLabel.text
     property alias iconSource: iconImage.name
     property bool unread
+    property bool loading
 
     //opacity: unread ? 1 : 0.5
 
@@ -97,9 +98,20 @@ UbuntuShape {
                 //color: unread ? "#77ddff" : Theme.palette.normal.baseText
             }
 
+            ActivityIndicator {
+                visible: loading
+                running: loading
+
+                anchors {
+                    right: parent.right
+                    margins: units.gu(1.5)
+                    verticalCenter: titleLabel.verticalCenter
+                }
+            }
+
             Button {
                 id: actionButton
-                visible: action
+                visible: action && !loading
                 height: units.gu(4)
                 anchors {
                     right: parent.right
