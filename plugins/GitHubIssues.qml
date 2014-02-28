@@ -76,6 +76,8 @@ Plugin {
     property string repo:  project.serviceValue("github")
 
     onRepoChanged: github.getIssues(repo, function(response) {
+        if (response === -1)
+            error(i18n.tr("Connection Error"), i18n.tr("Unable to download list of issues. Check your connection and/or firewall settings."))
         print("GitHub Results:", response)
         doc.set("issues", JSON.parse(response))
     })

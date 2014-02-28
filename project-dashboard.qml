@@ -98,11 +98,7 @@ MainView {
 
     GitHub {
         id: github
-
-        onAccessRevoked: accessRevokedDialog.show()
     }
-
-    property var githubToken: settings.get("githubToken", "")
 
     function getIcon(name) {
         var mainView = "icons/"
@@ -123,25 +119,12 @@ MainView {
         return converter.makeHtml(text)
     }
 
-    Dialog {
-        id: accessRevokedDialog
-
-        title: i18n.tr("GitHub Access Revoked")
-        text: i18n.tr("You will no longer be able to access any projects on GitHub. Go to Settings to re-enable GitHub integration.")
-
-        Button {
-            text: i18n.tr("Ok")
-            onTriggered: {
-                accessRevokedDialog.hide()
-            }
-        }
-
-        Button {
-            text: i18n.tr("Open Settings")
-            onTriggered: {
-                accessRevokedDialog.hide()
-                pageStack.push(Qt.resolvedUrl("ui/SettingsPage.qml"))
-            }
-        }
+    function error(title, message, action) {
+        PopupUtils.open(Qt.resolvedUrl("ubuntu-ui-extras/NotifyDialog.qml"), mainView,
+                        {
+                            title: title,
+                            text: message,
+                            action:action
+                        })
     }
 }

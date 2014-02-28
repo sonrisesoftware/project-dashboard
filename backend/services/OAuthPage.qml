@@ -53,6 +53,13 @@ Page {
                 xhr.send();
             }
         }
+
+        onLoadingChanged: {
+            if (loadRequest.status === WebView.LoadFailedStatus) {
+                error(i18n.tr("Connection Error"), i18n.tr("Unable to authenticate to GitHub. Check your connection and/or firewall settings."), pageStack.pop)
+            }
+        }
+
     }
 
     Column {

@@ -37,8 +37,6 @@ Service {
     property string github: "https://api.github.com"
     property string user: settings.get("githubUser", "")
 
-    signal accessRevoked
-
     onOauthChanged: {
         if (oauth !== "") {
             get("/user", userLoaded)
@@ -53,7 +51,7 @@ Service {
 
         if (json.hasOwnProperty("message") && json.message === "Bad credentials") {
             settings.set("githubToken", "")
-            accessRevoked()
+            PopupUtils.open(accessRevokedDialog, mainView.pageStack.currentPage)
         } else {
             settings.set("githubUser", json.login)
         }
@@ -95,6 +93,31 @@ Service {
             placeholderText: i18n.tr("owner/repo")
             onAccepted: {
                 project.enablePlugin("github", value)
+            }
+        }
+    }
+
+    Component {
+        id: accessRevokedDialog
+
+        Dialog {
+
+            title: i18n.tr("GitHub Access Revoked")
+            text: i18n.tr("You will no longer be able to access any projects on GitHub. Go to Settings to re-enable GitHub integration.")
+
+            Button {
+                text: i18n.tr("Ok")
+                onTriggered: {
+                    PopupUtils.close(accessRevokedDialog)
+                }
+            }
+
+            Button {
+                text: i18n.tr("Open Settings")
+                onTriggered: {
+                    PopupUtils.close(accessRevokedDialog)
+                    pageStack.push(Qt.resolvedUrl("ui/SettingsPage.qml"))
+                }
             }
         }
     }
