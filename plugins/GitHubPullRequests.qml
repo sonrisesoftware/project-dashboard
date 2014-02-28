@@ -55,12 +55,12 @@ Plugin {
 
     ListItem.Standard {
         enabled: false
-        visible: issues.length === 0
-        text: "No open pull requests"
+        visible: !issues || !issues.hasOwnProperty("length") || issues.length === 0
+        text: i18n.tr("No open pull requests")
     }
 
     ListItem.Standard {
-        text: "View all issues"
+        text: i18n.tr("View all issues")
         progression: true
         showDivider: false
     }

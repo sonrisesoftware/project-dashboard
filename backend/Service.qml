@@ -28,6 +28,7 @@ Item {
     property string title
     property int docId: -1
     property string authenticationStatus
+    property string disabledMessage
 
     function connect(project) {}
     function status(value) {}

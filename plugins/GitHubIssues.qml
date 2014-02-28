@@ -62,12 +62,12 @@ Plugin {
 
     ListItem.Standard {
         enabled: false
-        visible: issues.length === 0
-        text: "No open issues"
+        visible: !issues || !issues.hasOwnProperty("length") || issues.length === 0
+        text: i18n.tr("No open issues")
     }
 
     ListItem.Standard {
-        text: "View all issues"
+        text: i18n.tr("View all issues")
         progression: true
         showDivider: false
         onTriggered: pageStack.push(issuesPage)
@@ -79,7 +79,15 @@ Plugin {
         if (response === -1)
             error(i18n.tr("Connection Error"), i18n.tr("Unable to download list of issues. Check your connection and/or firewall settings."))
         print("GitHub Results:", response)
-        doc.set("issues", JSON.parse(response))
+        var json = JSON.parse(response)
+        var list = []
+        for (var i = 0; i < json.length; i++) {
+            var item = json[i]
+            if (!item.hasOwnProperty("pull_request"))
+                list.push(item)
+        }
+
+        doc.set("issues", list)
     })
 
     Component {
