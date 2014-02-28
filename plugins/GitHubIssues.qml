@@ -40,7 +40,7 @@ Plugin {
 
     action: Action {
         text: i18n.tr("New Issue")
-        onTriggered: pageStack.push(Qt.resolvedUrl("github/NewIssuePage.qml"), {repo: repo})
+        onTriggered: pageStack.push(Qt.resolvedUrl("github/NewIssuePage.qml"), {repo: repo, action: reload})
     }
 
     property var issues: doc.get("issues", [])
@@ -75,7 +75,9 @@ Plugin {
 
     property string repo:  project.serviceValue("github")
 
-    onRepoChanged: {
+    onRepoChanged: reload()
+
+    function reload() {
         loading = true
         github.getIssues(repo, function(response) {
             loading = false
@@ -104,7 +106,7 @@ Plugin {
                 id: newIssueAction
                 iconSource: getIcon("add")
                 text: i18n.tr("New Issue")
-                onTriggered: pageStack.push(Qt.resolvedUrl("github/NewIssuePage.qml"), {repo: repo})
+                onTriggered: pageStack.push(Qt.resolvedUrl("github/NewIssuePage.qml"), {repo: repo, action: reload})
             }
 
             ListView {
