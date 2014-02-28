@@ -19,56 +19,24 @@ import QtQuick 2.0
 import Ubuntu.Components 0.1
 import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
-import "../backend"
-import "../ubuntu-ui-extras"
 
 Page {
     id: page
     
-    title: i18n.tr("Project Configuration")
-
-    property Project project
+    title: i18n.tr("Settings")
 
     Column {
         anchors.fill: parent
 
-        ListItem.Standard {
-            text: i18n.tr("Name")
-            control: TextField {
-                text: project.name
-                onTextChanged: project.name = text
-            }
-        }
-
         ListItem.Header {
-            text: i18n.tr("Local Plugins")
-        }
-
-        Repeater {
-            model: backend.availablePlugins
-
-            delegate: ListItem.Standard {
-                text: title
-                enabled: type !== ""
-                control: Switch {
-                    checked: project.hasPlugin(name)
-                    onCheckedChanged: project.enablePlugin(name, checked)
-                }
-            }
-        }
-
-        ListItem.Header {
-            text: i18n.tr("Services")
+            text: i18n.tr("Accounts")
         }
 
         Repeater {
             model: backend.availableServices
-
             delegate: ListItem.Standard {
-                enabled: modelData.enabled
                 Column {
                     spacing: units.gu(0.1)
-                    opacity: parent.enabled ? 1 :0.5
 
                     anchors {
                         verticalCenter: parent.verticalCenter
@@ -79,6 +47,7 @@ Page {
                     }
 
                     Label {
+
                         width: parent.width
                         elide: Text.ElideRight
                         text: modelData.title
@@ -91,22 +60,25 @@ Page {
                         color:  Theme.palette.normal.backgroundText
                         fontSize: "small"
                         //font.italic: true
-                        text: project.hasPlugin(modelData.name) ? modelData.status(project.serviceValue(modelData.name)) : ""
+                        text: modelData.authenticationStatus
                         visible: text !== ""
                         elide: Text.ElideRight
                     }
                 }
-                control: Switch {
-                    checked: project.hasPlugin(modelData.name)
-                    onCheckedChanged: {
-                        if (checked) {
-                            if (!project.hasPlugin(modelData.name)) {
-                                modelData.connect(project)
-                            }
-                        } else {
-                            project.enablePlugin(modelData.name, "")
-                        }
-                        checked = Qt.binding(function() { return project.hasPlugin(modelData.name) })
+
+                control: Button {
+                    text: modelData.enabled ? i18n.tr("Log out") : i18n.tr("Log in")
+                    height: units.gu(4)
+                    anchors {
+                        right: parent.right
+                        verticalCenter: parent.verticalCenter
+                    }
+
+                    onClicked: {
+                        if (!modelData.enabled)
+                            modelData.authenticate()
+                        else
+                            modelData.revoke()
                     }
                 }
             }
@@ -118,16 +90,5 @@ Page {
         locked: wideAspect
 
         onLockedChanged: opened = locked
-    }
-
-    Component {
-        id: launchpadDialog
-
-        InputDialog {
-            title: i18n.tr("Connect to Launchpad")
-            text: i18n.tr("Enter the name of repository on Launchpad you would like to add to your project")
-            placeholderText: i18n.tr("name")
-            onAccepted: project.enabledPlugin("launchpad", value)
-        }
     }
 }

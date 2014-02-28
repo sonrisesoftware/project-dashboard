@@ -17,9 +17,11 @@
  */
 import QtQuick 2.0
 import Ubuntu.Components 0.1
+import Ubuntu.Components.Popups 0.1
 import "components"
 import "ui"
 import "backend"
+import "backend/services"
 import "ubuntu-ui-extras"
 import Friends 0.2
 import "Markdown.Converter.js" as Markdown
@@ -29,7 +31,7 @@ import "Markdown.Converter.js" as Markdown
 */
 
 MainView {
-    id: root
+    id: mainView
     // objectName for functional testing purposes (autopilot-qt5)
     objectName: "mainView"
 
@@ -51,6 +53,15 @@ MainView {
     property bool extraWideAspect: width > units.gu(150)
     property alias pageStack: pageStack
 
+    actions: [
+        Action {
+            id: settingsAction
+            text: i18n.tr("Settings")
+            iconSource: getIcon("settings")
+            onTriggered: pageStack.push(Qt.resolvedUrl("ui/SettingsPage.qml"))
+        }
+    ]
+
     PageStack {
         id: pageStack
 
@@ -59,15 +70,10 @@ MainView {
             visible: false
         }
 
-        anchors.bottomMargin: wideAspect ? -root.toolbar.triggerSize : 0
+        anchors.bottomMargin: wideAspect ? -mainView.toolbar.triggerSize : 0
 
         Component.onCompleted: {
             pageStack.push(projectsPage)
-
-            if (settings.get("githubToken", "") === "")
-                pageStack.push(Qt.resolvedUrl("backend/services/OAuthPage.qml"))
-            else
-                print(settings.get("githubToken", ""))
         }
     }
 
@@ -90,16 +96,20 @@ MainView {
         parent: db.document
     }
 
+    GitHub {
+        id: github
+    }
+
     function getIcon(name) {
-        var root = "icons/"
+        var mainView = "icons/"
         var ext = ".png"
 
         //return "image://theme/" + name
 
         if (name.indexOf(".") === -1)
-            name = root + name + ext
+            name = mainView + name + ext
         else
-            name = root + name
+            name = mainView + name
 
         return Qt.resolvedUrl(name)
     }
@@ -107,5 +117,14 @@ MainView {
     function renderMarkdown(text) {
         var converter = new Markdown.Markdown.Converter();
         return converter.makeHtml(text)
+    }
+
+    function error(title, message, action) {
+        PopupUtils.open(Qt.resolvedUrl("ubuntu-ui-extras/NotifyDialog.qml"), mainView,
+                        {
+                            title: title,
+                            text: message,
+                            action:action
+                        })
     }
 }

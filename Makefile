@@ -23,3 +23,7 @@ python_check:
 
 run:
 	/usr/bin/qmlscene $@ project-dashboard.qml
+
+clean:
+	rm ~/.local/share/com.ubuntu.developer.mdspencer.project-dashboard/ -R
+

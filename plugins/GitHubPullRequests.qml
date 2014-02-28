@@ -40,7 +40,7 @@ Plugin {
 
     Document {
         id: doc
-        docId: root.project.pluginDocId["githubPullRequests"]
+        docId: backend.getPlugin("github").docId
         parent: root.project.document
     }
 
@@ -65,13 +65,12 @@ Plugin {
         showDivider: false
     }
 
-    GitHub {
-        id: github
-        repo:  root.project.services.github
+    property string repo:  project.serviceValue("github")
 
-        onRepoChanged: github.getPullRequests(function(response) {
-            print("GitHub Results:", response)
-            doc.set("pullRequests", JSON.parse(response))
-        })
-    }
+    onRepoChanged: github.getPullRequests(repo, function(response) {
+        if (response === -1)
+            error(i18n.tr("Connection Error"), i18n.tr("Unable to download list of pull requests. Check your connection and/or firewall settings."))
+        print("GitHub Results:", response)
+        doc.set("pullRequests", JSON.parse(response))
+    })
 }

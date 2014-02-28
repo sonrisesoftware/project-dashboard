@@ -20,23 +20,114 @@ import Ubuntu.Components 0.1
 import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
 import "../../ubuntu-ui-extras/httplib.js" as Http
+import "../../ubuntu-ui-extras"
+import ".."
 
-Object {
+Service {
     id: root
+
+    name: "github"
+    type: ["GitHubIssues", "GitHubPullRequests"]
+    title: "GitHub"
+    docId: 3
+    authenticationStatus: oauth === "" ? "" : i18n.tr("Logged in as %1").arg(user)
+
+    enabled: oauth !== ""
 
     property string oauth:settings.get("githubToken", "")
     property string github: "https://api.github.com"
-    property string repo
+    property string user: settings.get("githubUser", "")
 
-    function getIssues(callback) {
-        return Http.get(github + "/repos/" + repo + "/issues", ["access_token=" + oauth], callback)
+    onOauthChanged: {
+        if (oauth !== "") {
+            get("/user", userLoaded)
+        } else {
+            settings.set("githubUser", "")
+        }
     }
 
-    function newIssue(title, description, callback) {
+    function userLoaded(response) {
+        print("User:", response)
+        var json = JSON.parse(response)
+
+        if (json.hasOwnProperty("message") && json.message === "Bad credentials") {
+            settings.set("githubToken", "")
+            PopupUtils.open(accessRevokedDialog, mainView.pageStack.currentPage)
+        } else {
+            settings.set("githubUser", json.login)
+        }
+    }
+
+    function get(request, callback) {
+        return Http.get(github + request, ["access_token=" + oauth], callback)
+    }
+
+    function getIssues(repo, callback) {
+        return get("/repos/" + repo + "/issues", callback)
+    }
+
+    function newIssue(repo, title, description, callback) {
         return Http.post(github + "/repos/" + repo + "/issues", ["access_token=" + oauth], callback, undefined, JSON.stringify({ "title": title, "description": description }))
     }
 
-    function getPullRequests(callback) {
-        return Http.get(github + "/repos/" + repo + "/pulls", ["access_token=" + oauth], callback)
+    function getPullRequests(repo, callback) {
+        return get("/repos/" + repo + "/pulls", callback)
+    }
+
+    function connect(project) {
+        print("Connecting...")
+        PopupUtils.open(githubDialog, mainView.pageStack.currentPage, {project: project})
+    }
+
+    function authenticate() {
+        pageStack.push(Qt.resolvedUrl("OAuthPage.qml"))
+    }
+
+    function revoke() {
+        settings.set("githubToken", "")
+    }
+
+    function status(value) {
+        return i18n.tr("Connected to %1").arg(value)
+    }
+
+    Component {
+        id: githubDialog
+
+        InputDialog {
+            property var project
+
+            title: i18n.tr("Connect to GitHub")
+            text: i18n.tr("Enter the name of repository on GitHub you would like to add to your project")
+            placeholderText: i18n.tr("owner/repo")
+            onAccepted: {
+                project.enablePlugin("github", value)
+            }
+        }
+    }
+
+    Component {
+        id: accessRevokedDialog
+
+        Dialog {
+
+            title: i18n.tr("GitHub Access Revoked")
+            text: i18n.tr("You will no longer be able to access any projects on GitHub. Go to Settings to re-enable GitHub integration.")
+
+            Button {
+                text: i18n.tr("Ok")
+                onTriggered: {
+                    PopupUtils.close(accessRevokedDialog)
+                }
+            }
+
+            Button {
+                text: i18n.tr("Open Settings")
+                onTriggered: {
+                    PopupUtils.close(accessRevokedDialog)
+                    pageStack.push(Qt.resolvedUrl("ui/SettingsPage.qml"))
+                }
+            }
+        }
     }
 }
