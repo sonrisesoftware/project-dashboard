@@ -74,8 +74,12 @@ Page {
                 busyDialog.show()
                 request = github.newIssue(repo, nameField.text, descriptionField.text, function(response) {
                     busyDialog.hide()
-                    pageStack.pop()
-                    dialog.action()
+                    if (response === -1) {
+                        error(i18n.tr("Connection Error"), i18n.tr("Unable to create issue. Check your connection and/or firewall settings."))
+                    } else {
+                        pageStack.pop()
+                        dialog.action()
+                    }
                 })
             }
         }

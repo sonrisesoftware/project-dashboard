@@ -27,6 +27,8 @@ Page {
     title: i18n.tr("Issue %1").arg(issue.number)
 
     property var issue
+    property var request
+    property var plugin
 
     actions: [
         Action {
@@ -39,6 +41,21 @@ Page {
             id: closeAction
             text: i18n.tr("Close")
             iconSource: getIcon("close")
+            onTriggered: {
+                busyDialog.title = i18n.tr("Closing Issue <b>#%1</b>").arg(issue.number)
+                busyDialog.show()
+
+                request = github.editIssue(plugin.repo, issue.number, {"state": "closed"}, function(response) {
+                    busyDialog.hide()
+                    if (response === -1) {
+                        error(i18n.tr("Connection Error"), i18n.tr("Unable to download list of issues. Check your connection and/or firewall settings."))
+                    } else {
+                        issue.state = "closed"
+                        issue = issue
+                        plugin.reload()
+                    }
+                })
+            }
         }
     ]
 
@@ -152,8 +169,8 @@ Page {
             }
 
             ListItem.Standard {
-                text: issue.milestone ? issue.milestone : i18n.tr("No milestone")
-                enabled: issue.milestone
+                text: enabled ? issue.milestone.title : i18n.tr("No milestone")
+                enabled: issue.milestone && issue.milestone.hasOwnProperty("title")
             }
 
             ListItem.Header {
@@ -161,8 +178,8 @@ Page {
             }
 
             ListItem.Standard {
-                text: issue.assignee ? issue.assignee.login : i18n.tr("No one assigned")
-                enabled: issue.assignee
+                text: enabled ? issue.assignee.login : i18n.tr("No one assigned")
+                enabled: issue.assignee && issue.assignee.hasOwnProperty("login")
             }
         }
     }
@@ -175,5 +192,24 @@ Page {
 
         ToolbarButton { action: editAction }
         ToolbarButton { action: closeAction }
+    }
+
+    Dialog {
+        id: busyDialog
+
+        ActivityIndicator {
+            running: busyDialog.visible
+            implicitHeight: units.gu(5)
+            implicitWidth: implicitHeight
+            anchors.horizontalCenter: parent.horizontalCenter
+        }
+
+        Button {
+            text: i18n.tr("Cancel")
+            onTriggered: {
+                request.abort()
+                busyDialog.hide()
+            }
+        }
     }
 }

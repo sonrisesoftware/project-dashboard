@@ -71,6 +71,10 @@ Service {
         return get("/repos/" + repo + "/issues", callback, ["state=" + state])
     }
 
+    function editIssue(repo, number, issue, callback) {
+        return Http.patch(github + "/repos/" + repo + "/issues/" + number, ["access_token=" + oauth], callback, undefined, {"Accept":"application/vnd.github.v3+json"}, JSON.stringify(issue))
+    }
+
     function newIssue(repo, title, description, callback) {
         return Http.post(github + "/repos/" + repo + "/issues", ["access_token=" + oauth], callback, undefined, {"Accept":"application/vnd.github.v3+json"}, JSON.stringify({ "title": title, "description": description }))
     }

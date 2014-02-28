@@ -25,7 +25,7 @@ ListItem.Standard {
 
     //property var modelData: plugin.issues[index]
 
-    onClicked: pageStack.push(Qt.resolvedUrl("IssuePage.qml"), {issue: modelData})
+    onClicked: pageStack.push(Qt.resolvedUrl("IssuePage.qml"), {issue: modelData, plugin:plugin})
 
     height: opacity === 0 ? 0 : implicitHeight
 

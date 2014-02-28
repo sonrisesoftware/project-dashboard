@@ -26,13 +26,13 @@ import "../ubuntu-ui-extras"
 import "github"
 
 Plugin {
-    id: root
+    id: plugin
 
     title: "GitHub Issues"
     iconSource: "bug"
     unread: issues.length > 0
 
-    onClicked: pageStack.push(Qt.resolvedUrl("github/IssuesPage.qml"), {plugin: root})
+    onClicked: pageStack.push(Qt.resolvedUrl("github/IssuesPage.qml"), {plugin: plugin})
 
     ListItem.Header {
         text: "Recent Issues"
@@ -74,7 +74,7 @@ Plugin {
         text: i18n.tr("View all issues")
         progression: true
         showDivider: false
-        onTriggered: root.clicked()
+        onTriggered: plugin.clicked()
     }
 
     property string repo:  project.serviceValue("github")
