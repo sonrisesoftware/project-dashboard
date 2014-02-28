@@ -29,54 +29,57 @@ Page {
         anchors.fill: parent
 
         ListItem.Header {
-            text: i18n.tr("Connected Accounts")
+            text: i18n.tr("Accounts")
         }
 
-        ListItem.SingleValue {
-            Column {
-                spacing: units.gu(0.1)
+        Repeater {
+            model: backend.availableServices
+            delegate: ListItem.Standard {
+                Column {
+                    spacing: units.gu(0.1)
 
-                anchors {
-                    verticalCenter: parent.verticalCenter
-                    left: parent.left
-                    leftMargin: units.gu(2)
-                    rightMargin: units.gu(1)
-                    right: parent.right
+                    anchors {
+                        verticalCenter: parent.verticalCenter
+                        left: parent.left
+                        leftMargin: units.gu(2)
+                        rightMargin: units.gu(1)
+                        right: parent.right
+                    }
+
+                    Label {
+
+                        width: parent.width
+                        elide: Text.ElideRight
+                        text: modelData.title
+                    }
+
+                    Label {
+                        width: parent.width
+
+                        height: visible ? implicitHeight: 0
+                        color:  Theme.palette.normal.backgroundText
+                        fontSize: "small"
+                        //font.italic: true
+                        text: modelData.authenticationStatus
+                        visible: text !== ""
+                        elide: Text.ElideRight
+                    }
                 }
 
-                Label {
+                control: Button {
+                    text: modelData.enabled ? i18n.tr("Log out") : i18n.tr("Log in")
+                    height: units.gu(4)
+                    anchors {
+                        right: parent.right
+                        verticalCenter: parent.verticalCenter
+                    }
 
-                    width: parent.width
-                    elide: Text.ElideRight
-                    text: "GitHub"
-                }
-
-                Label {
-                    width: parent.width
-
-                    height: visible ? implicitHeight: 0
-                    color:  Theme.palette.normal.backgroundText
-                    fontSize: "small"
-                    //font.italic: true
-                    text: github.oauth === "" ? "" : ("Logged in as " + github.user)
-                    visible: text !== ""
-                    elide: Text.ElideRight
-                }
-            }
-            value: github.oauth !== "" ? github.user : ""
-            Button {
-                text: github.oauth === "" ? i18n.tr("Log in") : i18n.tr("Log out")
-                height: units.gu(4)
-                anchors {
-                    right: parent.right
-                    verticalCenter: parent.verticalCenter
-                }
-
-                onClicked: {
-                    if (github.oauth === "")
-                        pageStack.push(Qt.resolvedUrl("../backend/services/OAuthPage.qml"))
-                    else
-                        settings.set("githubToken", "")
+                    onClicked: {
+                        if (!modelData.enabled)
+                            modelData.authenticate()
+                        else
+                            modelData.revoke()
+                    }
                 }
             }
         }

@@ -27,7 +27,10 @@ Item {
     property var type: []
     property string title
     property int docId: -1
+    property string authenticationStatus
 
     function connect(project) {}
     function status(value) {}
+    function authenticate() {}
+    function revoke() {}
 }

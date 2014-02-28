@@ -30,8 +30,9 @@ Service {
     type: ["GitHubIssues", "GitHubPullRequests"]
     title: "GitHub"
     docId: 3
+    authenticationStatus: oauth === "" ? "" : i18n.tr("Logged in as %1").arg(user)
 
-    property bool enabled: oauth !== ""
+    enabled: oauth !== ""
 
     property string oauth:settings.get("githubToken", "")
     property string github: "https://api.github.com"
@@ -76,6 +77,14 @@ Service {
     function connect(project) {
         print("Connecting...")
         PopupUtils.open(githubDialog, mainView.pageStack.currentPage, {project: project})
+    }
+
+    function authenticate() {
+        pageStack.push(Qt.resolvedUrl("OAuthPage.qml"))
+    }
+
+    function revoke() {
+        settings.set("githubToken", "")
     }
 
     function status(value) {
