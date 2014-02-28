@@ -46,6 +46,7 @@ Page {
 
     Flickable {
         id: mainFlickable
+        clip: true
         anchors {
             margins: units.gu(2)
             left: parent.left

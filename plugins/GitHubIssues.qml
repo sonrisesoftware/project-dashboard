@@ -23,6 +23,7 @@ import "../backend"
 import "../components"
 import "../backend/services"
 import "../ubuntu-ui-extras"
+import "github"
 
 Plugin {
     id: root
@@ -31,7 +32,7 @@ Plugin {
     iconSource: "bug"
     unread: issues.length > 0
 
-    onClicked: pageStack.push(issuesPage)
+    onClicked: pageStack.push(Qt.resolvedUrl("github/IssuesPage.qml"), {plugin: root})
 
     ListItem.Header {
         text: "Recent Issues"
@@ -44,6 +45,11 @@ Plugin {
     }
 
     property var issues: doc.get("issues", [])
+    property var closedIssues: doc.get("closedIssues", [])
+
+    property var allIssues: issues.concat(closedIssues).sort(function sort(a1, a2) {
+        return a2.number - a1.number
+    })
 
     Document {
         id: doc
@@ -53,10 +59,8 @@ Plugin {
 
     Repeater {
         model: Math.min(issues.length, 4)
-        delegate: ListItem.Standard {
+        delegate: IssueListItem {
             property var modelData: issues[index]
-            text: "<b>#" + modelData.number + "</b> - " + modelData.title
-            onClicked: pageStack.push(Qt.resolvedUrl("github/IssuePage.qml"), {issue: modelData})
         }
     }
 
@@ -70,7 +74,7 @@ Plugin {
         text: i18n.tr("View all issues")
         progression: true
         showDivider: false
-        onTriggered: pageStack.push(issuesPage)
+        onTriggered: root.clicked()
     }
 
     property string repo:  project.serviceValue("github")
@@ -79,11 +83,11 @@ Plugin {
 
     function reload() {
         loading = true
-        github.getIssues(repo, function(response) {
+        github.getIssues(repo, "open", function(response) {
             loading = false
             if (response === -1)
                 error(i18n.tr("Connection Error"), i18n.tr("Unable to download list of issues. Check your connection and/or firewall settings."))
-            print("GitHub Results:", response)
+            //print("GitHub Results:", response)
             var json = JSON.parse(response)
             var list = []
             for (var i = 0; i < json.length; i++) {
@@ -94,40 +98,19 @@ Plugin {
 
             doc.set("issues", list)
         })
-    }
 
-    Component {
-        id: issuesPage
-
-        Page {
-            title: i18n.tr("Issues")
-
-            Action {
-                id: newIssueAction
-                iconSource: getIcon("add")
-                text: i18n.tr("New Issue")
-                onTriggered: pageStack.push(Qt.resolvedUrl("github/NewIssuePage.qml"), {repo: repo, action: reload})
+        github.getIssues(repo, "closed", function(response) {
+            loading = false
+           // print("GitHub Results:", response)
+            var json = JSON.parse(response)
+            var list = []
+            for (var i = 0; i < json.length; i++) {
+                var item = json[i]
+                if (!item.hasOwnProperty("pull_request"))
+                    list.push(item)
             }
 
-            ListView {
-                id: listView
-                anchors.fill: parent
-                model: issues.length
-                delegate: ListItem.Standard {
-                    property var modelData: issues[index]
-                    text: "<b>#" + modelData.number + "</b> - " + modelData.title
-                    onClicked: pageStack.push(Qt.resolvedUrl("github/IssuePage.qml"), {issue: modelData})
-                }
-            }
-
-            tools: ToolbarItems {
-                opened: wideAspect
-                locked: wideAspect
-
-                onLockedChanged: opened = locked
-
-                ToolbarButton { action: newIssueAction }
-            }
-        }
+            doc.set("closedIssues", list)
+        })
     }
 }

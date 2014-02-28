@@ -59,14 +59,16 @@ Service {
         }
     }
 
-    function get(request, callback) {
+    function get(request, callback, options) {
         if (oauth === "")
             return undefined
-        return Http.get(github + request, ["access_token=" + oauth], callback, undefined, {"Accept":"application/vnd.github.v3+json"})
+        if (options === undefined)
+            options = []
+        return Http.get(github + request, ["access_token=" + oauth].concat(options), callback, undefined, {"Accept":"application/vnd.github.v3+json"})
     }
 
-    function getIssues(repo, callback) {
-        return get("/repos/" + repo + "/issues", callback)
+    function getIssues(repo, state, callback) {
+        return get("/repos/" + repo + "/issues", callback, ["state=" + state])
     }
 
     function newIssue(repo, title, description, callback) {

@@ -60,7 +60,7 @@ Plugin {
     }
 
     ListItem.Standard {
-        text: i18n.tr("View all issues")
+        text: i18n.tr("View all pull requests")
         progression: true
         showDivider: false
     }
@@ -75,7 +75,7 @@ Plugin {
             loading = false
             if (response === -1)
                 error(i18n.tr("Connection Error"), i18n.tr("Unable to download list of pull requests. Check your connection and/or firewall settings."))
-            print("GitHub Results:", response)
+            //print("GitHub Results:", response)
             doc.set("pullRequests", JSON.parse(response))
         })
     }
