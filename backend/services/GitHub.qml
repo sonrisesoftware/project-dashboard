@@ -62,7 +62,7 @@ Service {
     function get(request, callback) {
         if (oauth === "")
             return undefined
-        return Http.get(github + request, ["access_token=" + oauth], callback)
+        return Http.get(github + request, ["access_token=" + oauth], callback, undefined, {"Accept":"application/vnd.github.v3+json"})
     }
 
     function getIssues(repo, callback) {
