@@ -32,6 +32,15 @@ UbuntuShape {
     property alias iconSource: iconImage.name
     property bool unread
     property bool loading
+    function reload() {}
+
+    Connections {
+        target: plugin.project
+        onReload: {
+            print("Reloading" + plugin.title)
+            plugin.reload()
+        }
+    }
 
     //opacity: unread ? 1 : 0.5
 

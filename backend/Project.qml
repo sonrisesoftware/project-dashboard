@@ -33,6 +33,8 @@ Object {
 
     property var plugins: doc.get("plugins", {"tasks": true})
 
+    signal reload
+
     function enablePlugin(name, value) {
         print("Setting state of", name, "to:", value)
         plugins[name] = value

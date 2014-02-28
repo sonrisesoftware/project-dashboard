@@ -67,7 +67,9 @@ Plugin {
 
     property string repo:  project.serviceValue("github")
 
-    onRepoChanged: {
+    onRepoChanged: reload()
+
+    function reload() {
         loading = true
         github.getPullRequests(repo, function(response) {
             loading = false

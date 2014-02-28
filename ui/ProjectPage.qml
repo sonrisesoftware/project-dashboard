@@ -35,8 +35,14 @@ Page {
             text: i18n.tr("Edit")
             iconSource: getIcon("edit")
             onTriggered:pageStack.push(Qt.resolvedUrl("ConfigPage.qml"), {project: project})
-        }
+        },
 
+        Action {
+            id: refreshAction
+            text: i18n.tr("Refresh")
+            iconSource: getIcon("reload")
+            onTriggered: project.reload()
+        }
     ]
 
     flickable: project.enabledPlugins.length === 0 ? null : flickable
@@ -108,6 +114,10 @@ Page {
         locked: wideAspect
 
         onLockedChanged: opened = locked
+
+        ToolbarButton {
+            action: refreshAction
+        }
 
         ToolbarButton {
             action: configAction
