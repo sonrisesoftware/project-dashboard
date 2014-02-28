@@ -27,7 +27,7 @@ import "../ubuntu-ui-extras"
 Plugin {
     id: root
 
-    title: "GitHub Pull Requests"
+    title: "Pull Requests"
     iconSource: "code-fork"
     unread: issues.length > 0
 

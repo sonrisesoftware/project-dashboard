@@ -28,7 +28,7 @@ import "github"
 Plugin {
     id: plugin
 
-    title: "GitHub Issues"
+    title: "Issues"
     iconSource: "bug"
     unread: issues.length > 0
 
@@ -54,7 +54,7 @@ Plugin {
     Document {
         id: doc
         docId: backend.getPlugin("github").docId
-        parent: root.project.document
+        parent: project.document
     }
 
     Repeater {

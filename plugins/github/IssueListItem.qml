@@ -33,23 +33,43 @@ ListItem.Standard {
         UbuntuNumberAnimation {}
     }
 
-    Label {
-        id: titleLabel
+    Column {
+        id: labels
+
+        spacing: units.gu(0.1)
 
         anchors {
-            left: parent.left
-            right: parent.right
             verticalCenter: parent.verticalCenter
-            margins: units.gu(2)
+            left: parent.left
+            leftMargin: units.gu(2)
+            rightMargin: units.gu(2)
+            right: parent.right
         }
 
-        elide: Text.ElideRight
-        text: i18n.tr("<b>#%1</b> - %2").arg(modelData.number).arg(modelData.title)
+        Label {
+            id: titleLabel
 
-        font.strikeout: modelData.state === "closed"
-        //font.bold: task.priority !== "low"
-        //color: selected ? UbuntuColors.orange : /*task.priority === "low" ? */Theme.palette.selected.backgroundText/* : priorityColor(task.priority)*/
-        fontSize: "medium"
+            width: parent.width
+            elide: Text.ElideRight
+            text: i18n.tr("<b>#%1</b> - %2").arg(modelData.number).arg(modelData.title)
+
+            font.strikeout: modelData.state === "closed"
+        }
+
+        Label {
+            id: subLabel
+            width: parent.width
+
+            height: visible ? implicitHeight: 0
+            //color:  Theme.palette.normal.backgroundText
+            opacity: 0.65
+            font.weight: Font.Light
+            fontSize: "small"
+            //font.italic: true
+            text: i18n.tr("%1 opened this issue %2").arg(modelData.user.login).arg(friendsUtils.createTimeString(modelData.created_at))
+            visible: text !== ""
+            elide: Text.ElideRight
+        }
     }
 
     opacity: show ? 1 : 0
