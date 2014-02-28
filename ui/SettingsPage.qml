@@ -33,11 +33,39 @@ Page {
         }
 
         ListItem.SingleValue {
-            text: i18n.tr("GitHub")
+            Column {
+                spacing: units.gu(0.1)
+
+                anchors {
+                    verticalCenter: parent.verticalCenter
+                    left: parent.left
+                    leftMargin: units.gu(2)
+                    rightMargin: units.gu(1)
+                    right: parent.right
+                }
+
+                Label {
+
+                    width: parent.width
+                    elide: Text.ElideRight
+                    text: "GitHub"
+                }
+
+                Label {
+                    width: parent.width
+
+                    height: visible ? implicitHeight: 0
+                    color:  Theme.palette.normal.backgroundText
+                    fontSize: "small"
+                    //font.italic: true
+                    text: github.oauth === "" ? "" : ("Logged in as " + github.user)
+                    visible: text !== ""
+                    elide: Text.ElideRight
+                }
+            }
             value: github.oauth !== "" ? github.user : ""
             Button {
-                visible: github.oauth === ""
-                text: i18n.tr("Connect")
+                text: github.oauth === "" ? i18n.tr("Log in") : i18n.tr("Log out")
                 height: units.gu(4)
                 anchors {
                     right: parent.right
@@ -45,7 +73,10 @@ Page {
                 }
 
                 onClicked: {
-                    pageStack.push(Qt.resolvedUrl("../backend/services/OAuthPage.qml"))
+                    if (github.oauth === "")
+                        pageStack.push(Qt.resolvedUrl("../backend/services/OAuthPage.qml"))
+                    else
+                        settings.set("githubToken", "")
                 }
             }
         }

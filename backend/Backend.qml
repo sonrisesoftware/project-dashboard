@@ -38,4 +38,43 @@ Object {
     function newProject(name) {
         doc.newDoc({"name": name})
     }
+
+    property ListModel availablePlugins: ListModel {
+        ListElement {
+            name: "tasks"
+            type: "ToDo"
+            title: "Tasks"
+            docId: 0
+        }
+
+        ListElement {
+            name: "notes"
+            type: ""
+            title: "Notes"
+            docId: 1
+        }
+
+        ListElement {
+            name: "drawings"
+            type: ""
+            title: "Drawings"
+            docId: 2
+        }
+    }
+
+    property var availableServices: [github]
+
+    function getPlugin(name) {
+        for (var i = 0; i < availablePlugins.count;i++) {
+            var plugin = availablePlugins.get(i)
+            if (plugin.name === name)
+                return plugin
+        }
+
+        for (i = 0; i < availableServices.length;i++) {
+            var service = availableServices[i]
+            if (service.name === name)
+                return service
+        }
+    }
 }

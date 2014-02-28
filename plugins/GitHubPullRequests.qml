@@ -40,7 +40,7 @@ Plugin {
 
     Document {
         id: doc
-        docId: root.project.pluginDocId["githubPullRequests"]
+        docId: backend.getPlugin("github").docId
         parent: root.project.document
     }
 
@@ -65,7 +65,7 @@ Plugin {
         showDivider: false
     }
 
-    property string repo:  root.project.services.github
+    property string repo:  project.serviceValue("github")
 
     onRepoChanged: github.getPullRequests(repo, function(response) {
         print("GitHub Results:", response)

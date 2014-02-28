@@ -31,43 +31,40 @@ Object {
 
     property alias document: doc
 
-    property var plugins: doc.get("plugins", {
-        "todo": true,
-        "notes": false,
-        "drawings": false
-    })
+    property var plugins: doc.get("plugins", {"tasks": true})
 
-    property var services: doc.get("services", {
-        "github": "",
-        "launchpad": ""
-    })
-
-    property var pluginDocId: {
-        "todo": 0,
-        "notes": 1,
-        "drawings": 2,
-        "githubIssues": 3,
-        "githubPullRequests": 4,
-        "launchpad": 5
+    function enablePlugin(name, value) {
+        print("Setting state of", name, "to:", value)
+        plugins[name] = value
+        doc.set("plugins", plugins)
     }
 
-    function enabledPlugin(name, state) {
-        if (plugins.hasOwnProperty(name)) {
-            plugins[name] = state
-            plugins = plugins
-            doc.set("plugins", plugins)
-        } else {
-            services[name] = state
-            services = services
-            doc.set("services", services)
-        }
+    function hasPlugin(name) {
+        return plugins.hasOwnProperty(name) && (plugins[name] === true || (plugins[name] !== false && plugins[name] !== ""))
+    }
+
+    function serviceValue(name) {
+        return plugins.hasOwnProperty(name) ? plugins[name] : ""
     }
 
     property var enabledPlugins: {
         var list = []
 
-        if (services.github) { list.push("GitHubIssues"); list.push("GitHubPullRequests") }
-        if (plugins.todo) list.push("ToDo")
+        for (var name in plugins) {
+            if (!hasPlugin(name))
+                continue
+            var plugin = backend.getPlugin(name)
+            print(plugin.name)
+
+            var type = plugin.type
+            print("Type:", typeof(type))
+
+            if (typeof(type) == "object") {
+                list = list.concat(type)
+            } else {
+                list.push(type)
+            }
+        }
 
         return list
     }

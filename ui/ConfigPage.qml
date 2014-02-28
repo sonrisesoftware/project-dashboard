@@ -44,27 +44,16 @@ Page {
             text: i18n.tr("Local Plugins")
         }
 
-        ListItem.Standard {
-            text: i18n.tr("Notes")
-            control: Switch {
-                checked: project.plugins.notes
-                onCheckedChanged: project.enabledPlugin("notes", checked)
-            }
-        }
+        Repeater {
+            model: backend.availablePlugins
 
-        ListItem.Standard {
-            text: i18n.tr("Tasks")
-            control: Switch {
-                checked: project.plugins.todo
-                onCheckedChanged: project.enabledPlugin("todo", checked)
-            }
-        }
-
-        ListItem.Standard {
-            text: i18n.tr("Drawings")
-            control: Switch {
-                checked: project.plugins.drawings
-                onCheckedChanged: project.enabledPlugin("drawings", checked)
+            delegate: ListItem.Standard {
+                text: title
+                enabled: type !== ""
+                control: Switch {
+                    checked: project.hasPlugin(name)
+                    onCheckedChanged: project.enablePlugin(name, checked)
+                }
             }
         }
 
@@ -72,95 +61,53 @@ Page {
             text: i18n.tr("Services")
         }
 
-        ListItem.Standard {
-            enabled: github.oauth !== ""
-            Column {
-                spacing: units.gu(0.1)
-                opacity: parent.enabled ? 1 :0.5
+        Repeater {
+            model: backend.availableServices
 
-                anchors {
-                    verticalCenter: parent.verticalCenter
-                    left: parent.left
-                    leftMargin: units.gu(2)
-                    rightMargin: units.gu(1)
-                    right: parent.right
-                }
+            delegate: ListItem.Standard {
+                enabled: modelData.enabled
+                Column {
+                    spacing: units.gu(0.1)
+                    opacity: parent.enabled ? 1 :0.5
 
-                Label {
-                    width: parent.width
-                    elide: Text.ElideRight
-                    text: "GitHub"
-                }
-
-                Label {
-                    width: parent.width
-
-                    height: visible ? implicitHeight: 0
-                    color:  Theme.palette.normal.backgroundText
-                    fontSize: "small"
-                    //font.italic: true
-                    text: project.services.github === "" ? "" : "Connected to " + project.services.github
-                    visible: text !== ""
-                    elide: Text.ElideRight
-                }
-            }
-            control: Switch {
-                checked: project.services.github !== ""
-                onCheckedChanged: {
-                    if (checked) {
-                        if (project.services.github === "")
-                            PopupUtils.open(githubDialog, page)
-                    } else {
-                        project.enabledPlugin("github", "")
+                    anchors {
+                        verticalCenter: parent.verticalCenter
+                        left: parent.left
+                        leftMargin: units.gu(2)
+                        rightMargin: units.gu(1)
+                        right: parent.right
                     }
-                    checked = Qt.binding(function() { return project.services.github !== ""})
-                }
-            }
-        }
 
-        ListItem.Standard {
-            enabled: false
-            Column {
-                opacity: parent.enabled ? 1 :0.5
-                spacing: units.gu(0.1)
-
-                anchors {
-                    verticalCenter: parent.verticalCenter
-                    left: parent.left
-                    leftMargin: units.gu(2)
-                    rightMargin: units.gu(1)
-                    right: parent.right
-                }
-
-                Label {
-
-                    width: parent.width
-                    elide: Text.ElideRight
-                    text: "Launchpad"
-                }
-
-                Label {
-                    width: parent.width
-
-                    height: visible ? implicitHeight: 0
-                    color:  Theme.palette.normal.backgroundText
-                    fontSize: "small"
-                    //font.italic: true
-                    text: project.services.launchpad === "" ? "" : "Connected to " + project.services.launchpad
-                    visible: text !== ""
-                    elide: Text.ElideRight
-                }
-            }
-            control: Switch {
-                checked: project.services.launchpad !== ""
-                onCheckedChanged: {
-                    if (checked) {
-                        if (project.services.launchpad === "")
-                            PopupUtils.open(launchpadDialog, page)
-                    } else {
-                        project.enabledPlugin("launchpad", "")
+                    Label {
+                        width: parent.width
+                        elide: Text.ElideRight
+                        text: modelData.title
                     }
-                    checked = Qt.binding(function() { return project.services.launchpad !== ""})
+
+                    Label {
+                        width: parent.width
+
+                        height: visible ? implicitHeight: 0
+                        color:  Theme.palette.normal.backgroundText
+                        fontSize: "small"
+                        //font.italic: true
+                        text: project.hasPlugin(modelData.name) ? modelData.status(project.serviceValue(modelData.name)) : ""
+                        visible: text !== ""
+                        elide: Text.ElideRight
+                    }
+                }
+                control: Switch {
+                    checked: project.hasPlugin(modelData.name)
+                    onCheckedChanged: {
+                        if (checked) {
+                            if (!project.hasPlugin(modelData.name)) {
+                                modelData.connect(project)
+                            }
+                        } else {
+                            project.enablePlugin(modelData.name, "")
+                        }
+                        checked = Qt.binding(function() { return project.hasPlugin(modelData.name) })
+                    }
                 }
             }
         }
@@ -171,19 +118,6 @@ Page {
         locked: wideAspect
 
         onLockedChanged: opened = locked
-    }
-
-    Component {
-        id: githubDialog
-
-        InputDialog {
-            title: i18n.tr("Connect to GitHub")
-            text: i18n.tr("Enter the name of repository on GitHub you would like to add to your project")
-            placeholderText: i18n.tr("owner/repo")
-            onAccepted: {
-                project.enabledPlugin("github", value)
-            }
-        }
     }
 
     Component {

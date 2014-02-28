@@ -31,7 +31,7 @@ import "Markdown.Converter.js" as Markdown
 */
 
 MainView {
-    id: root
+    id: mainView
     // objectName for functional testing purposes (autopilot-qt5)
     objectName: "mainView"
 
@@ -70,7 +70,7 @@ MainView {
             visible: false
         }
 
-        anchors.bottomMargin: wideAspect ? -root.toolbar.triggerSize : 0
+        anchors.bottomMargin: wideAspect ? -mainView.toolbar.triggerSize : 0
 
         Component.onCompleted: {
             pageStack.push(projectsPage)
@@ -105,15 +105,15 @@ MainView {
     property var githubToken: settings.get("githubToken", "")
 
     function getIcon(name) {
-        var root = "icons/"
+        var mainView = "icons/"
         var ext = ".png"
 
         //return "image://theme/" + name
 
         if (name.indexOf(".") === -1)
-            name = root + name + ext
+            name = mainView + name + ext
         else
-            name = root + name
+            name = mainView + name
 
         return Qt.resolvedUrl(name)
     }

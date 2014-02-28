@@ -20,9 +20,18 @@ import Ubuntu.Components 0.1
 import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
 import "../../ubuntu-ui-extras/httplib.js" as Http
+import "../../ubuntu-ui-extras"
+import ".."
 
-Object {
+Service {
     id: root
+
+    name: "github"
+    type: ["GitHubIssues", "GitHubPullRequests"]
+    title: "GitHub"
+    docId: 3
+
+    property bool enabled: oauth !== ""
 
     property string oauth:settings.get("githubToken", "")
     property string github: "https://api.github.com"
@@ -33,6 +42,8 @@ Object {
     onOauthChanged: {
         if (oauth !== "") {
             get("/user", userLoaded)
+        } else {
+            settings.set("githubUser", "")
         }
     }
 
@@ -42,7 +53,6 @@ Object {
 
         if (json.hasOwnProperty("message") && json.message === "Bad credentials") {
             settings.set("githubToken", "")
-            settings.set("githubUser", "")
             accessRevoked()
         } else {
             settings.set("githubUser", json.login)
@@ -54,7 +64,7 @@ Object {
     }
 
     function getIssues(repo, callback) {
-        return Http.get(github + "/repos/" + repo + "/issues", ["access_token=" + oauth], callback)
+        return get("/repos/" + repo + "/issues", callback)
     }
 
     function newIssue(repo, title, description, callback) {
@@ -62,6 +72,30 @@ Object {
     }
 
     function getPullRequests(repo, callback) {
-        return Http.get(github + "/repos/" + repo + "/pulls", ["access_token=" + oauth], callback)
+        return get("/repos/" + repo + "/pulls", callback)
+    }
+
+    function connect(project) {
+        print("Connecting...")
+        PopupUtils.open(githubDialog, mainView.pageStack.currentPage, {project: project})
+    }
+
+    function status(value) {
+        return i18n.tr("Connected to %1").arg(value)
+    }
+
+    Component {
+        id: githubDialog
+
+        InputDialog {
+            property var project
+
+            title: i18n.tr("Connect to GitHub")
+            text: i18n.tr("Enter the name of repository on GitHub you would like to add to your project")
+            placeholderText: i18n.tr("owner/repo")
+            onAccepted: {
+                project.enablePlugin("github", value)
+            }
+        }
     }
 }
