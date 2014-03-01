@@ -24,6 +24,7 @@ ListItem.SingleValue {
     property int number
     property int status
     property string message
+    property string built_at
 
     Column {
         id: labels
@@ -42,7 +43,7 @@ ListItem.SingleValue {
 
             width: parent.width
             elide: Text.ElideRight
-            text: i18n.tr("Build %1").arg(number)
+            text: i18n.tr("<b>Build %1</b> - %2").arg(number).arg(friendsUtils.createTimeString(built_at))
         }
 
         Label {

@@ -43,6 +43,7 @@ Plugin {
     BuildListItem {
         number: info.last_build_number
         status: info.last_build_result
+        built_at: info.last_build_finished_at
         message: builds[0].message
     }
 
@@ -103,6 +104,7 @@ Plugin {
                     number: modelData.number
                     message: modelData.message
                     status: modelData.result
+                    built_at: modelData.finished_at
                 }
             }
 
