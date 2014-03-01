@@ -20,6 +20,7 @@ import Ubuntu.Components 0.1
 import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
 import "../ubuntu-ui-extras"
+import "services"
 
 Object {
     id: root
@@ -60,6 +61,14 @@ Object {
             title: "Drawings"
             docId: 2
         }
+    }
+
+    GitHub {
+        id: github
+    }
+
+    TravisCI {
+        id: travisCI
     }
 
     property var availableServices: [github, travisCI]

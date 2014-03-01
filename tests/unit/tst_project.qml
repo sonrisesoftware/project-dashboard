@@ -10,6 +10,8 @@ import "../../ubuntu-ui-extras"
 //   qmltestrunner
 
 Item {
+    id: root
+
     // The objects
     Backend {
         id: backend
@@ -19,12 +21,22 @@ Item {
         id: db
     }
 
+    Document {
+        id: settings
+        docId: 1
+        parent: db.document
+    }
+
+    function newObject(type, args) {
+        var component = Qt.createComponent(type);
+        return component.createObject(root, args);
+    }
+
     TestCase {
-        name: "HelloComponent"
+        name: "Project"
 
         function init() {
             console.debug(">> init");
-            compare(backend.projects.length,0,"No projects should exist beforehand");
             console.debug("<< init");
         }
 
@@ -35,6 +47,7 @@ Item {
 
         function initTestCase() {
             console.debug(">> initTestCase");
+            compare(backend.projects.length,0,"No projects should exist beforehand");
             console.debug("<< initTestCase");
         }
 
@@ -44,10 +57,39 @@ Item {
         }
 
         function test_createProject() {
-            var expected = "Hello World";
+            var expected = "Sample Project";
+            var new_value = "Renamed Project"
 
             backend.newProject(expected)
             compare(backend.projects.length,1, "Project was not created correctly")
+
+            var project = newObject(Qt.resolvedUrl("../../backend/Project.qml"), {docId: 0})
+            compare(project.name,expected, "Project name is incorrect")
+
+            var document = newObject(Qt.resolvedUrl("../../ubuntu-ui-extras/Document.qml"), {docId: 0, parent: backend.document})
+            compare(document.get("name"),expected, "Project name is incorrect using a Document")
+
+            document.set("name", new_value)
+            compare(project.name,new_value, "Project name is incorrect after renaming it via the Document")
+
+            project.name = expected
+            compare(document.get("name"),expected, "Project name is incorrect using a Document")
+        }
+
+        function test_deleteProject() {
+            var expected = "Sample Project";
+            var new_value = "Renamed Project"
+
+            var orig_length = backend.projects.length
+
+            backend.newProject(expected)
+            compare(backend.projects.length,orig_length + 1, "Project was not created correctly")
+
+            var project = newObject(Qt.resolvedUrl("../../backend/Project.qml"), {docId: 0})
+            project.remove()
+
+            compare(backend.projects.length,orig_length, "Project was not deleted correctly")
+            compare(backend.document.save().children.length, orig_length, "Project still shows when saved")
         }
     }
 }
