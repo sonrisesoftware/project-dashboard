@@ -31,15 +31,15 @@ SubtitledListItem {
 
     property string status: modelData.hasOwnProperty("status") ? modelData.status.state : ""
 
-    Rectangle {
+    AwesomeIcon {
         anchors.centerIn: icon
 
         width: units.gu(2)
-        height: width
-        radius: width/2
+        size: units.gu(3)
 
-        color: "white"
-        visible: status != "error" && status != "" && status != "pending"
+        color: status === "pending" ? "gray" : "white"
+        name: "circle"
+        visible: status != "error" && status != ""
     }
 
     AwesomeIcon {
@@ -50,13 +50,13 @@ SubtitledListItem {
             verticalCenter: parent.verticalCenter
         }
 
-        size: units.gu(3)
+        size: status == "pending" ? units.gu(2.5) : units.gu(3)
 
         color: status == "success" ? "green"
-                                  : "failure" ? "red"
-                                              : "error" ? "yello" : "white"
+                                  : status == "failure" ? "red"
+                                              : status == "error" ? "yellow" : "white"
         name: status == "success" ? "check-circle"
-                                 : "failure" ? "times-circle"
-                                             : "error" ? "exclamation-triangle" : "ellipse-h"
+                                 : status == "failure" ? "times-circle"
+                                             : status == "error" ? "exclamation-triangle" : "ellipse-h"
     }
 }
