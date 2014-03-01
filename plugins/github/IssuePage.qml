@@ -225,6 +225,54 @@ Page {
                 text: i18n.tr("Assigned To")
             }
 
+            ListItem.ItemSelector {
+                model: plugin.availableAssignees.concat(i18n.tr("No one assigned"))
+                visible: plugin.hasPushAccess
+                selectedIndex: {
+                    if (issue.assignee && issue.assignee.hasOwnProperty("login")) {
+                        for (var i = 0; i < model.length; i++) {
+                            if (model[i].login === issue.assignee.login)
+                                return i
+                        }
+                    } else {
+                        return model.length - 1
+                    }
+                }
+
+                delegate: OptionSelectorDelegate {
+                    text: modelData.login
+                }
+
+                onSelectedIndexChanged: {
+                    var login = undefined
+                    if (selectedIndex < model.length - 1) {
+                        login = model[selectedIndex].login
+
+                        busyDialog.title = i18n.tr("Setting assignee to <b>%1</b>").arg(model[selectedIndex].login)
+                    } else {
+                        busyDialog.title = i18n.tr("Removing assignee from Issue")
+                    }
+
+                    if (issue.assignee && issue.assignee.hasOwnProperty("login") && issue.assignee.login === login)
+                        return
+
+                    if (!(issue.assignee && issue.assignee.hasOwnProperty("login")) && login === undefined)
+                        return
+
+                    busyDialog.show()
+
+                    request = github.editIssue(plugin.repo, issue.number, {"assignee": login}, function(response) {
+                        busyDialog.hide()
+                        if (response === -1) {
+                            error(i18n.tr("Connection Error"), i18n.tr("Unable to change assignee. Check your connection and/or firewall settings."))
+                        } else {
+                            issue = issue
+                            plugin.reload()
+                        }
+                    })
+                }
+            }
+
             ListItem.Standard {
                 id: assignedToItem
                 text: enabled ? (issue.assignee.login === github.user ? i18n.tr("%1 (Myself)").arg(issue.assignee.login) : issue.assignee.login) : i18n.tr("No one assigned")

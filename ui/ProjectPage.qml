@@ -64,7 +64,7 @@ Page {
     }
 
     property Plugin selectedPlugin
-    property bool wide: wideAspect
+    property bool wide: sidebar.expanded
 
     onWideChanged: {
         if (!wide && selectedPlugin) {
@@ -74,7 +74,7 @@ Page {
     }
 
     function displayPlugin(plugin) {
-        if (wideAspect) {
+        if (sidebar.expanded) {
             selectedPlugin = plugin
         } else {
             pageStack.push(pushedPage, {plugin: plugin})
@@ -89,7 +89,7 @@ Page {
             title: pluginItem.item.title
 
             property Plugin plugin
-            property bool wide: wideAspect
+            property bool wide: sidebar.expanded
 
             onWideChanged: {
                 if (wide) {
@@ -198,7 +198,7 @@ Page {
 
     Sidebar {
         id: sidebar
-        expanded: wideAspect
+        expanded: false//wideAspect
         width: units.gu(8)
         color: Qt.rgba(0.2,0.2,0.2,0.8)
 

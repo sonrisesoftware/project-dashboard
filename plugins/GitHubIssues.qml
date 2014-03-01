@@ -48,6 +48,7 @@ Plugin {
     property var issues: doc.get("issues", [])
     property var closedIssues: doc.get("closedIssues", [])
     property var info: doc.get("repo", {})
+    property var availableAssignees: doc.get("assignees", [])
 
     property var allIssues: issues.concat(closedIssues).sort(function sort(a1, a2) {
         return a2.number - a1.number
@@ -114,7 +115,7 @@ Plugin {
 
         github.getMilestones(repo, function(has_error, status, response) {
             loading--
-            print("Milestones:", response)
+            //print("Milestones:", response)
             var json = JSON.parse(response)
 
             doc.set("milestones", json)
@@ -122,10 +123,18 @@ Plugin {
 
         github.getRepository(repo, function(has_error, status, response) {
             loading--
-            print("Repository:", response)
+            //print("Repository:", response)
             var json = JSON.parse(response)
 
             doc.set("repo", json)
+        })
+
+        github.getAssignees(repo, function(has_error, status, response) {
+            loading--
+            print("Repository:", response)
+            var json = JSON.parse(response)
+
+            doc.set("assignees", json)
         })
     }
 }

@@ -85,6 +85,10 @@ Service {
         return get("/repos/" + repo + "/pulls", callback)
     }
 
+    function getAssignees(repo, callback) {
+        return get("/repos/" + repo + "/assignees", callback)
+    }
+
     function getMilestones(repo, callback) {
         return get("/repos/" + repo + "/milestones", callback)
     }
