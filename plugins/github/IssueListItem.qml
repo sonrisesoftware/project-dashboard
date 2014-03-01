@@ -96,7 +96,7 @@ ListItem.Standard {
 
         width: units.gu(4)
         height: width
-        visible: modelData.assignee !== undefined && modelData.assignee.hasOwnProperty("login") && modelData.assignee !== "" && showAssignee
+        visible: modelData.hasOwnProperty("assignee") && modelData.assignee != undefined && modelData.assignee.hasOwnProperty("login") && modelData.assignee !== "" && showAssignee
 
         UbuntuShape {
             anchors.fill: parent
@@ -111,7 +111,7 @@ ListItem.Standard {
             anchors.fill: parent
 
             image: Image {
-                source: modelData.assignee.avatar_url
+                source: assigneeIndicator.visible ? modelData.assignee.avatar_url : ""
             }
         }
     }

@@ -112,8 +112,8 @@ Plugin {
                 delegate: BuildListItem {
                     number: modelData.number
                     message: modelData.message
-                    status: modelData.hasOwnProperty("result") ? modelData.result : -1
-                    built_at: modelData.finished_at
+                    status: modelData.result != null ? modelData.result : -1
+                    built_at:  modelData.finished_at != null ? modelData.finished_at : ""
                 }
                 clip: true
             }
