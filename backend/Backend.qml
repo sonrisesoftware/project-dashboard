@@ -37,7 +37,7 @@ Object {
     }
 
     function newProject(name) {
-        doc.newDoc({"name": name})
+        return doc.newDoc({"name": name})
     }
 
     property ListModel availablePlugins: ListModel {
@@ -61,14 +61,6 @@ Object {
             title: "Drawings"
             docId: 2
         }
-    }
-
-    GitHub {
-        id: github
-    }
-
-    TravisCI {
-        id: travisCI
     }
 
     property var availableServices: [github, travisCI]

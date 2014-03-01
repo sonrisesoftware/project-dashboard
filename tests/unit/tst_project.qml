@@ -2,7 +2,9 @@ import QtQuick 2.0
 import QtTest 1.0
 import Ubuntu.Components 0.1
 import "../../backend"
+import "../../backend/services"
 import "../../ubuntu-ui-extras"
+import "../../ubuntu-ui-extras/listutils.js" as List
 
 // See more details @ http://qt-project.org/doc/qt-5.0/qtquick/qml-testcase.html
 
@@ -25,6 +27,14 @@ Item {
         id: settings
         docId: 1
         parent: db.document
+    }
+
+    GitHub {
+        id: github
+    }
+
+    TravisCI {
+        id: travisCI
     }
 
     function newObject(type, args) {
@@ -78,18 +88,26 @@ Item {
 
         function test_deleteProject() {
             var expected = "Sample Project";
-            var new_value = "Renamed Project"
+            var second = "Second Project"
 
             var orig_length = backend.projects.length
 
-            backend.newProject(expected)
+            var docId1 = backend.newProject(expected)
             compare(backend.projects.length,orig_length + 1, "Project was not created correctly")
 
-            var project = newObject(Qt.resolvedUrl("../../backend/Project.qml"), {docId: 0})
+            var docId2 = backend.newProject(second)
+            compare(backend.projects.length,orig_length + 2, "Project was not created correctly")
+
+            print(JSON.stringify(backend.document.save().children))
+
+            var project = newObject(Qt.resolvedUrl("../../backend/Project.qml"), {docId: docId1})
+            var project2 = newObject(Qt.resolvedUrl("../../backend/Project.qml"), {docId: docId2})
             project.remove()
 
-            compare(backend.projects.length,orig_length, "Project was not deleted correctly")
-            compare(backend.document.save().children.length, orig_length, "Project still shows when saved")
+            compare(backend.projects.length,orig_length + 1, "Project was not deleted correctly")
+            compare(List.objectKeys(backend.document.save().children).length, orig_length + 1, "Project still shows when saved")
+
+            compare(project2.name,second, "Project name is incorrect after removing the other project")
         }
     }
 }

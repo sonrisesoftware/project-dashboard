@@ -45,7 +45,7 @@ Plugin {
     }
 
     summary: i18n.tr("Build %1").arg(info.last_build_number)
-    summaryValue: info.last_build_status === 0 ? i18n.tr("Passed") : i18n.tr("Unknown")
+    summaryValue: info.last_build_status === 0 ? i18n.tr("Passed") : info.last_build_status === 1 ? i18n.tr("Failed") : i18n.tr("Unknown")
 
     viewAllMessage: "View details"
 

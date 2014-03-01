@@ -43,8 +43,10 @@ Page {
         anchors.fill: parent
         model: backend.projects
         delegate: ListItem.Standard {
+            id: projectDelegate
             text: project.name
             onClicked: pageStack.push(Qt.resolvedUrl("ProjectPage.qml"), {docId: modelData})
+            onPressAndHold: PopupUtils.open(projectActionPopover, projectDelegate, {project: project})
 
             Project {
                 id: project
@@ -78,6 +80,22 @@ Page {
 
         ToolbarButton {
             action: settingsAction
+        }
+    }
+
+    Component {
+        id: projectActionPopover
+
+        ActionSelectionPopover {
+            property Project project
+
+            actions: [
+                Action {
+                    text: i18n.tr("Delete")
+                    // TODO: Add confirm dialog
+                    onTriggered: project.remove()
+                }
+            ]
         }
     }
 
