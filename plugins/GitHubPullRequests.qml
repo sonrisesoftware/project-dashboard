@@ -29,6 +29,7 @@ Plugin {
     id: plugin
 
     title: "Pull Requests"
+    shortTitle: "Pulls"
     iconSource: "code-fork"
     unread: issues.length > 0
 

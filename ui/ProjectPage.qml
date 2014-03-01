@@ -21,6 +21,7 @@ import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
 import "../backend"
 import "../ubuntu-ui-extras"
+import "../components"
 
 Page {
     id: page
@@ -45,16 +46,100 @@ Page {
         }
     ]
 
-    flickable: project.enabledPlugins.length === 0 ? null : flickable
+    flickable: wideAspect || project.enabledPlugins.length === 0 ? null : flickable
 
     Project {
         id: project
         docId: modelData
     }
 
+    property Plugin selectedPlugin
+    property bool wide: wideAspect
+
+    onWideChanged: {
+        if (!wide) {
+            pageStack.push(pushedPage, {plugin: selectedPlugin})
+            selectedPlugin = null
+        }
+    }
+
+    function displayPlugin(plugin) {
+        if (wideAspect) {
+            selectedPlugin = plugin
+        } else {
+            pageStack.push(pushedPage, {plugin: plugin})
+        }
+    }
+
+    Component {
+        id: pushedPage
+
+        Page {
+            id: pushedPagePage
+            title: pluginItem.item.title
+
+            property Plugin plugin
+            property bool wide: wideAspect
+
+            onWideChanged: {
+                if (wide) {
+                    pageStack.pop()
+                    selectedPlugin = plugin
+                }
+            }
+
+            Loader {
+                id: pluginItem
+                anchors.fill: parent
+                visible: plugin
+                sourceComponent: plugin ? plugin.page : null
+                property Plugin plugin: pushedPagePage.plugin
+            }
+
+            tools: ToolbarItems {
+                opened: wideAspect
+                locked: wideAspect
+
+                onLockedChanged: opened = locked
+
+                Repeater {
+                    model: pluginItem.item.actions
+                    delegate: ToolbarButton {
+                        id: toolbarButton
+                        action: modelData
+                        function trigger(value) { action.triggered(toolbarButton) }
+                    }
+                }
+
+                ToolbarButton {
+                    action: refreshAction
+                }
+            }
+        }
+    }
+
+    Loader {
+        id: pluginPage
+        anchors {
+            left: sidebar.right
+            right: parent.right
+            top: parent.top
+            bottom: parent.bottom
+        }
+        visible: selectedPlugin
+        sourceComponent: selectedPlugin ? selectedPlugin.page : null
+        property Plugin plugin: selectedPlugin
+    }
+
     Flickable {
         id: flickable
-        anchors.fill: parent
+        anchors {
+            left: sidebar.right
+            right: parent.right
+            top: parent.top
+            bottom: parent.bottom
+        }
+        visible: selectedPlugin == null
         contentHeight: contents.height
         contentWidth: width
 
@@ -74,6 +159,9 @@ Page {
                 delegate: Item {
                     width: parent.width
                     height: loader.height + units.gu(2)
+
+                    property alias item: loader.item
+
                     Loader {
                         id: loader
                         anchors.centerIn: parent
@@ -97,6 +185,74 @@ Page {
         }
     }
 
+    Sidebar {
+        id: sidebar
+        expanded: wideAspect
+        width: units.gu(8)
+        color: Qt.rgba(0.2,0.2,0.2,0.8)
+
+        Column {
+            width: parent.width
+
+            ListItem.Standard {
+                id: item
+                height: width
+                onClicked: selectedPlugin = null
+                selected: selectedPlugin === null
+
+                Column {
+                    anchors.centerIn: parent
+                    spacing: units.gu(0.5)
+
+                    AwesomeIcon {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        name: "dashboard"
+                        size: units.gu(3)
+                        color: item.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
+                    }
+
+                    Label {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: i18n.tr("Pulse")
+                        color: item.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
+                    }
+                }
+            }
+
+            Repeater {
+                model: column.children
+                delegate: ListItem.Standard {
+                    id: pluginSidebarItem
+                    height: visible ? width : 0
+                    visible: modelData.hasOwnProperty("item")
+                    enabled: modelData.item.page
+                    opacity: enabled ? 1 : 0.5
+                    onClicked: selectedPlugin = modelData.item
+                    selected: selectedPlugin === modelData.item
+
+                    Column {
+                        anchors.centerIn: parent
+                        spacing: units.gu(0.5)
+
+                        AwesomeIcon {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            name: modelData.item.iconSource
+                            size: units.gu(3)
+
+                            color: pluginSidebarItem.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
+                        }
+
+                        Label {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            text: modelData.item.shortTitle
+                            color: pluginSidebarItem.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     Scrollbar {
         flickableItem: flickable
     }
@@ -114,6 +270,15 @@ Page {
         locked: wideAspect
 
         onLockedChanged: opened = locked
+
+        Repeater {
+            model: selectedPlugin ? pluginPage.item.actions : []
+            delegate: ToolbarButton {
+                id: toolbarButton
+                action: modelData
+                function trigger(value) { action.triggered(toolbarButton) }
+            }
+        }
 
         ToolbarButton {
             action: refreshAction

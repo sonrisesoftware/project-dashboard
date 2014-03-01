@@ -29,6 +29,7 @@ Plugin {
     id: plugin
 
     title: "Continuous Integration"
+    shortTitle: "Testing"
     iconSource: "check-circle"
 
     property var info: doc.get("repo", [])
@@ -98,12 +99,10 @@ Plugin {
         })
     }
 
-    onTriggered: pageStack.push(buildsPage)
-
-    Component {
+    page: Component {
         id: buildsPage
 
-        Page {
+        PluginPage {
             title: i18n.tr("Build History")
 
             ListView {
@@ -116,17 +115,11 @@ Plugin {
                     status: modelData.result
                     built_at: modelData.finished_at
                 }
+                clip: true
             }
 
             Scrollbar {
                 flickableItem: listView
-            }
-
-            tools: ToolbarItems {
-                opened: wideAspect
-                locked: wideAspect
-
-                onLockedChanged: opened = locked
             }
         }
     }

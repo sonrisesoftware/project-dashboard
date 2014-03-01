@@ -32,7 +32,7 @@ Plugin {
     iconSource: "bug"
     unread: issues.length > 0
 
-    onTriggered: pageStack.push(Qt.resolvedUrl("github/IssuesPage.qml"), {plugin: plugin})
+    page: Component { IssuesPage {} }
 
     ListItem.Header {
         text: "Recent Issues"
