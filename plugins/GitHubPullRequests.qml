@@ -23,6 +23,7 @@ import "../backend"
 import "../components"
 import "../backend/services"
 import "../ubuntu-ui-extras"
+import "github"
 
 Plugin {
     id: root
@@ -46,10 +47,8 @@ Plugin {
 
     Repeater {
         model: Math.min(issues.length, 4)
-        delegate: ListItem.Subtitled {
+        delegate: PullRequestListItem {
             property var modelData: issues[index]
-            text: "<b>#" + modelData.number + "</b> - " + modelData.title
-            subText: new Date(modelData.created_at).toDateString()
         }
     }
 
