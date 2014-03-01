@@ -44,7 +44,17 @@ Plugin {
         number: info.last_build_number
         status: info.last_build_result
         built_at: info.last_build_finished_at
-        message: builds[0].message
+        message: {
+            var build
+            for (var i = 0; i < builds.length; i++) {
+                if (builds[i].id === info.last_build_id) {
+                    build = builds[i]
+                    break
+                }
+            }
+
+            return build ? build.message : ""
+        }
     }
 
     summary: i18n.tr("Build %1").arg(info.last_build_number)

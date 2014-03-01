@@ -68,12 +68,14 @@ Plugin {
 
     function reload() {
         loading += 1
-        github.getPullRequests(repo, function(response) {
+        github.getPullRequests(repo, function(has_error, status, response) {
             loading--
-            if (response === -1)
+            if (has_error) {
                 error(i18n.tr("Connection Error"), i18n.tr("Unable to download list of pull requests. Check your connection and/or firewall settings.\n\nError: %1").arg(status))
-            //print("GitHub Results:", response)
-            doc.set("pullRequests", JSON.parse(response))
+            } else {
+                //print("GitHub Results:", response)
+                doc.set("pullRequests", JSON.parse(response))
+            }
         })
     }
 }
