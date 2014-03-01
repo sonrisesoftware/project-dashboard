@@ -27,7 +27,7 @@ ListItem.Standard {
 
     onClicked: pageStack.push(Qt.resolvedUrl("IssuePage.qml"), {issue: modelData, plugin:plugin})
 
-    height: opacity === 0 ? 0 : implicitHeight
+    height: opacity === 0 ? 0 : (__height + units.dp(2))
 
     Behavior on height {
         UbuntuNumberAnimation {}

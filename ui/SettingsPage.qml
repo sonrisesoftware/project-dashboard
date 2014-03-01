@@ -34,40 +34,13 @@ Page {
 
         Repeater {
             model: backend.availableServices
-            delegate: ListItem.Standard {
-                Column {
-                    spacing: units.gu(0.1)
+            delegate: ListItem.SingleValue {
+                text: modelData.title
+                value: modelData.authenticationStatus
 
-                    anchors {
-                        verticalCenter: parent.verticalCenter
-                        left: parent.left
-                        leftMargin: units.gu(2)
-                        rightMargin: units.gu(1)
-                        right: parent.right
-                    }
-
-                    Label {
-
-                        width: parent.width
-                        elide: Text.ElideRight
-                        text: modelData.title
-                    }
-
-                    Label {
-                        width: parent.width
-
-                        height: visible ? implicitHeight: 0
-                        color:  Theme.palette.normal.backgroundText
-                        fontSize: "small"
-                        //font.italic: true
-                        text: modelData.authenticationStatus
-                        visible: text !== ""
-                        elide: Text.ElideRight
-                    }
-                }
-
-                control: Button {
-                    text: modelData.enabled ? i18n.tr("Log out") : i18n.tr("Log in")
+                Button {
+                    visible: !modelData.enabled
+                    text: i18n.tr("Authenticate")
                     height: units.gu(4)
                     anchors {
                         right: parent.right

@@ -32,7 +32,7 @@ Plugin {
     iconSource: "bug"
     unread: issues.length > 0
 
-    onClicked: pageStack.push(Qt.resolvedUrl("github/IssuesPage.qml"), {plugin: plugin})
+    onTriggered: pageStack.push(Qt.resolvedUrl("github/IssuesPage.qml"), {plugin: plugin})
 
     ListItem.Header {
         text: "Recent Issues"
@@ -51,7 +51,7 @@ Plugin {
         return a2.number - a1.number
     })
 
-    Document {
+    document: Document {
         id: doc
         docId: backend.getPlugin("github").docId
         parent: project.document
@@ -70,12 +70,8 @@ Plugin {
         text: i18n.tr("No open issues")
     }
 
-    ListItem.Standard {
-        text: i18n.tr("View all issues")
-        progression: true
-        showDivider: false
-        onTriggered: plugin.clicked()
-    }
+    viewAllMessage: i18n.tr("View all issues")
+    summary: i18n.tr("<b>%1</b> open issues").arg(issues.length)
 
     property string repo:  project.serviceValue("github")
 

@@ -62,7 +62,7 @@ Object {
         }
     }
 
-    property var availableServices: [github]
+    property var availableServices: [github, travisCI]
 
     function getPlugin(name) {
         for (var i = 0; i < availablePlugins.count;i++) {

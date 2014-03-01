@@ -38,7 +38,7 @@ Plugin {
 
     property var issues: doc.get("pullRequests", [])
 
-    Document {
+    document: Document {
         id: doc
         docId: backend.getPlugin("github").docId
         parent: root.project.document
@@ -59,11 +59,8 @@ Plugin {
         text: i18n.tr("No open pull requests")
     }
 
-    ListItem.Standard {
-        text: i18n.tr("View all pull requests")
-        progression: true
-        showDivider: false
-    }
+    viewAllMessage: i18n.tr("View all pull requests")
+    summary: i18n.tr("<b>%1</b> open pull requests").arg(issues.length)
 
     property string repo:  project.serviceValue("github")
 

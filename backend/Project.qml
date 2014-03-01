@@ -76,6 +76,4 @@ Object {
         docId: project.docId
         parent: backend.document
     }
-
-    function newPlugin() {doc.newDoc({"name": "TEst"})}
 }
