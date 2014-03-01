@@ -39,7 +39,7 @@ SubtitledListItem {
         radius: width/2
 
         color: "white"
-        visible: status != "error" && status != ""
+        visible: status != "error" && status != "" && status != "pending"
     }
 
     AwesomeIcon {
@@ -57,6 +57,6 @@ SubtitledListItem {
                                               : "error" ? "yello" : "lightgray"
         name: status == "success" ? "check-circle"
                                  : "failure" ? "times-circle"
-                                             : "error" ? "exclamation-triangle" : "ellipse-h-circle"
+                                             : "error" ? "exclamation-triangle" : "ellipse-h"
     }
 }

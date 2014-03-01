@@ -89,8 +89,13 @@ Plugin {
                     loading++
                     github.get(issue._links.statuses.href, function(has_error, status, response) {
                         print(response)
-                        issue.status = JSON.parse(response)[0]
+                        if (JSON.parse(response)[0] === undefined) {
+                            issue.status = {"state": "pending"}
+                        } else {
+                            issue.status = JSON.parse(response)[0]
+                        }
                         print(issue.status.state)
+
                         pullRequests_TEMP = issues
 
                         loading--
