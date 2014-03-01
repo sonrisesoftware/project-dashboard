@@ -23,7 +23,7 @@ import "../backend"
 import "../components"
 import "../backend/services"
 import "../ubuntu-ui-extras"
-import "github"
+import "travis"
 
 Plugin {
     id: plugin
@@ -40,9 +40,10 @@ Plugin {
         parent: project.document
     }
 
-    ListItem.SingleValue {
-        value: summaryValue
-        text: summary
+    BuildListItem {
+        number: info.last_build_number
+        status: info.last_build_result
+        message: builds[0].message
     }
 
     summary: i18n.tr("Build %1").arg(info.last_build_number)
@@ -98,48 +99,10 @@ Plugin {
                 id: listView
                 anchors.fill: parent
                 model: builds
-                delegate: ListItem.SingleValue {
-                    Column {
-                        id: labels
-
-                        spacing: units.gu(0.1)
-
-                        anchors {
-                            verticalCenter: parent.verticalCenter
-                            left: parent.left
-                        }
-
-                        width: parent.width * 0.8
-
-                        Label {
-                            id: titleLabel
-
-                            width: parent.width
-                            elide: Text.ElideRight
-                            text: i18n.tr("Build %1").arg(modelData.number)
-
-                            font.strikeout: modelData.state === "closed"
-                        }
-
-                        Label {
-                            id: subLabel
-                            width: parent.width
-
-                            height: visible ? implicitHeight: 0
-                            //color:  Theme.palette.normal.backgroundText
-                            opacity: 0.65
-                            font.weight: Font.Light
-                            fontSize: "small"
-                            //font.italic: true
-                            text: modelData.message.indexOf('\n') === -1 ? modelData.message : modelData.message.substring(0, modelData.message.indexOf('\n'))
-                            visible: text !== ""
-                            elide: Text.ElideRight
-                            //maximumLineCount: 1
-                        }
-                    }
-
-                    //text: i18n.tr("Build %1").arg(modelData.number)
-                    value: buildStatus(modelData.result)
+                delegate: BuildListItem {
+                    number: modelData.number
+                    message: modelData.message
+                    status: modelData.result
                 }
             }
 
