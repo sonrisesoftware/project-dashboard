@@ -69,6 +69,10 @@ Service {
         return get("/repos/" + repo, callback)
     }
 
+    function getBuilds(repo, callback) {
+        return get("/repos/" + repo + "/builds", callback)
+    }
+
     function connect(project) {
         print("Connecting...")
         PopupUtils.open(travisDialog, mainView.pageStack.currentPage, {project: project})

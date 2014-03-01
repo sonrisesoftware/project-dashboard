@@ -32,7 +32,7 @@ UbuntuShape {
     property alias title: titleLabel.text
     property alias iconSource: iconImage.name
     property bool unread
-    property bool loading
+    property int loading: 0
     property string viewAllMessage
     property string summary
     property string summaryValue
@@ -118,8 +118,8 @@ UbuntuShape {
             }
 
             ActivityIndicator {
-                visible: loading
-                running: loading
+                visible: loading > 0
+                running: loading > 0
 
                 anchors {
                     right: parent.right
@@ -130,7 +130,7 @@ UbuntuShape {
 
             Button {
                 id: actionButton
-                visible: action && !loading
+                visible: action && loading == 0
                 height: units.gu(4)
                 anchors {
                     right: parent.right

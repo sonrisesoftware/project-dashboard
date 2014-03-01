@@ -67,9 +67,9 @@ Plugin {
     onRepoChanged: reload()
 
     function reload() {
-        loading = true
+        loading += 1
         github.getPullRequests(repo, function(response) {
-            loading = false
+            loading--
             if (response === -1)
                 error(i18n.tr("Connection Error"), i18n.tr("Unable to download list of pull requests. Check your connection and/or firewall settings."))
             //print("GitHub Results:", response)

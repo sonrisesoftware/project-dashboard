@@ -32,6 +32,7 @@ Plugin {
     iconSource: "check-circle"
 
     property var info: doc.get("repo", [])
+    property var builds: doc.get("builds", [])
 
     document: Document {
         id: doc
@@ -45,26 +46,113 @@ Plugin {
     }
 
     summary: i18n.tr("Build %1").arg(info.last_build_number)
-    summaryValue: info.last_build_status === 0 ? i18n.tr("Passed") : info.last_build_status === 1 ? i18n.tr("Failed") : i18n.tr("Unknown")
+    summaryValue: buildStatus(info.last_build_result)
 
-    viewAllMessage: "View details"
+    viewAllMessage: "View build history"
 
     property string repo:  project.serviceValue("travis")
 
     onRepoChanged: reload()
 
-    function statusColor() {
+    function statusColor(status) {
+        if (status === 0)
+            return "green"
+        else if (status === 1)
+            return "red"
+        else
+            return ""
+    }
 
+    function buildStatus(status) {
+        return "<font color=\"" + statusColor(status) + "\">" + (status === 0 ? i18n.tr("Passed") : status === 1 ? i18n.tr("Failed") : i18n.tr("Error")) + "</font>"
     }
 
     function reload() {
-        loading = true
+        loading += 2
         travisCI.getRepo(repo, function(response) {
-            loading = false
+            loading--
             if (response === -1)
                 error(i18n.tr("Connection Error"), i18n.tr("Unable to download results from Travis CI. Check your connection and/or firewall settings."))
             print("Travis CI Results:", response)
             doc.set("repo", JSON.parse(response))
         })
+
+        travisCI.getBuilds(repo, function(response) {
+            loading--
+            if (response === -1)
+                error(i18n.tr("Connection Error"), i18n.tr("Unable to download results from Travis CI. Check your connection and/or firewall settings."))
+            print("Travis CI Results:", response)
+            doc.set("builds", JSON.parse(response))
+        })
+    }
+
+    onTriggered: pageStack.push(buildsPage)
+
+    Component {
+        id: buildsPage
+
+        Page {
+            title: i18n.tr("Build History")
+
+            ListView {
+                id: listView
+                anchors.fill: parent
+                model: builds
+                delegate: ListItem.SingleValue {
+                    Column {
+                        id: labels
+
+                        spacing: units.gu(0.1)
+
+                        anchors {
+                            verticalCenter: parent.verticalCenter
+                            left: parent.left
+                        }
+
+                        width: parent.width * 0.8
+
+                        Label {
+                            id: titleLabel
+
+                            width: parent.width
+                            elide: Text.ElideRight
+                            text: i18n.tr("Build %1").arg(modelData.number)
+
+                            font.strikeout: modelData.state === "closed"
+                        }
+
+                        Label {
+                            id: subLabel
+                            width: parent.width
+
+                            height: visible ? implicitHeight: 0
+                            //color:  Theme.palette.normal.backgroundText
+                            opacity: 0.65
+                            font.weight: Font.Light
+                            fontSize: "small"
+                            //font.italic: true
+                            text: modelData.message.indexOf('\n') === -1 ? modelData.message : modelData.message.substring(0, modelData.message.indexOf('\n'))
+                            visible: text !== ""
+                            elide: Text.ElideRight
+                            //maximumLineCount: 1
+                        }
+                    }
+
+                    //text: i18n.tr("Build %1").arg(modelData.number)
+                    value: buildStatus(modelData.result)
+                }
+            }
+
+            Scrollbar {
+                flickableItem: listView
+            }
+
+            tools: ToolbarItems {
+                opened: wideAspect
+                locked: wideAspect
+
+                onLockedChanged: opened = locked
+            }
+        }
     }
 }

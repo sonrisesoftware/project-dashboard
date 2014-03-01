@@ -78,9 +78,9 @@ Plugin {
     onRepoChanged: reload()
 
     function reload() {
-        loading = true
+        loading += 2
         github.getIssues(repo, "open", function(response) {
-            loading = false
+            loading--
             if (response === -1)
                 error(i18n.tr("Connection Error"), i18n.tr("Unable to download list of issues. Check your connection and/or firewall settings."))
             //print("GitHub Results:", response)
@@ -96,7 +96,7 @@ Plugin {
         })
 
         github.getIssues(repo, "closed", function(response) {
-            loading = false
+            loading--
            // print("GitHub Results:", response)
             var json = JSON.parse(response)
             var list = []

@@ -94,6 +94,13 @@ Plugin {
                     }
                 }
             }
+
+            tools: ToolbarItems {
+                opened: wideAspect
+                locked: wideAspect
+
+                onLockedChanged: opened = locked
+            }
         }
     }
 
