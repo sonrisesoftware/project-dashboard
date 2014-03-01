@@ -54,7 +54,7 @@ SubtitledListItem {
 
         color: status == "success" ? "green"
                                   : "failure" ? "red"
-                                              : "error" ? "yello" : "lightgray"
+                                              : "error" ? "yello" : "white"
         name: status == "success" ? "check-circle"
                                  : "failure" ? "times-circle"
                                              : "error" ? "exclamation-triangle" : "ellipse-h"

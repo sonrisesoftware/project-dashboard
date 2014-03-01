@@ -33,6 +33,7 @@ Item {
     property var icons: {
         "check-circle": "",
         "check-square-o": "",
+                "exclamation-triangle": "",
         "ellipse-h": "",
         "ellipse-v": "",
         "save": "",
