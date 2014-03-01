@@ -66,7 +66,20 @@ ListItem.Standard {
             font.weight: Font.Light
             fontSize: "small"
             //font.italic: true
-            text: i18n.tr("%1 opened this issue %2").arg(modelData.user.login).arg(friendsUtils.createTimeString(modelData.created_at))
+            text: {
+                var text = i18n.tr("%1 opened this issue %2").arg(modelData.user.login).arg(friendsUtils.createTimeString(modelData.created_at))
+                if (modelData.labels.length > 0) {
+                    text += " | "
+                    for (var i = 0; i < modelData.labels.length; i++) {
+                        var label = modelData.labels[i]
+                        text += '<font color="#' + label.color + '">' + label.name + '</font>'
+                        if (i < modelData.labels.length - 1)
+                            text += ', '
+                    }
+                }
+
+                return text
+            }
             visible: text !== ""
             elide: Text.ElideRight
         }

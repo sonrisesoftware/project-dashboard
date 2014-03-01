@@ -71,7 +71,7 @@ Plugin {
         github.getPullRequests(repo, function(response) {
             loading--
             if (response === -1)
-                error(i18n.tr("Connection Error"), i18n.tr("Unable to download list of pull requests. Check your connection and/or firewall settings."))
+                error(i18n.tr("Connection Error"), i18n.tr("Unable to download list of pull requests. Check your connection and/or firewall settings.\n\nError: %1").arg(status))
             //print("GitHub Results:", response)
             doc.set("pullRequests", JSON.parse(response))
         })

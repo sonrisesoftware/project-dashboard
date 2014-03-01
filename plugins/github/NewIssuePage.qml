@@ -72,10 +72,10 @@ Page {
 
             onTriggered: {
                 busyDialog.show()
-                request = github.newIssue(repo, nameField.text, descriptionField.text, function(response) {
+                request = github.newIssue(repo, nameField.text, descriptionField.text, function(has_error, status, response) {
                     busyDialog.hide()
-                    if (response === -1) {
-                        error(i18n.tr("Connection Error"), i18n.tr("Unable to create issue. Check your connection and/or firewall settings."))
+                    if (has_error) {
+                        error(i18n.tr("Connection Error"), i18n.tr("Unable to create issue. Check your connection and/or firewall settings.\n\nError: %1").arg(status))
                     } else {
                         pageStack.pop()
                         dialog.action()

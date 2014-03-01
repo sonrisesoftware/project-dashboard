@@ -79,10 +79,10 @@ Plugin {
 
     function reload() {
         loading += 2
-        github.getIssues(repo, "open", function(response) {
+        github.getIssues(repo, "open", function(has_error, status, response) {
             loading--
-            if (response === -1)
-                error(i18n.tr("Connection Error"), i18n.tr("Unable to download list of issues. Check your connection and/or firewall settings."))
+            if (has_error)
+                error(i18n.tr("Connection Error"), i18n.tr("Unable to download list of issues. Check your connection and/or firewall settings.\n\nError: %1").arg(status))
             //print("GitHub Results:", response)
             var json = JSON.parse(response)
             var list = []
@@ -95,7 +95,7 @@ Plugin {
             doc.set("issues", list)
         })
 
-        github.getIssues(repo, "closed", function(response) {
+        github.getIssues(repo, "closed", function(has_error, status, response) {
             loading--
            // print("GitHub Results:", response)
             var json = JSON.parse(response)

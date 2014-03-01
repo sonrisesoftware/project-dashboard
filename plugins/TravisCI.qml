@@ -70,18 +70,18 @@ Plugin {
 
     function reload() {
         loading += 2
-        travisCI.getRepo(repo, function(response) {
+        travisCI.getRepo(repo, function(has_error, status, response) {
             loading--
-            if (response === -1)
-                error(i18n.tr("Connection Error"), i18n.tr("Unable to download results from Travis CI. Check your connection and/or firewall settings."))
+            if (has_error)
+                error(i18n.tr("Connection Error"), i18n.tr("Unable to download results from Travis CI. Check your connection and/or firewall settings.\n\nError: %1").arg(status))
             print("Travis CI Results:", response)
             doc.set("repo", JSON.parse(response))
         })
 
-        travisCI.getBuilds(repo, function(response) {
+        travisCI.getBuilds(repo, function(has_error, status, response) {
             loading--
-            if (response === -1)
-                error(i18n.tr("Connection Error"), i18n.tr("Unable to download results from Travis CI. Check your connection and/or firewall settings."))
+            if (has_error)
+                error(i18n.tr("Connection Error"), i18n.tr("Unable to download results from Travis CI. Check your connection and/or firewall settings.\n\nError: %1").arg(status))
             print("Travis CI Results:", response)
             doc.set("builds", JSON.parse(response))
         })
