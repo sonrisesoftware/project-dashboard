@@ -20,6 +20,7 @@ import Ubuntu.Components 0.1
 import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
 import "../ubuntu-ui-extras"
+import "services"
 
 Object {
     id: root
@@ -36,7 +37,7 @@ Object {
     }
 
     function newProject(name) {
-        doc.newDoc({"name": name})
+        return doc.newDoc({"name": name})
     }
 
     property ListModel availablePlugins: ListModel {
@@ -62,7 +63,7 @@ Object {
         }
     }
 
-    property var availableServices: [github]
+    property var availableServices: [github, travisCI]
 
     function getPlugin(name) {
         for (var i = 0; i < availablePlugins.count;i++) {

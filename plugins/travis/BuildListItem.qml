@@ -20,18 +20,11 @@ import Ubuntu.Components 0.1
 import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
 
-ListItem.Standard {
-    id: listItem
-
-    //property var modelData: plugin.issues[index]
-
-    onClicked: pageStack.push(Qt.resolvedUrl("IssuePage.qml"), {issue: modelData, plugin:plugin})
-
-    height: opacity === 0 ? 0 : (__height + units.dp(2))
-
-    Behavior on height {
-        UbuntuNumberAnimation {}
-    }
+ListItem.SingleValue {
+    property int number
+    property int status
+    property string message
+    property string built_at
 
     Column {
         id: labels
@@ -41,19 +34,16 @@ ListItem.Standard {
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
-            leftMargin: units.gu(2)
-            rightMargin: units.gu(2)
-            right: parent.right
         }
+
+        width: parent.width * 0.8
 
         Label {
             id: titleLabel
 
             width: parent.width
             elide: Text.ElideRight
-            text: i18n.tr("<b>#%1</b> - %2").arg(modelData.number).arg(modelData.title)
-
-            font.strikeout: modelData.state === "closed"
+            text: i18n.tr("<b>Build %1</b> - %2").arg(number).arg(friendsUtils.createTimeString(built_at))
         }
 
         Label {
@@ -66,30 +56,12 @@ ListItem.Standard {
             font.weight: Font.Light
             fontSize: "small"
             //font.italic: true
-            text: {
-                var text = i18n.tr("%1 opened this issue %2").arg(modelData.user.login).arg(friendsUtils.createTimeString(modelData.created_at))
-                if (modelData.labels.length > 0) {
-                    text += " | "
-                    for (var i = 0; i < modelData.labels.length; i++) {
-                        var label = modelData.labels[i]
-                        text += '<font color="#' + label.color + '">' + label.name + '</font>'
-                        if (i < modelData.labels.length - 1)
-                            text += ', '
-                    }
-                }
-
-                return text
-            }
+            text: message.indexOf('\n') === -1 ? message : message.substring(0, message.indexOf('\n'))
             visible: text !== ""
             elide: Text.ElideRight
+            //maximumLineCount: 1
         }
     }
 
-    opacity: show ? 1 : 0
-
-    Behavior on opacity {
-        UbuntuNumberAnimation {}
-    }
-
-    property bool show: true
+    value: buildStatus(status)
 }

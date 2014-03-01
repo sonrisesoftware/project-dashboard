@@ -24,7 +24,7 @@ import "../ubuntu-ui-extras"
 Object {
     id: project
 
-    property int docId: -1
+    property alias docId: doc.docId
 
     property string name: doc.get("name", "")
     onNameChanged: name = doc.sync("name", name)
@@ -73,9 +73,10 @@ Object {
 
     Document {
         id: doc
-        docId: project.docId
         parent: backend.document
     }
 
-    function newPlugin() {doc.newDoc({"name": "TEst"})}
+    function remove() {
+        doc.remove()
+    }
 }

@@ -20,6 +20,7 @@ import Ubuntu.Components 0.1
 import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
 import "../components"
+import "../ubuntu-ui-extras"
 
 UbuntuShape {
     id: plugin
@@ -31,8 +32,14 @@ UbuntuShape {
     property alias title: titleLabel.text
     property alias iconSource: iconImage.name
     property bool unread
-    property bool loading
+    property int loading: 0
+    property string viewAllMessage
+    property string summary
+    property string summaryValue
+    property bool expanded: document.get("expanded" + title, true)
     function reload() {}
+
+    signal triggered
 
     Connections {
         target: plugin.project
@@ -42,9 +49,11 @@ UbuntuShape {
         }
     }
 
+    onClicked: document.set("expanded" + title, !expanded)
+
     //opacity: unread ? 1 : 0.5
 
-    height: titleLabel.height + units.gu(3) + column.height
+    height: titleLabel.height + units.gu(3) + contents.height
 
     default property alias contents: column.data
 
@@ -52,6 +61,7 @@ UbuntuShape {
 
     property Project project
     property alias action: actionButton.action
+    property Document document
 
     Item {
         id: titleItem
@@ -108,8 +118,8 @@ UbuntuShape {
             }
 
             ActivityIndicator {
-                visible: loading
-                running: loading
+                visible: loading > 0
+                running: loading > 0
 
                 anchors {
                     right: parent.right
@@ -120,7 +130,7 @@ UbuntuShape {
 
             Button {
                 id: actionButton
-                visible: action && !loading
+                visible: action && loading == 0
                 height: units.gu(4)
                 anchors {
                     right: parent.right
@@ -132,7 +142,7 @@ UbuntuShape {
     }
 
     Column {
-        id: column
+        id: contents
 
         anchors {
             bottom: parent.bottom
@@ -141,5 +151,26 @@ UbuntuShape {
         }
 
         ListItem.ThinDivider {}
+
+        Column {
+            id: column
+            width: parent.width
+            height: expanded ? childrenRect.height : 0
+            clip: true
+
+            Behavior on height {
+                UbuntuNumberAnimation {
+                    duration: UbuntuAnimation.SlowDuration
+                }
+            }
+        }
+
+        ListItem.SingleValue {
+            text: expanded ? viewAllMessage : summary
+            value: expanded ? "" : summaryValue
+            progression: true
+            showDivider: false
+            onTriggered: plugin.triggered()
+        }
     }
 }

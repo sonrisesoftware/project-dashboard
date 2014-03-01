@@ -100,6 +100,10 @@ MainView {
         id: github
     }
 
+    TravisCI {
+        id: travisCI
+    }
+
     function getIcon(name) {
         var mainView = "icons/"
         var ext = ".png"

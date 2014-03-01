@@ -38,7 +38,7 @@ Plugin {
 
     property var issues: doc.get("pullRequests", [])
 
-    Document {
+    document: Document {
         id: doc
         docId: backend.getPlugin("github").docId
         parent: root.project.document
@@ -59,22 +59,19 @@ Plugin {
         text: i18n.tr("No open pull requests")
     }
 
-    ListItem.Standard {
-        text: i18n.tr("View all pull requests")
-        progression: true
-        showDivider: false
-    }
+    viewAllMessage: i18n.tr("View all pull requests")
+    summary: i18n.tr("<b>%1</b> open pull requests").arg(issues.length)
 
     property string repo:  project.serviceValue("github")
 
     onRepoChanged: reload()
 
     function reload() {
-        loading = true
+        loading += 1
         github.getPullRequests(repo, function(response) {
-            loading = false
+            loading--
             if (response === -1)
-                error(i18n.tr("Connection Error"), i18n.tr("Unable to download list of pull requests. Check your connection and/or firewall settings."))
+                error(i18n.tr("Connection Error"), i18n.tr("Unable to download list of pull requests. Check your connection and/or firewall settings.\n\nError: %1").arg(status))
             //print("GitHub Results:", response)
             doc.set("pullRequests", JSON.parse(response))
         })

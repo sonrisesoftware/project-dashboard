@@ -32,12 +32,12 @@ Plugin {
     iconSource: "list"
     //unread: true
 
-    onClicked: pageStack.push(todoPage)
+    onTriggered: pageStack.push(todoPage)
 
     property alias tasks: doc.children
     unread: tasks.length > 0
 
-    Document {
+    document: Document {
         id: doc
         docId: backend.getPlugin("tasks").docId
         parent: root.project.document
@@ -70,12 +70,8 @@ Plugin {
         text: "No upcoming tasks"
     }
 
-    ListItem.Standard {
-        text: "View all tasks"
-        progression: true
-        showDivider: false
-        onClicked: pageStack.push(todoPage)
-    }
+    viewAllMessage:  "View all tasks"
+    summary: tasks.length > 0 ? i18n.tr("<b>%1</b> tasks").arg(tasks.length) : i18n.tr("No tasks")
 
     Component {
         id: todoPage
@@ -97,6 +93,13 @@ Plugin {
                         parent: doc
                     }
                 }
+            }
+
+            tools: ToolbarItems {
+                opened: wideAspect
+                locked: wideAspect
+
+                onLockedChanged: opened = locked
             }
         }
     }
