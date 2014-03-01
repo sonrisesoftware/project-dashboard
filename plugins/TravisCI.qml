@@ -85,7 +85,7 @@ Plugin {
             loading--
             if (has_error)
                 error(i18n.tr("Connection Error"), i18n.tr("Unable to download results from Travis CI. Check your connection and/or firewall settings.\n\nError: %1").arg(status))
-            print("Travis CI Results:", response)
+            //print("Travis CI Results:", response)
             doc.set("repo", JSON.parse(response))
         })
 
@@ -93,7 +93,7 @@ Plugin {
             loading--
             if (has_error)
                 error(i18n.tr("Connection Error"), i18n.tr("Unable to download results from Travis CI. Check your connection and/or firewall settings.\n\nError: %1").arg(status))
-            print("Travis CI Results:", response)
+            //print("Travis CI Results:", response)
             doc.set("builds", JSON.parse(response))
         })
     }

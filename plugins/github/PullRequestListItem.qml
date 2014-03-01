@@ -28,4 +28,35 @@ SubtitledListItem {
 
     text: i18n.tr("<b>#%1</b> - %2").arg(modelData.number).arg(modelData.title)
     subText: i18n.tr("%1 opened this pull request %2").arg(modelData.user.login).arg(friendsUtils.createTimeString(modelData.created_at))
+
+    property string status: modelData.hasOwnProperty("status") ? modelData.status.state : ""
+
+    Rectangle {
+        anchors.centerIn: icon
+
+        width: units.gu(2)
+        height: width
+        radius: width/2
+
+        color: "white"
+        visible: status != "error" && status != ""
+    }
+
+    AwesomeIcon {
+        id: icon
+        anchors {
+            right: parent.right
+            rightMargin: units.gu(2)
+            verticalCenter: parent.verticalCenter
+        }
+
+        size: units.gu(3)
+
+        color: status == "success" ? "green"
+                                  : "failure" ? "red"
+                                              : "error" ? "yello" : "lightgray"
+        name: status == "success" ? "check-circle"
+                                 : "failure" ? "times-circle"
+                                             : "error" ? "exclamation-triangle" : "ellipse-h-circle"
+    }
 }

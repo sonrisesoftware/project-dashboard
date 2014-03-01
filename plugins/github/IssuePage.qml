@@ -178,8 +178,26 @@ Page {
             }
 
             ListItem.Standard {
+                id: assignedToItem
                 text: enabled ? issue.assignee.login : i18n.tr("No one assigned")
                 enabled: issue.assignee && issue.assignee.hasOwnProperty("login")
+
+                control: UbuntuShape {
+//                    anchors {
+//                        right: parent.right
+//                        rightMargin: units.gu(2)
+//                        verticalCenter: parent.verticalCenter
+//                    }
+
+                    image: Image {
+                        source: getIcon("user")
+                    }
+
+                    visible: assignedToItem.enabled
+
+                    width: units.gu(4)
+                    height: width
+                }
             }
         }
     }

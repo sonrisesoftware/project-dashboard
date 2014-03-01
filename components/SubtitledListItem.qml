@@ -20,7 +20,7 @@ import Ubuntu.Components 0.1
 import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
 
-ListItem.Standard {
+ListItem.Empty {
     id: listItem
 
     property alias text: titleLabel.text

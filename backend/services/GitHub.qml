@@ -64,7 +64,9 @@ Service {
             return undefined
         if (options === undefined)
             options = []
-        return Http.get(github + request, ["access_token=" + oauth].concat(options), callback, undefined, {"Accept":"application/vnd.github.v3+json"})
+        if (request && request.indexOf(github) !== 0)
+            request = github + request
+        return Http.get(request, ["access_token=" + oauth].concat(options), callback, undefined, {"Accept":"application/vnd.github.v3+json"})
     }
 
     function getIssues(repo, state, callback) {

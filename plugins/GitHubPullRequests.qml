@@ -26,7 +26,7 @@ import "../ubuntu-ui-extras"
 import "github"
 
 Plugin {
-    id: root
+    id: plugin
 
     title: "Pull Requests"
     iconSource: "code-fork"
@@ -42,7 +42,7 @@ Plugin {
     document: Document {
         id: doc
         docId: backend.getPlugin("github").docId
-        parent: root.project.document
+        parent: plugin.project.document
     }
 
     Repeater {
@@ -65,6 +65,14 @@ Plugin {
 
     onRepoChanged: reload()
 
+    property var pullRequests_TEMP: undefined
+    onLoadingChanged: {
+        if (loading === 0 && pullRequests_TEMP !== undefined) {
+            print("SETTING TO TEMP")
+            doc.set("pullRequests", pullRequests_TEMP)
+        }
+    }
+
     function reload() {
         loading += 1
         github.getPullRequests(repo, function(has_error, status, response) {
@@ -73,7 +81,21 @@ Plugin {
                 error(i18n.tr("Connection Error"), i18n.tr("Unable to download list of pull requests. Check your connection and/or firewall settings.\n\nError: %1").arg(status))
             } else {
                 //print("GitHub Results:", response)
-                doc.set("pullRequests", JSON.parse(response))
+                var issues = JSON.parse(response)
+                pullRequests_TEMP = issues
+
+                for (var i = 0; i < issues.length; i++) {
+                    var issue = issues[i]
+                    loading++
+                    github.get(issue._links.statuses.href, function(has_error, status, response) {
+                        print(response)
+                        issue.status = JSON.parse(response)[0]
+                        print(issue.status.state)
+                        pullRequests_TEMP = issues
+
+                        loading--
+                    })
+                }
             }
         })
     }
