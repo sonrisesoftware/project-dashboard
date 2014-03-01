@@ -29,6 +29,7 @@ Item {
     property int docId: -1
     property string authenticationStatus
     property string disabledMessage
+    property bool authenticationRequired: true
 
     function connect(project) {}
     function status(value) {}

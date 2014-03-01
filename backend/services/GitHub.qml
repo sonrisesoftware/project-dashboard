@@ -47,11 +47,11 @@ Service {
         }
     }
 
-    function userLoaded(response) {
+    function userLoaded(has_error, status, response) {
         print("User:", response)
         var json = JSON.parse(response)
 
-        if (json.hasOwnProperty("message") && json.message === "Bad credentials") {
+        if (has_error && json.hasOwnProperty("message") && json.message === "Bad credentials") {
             settings.set("githubToken", "")
             PopupUtils.open(accessRevokedDialog, mainView.pageStack.currentPage)
         } else {
@@ -78,7 +78,7 @@ Service {
     }
 
     function newIssue(repo, title, description, callback) {
-        return Http.post(github + "/repos/" + repo + "/issues", ["access_token=" + oauth], callback, undefined, {"Accept":"application/vnd.github.v3+json"}, JSON.stringify({ "title": title, "description": description }))
+        return Http.post(github + "/repos/" + repo + "/issues", ["access_token=" + oauth], callback, undefined, {"Accept":"application/vnd.github.v3+json"}, JSON.stringify({ "title": title, "body": description }))
     }
 
     function getPullRequests(repo, callback) {

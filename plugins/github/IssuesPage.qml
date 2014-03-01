@@ -43,7 +43,7 @@ PluginPage {
     ListView {
         id: listView
         anchors.fill: parent
-        model: plugin.allIssues
+        model: allIssues
         delegate: IssueListItem {
             show: modelData.state === "open" || settings.get("showClosedTickets", false)
         }

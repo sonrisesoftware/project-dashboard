@@ -77,7 +77,7 @@ Plugin {
     }
 
     function buildStatus(status) {
-        return "<font color=\"" + statusColor(status) + "\">" + (status === 0 ? i18n.tr("Passed") : status === 1 ? i18n.tr("Failed") : i18n.tr("Error")) + "</font>"
+        return "<font color=\"" + statusColor(status) + "\">" + (status === -1 ? i18n.tr("Pending") : status === 0 ? i18n.tr("Passed") : status === 1 ? i18n.tr("Failed") : i18n.tr("Error")) + "</font>"
     }
 
     function reload() {
@@ -112,7 +112,7 @@ Plugin {
                 delegate: BuildListItem {
                     number: modelData.number
                     message: modelData.message
-                    status: modelData.result
+                    status: modelData.hasOwnProperty("result") ? modelData.result : -1
                     built_at: modelData.finished_at
                 }
                 clip: true

@@ -37,6 +37,7 @@ Page {
             delegate: ListItem.SingleValue {
                 text: modelData.title
                 value: modelData.authenticationStatus
+                visible: modelData.authenticationRequired
 
                 Button {
                     visible: !modelData.enabled

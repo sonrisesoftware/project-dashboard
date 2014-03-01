@@ -46,7 +46,17 @@ Page {
         }
     ]
 
-    flickable: wideAspect || project.enabledPlugins.length === 0 ? null : flickable
+    flickable: wideAspect || project.enabledPlugins.length === 0 ? null : mainFlickable
+
+    onFlickableChanged: {
+        if (flickable === null) {
+            mainFlickable.topMargin = 0
+            mainFlickable.contentY = 0
+        } else {
+            mainFlickable.topMargin = units.gu(9.5)
+            mainFlickable.contentY = -units.gu(9.5)
+        }
+    }
 
     Project {
         id: project
@@ -57,7 +67,7 @@ Page {
     property bool wide: wideAspect
 
     onWideChanged: {
-        if (!wide) {
+        if (!wide && selectedPlugin) {
             pageStack.push(pushedPage, {plugin: selectedPlugin})
             selectedPlugin = null
         }
@@ -132,13 +142,14 @@ Page {
     }
 
     Flickable {
-        id: flickable
+        id: mainFlickable
         anchors {
             left: sidebar.right
             right: parent.right
             top: parent.top
             bottom: parent.bottom
         }
+        clip: wideAspect
         visible: selectedPlugin == null
         contentHeight: contents.height
         contentWidth: width
@@ -254,7 +265,7 @@ Page {
     }
 
     Scrollbar {
-        flickableItem: flickable
+        flickableItem: mainFlickable
     }
 
     Label {

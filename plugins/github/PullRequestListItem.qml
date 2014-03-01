@@ -35,7 +35,7 @@ SubtitledListItem {
         anchors.centerIn: icon
 
         width: units.gu(2)
-        size: units.gu(3)
+        size: status === "pending" ? units.gu(3) : units.gu(2.8)
 
         color: status === "pending" ? "gray" : "white"
         name: "circle"
