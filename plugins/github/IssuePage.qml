@@ -168,13 +168,14 @@ Page {
                 text: i18n.tr("Milestone")
             }
 
-//            ListItem.Standard {
-//                text: enabled ? issue.milestone.title : i18n.tr("No milestone")
-//                enabled: issue.milestone && issue.milestone.hasOwnProperty("title")
-//            }
+            ListItem.Standard {
+                text: enabled ? issue.milestone.title : i18n.tr("No milestone")
+                visible: !plugin.hasPushAccess
+            }
 
             ListItem.ItemSelector {
                 model: plugin.milestones.concat(i18n.tr("No milestone"))
+                visible: plugin.hasPushAccess
                 selectedIndex: {
                     if (issue.milestone && issue.milestone.hasOwnProperty("number")) {
                         for (var i = 0; i < model.length; i++) {
@@ -226,21 +227,37 @@ Page {
 
             ListItem.Standard {
                 id: assignedToItem
-                text: enabled ? issue.assignee.login : i18n.tr("No one assigned")
-                enabled: issue.assignee && issue.assignee.hasOwnProperty("login")
+                text: enabled ? (issue.assignee.login === github.user ? i18n.tr("%1 (Myself)").arg(issue.assignee.login) : issue.assignee.login) : i18n.tr("No one assigned")
+                enabled: issue.assignee !== undefined && issue.assignee.hasOwnProperty("login") && issue.assignee !== ""
 
-                control: UbuntuShape {
-//                    anchors {
-//                        right: parent.right
-//                        rightMargin: units.gu(2)
-//                        verticalCenter: parent.verticalCenter
-//                    }
+                UbuntuShape {
+                    anchors {
+                        right: parent.right
+                        rightMargin: units.gu(2)
+                        verticalCenter: parent.verticalCenter
+                    }
 
                     image: Image {
                         source: getIcon("user")
                     }
 
                     visible: assignedToItem.enabled
+
+                    width: units.gu(4)
+                    height: width
+                }
+
+                UbuntuShape {
+                    visible: image.status === Image.Ready && assignedToItem.enabled
+                    anchors {
+                        right: parent.right
+                        rightMargin: units.gu(2)
+                        verticalCenter: parent.verticalCenter
+                    }
+
+                    image: Image {
+                        source: issue.assignee.avatar_url
+                    }
 
                     width: units.gu(4)
                     height: width

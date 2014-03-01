@@ -24,6 +24,7 @@ ListItem.Standard {
     id: listItem
 
     //property var modelData: plugin.issues[index]
+    property bool showAssignee: true
 
     onClicked: pageStack.push(Qt.resolvedUrl("IssuePage.qml"), {issue: modelData, plugin:plugin})
 
@@ -42,8 +43,8 @@ ListItem.Standard {
             verticalCenter: parent.verticalCenter
             left: parent.left
             leftMargin: units.gu(2)
-            rightMargin: units.gu(2)
-            right: parent.right
+            rightMargin: assigneeIndicator.visible ? units.gu(1) : units.gu(2)
+            right: assigneeIndicator.visible ? assigneeIndicator.left : parent.right
         }
 
         Label {
@@ -82,6 +83,36 @@ ListItem.Standard {
             }
             visible: text !== ""
             elide: Text.ElideRight
+        }
+    }
+
+    Item {
+        id: assigneeIndicator
+        anchors {
+            right: parent.right
+            rightMargin: units.gu(2)
+            verticalCenter: parent.verticalCenter
+        }
+
+        width: units.gu(4)
+        height: width
+        visible: modelData.assignee !== undefined && modelData.assignee.hasOwnProperty("login") && modelData.assignee !== "" && showAssignee
+
+        UbuntuShape {
+            anchors.fill: parent
+
+            image: Image {
+                source: getIcon("user")
+            }
+        }
+
+        UbuntuShape {
+            visible: image.status === Image.Ready
+            anchors.fill: parent
+
+            image: Image {
+                source: modelData.assignee.avatar_url
+            }
         }
     }
 

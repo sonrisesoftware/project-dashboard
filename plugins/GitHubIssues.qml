@@ -47,6 +47,7 @@ Plugin {
     property var milestones: doc.get("milestones", [])
     property var issues: doc.get("issues", [])
     property var closedIssues: doc.get("closedIssues", [])
+    property var info: doc.get("repo", {})
 
     property var allIssues: issues.concat(closedIssues).sort(function sort(a1, a2) {
         return a2.number - a1.number
@@ -75,11 +76,12 @@ Plugin {
     summary: i18n.tr("<b>%1</b> open issues").arg(issues.length)
 
     property string repo:  project.serviceValue("github")
+    property bool hasPushAccess: info.hasOwnProperty("permissions") ? info.permissions.push : false
 
     onRepoChanged: reload()
 
     function reload() {
-        loading += 3
+        loading += 4
         github.getIssues(repo, "open", function(has_error, status, response) {
             loading--
             if (has_error)
@@ -116,6 +118,14 @@ Plugin {
             var json = JSON.parse(response)
 
             doc.set("milestones", json)
+        })
+
+        github.getRepository(repo, function(has_error, status, response) {
+            loading--
+            print("Repository:", response)
+            var json = JSON.parse(response)
+
+            doc.set("repo", json)
         })
     }
 }
