@@ -48,7 +48,7 @@ Page {
                 request = github.editIssue(plugin.repo, issue.number, {"state": "closed"}, function(response) {
                     busyDialog.hide()
                     if (response === -1) {
-                        error(i18n.tr("Connection Error"), i18n.tr("Unable to download list of issues. Check your connection and/or firewall settings."))
+                        error(i18n.tr("Connection Error"), i18n.tr("Unable to close issue. Check your connection and/or firewall settings."))
                     } else {
                         issue.state = "closed"
                         issue = issue
@@ -168,9 +168,56 @@ Page {
                 text: i18n.tr("Milestone")
             }
 
-            ListItem.Standard {
-                text: enabled ? issue.milestone.title : i18n.tr("No milestone")
-                enabled: issue.milestone && issue.milestone.hasOwnProperty("title")
+//            ListItem.Standard {
+//                text: enabled ? issue.milestone.title : i18n.tr("No milestone")
+//                enabled: issue.milestone && issue.milestone.hasOwnProperty("title")
+//            }
+
+            ListItem.ItemSelector {
+                model: plugin.milestones.concat(i18n.tr("No milestone"))
+                selectedIndex: {
+                    if (issue.milestone && issue.milestone.hasOwnProperty("number")) {
+                        for (var i = 0; i < model.length; i++) {
+                            if (model[i].number === issue.milestone.number)
+                                return i
+                        }
+                    } else {
+                        return model.length - 1
+                    }
+                }
+
+                delegate: OptionSelectorDelegate {
+                    text: modelData.title
+                }
+
+                onSelectedIndexChanged: {
+                    var number = undefined
+                    if (selectedIndex < model.length - 1) {
+                        number = model[selectedIndex].number
+
+                        busyDialog.title = i18n.tr("Setting milestone to <b>%1</b>").arg(model[selectedIndex].title)
+                    } else {
+                        busyDialog.title = i18n.tr("Removing milestone from Issue")
+                    }
+
+                    if (issue.milestone && issue.milestone.hasOwnProperty("number") && issue.milestone.number === number)
+                        return
+
+                    if (!(issue.milestone && issue.milestone.hasOwnProperty("number")) && number === undefined)
+                        return
+
+                    busyDialog.show()
+
+                    request = github.editIssue(plugin.repo, issue.number, {"milestone": number}, function(response) {
+                        busyDialog.hide()
+                        if (response === -1) {
+                            error(i18n.tr("Connection Error"), i18n.tr("Unable to change milestone. Check your connection and/or firewall settings."))
+                        } else {
+                            issue = issue
+                            plugin.reload()
+                        }
+                    })
+                }
             }
 
             ListItem.Header {

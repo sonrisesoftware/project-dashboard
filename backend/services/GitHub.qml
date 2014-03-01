@@ -85,6 +85,10 @@ Service {
         return get("/repos/" + repo + "/pulls", callback)
     }
 
+    function getMilestones(repo, callback) {
+        return get("/repos/" + repo + "/milestones", callback)
+    }
+
     function connect(project) {
         print("Connecting...")
         PopupUtils.open(githubDialog, mainView.pageStack.currentPage, {project: project})

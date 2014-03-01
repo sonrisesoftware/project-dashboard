@@ -44,6 +44,7 @@ Plugin {
         onTriggered: pageStack.push(Qt.resolvedUrl("github/NewIssuePage.qml"), {repo: repo, action: reload})
     }
 
+    property var milestones: doc.get("milestones", [])
     property var issues: doc.get("issues", [])
     property var closedIssues: doc.get("closedIssues", [])
 
@@ -78,7 +79,7 @@ Plugin {
     onRepoChanged: reload()
 
     function reload() {
-        loading += 2
+        loading += 3
         github.getIssues(repo, "open", function(has_error, status, response) {
             loading--
             if (has_error)
@@ -107,6 +108,14 @@ Plugin {
             }
 
             doc.set("closedIssues", list)
+        })
+
+        github.getMilestones(repo, function(has_error, status, response) {
+            loading--
+            print("Milestones:", response)
+            var json = JSON.parse(response)
+
+            doc.set("milestones", json)
         })
     }
 }
