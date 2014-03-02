@@ -196,9 +196,9 @@ Page {
                     if (selectedIndex < model.length - 1) {
                         number = model[selectedIndex].number
 
-                        busyDialog.title = i18n.tr("Setting milestone to <b>%1</b>").arg(model[selectedIndex].title)
+                        busyDialog.text = i18n.tr("Setting milestone to <b>%1</b>").arg(model[selectedIndex].title)
                     } else {
-                        busyDialog.title = i18n.tr("Removing milestone from Issue")
+                        busyDialog.text = i18n.tr("Removing milestone from the issue")
                     }
 
                     if (issue.milestone && issue.milestone.hasOwnProperty("number") && issue.milestone.number === number)
@@ -207,6 +207,7 @@ Page {
                     if (!(issue.milestone && issue.milestone.hasOwnProperty("number")) && number === undefined)
                         return
 
+                    busyDialog.title = i18n.tr("Changing Milestone")
                     busyDialog.show()
 
                     request = github.editIssue(plugin.repo, issue.number, {"milestone": number}, function(response) {
@@ -214,6 +215,7 @@ Page {
                         if (response === -1) {
                             error(i18n.tr("Connection Error"), i18n.tr("Unable to change milestone. Check your connection and/or firewall settings."))
                         } else {
+                            issue.milestone = {"number": number}
                             issue = issue
                             plugin.reload()
                         }
@@ -253,9 +255,9 @@ Page {
                     if (selectedIndex < model.length - 1) {
                         login = model[selectedIndex].login
 
-                        busyDialog.title = i18n.tr("Setting assignee to <b>%1</b>").arg(model[selectedIndex].login)
+                        busyDialog.text = i18n.tr("Setting assignee to <b>%1</b>").arg(model[selectedIndex].login)
                     } else {
-                        busyDialog.title = i18n.tr("Removing assignee from Issue")
+                        busyDialog.text = i18n.tr("Removing assignee from the issue")
                     }
 
                     if (issue.assignee && issue.assignee.hasOwnProperty("login") && issue.assignee.login === login)
@@ -264,6 +266,7 @@ Page {
                     if (!(issue.assignee && issue.assignee.hasOwnProperty("login")) && login === undefined)
                         return
 
+                    busyDialog.title = i18n.tr("Changing Assignee")
                     busyDialog.show()
 
                     request = github.editIssue(plugin.repo, issue.number, {"assignee": login}, function(response) {
@@ -271,6 +274,7 @@ Page {
                         if (response === -1) {
                             error(i18n.tr("Connection Error"), i18n.tr("Unable to change assignee. Check your connection and/or firewall settings."))
                         } else {
+                            issue.assignee = {"login": login}
                             issue = issue
                             plugin.reload()
                         }

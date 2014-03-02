@@ -91,6 +91,8 @@ Page {
         id: busyDialog
         title: i18n.tr("Creating Issue")
 
+        text: i18n.tr("Creating issue titled <b>'%1'</b>").arg(nameField.text)
+
         ActivityIndicator {
             running: busyDialog.visible
             implicitHeight: units.gu(5)
