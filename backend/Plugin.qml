@@ -30,6 +30,7 @@ UbuntuShape {
     radius: "medium"
 
     property alias title: titleLabel.text
+    property string shortTitle: title
     property alias iconSource: iconImage.name
     property bool unread
     property int loading: 0
@@ -39,7 +40,14 @@ UbuntuShape {
     property bool expanded: document.get("expanded" + title, true)
     function reload() {}
 
+    property Component page
+
     signal triggered
+
+    onTriggered: {
+        if (page)
+            displayPlugin(plugin)
+    }
 
     Connections {
         target: plugin.project

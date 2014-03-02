@@ -48,7 +48,7 @@ Page {
                 request = github.editIssue(plugin.repo, issue.number, {"state": "closed"}, function(response) {
                     busyDialog.hide()
                     if (response === -1) {
-                        error(i18n.tr("Connection Error"), i18n.tr("Unable to download list of issues. Check your connection and/or firewall settings."))
+                        error(i18n.tr("Connection Error"), i18n.tr("Unable to close issue. Check your connection and/or firewall settings."))
                     } else {
                         issue.state = "closed"
                         issue = issue
@@ -110,21 +110,21 @@ Page {
             TextArea {
                 id: textArea
                 width: parent.width
-                text: issue.hasOwnProperty("body") ? renderMarkdown(issue.body) : ""
-                height: __internal.linesHeight(Math.min(15, Math.max(4, edit.lineCount)))
+                text: issue.hasOwnProperty("body") ? renderMarkdown(issue.body, plugin.repo) : ""
+                height: Math.min(__internal.linesHeight(15), Math.max(__internal.linesHeight(4), edit.height))
                 placeholderText: i18n.tr("No description set.")
                 readOnly: true
                 textFormat: Text.RichText
                 color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
 
                 // FIXME: Hack necessary to get the correct line height
-                Label {
+                TextEdit {
                     id: edit
                     visible: false
                     width: parent.width
-                    //textFormat: Text.RichText
+                    textFormat: Text.RichText
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                    text: issue.hasOwnProperty("body") ? issue.body : ""//textArea.text
+                    text: textArea.text
                     font: textArea.font
                 }
             }
@@ -169,8 +169,56 @@ Page {
             }
 
             ListItem.Standard {
-                text: enabled ? issue.milestone.title : i18n.tr("No milestone")
-                enabled: issue.milestone && issue.milestone.hasOwnProperty("title")
+                text: issue.milestone && issue.milestone.hasOwnProperty("number") ? issue.milestone.title : i18n.tr("No milestone")
+                visible: !plugin.hasPushAccess
+            }
+
+            ListItem.ItemSelector {
+                model: plugin.milestones.concat(i18n.tr("No milestone"))
+                visible: plugin.hasPushAccess
+                selectedIndex: {
+                    if (issue.milestone && issue.milestone.hasOwnProperty("number")) {
+                        for (var i = 0; i < model.length; i++) {
+                            if (model[i].number === issue.milestone.number)
+                                return i
+                        }
+                    } else {
+                        return model.length - 1
+                    }
+                }
+
+                delegate: OptionSelectorDelegate {
+                    text: modelData.title
+                }
+
+                onSelectedIndexChanged: {
+                    var number = undefined
+                    if (selectedIndex < model.length - 1) {
+                        number = model[selectedIndex].number
+
+                        busyDialog.title = i18n.tr("Setting milestone to <b>%1</b>").arg(model[selectedIndex].title)
+                    } else {
+                        busyDialog.title = i18n.tr("Removing milestone from Issue")
+                    }
+
+                    if (issue.milestone && issue.milestone.hasOwnProperty("number") && issue.milestone.number === number)
+                        return
+
+                    if (!(issue.milestone && issue.milestone.hasOwnProperty("number")) && number === undefined)
+                        return
+
+                    busyDialog.show()
+
+                    request = github.editIssue(plugin.repo, issue.number, {"milestone": number}, function(response) {
+                        busyDialog.hide()
+                        if (response === -1) {
+                            error(i18n.tr("Connection Error"), i18n.tr("Unable to change milestone. Check your connection and/or firewall settings."))
+                        } else {
+                            issue = issue
+                            plugin.reload()
+                        }
+                    })
+                }
             }
 
             ListItem.Header {
@@ -178,8 +226,56 @@ Page {
             }
 
             ListItem.Standard {
-                text: enabled ? issue.assignee.login : i18n.tr("No one assigned")
-                enabled: issue.assignee && issue.assignee.hasOwnProperty("login")
+                text: issue.assignee && issue.assignee.hasOwnProperty("login") ? issue.assignee.login : i18n.tr("No one assigned")
+                visible: !plugin.hasPushAccess
+            }
+
+            ListItem.ItemSelector {
+                model: plugin.availableAssignees.concat(i18n.tr("No one assigned"))
+                visible: plugin.hasPushAccess
+                selectedIndex: {
+                    if (issue.assignee && issue.assignee.hasOwnProperty("login")) {
+                        for (var i = 0; i < model.length; i++) {
+                            if (model[i].login === issue.assignee.login)
+                                return i
+                        }
+                    } else {
+                        return model.length - 1
+                    }
+                }
+
+                delegate: OptionSelectorDelegate {
+                    text: modelData.login
+                }
+
+                onSelectedIndexChanged: {
+                    var login = undefined
+                    if (selectedIndex < model.length - 1) {
+                        login = model[selectedIndex].login
+
+                        busyDialog.title = i18n.tr("Setting assignee to <b>%1</b>").arg(model[selectedIndex].login)
+                    } else {
+                        busyDialog.title = i18n.tr("Removing assignee from Issue")
+                    }
+
+                    if (issue.assignee && issue.assignee.hasOwnProperty("login") && issue.assignee.login === login)
+                        return
+
+                    if (!(issue.assignee && issue.assignee.hasOwnProperty("login")) && login === undefined)
+                        return
+
+                    busyDialog.show()
+
+                    request = github.editIssue(plugin.repo, issue.number, {"assignee": login}, function(response) {
+                        busyDialog.hide()
+                        if (response === -1) {
+                            error(i18n.tr("Connection Error"), i18n.tr("Unable to change assignee. Check your connection and/or firewall settings."))
+                        } else {
+                            issue = issue
+                            plugin.reload()
+                        }
+                    })
+                }
             }
         }
     }

@@ -47,11 +47,11 @@ Service {
         }
     }
 
-    function userLoaded(response) {
+    function userLoaded(has_error, status, response) {
         print("User:", response)
         var json = JSON.parse(response)
 
-        if (json.hasOwnProperty("message") && json.message === "Bad credentials") {
+        if (has_error && json.hasOwnProperty("message") && json.message === "Bad credentials") {
             settings.set("githubToken", "")
             PopupUtils.open(accessRevokedDialog, mainView.pageStack.currentPage)
         } else {
@@ -64,7 +64,9 @@ Service {
             return undefined
         if (options === undefined)
             options = []
-        return Http.get(github + request, ["access_token=" + oauth].concat(options), callback, undefined, {"Accept":"application/vnd.github.v3+json"})
+        if (request && request.indexOf(github) !== 0)
+            request = github + request
+        return Http.get(request, ["access_token=" + oauth].concat(options), callback, undefined, {"Accept":"application/vnd.github.v3+json"})
     }
 
     function getIssues(repo, state, callback) {
@@ -76,11 +78,23 @@ Service {
     }
 
     function newIssue(repo, title, description, callback) {
-        return Http.post(github + "/repos/" + repo + "/issues", ["access_token=" + oauth], callback, undefined, {"Accept":"application/vnd.github.v3+json"}, JSON.stringify({ "title": title, "description": description }))
+        return Http.post(github + "/repos/" + repo + "/issues", ["access_token=" + oauth], callback, undefined, {"Accept":"application/vnd.github.v3+json"}, JSON.stringify({ "title": title, "body": description }))
     }
 
     function getPullRequests(repo, callback) {
         return get("/repos/" + repo + "/pulls", callback)
+    }
+
+    function getAssignees(repo, callback) {
+        return get("/repos/" + repo + "/assignees", callback)
+    }
+
+    function getMilestones(repo, callback) {
+        return get("/repos/" + repo + "/milestones", callback)
+    }
+
+    function getRepository(repo, callback) {
+        return get("/repos/" + repo, callback)
     }
 
     function connect(project) {

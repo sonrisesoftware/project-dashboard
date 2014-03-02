@@ -33,6 +33,9 @@ Item {
     property var icons: {
         "check-circle": "",
         "check-square-o": "",
+                "circle": "",
+                "exclamation-triangle": "",
+        "ellipse-h": "",
         "ellipse-v": "",
         "save": "",
         "spinner": "",
@@ -71,14 +74,14 @@ Item {
 
     FontLoader { id: fontAwesome; source: Qt.resolvedUrl("../icons/FontAwesome.otf") }
 
-    Text {
+    Label {
         id: text
         anchors.centerIn: parent
 
         font.family: fontAwesome.name
         font.weight: Font.Light
         text: widget.icons.hasOwnProperty(widget.name) ? widget.icons[widget.name] : ""
-        color: widget.enabled ? styleObject.color : styleObject.color_disabled
+        //color: widget.enabled ? styleObject.color : styleObject.color_disabled
         style: shadow ? Text.Raised : Text.Normal
         styleColor: Qt.rgba(0,0,0,0.9)
 

@@ -20,11 +20,17 @@ import Ubuntu.Components 0.1
 import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
 
-ListItem.SingleValue {
-    property int number
-    property int status
-    property string message
-    property string built_at
+ListItem.Empty {
+    id: listItem
+
+    property alias text: titleLabel.text
+    property alias subText: subLabel.text
+
+    height: opacity === 0 ? 0 : (__height + units.dp(2))
+
+    Behavior on height {
+        UbuntuNumberAnimation {}
+    }
 
     Column {
         id: labels
@@ -34,16 +40,16 @@ ListItem.SingleValue {
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
+            leftMargin: units.gu(2)
+            rightMargin: units.gu(2)
+            right: parent.right
         }
-
-        width: parent.width * 0.8
 
         Label {
             id: titleLabel
 
             width: parent.width
             elide: Text.ElideRight
-            text: status === -1 ? i18n.tr("<b>Build %1</b> - in progress").arg(number) : i18n.tr("<b>Build %1</b> - %2").arg(number).arg(friendsUtils.createTimeString(built_at))
         }
 
         Label {
@@ -55,13 +61,16 @@ ListItem.SingleValue {
             opacity: 0.65
             font.weight: Font.Light
             fontSize: "small"
-            //font.italic: true
-            text: message.indexOf('\n') === -1 ? message : message.substring(0, message.indexOf('\n'))
             visible: text !== ""
             elide: Text.ElideRight
-            //maximumLineCount: 1
         }
     }
 
-    value: buildStatus(status)
+    opacity: show ? 1 : 0
+
+    Behavior on opacity {
+        UbuntuNumberAnimation {}
+    }
+
+    property bool show: true
 }

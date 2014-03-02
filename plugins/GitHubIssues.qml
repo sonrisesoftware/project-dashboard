@@ -32,7 +32,7 @@ Plugin {
     iconSource: "bug"
     unread: issues.length > 0
 
-    onTriggered: pageStack.push(Qt.resolvedUrl("github/IssuesPage.qml"), {plugin: plugin})
+    page: Component { IssuesPage {} }
 
     ListItem.Header {
         text: "Recent Issues"
@@ -44,8 +44,11 @@ Plugin {
         onTriggered: pageStack.push(Qt.resolvedUrl("github/NewIssuePage.qml"), {repo: repo, action: reload})
     }
 
+    property var milestones: doc.get("milestones", [])
     property var issues: doc.get("issues", [])
     property var closedIssues: doc.get("closedIssues", [])
+    property var info: doc.get("repo", {})
+    property var availableAssignees: doc.get("assignees", [])
 
     property var allIssues: issues.concat(closedIssues).sort(function sort(a1, a2) {
         return a2.number - a1.number
@@ -74,11 +77,12 @@ Plugin {
     summary: i18n.tr("<b>%1</b> open issues").arg(issues.length)
 
     property string repo:  project.serviceValue("github")
+    property bool hasPushAccess: info.hasOwnProperty("permissions") ? info.permissions.push : false
 
     onRepoChanged: reload()
 
     function reload() {
-        loading += 2
+        loading += 5
         github.getIssues(repo, "open", function(has_error, status, response) {
             loading--
             if (has_error)
@@ -107,6 +111,30 @@ Plugin {
             }
 
             doc.set("closedIssues", list)
+        })
+
+        github.getMilestones(repo, function(has_error, status, response) {
+            loading--
+            //print("Milestones:", response)
+            var json = JSON.parse(response)
+
+            doc.set("milestones", json)
+        })
+
+        github.getRepository(repo, function(has_error, status, response) {
+            loading--
+            //print("Repository:", response)
+            var json = JSON.parse(response)
+
+            doc.set("repo", json)
+        })
+
+        github.getAssignees(repo, function(has_error, status, response) {
+            loading--
+            print("Repository:", response)
+            var json = JSON.parse(response)
+
+            doc.set("assignees", json)
         })
     }
 }

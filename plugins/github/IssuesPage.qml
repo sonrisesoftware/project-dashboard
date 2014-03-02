@@ -19,11 +19,10 @@ import QtQuick 2.0
 import Ubuntu.Components 0.1
 import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
+import "../../components"
 
-Page {
+PluginPage {
     title: i18n.tr("Issues")
-
-    property var plugin
 
     actions: [
         Action {
@@ -34,38 +33,21 @@ Page {
         },
 
         Action {
-            id: refreshAction
-            text: i18n.tr("Refresh")
-            iconSource: getIcon("reload")
-            onTriggered: plugin.reload()
+            id: viewAction
+            text: i18n.tr("View")
+            iconSource: getIcon("navigation-menu")
+            onTriggered: PopupUtils.open(viewMenu, value)
         }
     ]
 
     ListView {
         id: listView
         anchors.fill: parent
-        model: plugin.allIssues
+        model: allIssues
         delegate: IssueListItem {
             show: modelData.state === "open" || settings.get("showClosedTickets", false)
         }
-    }
-
-    tools: ToolbarItems {
-        opened: wideAspect
-        locked: wideAspect
-
-        onLockedChanged: opened = locked
-
-        ToolbarButton { action: newIssueAction; width: units.gu(7)}
-
-        ToolbarButton { action: refreshAction }
-
-        ToolbarButton {
-            id: viewButton
-            text: i18n.tr("View")
-            iconSource: getIcon("navigation-menu")
-            onTriggered: PopupUtils.open(viewMenu, viewButton)
-        }
+        clip: true
     }
 
     Component {

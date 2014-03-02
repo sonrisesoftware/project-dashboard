@@ -29,6 +29,7 @@ Plugin {
     id: plugin
 
     title: "Continuous Integration"
+    shortTitle: "Testing"
     iconSource: "check-circle"
 
     property var info: doc.get("repo", [])
@@ -44,7 +45,17 @@ Plugin {
         number: info.last_build_number
         status: info.last_build_result
         built_at: info.last_build_finished_at
-        message: builds[0].message
+        message: {
+            var build
+            for (var i = 0; i < builds.length; i++) {
+                if (builds[i].id === info.last_build_id) {
+                    build = builds[i]
+                    break
+                }
+            }
+
+            return build ? build.message : ""
+        }
     }
 
     summary: i18n.tr("Build %1").arg(info.last_build_number)
@@ -66,7 +77,7 @@ Plugin {
     }
 
     function buildStatus(status) {
-        return "<font color=\"" + statusColor(status) + "\">" + (status === 0 ? i18n.tr("Passed") : status === 1 ? i18n.tr("Failed") : i18n.tr("Error")) + "</font>"
+        return "<font color=\"" + statusColor(status) + "\">" + (status === -1 ? i18n.tr("Pending") : status === 0 ? i18n.tr("Passed") : status === 1 ? i18n.tr("Failed") : i18n.tr("Error")) + "</font>"
     }
 
     function reload() {
@@ -75,7 +86,7 @@ Plugin {
             loading--
             if (has_error)
                 error(i18n.tr("Connection Error"), i18n.tr("Unable to download results from Travis CI. Check your connection and/or firewall settings.\n\nError: %1").arg(status))
-            print("Travis CI Results:", response)
+            //print("Travis CI Results:", response)
             doc.set("repo", JSON.parse(response))
         })
 
@@ -83,17 +94,15 @@ Plugin {
             loading--
             if (has_error)
                 error(i18n.tr("Connection Error"), i18n.tr("Unable to download results from Travis CI. Check your connection and/or firewall settings.\n\nError: %1").arg(status))
-            print("Travis CI Results:", response)
+            //print("Travis CI Results:", response)
             doc.set("builds", JSON.parse(response))
         })
     }
 
-    onTriggered: pageStack.push(buildsPage)
-
-    Component {
+    page: Component {
         id: buildsPage
 
-        Page {
+        PluginPage {
             title: i18n.tr("Build History")
 
             ListView {
@@ -103,20 +112,14 @@ Plugin {
                 delegate: BuildListItem {
                     number: modelData.number
                     message: modelData.message
-                    status: modelData.result
-                    built_at: modelData.finished_at
+                    status: modelData.result != null ? modelData.result : -1
+                    built_at:  modelData.finished_at != null ? modelData.finished_at : ""
                 }
+                clip: true
             }
 
             Scrollbar {
                 flickableItem: listView
-            }
-
-            tools: ToolbarItems {
-                opened: wideAspect
-                locked: wideAspect
-
-                onLockedChanged: opened = locked
             }
         }
     }
