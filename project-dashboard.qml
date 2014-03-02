@@ -101,6 +101,10 @@ MainView {
         id: github
     }
 
+    Launchpad {
+        id: launchpad
+    }
+
     TravisCI {
         id: travisCI
     }
