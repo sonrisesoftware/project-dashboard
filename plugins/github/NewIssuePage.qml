@@ -38,6 +38,8 @@ Page {
             right: parent.right
             margins: units.gu(2)
         }
+
+        Keys.onTabPressed: descriptionField.forceActiveFocus()
     }
 
     TextArea {

@@ -34,6 +34,8 @@ Plugin {
     property var documents: doc.get("resources", [])
 
     action: Action {
+        id: addAction
+        iconSource: getIcon("add")
         text: i18n.tr("Add")
         onTriggered: PopupUtils.open(addLinkDialog, value)
     }
@@ -46,6 +48,13 @@ Plugin {
 
     ListItem.Header {
         text: i18n.tr("Recently Saved")
+        visible: documents.length > 0
+    }
+
+    ListItem.Standard {
+        text: i18n.tr("No saved resources")
+        visible: documents.length === 0
+        enabled: false
     }
 
     Repeater {
@@ -58,6 +67,34 @@ Plugin {
 
             onClicked: pageStack.push(Qt.resolvedUrl("resources/WebPage.qml"), {resource: modelData})
             onPressAndHold: PopupUtils.open(actionsPopover, item, {index: documents.length - index - 1})
+        }
+    }
+
+    page: Component {
+        PluginPage {
+            title: i18n.tr("Resources")
+            actions: [addAction]
+
+            flickable: listView
+            ListView {
+                id: listView
+                anchors.fill: parent
+
+                model: documents.length
+                delegate: ListItem.Subtitled {
+                    id: item
+                    property var modelData: documents[documents.length - index - 1]
+                    text: modelData.title
+                    subText: modelData.text
+
+                    onClicked: pageStack.push(Qt.resolvedUrl("resources/WebPage.qml"), {resource: modelData})
+                    onPressAndHold: PopupUtils.open(actionsPopover, item, {index: documents.length - index - 1})
+                }
+            }
+
+            Scrollbar {
+                flickableItem: listView
+            }
         }
     }
 
@@ -123,6 +160,7 @@ Plugin {
                 placeholderText: i18n.tr("Title")
 
                 onAccepted: textField.forceActiveFocus()
+                Keys.onTabPressed: descriptionField.forceActiveFocus()
             }
 
             TextField {
@@ -191,6 +229,7 @@ Plugin {
                 text: documents[index].title
 
                 onAccepted: textField.forceActiveFocus()
+                Keys.onTabPressed: descriptionField.forceActiveFocus()
             }
 
             TextField {

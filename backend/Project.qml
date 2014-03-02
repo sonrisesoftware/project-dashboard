@@ -52,12 +52,21 @@ Object {
     property var enabledPlugins: {
         var list = []
 
+        var pluginObjects = []
         for (var name in plugins) {
             if (!hasPlugin(name))
                 continue
             var plugin = backend.getPlugin(name)
             print(plugin.name)
+            pluginObjects.push(plugin)
+        }
 
+        pluginObjects.sort(function(item1, item2) {
+            return item1.docId - item2.docId
+        })
+
+        for (var i = 0; i < pluginObjects.length; i++) {
+            plugin = pluginObjects[i]
             var type = plugin.type
             print("Type:", typeof(type))
 
