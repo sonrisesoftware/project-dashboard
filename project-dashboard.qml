@@ -23,6 +23,7 @@ import "ui"
 import "backend"
 import "backend/services"
 import "ubuntu-ui-extras"
+import "ubuntu-ui-extras/httplib.js" as Http
 import Friends 0.2
 import "Markdown.Converter.js" as Markdown
 
@@ -118,10 +119,28 @@ MainView {
         return Qt.resolvedUrl(name)
     }
 
-    function renderMarkdown(text) {
-        var converter = new Markdown.Markdown.Converter();
-        return converter.makeHtml(text)
+    function renderMarkdown(text, context) {
+        if (markdownCache.hasOwnProperty(text)) {
+            return markdownCache[text]
+        } else {
+            print("Calling Markdown API")
+            Http.post(github.github + "/markdown", ["access_token=" + github.oauth], function(has_error, status, response) {
+                print("MARKDOWN", response)
+                markdownCache[text] = response
+                settings.set("markdownCache", markdownCache)
+            }, undefined, undefined, JSON.stringify({
+                "text": text,
+                "mode": context !== undefined ? "gfm" : "markdown",
+                "context": context
+              }))
+            return "Loading..."
+        }
+
+        //var converter = new Markdown.Markdown.Converter();
+        //return converter.makeHtml(text)
     }
+
+    property var markdownCache: settings.get("markdownCache", {})
 
     function error(title, message, action) {
         PopupUtils.open(Qt.resolvedUrl("ubuntu-ui-extras/NotifyDialog.qml"), mainView,

@@ -91,7 +91,7 @@ Plugin {
                     github.get(issue._links.statuses.href, function(has_error, status, response) {
                         print(response)
                         if (JSON.parse(response)[0] === undefined) {
-                            issue.status = {"state": "pending"}
+                            issue.status = {"state": ""}
                         } else {
                             issue.status = JSON.parse(response)[0]
                         }

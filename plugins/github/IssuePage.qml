@@ -110,21 +110,21 @@ Page {
             TextArea {
                 id: textArea
                 width: parent.width
-                text: issue.hasOwnProperty("body") ? renderMarkdown(issue.body) : ""
-                height: __internal.linesHeight(Math.min(15, Math.max(4, edit.lineCount)))
+                text: issue.hasOwnProperty("body") ? renderMarkdown(issue.body, plugin.repo) : ""
+                height: Math.min(__internal.linesHeight(15), Math.max(__internal.linesHeight(4), edit.height))
                 placeholderText: i18n.tr("No description set.")
                 readOnly: true
                 textFormat: Text.RichText
                 color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
 
                 // FIXME: Hack necessary to get the correct line height
-                Label {
+                TextEdit {
                     id: edit
                     visible: false
                     width: parent.width
-                    //textFormat: Text.RichText
+                    textFormat: Text.RichText
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                    text: issue.hasOwnProperty("body") ? issue.body : ""//textArea.text
+                    text: textArea.text
                     font: textArea.font
                 }
             }
@@ -169,7 +169,7 @@ Page {
             }
 
             ListItem.Standard {
-                text: enabled ? issue.milestone.title : i18n.tr("No milestone")
+                text: issue.milestone && issue.milestone.hasOwnProperty("number") ? issue.milestone.title : i18n.tr("No milestone")
                 visible: !plugin.hasPushAccess
             }
 
@@ -225,6 +225,11 @@ Page {
                 text: i18n.tr("Assigned To")
             }
 
+            ListItem.Standard {
+                text: issue.assignee && issue.assignee.hasOwnProperty("login") ? issue.assignee.login : i18n.tr("No one assigned")
+                visible: !plugin.hasPushAccess
+            }
+
             ListItem.ItemSelector {
                 model: plugin.availableAssignees.concat(i18n.tr("No one assigned"))
                 visible: plugin.hasPushAccess
@@ -270,45 +275,6 @@ Page {
                             plugin.reload()
                         }
                     })
-                }
-            }
-
-            ListItem.Standard {
-                id: assignedToItem
-                text: enabled ? (issue.assignee.login === github.user ? i18n.tr("%1 (Myself)").arg(issue.assignee.login) : issue.assignee.login) : i18n.tr("No one assigned")
-                enabled: issue.assignee !== undefined && issue.assignee.hasOwnProperty("login") && issue.assignee !== ""
-
-                UbuntuShape {
-                    anchors {
-                        right: parent.right
-                        rightMargin: units.gu(2)
-                        verticalCenter: parent.verticalCenter
-                    }
-
-                    image: Image {
-                        source: getIcon("user")
-                    }
-
-                    visible: assignedToItem.enabled
-
-                    width: units.gu(4)
-                    height: width
-                }
-
-                UbuntuShape {
-                    visible: image.status === Image.Ready && assignedToItem.enabled
-                    anchors {
-                        right: parent.right
-                        rightMargin: units.gu(2)
-                        verticalCenter: parent.verticalCenter
-                    }
-
-                    image: Image {
-                        source: issue.assignee.avatar_url
-                    }
-
-                    width: units.gu(4)
-                    height: width
                 }
             }
         }

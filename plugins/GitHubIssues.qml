@@ -82,7 +82,7 @@ Plugin {
     onRepoChanged: reload()
 
     function reload() {
-        loading += 4
+        loading += 5
         github.getIssues(repo, "open", function(has_error, status, response) {
             loading--
             if (has_error)

@@ -51,7 +51,7 @@ SubtitledListItem {
         }
 
         size: status == "pending" ? units.gu(2.5) : units.gu(3)
-
+        visible: status != ""
         color: status == "success" ? "green"
                                   : status == "failure" ? "red"
                                               : status == "error" ? "yellow" : "white"
