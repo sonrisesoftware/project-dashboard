@@ -1,5 +1,6 @@
 VERSION=$1
 RELEASE_DIR=../releases/project-dashboard/v$VERSION
+mkdir -p ../releases/project-dashboard
 
 cp . $RELEASE_DIR -r
 cd $RELEASE_DIR
