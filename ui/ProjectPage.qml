@@ -46,7 +46,7 @@ Page {
         }
     ]
 
-    flickable: wideAspect || project.enabledPlugins.length === 0 ? null : mainFlickable
+    flickable: sidebar.expanded || project.enabledPlugins.length === 0 ? null : mainFlickable
 
     onFlickableChanged: {
         if (flickable === null) {
@@ -90,6 +90,7 @@ Page {
 
             property Plugin plugin
             property bool wide: sidebar.expanded
+            flickable: pluginItem.item.flickable
 
             onWideChanged: {
                 if (wide) {

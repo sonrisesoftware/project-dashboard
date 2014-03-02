@@ -27,4 +27,6 @@ Item {
     property string title
 
     property list<Action> actions
+
+    property Flickable flickable
 }

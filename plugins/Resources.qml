@@ -35,7 +35,7 @@ Plugin {
 
     action: Action {
         text: i18n.tr("Add")
-        onTriggered: PopupUtils.open(addPopover, value)
+        onTriggered: PopupUtils.open(addLinkDialog, value)
     }
 
     document: Document {
@@ -51,11 +51,13 @@ Plugin {
     Repeater {
         model: Math.min(documents.length, 4)
         delegate: ListItem.Subtitled {
+            id: item
             property var modelData: documents[documents.length - index - 1]
             text: modelData.title
             subText: modelData.text
 
             onClicked: pageStack.push(Qt.resolvedUrl("resources/WebPage.qml"), {resource: modelData})
+            onPressAndHold: PopupUtils.open(actionsPopover, item, {index: documents.length - index - 1})
         }
     }
 
@@ -74,6 +76,33 @@ Plugin {
 
                 Action {
                     text: i18n.tr("Content from other apps")
+                }
+            }
+        }
+    }
+
+    Component {
+        id: actionsPopover
+
+        ActionSelectionPopover {
+            id: actionsPopoverItem
+            property int index
+
+            actions: ActionList {
+                Action {
+                    text: i18n.tr("Remove")
+                    onTriggered: {
+                        documents.splice(actionsPopoverItem.index, 1)
+                        doc.set("resources", documents)
+                    }
+                }
+
+                Action {
+                    text: i18n.tr("Edit")
+                    onTriggered: {
+                        if (documents[actionsPopoverItem.index].type === "link")
+                            PopupUtils.open(editLinkDialog, plugin, {index: actionsPopoverItem.index})
+                    }
                 }
             }
         }
@@ -117,6 +146,75 @@ Plugin {
                 onClicked: {
                     PopupUtils.close(root)
                     documents.push({"title": titleField.text, "type": "link", "text": textField.text})
+                    doc.set("resources", documents)
+                }
+            }
+
+            Button {
+                objectName: "cancelButton"
+                text: i18n.tr("Cancel")
+
+                gradient: Gradient {
+                    GradientStop {
+                        position: 0
+                        color: "gray"
+                    }
+
+                    GradientStop {
+                        position: 1
+                        color: "lightgray"
+                    }
+                }
+
+                onClicked: {
+                    PopupUtils.close(root)
+                }
+            }
+        }
+    }
+
+    Component {
+        id: editLinkDialog
+
+        Dialog {
+            id: root
+
+            property int index
+
+            title: i18n.tr("Edit Link")
+            text: i18n.tr("Edit the title or link:")
+
+            TextField {
+                id: titleField
+
+                placeholderText: i18n.tr("Title")
+                text: documents[index].title
+
+                onAccepted: textField.forceActiveFocus()
+            }
+
+            TextField {
+                id: textField
+
+                placeholderText: i18n.tr("Link")
+                text: documents[index].text
+
+                onAccepted: okButton.clicked()
+                validator: RegExpValidator {
+                    regExp: /.+/
+                }
+            }
+
+            Button {
+                id: okButton
+                objectName: "okButton"
+
+                text: i18n.tr("Ok")
+                enabled: textField.acceptableInput
+
+                onClicked: {
+                    PopupUtils.close(root)
+                    documents[index] = {"title": titleField.text, "type": "link", "text": textField.text}
                     doc.set("resources", documents)
                 }
             }

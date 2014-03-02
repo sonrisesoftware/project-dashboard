@@ -40,6 +40,8 @@ PluginPage {
         }
     ]
 
+    flickable: listView
+
     ListView {
         id: listView
         anchors.fill: parent
@@ -48,6 +50,10 @@ PluginPage {
             show: modelData.state === "open" || settings.get("showClosedTickets", false)
         }
         clip: true
+    }
+
+    Scrollbar {
+        flickableItem: listView
     }
 
     Component {

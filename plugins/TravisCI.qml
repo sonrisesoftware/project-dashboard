@@ -105,6 +105,8 @@ Plugin {
         PluginPage {
             title: i18n.tr("Build History")
 
+            flickable: listView
+
             ListView {
                 id: listView
                 anchors.fill: parent
