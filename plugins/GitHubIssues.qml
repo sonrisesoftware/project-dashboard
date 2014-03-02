@@ -82,7 +82,7 @@ Plugin {
     onRepoChanged: reload()
 
     function reload() {
-        loading += 5
+        loading += 2
         github.getIssues(repo, "open", function(has_error, status, response) {
             loading--
             if (has_error)
@@ -111,30 +111,6 @@ Plugin {
             }
 
             doc.set("closedIssues", list)
-        })
-
-        github.getMilestones(repo, function(has_error, status, response) {
-            loading--
-            //print("Milestones:", response)
-            var json = JSON.parse(response)
-
-            doc.set("milestones", json)
-        })
-
-        github.getRepository(repo, function(has_error, status, response) {
-            loading--
-            //print("Repository:", response)
-            var json = JSON.parse(response)
-
-            doc.set("repo", json)
-        })
-
-        github.getAssignees(repo, function(has_error, status, response) {
-            loading--
-            print("Repository:", response)
-            var json = JSON.parse(response)
-
-            doc.set("assignees", json)
         })
     }
 }

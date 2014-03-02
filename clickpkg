@@ -1,0 +1,12 @@
+VERSION=$1
+RELEASE_DIR=../releases/project-dashboard/v$VERSION
+
+cp . $RELEASE_DIR -r
+cd $RELEASE_DIR
+replace '@APP_VERSION@' $VERSION manifest.json
+sudo rm .git* -r
+rm ubuntu-ui-extras -r
+cp ../../../ubuntu-ui-extras . -r
+sudo rm ubuntu-ui-extras/.git* -r
+cd ..
+click build v$VERSION

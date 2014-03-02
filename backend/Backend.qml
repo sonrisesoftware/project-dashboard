@@ -61,6 +61,13 @@ Object {
             title: "Drawings"
             docId: 2
         }
+
+        ListElement {
+            name: "resources"
+            type: "Resources"
+            title: "Resources"
+            docId: 5
+        }
     }
 
     property var availableServices: [github, travisCI]

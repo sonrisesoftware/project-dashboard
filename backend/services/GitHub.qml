@@ -27,7 +27,7 @@ Service {
     id: root
 
     name: "github"
-    type: ["GitHubIssues", "GitHubPullRequests"]
+    type: ["GitHubIssues", "GitHubPullRequests", "GitHub"]
     title: i18n.tr("GitHub")
     docId: 3
     authenticationStatus: oauth === "" ? "" : i18n.tr("Logged in as %1").arg(user)

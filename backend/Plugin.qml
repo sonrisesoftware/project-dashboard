@@ -35,7 +35,7 @@ UbuntuShape {
     property bool unread
     property int loading: 0
     property string viewAllMessage
-    property string summary
+    property string summary: viewAllMessage
     property string summaryValue
     property bool expanded: document.get("expanded" + title, true)
     function reload() {}
@@ -68,7 +68,7 @@ UbuntuShape {
     signal clicked()
 
     property Project project
-    property alias action: actionButton.action
+    property Action action
     property Document document
 
     Item {
@@ -138,13 +138,16 @@ UbuntuShape {
 
             Button {
                 id: actionButton
-                visible: action && loading == 0
+                visible: plugin.action && loading == 0
                 height: units.gu(4)
                 anchors {
                     right: parent.right
                     margins: units.gu(1)
                     verticalCenter: titleLabel.verticalCenter
                 }
+
+                text: plugin.action.text
+                onClicked: plugin.action.triggered(actionButton)
             }
         }
     }

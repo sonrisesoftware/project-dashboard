@@ -35,6 +35,8 @@ Item {
         "check-square-o": "",
                 "circle": "",
                 "exclamation-triangle": "",
+                "github": "",
+                "file": "",
         "ellipse-h": "",
         "ellipse-v": "",
         "save": "",
