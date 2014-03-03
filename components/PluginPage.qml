@@ -21,6 +21,7 @@ import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
 
 Item {
+    id: page
     width: 100
     height: 62
 
@@ -29,4 +30,31 @@ Item {
     property list<Action> actions
 
     property Flickable flickable
+
+    property int loading: plugin.loading
+
+    onLoadingChanged: {
+        if (loading > 0) {
+            header.show()
+        }
+    }
+
+    Item {
+        anchors.fill: parent
+        anchors.bottomMargin: header.height - header.__styleInstance.contentHeight
+        parent: header
+
+        ActivityIndicator {
+            anchors {
+                right: parent.right
+                verticalCenter: parent.verticalCenter
+                rightMargin: (parent.height - height)/2
+            }
+
+            height: units.gu(4)
+            width: height
+            running: visible
+            visible: loading > 0
+        }
+    }
 }

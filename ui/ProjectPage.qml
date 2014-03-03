@@ -105,6 +105,8 @@ Page {
                 visible: plugin
                 sourceComponent: plugin ? plugin.page : null
                 property Plugin plugin: pushedPagePage.plugin
+
+                property Header header: pushedPagePage.header
             }
 
             tools: ToolbarItems {
