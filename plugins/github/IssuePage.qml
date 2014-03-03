@@ -124,7 +124,7 @@ Page {
                 id: textArea
                 width: parent.width
                 text: issue.hasOwnProperty("body") ? renderMarkdown(issue.body, plugin.repo) : ""
-                height: Math.min(__internal.linesHeight(15), Math.max(__internal.linesHeight(4), edit.height))
+                height: Math.min(__internal.linesHeight(15), Math.max(__internal.linesHeight(4), edit.height + textArea.__internal.frameSpacing * 2))
                 placeholderText: i18n.tr("No description set.")
                 readOnly: true
                 textFormat: Text.RichText

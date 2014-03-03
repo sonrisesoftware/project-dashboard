@@ -124,7 +124,8 @@ MainView {
     }
 
     function renderMarkdown(text, context) {
-        if (text === undefined) {
+        print("MARKDOWN:", typeof(text))
+        if (typeof(text) != "string") {
             return ""
         } if (markdownCache.hasOwnProperty(text)) {
             return markdownCache[text]
