@@ -49,6 +49,7 @@ Plugin {
     property var closedIssues: doc.get("closedIssues", [])
     property var info: doc.get("repo", {})
     property var availableAssignees: doc.get("assignees", [])
+    property var availableLabels: doc.get("labels", [])
 
     property var allIssues: issues.concat(closedIssues).sort(function sort(a1, a2) {
         return a2.number - a1.number

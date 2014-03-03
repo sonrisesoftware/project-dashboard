@@ -20,6 +20,7 @@ import Ubuntu.Components 0.1
 import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
 import "../../ubuntu-ui-extras"
+import "../../components"
 
 Page {
     id: page
@@ -29,6 +30,13 @@ Page {
     property var issue
     property var request
     property var plugin
+    property var comments: []
+
+    Component.onCompleted: {
+        github.getIssueComments(plugin.repo, issue, function(has_error, status, response) {
+            comments = JSON.parse(response)
+        })
+    }
 
     actions: [
         Action {
@@ -65,19 +73,24 @@ Page {
         id: mainFlickable
         clip: true
         anchors {
-            margins: units.gu(2)
             left: parent.left
             right: sidebar.left
             top: parent.top
             bottom: parent.bottom
         }
 
-        contentHeight: column.height
+        contentHeight: column.height + units.gu(4)
         contentWidth: width
 
         Column {
             id: column
             width: parent.width
+            anchors {
+                top: parent.top
+                margins: units.gu(2)
+                left: parent.left
+                right: parent.right
+            }
             spacing: units.gu(1)
             Label {
                 width: parent.width
@@ -126,6 +139,94 @@ Page {
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                     text: textArea.text
                     font: textArea.font
+                }
+            }
+
+            Repeater {
+                model: comments
+                delegate: CommentArea {
+                    author: modelData.user.login
+                    text: renderMarkdown(modelData.body)
+                    date: modelData.created_at
+                }
+            }
+
+            TextArea {
+                id: commentBox
+                width: parent.width
+
+                property bool show
+
+                height: show ? implicitHeight : 0
+
+                onHeightChanged: {
+                    mainFlickable.contentY = mainFlickable.contentHeight - mainFlickable.height
+                }
+
+                Behavior on height {
+                    UbuntuNumberAnimation {}
+                }
+            }
+
+            Row {
+                spacing: units.gu(1)
+                anchors.right: parent.right
+
+                Button {
+                    text: i18n.tr("Cancel")
+                    gradient: Gradient {
+                        GradientStop {
+                            position: 0
+                            color: "gray"
+                        }
+
+                        GradientStop {
+                            position: 1
+                            color: Qt.rgba(0.65,0.65,0.65,1)
+                        }
+                    }
+                    height: units.gu(4.5)
+
+                    opacity: commentBox.show ? 1 : 0
+
+                    onClicked: {
+                        commentBox.text = ""
+                        commentBox.show = false
+                    }
+
+                    Behavior on opacity {
+                        UbuntuNumberAnimation {}
+                    }
+                }
+
+                Button {
+                    text: i18n.tr("Comment")
+                    height: units.gu(4.5)
+                    onClicked: {
+                        if (commentBox.show) {
+                            busyDialog.title = i18n.tr("Creating Comment")
+                            busyDialog.text = i18n.tr("Creating a new comment for issue <b>%1</b>").arg(issue.number)
+                            busyDialog.show()
+
+                            var text = commentBox.text
+
+                            request = github.newIssueComment(plugin.repo, issue, commentBox.text, function(response) {
+                                busyDialog.hide()
+                                if (response === -1) {
+                                    error(i18n.tr("Connection Error"), i18n.tr("Unable to create comment. Check your connection and/or firewall settings."))
+                                } else {
+                                    comments.push({body: text, user: {login: github.user}, date: new Date().toISOString()})
+                                    comments = comments
+                                }
+                            })
+
+                            commentBox.text = ""
+                            commentBox.show = false
+                        } else {
+                            commentBox.show = true
+                            commentBox.forceActiveFocus()
+                        }
+                    }
                 }
             }
         }

@@ -124,7 +124,9 @@ MainView {
     }
 
     function renderMarkdown(text, context) {
-        if (markdownCache.hasOwnProperty(text)) {
+        if (text === undefined) {
+            return ""
+        } if (markdownCache.hasOwnProperty(text)) {
             return markdownCache[text]
         } else {
             print("Calling Markdown API")

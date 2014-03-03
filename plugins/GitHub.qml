@@ -30,7 +30,6 @@ Plugin {
 
     title: "GitHub"
     iconSource: "github"
-    unread: issues.length > 0
 
     property var milestones: doc.get("milestones", [])
     property var info: doc.get("repo", {})
@@ -66,7 +65,7 @@ Plugin {
     onRepoChanged: reload()
 
     function reload() {
-        loading += 3
+        loading += 4
         github.getMilestones(repo, function(has_error, status, response) {
             loading--
             //print("Milestones:", response)
@@ -89,6 +88,14 @@ Plugin {
             var json = JSON.parse(response)
 
             doc.set("assignees", json)
+        })
+
+        github.getLabels(repo, function(has_error, status, response) {
+            loading--
+            print("Labels:", response)
+            var json = JSON.parse(response)
+
+            doc.set("labels", json)
         })
     }
 }

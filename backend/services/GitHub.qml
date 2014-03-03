@@ -69,6 +69,16 @@ Service {
         return Http.get(request, ["access_token=" + oauth].concat(options), callback, undefined, {"Accept":"application/vnd.github.v3+json"})
     }
 
+    function post(request, callback, options, body) {
+        if (oauth === "")
+            return undefined
+        if (options === undefined)
+            options = []
+        if (request && request.indexOf(github) !== 0)
+            request = github + request
+        return Http.post(request, ["access_token=" + oauth].concat(options), callback, undefined, {"Accept":"application/vnd.github.v3+json"}, body)
+    }
+
     function getIssues(repo, state, callback) {
         return get("/repos/" + repo + "/issues", callback, ["state=" + state])
     }
@@ -93,8 +103,20 @@ Service {
         return get("/repos/" + repo + "/milestones", callback)
     }
 
+    function getLabels(repo, callback) {
+        return get("/repos/" + repo + "/labels", callback)
+    }
+
     function getRepository(repo, callback) {
         return get("/repos/" + repo, callback)
+    }
+
+    function getIssueComments(repo, issue, callback) {
+        return get('/repos/' + repo + '/issues/' + issue.number + '/comments', callback)
+    }
+
+    function newIssueComment(repo, issue, comment, callback) {
+        return post("/repos/" + repo + "/issues/" + issue.number + "/comments", callback, undefined, JSON.stringify({body: comment}))
     }
 
     function connect(project) {
