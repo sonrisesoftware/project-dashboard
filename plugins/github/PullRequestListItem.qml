@@ -52,9 +52,9 @@ SubtitledListItem {
 
         size: status == "pending" ? units.gu(2.5) : units.gu(3)
         visible: status != ""
-        color: status == "success" ? "green"
-                                  : status == "failure" ? "red"
-                                              : status == "error" ? "yellow" : "white"
+        color: status == "success" ? colors["green"]
+                                   : status == "failure" ? colors["red"]
+                                                         : status == "error" ? colors["yellow"] : "white"
         name: status == "success" ? "check-circle"
                                  : status == "failure" ? "times-circle"
                                              : status == "error" ? "exclamation-triangle" : "ellipse-h"

@@ -104,7 +104,7 @@ Page {
                 UbuntuShape {
                     height: stateLabel.height + units.gu(1)
                     width: stateLabel.width + units.gu(2)
-                    color: issue.state === "open" ? "green" : "red"
+                    color: issue.state === "open" ? colors["green"] : colors["red"]
                     anchors.verticalCenter: parent.verticalCenter
 
                     Label {
@@ -217,11 +217,11 @@ Page {
                                 } else {
                                     comments.push({body: text, user: {login: github.user}, date: new Date().toISOString()})
                                     comments = comments
+
+                                    commentBox.text = ""
+                                    commentBox.show = false
                                 }
                             })
-
-                            commentBox.text = ""
-                            commentBox.show = false
                         } else {
                             commentBox.show = true
                             commentBox.forceActiveFocus()

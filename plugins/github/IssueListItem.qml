@@ -116,7 +116,7 @@ ListItem.Standard {
         }
     }
 
-    opacity: show ? 1 : 0
+    opacity: show ? modelData.state === "open" ? 1 : 0.5 : 0
 
     Behavior on opacity {
         UbuntuNumberAnimation {}

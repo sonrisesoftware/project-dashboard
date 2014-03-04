@@ -50,6 +50,13 @@ MainView {
     width: units.gu(100)
     height: units.gu(75)
 
+    property var colors: {
+        "green": "#59B159",//"#859a01",
+        "red": "#db3131",
+        "yellow": "#b68b01",
+        "default": Theme.palette.normal.baseText
+    }
+
     property bool wideAspect: width > units.gu(80)
     property bool extraWideAspect: width > units.gu(150)
     property alias pageStack: pageStack

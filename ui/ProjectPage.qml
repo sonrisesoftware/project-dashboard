@@ -120,6 +120,7 @@ Page {
                     delegate: ToolbarButton {
                         id: toolbarButton
                         action: modelData
+                        visible: action.visible
                         function trigger(value) { action.triggered(toolbarButton) }
                     }
                 }
@@ -290,6 +291,7 @@ Page {
             delegate: ToolbarButton {
                 id: toolbarButton
                 action: modelData
+                visible: action.visible
                 function trigger(value) { action.triggered(toolbarButton) }
             }
         }

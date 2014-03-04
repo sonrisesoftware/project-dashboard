@@ -69,9 +69,9 @@ Plugin {
 
     function statusColor(status) {
         if (status === 0)
-            return "green"
+            return colors["green"]
         else if (status === 1)
-            return "red"
+            return colors["red"]
         else
             return ""
     }
