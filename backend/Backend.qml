@@ -67,6 +67,12 @@ Object {
             type: "Resources"
             title: "Resources"
         }
+
+        ListElement {
+            name: "timer"
+            type: "Timer"
+            title: "Timer"
+        }
     }
 
     property var availableServices: [github, travisCI]

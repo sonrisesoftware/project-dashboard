@@ -36,7 +36,7 @@ Object {
     signal reload
 
     function enablePlugin(name, value) {
-        print("Setting state of", name, "to:", value)
+        //print("Setting state of", name, "to:", value)
         plugins[name] = value
         doc.set("plugins", plugins)
     }
@@ -57,7 +57,7 @@ Object {
             if (!hasPlugin(name))
                 continue
             var plugin = backend.getPlugin(name)
-            print(plugin.name)
+            //print(plugin.name)
             pluginObjects.push(plugin)
         }
 
@@ -68,7 +68,7 @@ Object {
         for (var i = 0; i < pluginObjects.length; i++) {
             plugin = pluginObjects[i]
             var type = plugin.type
-            print("Type:", typeof(type))
+            //print("Type:", typeof(type))
 
             if (typeof(type) == "object") {
                 list = list.concat(type)

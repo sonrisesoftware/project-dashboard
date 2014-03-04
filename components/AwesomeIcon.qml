@@ -37,6 +37,7 @@ Item {
                 "exclamation-triangle": "",
                 "github": "",
                 "file": "",
+                "clock": "",
         "ellipse-h": "",
         "ellipse-v": "",
         "save": "",
