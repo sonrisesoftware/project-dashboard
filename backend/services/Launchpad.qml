@@ -29,7 +29,6 @@ Service {
     name: "launchpad"
     type: ["LaunchpadBugs"]
     title: i18n.tr("Launchpad")
-    docId: 6
     authenticationStatus: oauth === "" ? "" : i18n.tr("Logged in as %1").arg(user)
     disabledMessage: i18n.tr("To connect to a launchpad project, please authenticate to launchpad from Settings")
 

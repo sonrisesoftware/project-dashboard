@@ -26,7 +26,6 @@ Item {
     property string name
     property var type: []
     property string title
-    property int docId: -1
     property string authenticationStatus
     property string disabledMessage
     property bool authenticationRequired: true

@@ -42,7 +42,7 @@ Plugin {
 
     document: Document {
         id: doc
-        docId: backend.getPlugin("github").docId
+        docId: "github"
         parent: plugin.project.document
     }
 

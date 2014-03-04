@@ -183,7 +183,6 @@ Page {
                         width: parent.width - units.gu(2)
                         source: Qt.resolvedUrl("../plugins/" + modelData + ".qml")
                         onLoaded: {
-                            item.project = project
                             column.reEvalColumns()
                         }
 
@@ -206,66 +205,66 @@ Page {
         width: units.gu(8)
         color: Qt.rgba(0.2,0.2,0.2,0.8)
 
-        Column {
-            width: parent.width
+//        Column {
+//            width: parent.width
 
-            ListItem.Standard {
-                id: item
-                height: width
-                onClicked: selectedPlugin = null
-                selected: selectedPlugin === null
+//            ListItem.Standard {
+//                id: item
+//                height: width
+//                onClicked: selectedPlugin = null
+//                selected: selectedPlugin === null
 
-                Column {
-                    anchors.centerIn: parent
-                    spacing: units.gu(0.5)
+//                Column {
+//                    anchors.centerIn: parent
+//                    spacing: units.gu(0.5)
 
-                    AwesomeIcon {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        name: "dashboard"
-                        size: units.gu(3)
-                        color: item.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
-                    }
+//                    AwesomeIcon {
+//                        anchors.horizontalCenter: parent.horizontalCenter
+//                        name: "dashboard"
+//                        size: units.gu(3)
+//                        color: item.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
+//                    }
 
-                    Label {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: i18n.tr("Pulse")
-                        color: item.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
-                    }
-                }
-            }
+//                    Label {
+//                        anchors.horizontalCenter: parent.horizontalCenter
+//                        text: i18n.tr("Pulse")
+//                        color: item.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
+//                    }
+//                }
+//            }
 
-            Repeater {
-                model: column.children
-                delegate: ListItem.Standard {
-                    id: pluginSidebarItem
-                    height: visible ? width : 0
-                    visible: modelData.hasOwnProperty("item")
-                    enabled: modelData.item.page
-                    opacity: enabled ? 1 : 0.5
-                    onClicked: selectedPlugin = modelData.item
-                    selected: selectedPlugin === modelData.item
+//            Repeater {
+//                model: column.children
+//                delegate: ListItem.Standard {
+//                    id: pluginSidebarItem
+//                    height: visible ? width : 0
+//                    visible: modelData.hasOwnProperty("item")
+//                    enabled: modelData.item.page
+//                    opacity: enabled ? 1 : 0.5
+//                    onClicked: selectedPlugin = modelData.item
+//                    selected: selectedPlugin === modelData.item
 
-                    Column {
-                        anchors.centerIn: parent
-                        spacing: units.gu(0.5)
+//                    Column {
+//                        anchors.centerIn: parent
+//                        spacing: units.gu(0.5)
 
-                        AwesomeIcon {
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            name: modelData.item.iconSource
-                            size: units.gu(3)
+//                        AwesomeIcon {
+//                            anchors.horizontalCenter: parent.horizontalCenter
+//                            name: modelData.item.iconSource
+//                            size: units.gu(3)
 
-                            color: pluginSidebarItem.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
-                        }
+//                            color: pluginSidebarItem.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
+//                        }
 
-                        Label {
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            text: modelData.item.shortTitle
-                            color: pluginSidebarItem.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
-                        }
-                    }
-                }
-            }
-        }
+//                        Label {
+//                            anchors.horizontalCenter: parent.horizontalCenter
+//                            text: modelData.item.shortTitle
+//                            color: pluginSidebarItem.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
+//                        }
+//                    }
+//                }
+//            }
+//        }
     }
 
     Scrollbar {

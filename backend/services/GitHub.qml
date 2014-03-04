@@ -29,7 +29,6 @@ Service {
     name: "github"
     type: ["GitHubIssues", "GitHubPullRequests", "GitHub"]
     title: i18n.tr("GitHub")
-    docId: 3
     authenticationStatus: oauth === "" ? "" : i18n.tr("Logged in as %1").arg(user)
     disabledMessage: i18n.tr("To connect to a GitHub project, please authenticate to GitHub from Settings")
 

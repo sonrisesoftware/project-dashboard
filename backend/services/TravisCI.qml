@@ -29,7 +29,6 @@ Service {
     name: "travis"
     type: ["TravisCI"]
     title: i18n.tr("Travis CI")
-    docId: 4
     authenticationStatus: oauth === "" ? "" : i18n.tr("Logged in as %1").arg(user)
     disabledMessage: i18n.tr("To connect to a Travis CI project, please authenticate to Travis CI from Settings")
     authenticationRequired: false

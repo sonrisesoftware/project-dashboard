@@ -37,7 +37,7 @@ Plugin {
 
     document: Document {
         id: doc
-        docId: backend.getPlugin("travis").docId
+        docId: "travis"
         parent: project.document
     }
 

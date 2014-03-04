@@ -100,7 +100,7 @@ MainView {
 
     Document {
         id: settings
-        docId: 1
+        docId: "settings"
         parent: db.document
     }
 

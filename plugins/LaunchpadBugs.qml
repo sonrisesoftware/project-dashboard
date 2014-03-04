@@ -48,7 +48,7 @@ Plugin {
 
     document: Document {
         id: doc
-        docId: backend.getPlugin("launchpad").docId
+        docId: "launchpad"
         parent: project.document
     }
 

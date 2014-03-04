@@ -42,7 +42,7 @@ Plugin {
 
     document: Document {
         id: doc
-        docId: backend.getPlugin("resources").docId
+        docId: "resources"
         parent: project.document
     }
 
@@ -160,7 +160,7 @@ Plugin {
                 placeholderText: i18n.tr("Title")
 
                 onAccepted: textField.forceActiveFocus()
-                Keys.onTabPressed: descriptionField.forceActiveFocus()
+                Keys.onTabPressed: textField.forceActiveFocus()
             }
 
             TextField {

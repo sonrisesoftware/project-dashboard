@@ -21,11 +21,12 @@ Item {
 
     Database {
         id: db
+        Component.onCompleted: db.document.loaded = true
     }
 
     Document {
         id: settings
-        docId: 1
+        docId: "settings"
         parent: db.document
     }
 
@@ -70,13 +71,13 @@ Item {
             var expected = "Sample Project";
             var new_value = "Renamed Project"
 
-            backend.newProject(expected)
+            var docId = backend.newProject(expected)
             compare(backend.projects.length,1, "Project was not created correctly")
 
-            var project = newObject(Qt.resolvedUrl("../../backend/Project.qml"), {docId: 0})
+            var project = newObject(Qt.resolvedUrl("../../backend/Project.qml"), {docId: docId})
             compare(project.name,expected, "Project name is incorrect")
 
-            var document = newObject(Qt.resolvedUrl("../../ubuntu-ui-extras/Document.qml"), {docId: 0, parent: backend.document})
+            var document = newObject(Qt.resolvedUrl("../../ubuntu-ui-extras/Document.qml"), {docId: docId, parent: backend.document})
             compare(document.get("name"),expected, "Project name is incorrect using a Document")
 
             document.set("name", new_value)
@@ -108,6 +109,16 @@ Item {
             compare(List.objectKeys(backend.document.save().children).length, orig_length + 1, "Project still shows when saved")
 
             compare(project2.name,second, "Project name is incorrect after removing the other project")
+        }
+
+        function test_dbSave() {
+            var orig_length = backend.projects.length
+
+            var docId1 = backend.newProject("Dummy project")
+            compare(backend.projects.length,orig_length + 1, "Project was not created correctly")
+            compare(List.objectKeys(backend.document.save().children).length, orig_length + 1, "Project doesn't show when saved")
+
+            compare(List.objectKeys(db.document.save().children).length, 2, "Backend and settings aren't being saved")
         }
     }
 }

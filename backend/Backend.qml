@@ -28,16 +28,19 @@ Object {
     property alias projects: doc.children
 
     property alias document: doc
+    property int nextDocId: doc.get("nextDocId", 0)
 
     Document {
         id: doc
-        docId: 0
+        docId: "backend"
         parent: db.document
-        name: "backend storage"
     }
 
     function newProject(name) {
-        return doc.newDoc({"name": name})
+        var docId = String(nextDocId)
+        doc.set("nextDocId", nextDocId + 1)
+        doc.newDoc(docId, {"name": name})
+        return docId
     }
 
     property ListModel availablePlugins: ListModel {
@@ -45,28 +48,24 @@ Object {
             name: "tasks"
             type: "ToDo"
             title: "Tasks"
-            docId: 0
         }
 
         ListElement {
             name: "notes"
             type: ""
             title: "Notes"
-            docId: 1
         }
 
         ListElement {
             name: "drawings"
             type: ""
             title: "Drawings"
-            docId: 2
         }
 
         ListElement {
             name: "resources"
             type: "Resources"
             title: "Resources"
-            docId: 5
         }
     }
 

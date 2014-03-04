@@ -50,7 +50,7 @@ UbuntuShape {
     }
 
     Connections {
-        target: plugin.project
+        target: project
         onReload: {
             print("Reloading" + plugin.title)
             plugin.reload()
@@ -67,7 +67,7 @@ UbuntuShape {
 
     signal clicked()
 
-    property Project project
+    //property Project project
     property Action action
     property Document document
 

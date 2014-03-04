@@ -39,7 +39,7 @@ Plugin {
 
     document: Document {
         id: doc
-        docId: backend.getPlugin("tasks").docId
+        docId: "tasks"
         parent: root.project.document
     }
 
