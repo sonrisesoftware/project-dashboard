@@ -45,7 +45,7 @@ Plugin {
     property int allTime: otherTime + totalTime
     property var startTime: doc.get("startTime", undefined) === undefined ? undefined : new Date(doc.get("startTime", undefined))
 
-    onTotalTimeChanged: today.set("time", totalTime)
+    Component.onDestruction: today.set("time", totalTime)
 
     action: Action {
         text: startTime !== undefined ? i18n.tr("Stop") : i18n.tr("Start")
@@ -192,7 +192,8 @@ Plugin {
                     delegate: ListItem.SingleValue {
                         id: item
                         text: DateUtils.formattedDate(new Date(child.get("date", "")))
-                        value: DateUtils.friendlyDuration(child.get("time", 0))
+                        value: modelData === today.docId ? DateUtils.friendlyDuration(totalTime)
+                                                         : DateUtils.friendlyDuration(child.get("time", 0))
                         onClicked: PopupUtils.open(editDialog, item, {docId: modelData})
 
                         Document {
@@ -241,7 +242,8 @@ Plugin {
 
             title: i18n.tr("Edit")
             text: i18n.tr("Edit the time logged for <b>%1</b>").arg(DateUtils.formattedDate(new Date(child.get("date"))))
-            value: DateUtils.friendlyDuration(child.get("time"))
+            value: modelData === today.docId ? DateUtils.friendlyDuration(totalTime)
+                                             : DateUtils.friendlyDuration(child.get("time", 0))
 
             property bool running
 
