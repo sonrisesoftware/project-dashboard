@@ -75,7 +75,7 @@ Plugin {
             title: i18n.tr("Resources")
             actions: [addAction]
 
-            flickable: listView
+            flickable: listView.count === 0 ? null : listView
             ListView {
                 id: listView
                 anchors.fill: parent
@@ -94,6 +94,14 @@ Plugin {
 
             Scrollbar {
                 flickableItem: listView
+            }
+
+            Label {
+                anchors.centerIn: parent
+                visible: listView.count == 0
+                opacity: 0.5
+                fontSize: "large"
+                text: i18n.tr("No saved resources")
             }
         }
     }
@@ -161,6 +169,7 @@ Plugin {
 
                 onAccepted: textField.forceActiveFocus()
                 Keys.onTabPressed: textField.forceActiveFocus()
+                color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
             }
 
             TextField {
@@ -169,43 +178,48 @@ Plugin {
                 placeholderText: i18n.tr("Link")
 
                 onAccepted: okButton.clicked()
+                color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
                 validator: RegExpValidator {
                     regExp: /.+/
                 }
             }
 
-            Button {
-                id: okButton
-                objectName: "okButton"
-
-                text: i18n.tr("Ok")
-                enabled: textField.acceptableInput
-
-                onClicked: {
-                    PopupUtils.close(root)
-                    documents.push({"title": titleField.text, "type": "link", "text": textField.text})
-                    doc.set("resources", documents)
-                }
-            }
-
-            Button {
-                objectName: "cancelButton"
-                text: i18n.tr("Cancel")
-
-                gradient: Gradient {
-                    GradientStop {
-                        position: 0
-                        color: "gray"
+            Item {
+                width: parent.width
+                height: childrenRect.height
+                Button {
+                    id: okButton
+                    objectName: "okButton"
+                    anchors {
+                        left: parent.left
+                        right: parent.horizontalCenter
+                        rightMargin: units.gu(1)
                     }
 
-                    GradientStop {
-                        position: 1
-                        color: "lightgray"
+                    text: i18n.tr("Ok")
+                    enabled: textField.acceptableInput
+
+                    onClicked: {
+                        PopupUtils.close(root)
+                        documents.push({"title": titleField.text, "type": "link", "text": textField.text})
+                        doc.set("resources", documents)
                     }
                 }
 
-                onClicked: {
-                    PopupUtils.close(root)
+                Button {
+                    objectName: "cancelButton"
+                    text: i18n.tr("Cancel")
+                    anchors {
+                        left: parent.horizontalCenter
+                        right: parent.right
+                        leftMargin: units.gu(1)
+                    }
+
+                    color: "gray"
+
+                    onClicked: {
+                        PopupUtils.close(root)
+                    }
                 }
             }
         }
@@ -230,6 +244,7 @@ Plugin {
 
                 onAccepted: textField.forceActiveFocus()
                 Keys.onTabPressed: descriptionField.forceActiveFocus()
+                color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
             }
 
             TextField {
@@ -237,6 +252,7 @@ Plugin {
 
                 placeholderText: i18n.tr("Link")
                 text: documents[index].text
+                color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
 
                 onAccepted: okButton.clicked()
                 validator: RegExpValidator {
@@ -244,38 +260,42 @@ Plugin {
                 }
             }
 
-            Button {
-                id: okButton
-                objectName: "okButton"
-
-                text: i18n.tr("Ok")
-                enabled: textField.acceptableInput
-
-                onClicked: {
-                    PopupUtils.close(root)
-                    documents[index] = {"title": titleField.text, "type": "link", "text": textField.text}
-                    doc.set("resources", documents)
-                }
-            }
-
-            Button {
-                objectName: "cancelButton"
-                text: i18n.tr("Cancel")
-
-                gradient: Gradient {
-                    GradientStop {
-                        position: 0
-                        color: "gray"
+            Item {
+                width: parent.width
+                height: childrenRect.height
+                Button {
+                    id: okButton
+                    objectName: "okButton"
+                    anchors {
+                        left: parent.left
+                        right: parent.horizontalCenter
+                        rightMargin: units.gu(1)
                     }
 
-                    GradientStop {
-                        position: 1
-                        color: "lightgray"
+                    text: i18n.tr("Ok")
+                    enabled: textField.acceptableInput
+
+                    onClicked: {
+                        PopupUtils.close(root)
+                        documents[index] = {"title": titleField.text, "type": "link", "text": textField.text}
+                        doc.set("resources", documents)
                     }
                 }
 
-                onClicked: {
-                    PopupUtils.close(root)
+                Button {
+                    objectName: "cancelButton"
+                    text: i18n.tr("Cancel")
+                    anchors {
+                        left: parent.horizontalCenter
+                        right: parent.right
+                        leftMargin: units.gu(1)
+                    }
+
+                    color: "gray"
+
+                    onClicked: {
+                        PopupUtils.close(root)
+                    }
                 }
             }
         }

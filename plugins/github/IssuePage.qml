@@ -154,6 +154,7 @@ Page {
             TextArea {
                 id: commentBox
                 width: parent.width
+                color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
 
                 property bool show
 
@@ -174,18 +175,7 @@ Page {
 
                 Button {
                     text: i18n.tr("Cancel")
-                    gradient: Gradient {
-                        GradientStop {
-                            position: 0
-                            color: "gray"
-                        }
-
-                        GradientStop {
-                            position: 1
-                            color: Qt.rgba(0.65,0.65,0.65,1)
-                        }
-                    }
-                    height: units.gu(4.5)
+                    color: "gray"
 
                     opacity: commentBox.show ? 1 : 0
 
@@ -201,7 +191,6 @@ Page {
 
                 Button {
                     text: i18n.tr("Comment")
-                    height: units.gu(4.5)
                     onClicked: {
                         if (commentBox.show) {
                             busyDialog.title = i18n.tr("Creating Comment")

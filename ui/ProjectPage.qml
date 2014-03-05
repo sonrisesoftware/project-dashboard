@@ -127,6 +127,7 @@ Page {
 
                 ToolbarButton {
                     action: refreshAction
+                    visible: plugin.canReload
                 }
             }
         }

@@ -24,7 +24,29 @@ import "../../ubuntu-ui-extras"
 import "../../ubuntu-ui-extras/listutils.js" as List
 
 PluginPage {
+    id: page
     title: i18n.tr("Issues")
+
+    property string sort: doc.get("sort", "number")
+
+    onSortChanged: {
+        allIssues = Qt.binding(sortAllIssues)
+    }
+
+    property var allIssues: sortAllIssues()
+
+    function sortAllIssues() {
+        return issues.concat(closedIssues).sort(function sort(a1, a2) {
+            print("sorting", page.sort)
+            if (page.sort === "number") {
+                return a2.number - a1.number
+            } else if (page.sort === "assignee") {
+                return a2.assignee.login - a1.assignee.login
+            } else if (page.sort === "milestone") {
+                return a2.milestone.number - a1.milestone.number
+            }
+        })
+    }
 
     actions: [
         Action {
@@ -147,6 +169,22 @@ PluginPage {
                     control: CheckBox {
                         checked: settings.get("showClosedTickets", false)
                         onClicked: checked = settings.sync("showClosedTickets", checked)
+                    }
+                }
+
+                ListItem.ValueSelector {
+                    text: i18n.tr("Sort By")
+                    values: [i18n.tr("Number"), i18n.tr("Assignee"), i18n.tr("Milestone")]
+                    selectedIndex: {
+                        if (sort === "number") return 0
+                        if (sort === "assignee") return 1
+                        if (sort === "milestone") return 2
+                    }
+
+                    onSelectedIndexChanged: {
+                        if (selectedIndex === 0) doc.set("sort", "number")
+                        if (selectedIndex === 1) doc.set("sort", "assignee")
+                        if (selectedIndex === 2) doc.set("sort", "milestone")
                     }
                 }
             }

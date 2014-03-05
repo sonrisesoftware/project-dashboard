@@ -31,6 +31,7 @@ Plugin {
     title: "Bugs"
     iconSource: "bug"
     unread: issues.length > 0
+    canReload: true
 
     page: Component { IssuesPage {} }
 

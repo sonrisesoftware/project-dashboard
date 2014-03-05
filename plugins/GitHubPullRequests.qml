@@ -32,6 +32,7 @@ Plugin {
     shortTitle: "Pulls"
     iconSource: "code-fork"
     unread: issues.length > 0
+    canReload: true
 
     ListItem.Header {
         text: "Recent Pull Requests"

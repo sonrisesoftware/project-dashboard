@@ -38,6 +38,7 @@ UbuntuShape {
     property string summary: viewAllMessage
     property string summaryValue
     property bool expanded: document.get("expanded" + title, true)
+    property bool canReload: false
     function reload() {}
 
     property Component page
@@ -45,8 +46,9 @@ UbuntuShape {
     signal triggered
 
     onTriggered: {
-        if (page)
+        if (page) {
             displayPlugin(plugin)
+        }
     }
 
     Connections {

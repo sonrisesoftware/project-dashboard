@@ -31,6 +31,7 @@ Plugin {
     title: "Continuous Integration"
     shortTitle: "Testing"
     iconSource: "check-circle"
+    canReload: true
 
     property var info: doc.get("repo", [])
     property var builds: doc.get("builds", [])
