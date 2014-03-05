@@ -8,7 +8,11 @@ import os
 from autopilot import input, platform
 from autopilot.matchers import Eventually
 from testtools.matchers import Equals
-from ubuntuuitoolkit import base, emulators
+from ubuntuuitoolkit import (
+    base,
+    emulators as toolkit_emulators
+)
+from project_dashboard import emulators
 
 
 def _get_module_include_path():
@@ -48,7 +52,7 @@ class ClickAppTestCase(base.UbuntuUIToolkitAppTestCase):
                 '-I' + _get_module_include_path(),
                 app_qml_source_location,
                 app_type='qt',
-                emulator_base=emulators.UbuntuUIToolkitEmulatorBase)
+                emulator_base=toolkit_emulators.UbuntuUIToolkitEmulatorBase)
         else:
             raise NotImplementedError(
                 "On desktop we can't install click packages yet, so we can "

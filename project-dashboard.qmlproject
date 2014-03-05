@@ -38,7 +38,7 @@ Project {
     }
     Files {
         directory: "tests/"
-        filter: "*"
+        filter: "*.py;*.qml;run"
     }
     Files {
         directory: "debian"

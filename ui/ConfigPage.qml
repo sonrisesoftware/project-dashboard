@@ -29,88 +29,103 @@ Page {
 
     property Project project
 
-    Column {
+    Flickable {
+        id: flickable
         anchors.fill: parent
 
-        ListItem.Standard {
-            text: i18n.tr("Name")
-            control: TextField {
-                text: project.name
-                onTextChanged: project.name = text
-            }
-        }
+        contentWidth: width
+        contentHeight: column.height
 
-        ListItem.Header {
-            text: i18n.tr("Local Plugins")
-        }
+        Column {
+            id: column
+            width: parent.width
 
-        Repeater {
-            model: backend.availablePlugins
-
-            delegate: ListItem.Standard {
-                text: title
-                enabled: type !== ""
-                control: Switch {
-                    checked: project.hasPlugin(name)
-                    onCheckedChanged: project.enablePlugin(name, checked)
+            ListItem.Standard {
+                text: i18n.tr("Name")
+                control: TextField {
+                    color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
+                    text: project.name
+                    onTextChanged: project.name = text
                 }
             }
-        }
 
-        ListItem.Header {
-            text: i18n.tr("Services")
-        }
+            ListItem.Header {
+                text: i18n.tr("Local Plugins")
+            }
 
-        Repeater {
-            model: backend.availableServices
+            Repeater {
+                model: backend.availablePlugins
 
-            delegate: ListItem.Standard {
-                enabled: modelData.enabled
-                Column {
-                    spacing: units.gu(0.1)
-                    opacity: parent.enabled ? 1 :0.5
-
-                    anchors {
-                        verticalCenter: parent.verticalCenter
-                        left: parent.left
-                        leftMargin: units.gu(2)
-                        rightMargin: units.gu(1)
-                        right: parent.right
-                    }
-
-                    Label {
-                        width: parent.width
-                        elide: Text.ElideRight
-                        text: modelData.title
-                    }
-
-                    Label {
-                        width: parent.width
-
-                        height: visible ? implicitHeight: 0
-                        color:  Theme.palette.normal.backgroundText
-                        fontSize: "small"
-                        //font.italic: true
-                        text: project.hasPlugin(modelData.name) ? modelData.status(project.serviceValue(modelData.name)) : ""
-                        visible: text !== ""
-                        elide: Text.ElideRight
+                delegate: ListItem.Standard {
+                    text: title
+                    enabled: type !== ""
+                    control: Switch {
+                        checked: project.hasPlugin(name)
+                        onCheckedChanged: project.enablePlugin(name, checked)
                     }
                 }
-                control: Switch {
-                    checked: project.hasPlugin(modelData.name)
-                    onCheckedChanged: {
-                        if (checked) {
-                            if (!project.hasPlugin(modelData.name)) {
-                                modelData.connect(project)
-                            }
-                        } else {
-                            project.enablePlugin(modelData.name, "")
+            }
+
+            ListItem.Header {
+                text: i18n.tr("Services")
+            }
+
+            Repeater {
+                model: backend.availableServices
+
+                delegate: ListItem.Standard {
+                    enabled: modelData.enabled
+                    Column {
+                        spacing: units.gu(0.1)
+                        opacity: parent.enabled ? 1 :0.5
+
+                        anchors {
+                            verticalCenter: parent.verticalCenter
+                            left: parent.left
+                            leftMargin: units.gu(2)
+                            rightMargin: units.gu(1)
+                            right: parent.right
                         }
-                        checked = Qt.binding(function() { return project.hasPlugin(modelData.name) })
+
+                        Label {
+                            width: parent.width
+                            elide: Text.ElideRight
+                            text: modelData.title
+                        }
+
+                        Label {
+                            width: parent.width
+
+                            height: visible ? implicitHeight: 0
+                            color:  Theme.palette.normal.backgroundText
+                            fontSize: "small"
+                            //font.italic: true
+                            text: project.hasPlugin(modelData.name) ? modelData.status(project.serviceValue(modelData.name)) : ""
+                            visible: text !== ""
+                            elide: Text.ElideRight
+                        }
+                    }
+                    control: Switch {
+                        checked: project.hasPlugin(modelData.name)
+                        onCheckedChanged: {
+                            if (checked) {
+                                if (!project.hasPlugin(modelData.name)) {
+                                    modelData.connect(project)
+                                }
+                            } else {
+                                project.enablePlugin(modelData.name, "")
+                            }
+                            checked = Qt.binding(function() { return project.hasPlugin(modelData.name) })
+                        }
                     }
                 }
             }
         }
+
+    }
+
+    Scrollbar {
+        flickableItem: flickable
     }
 
     tools: ToolbarItems {

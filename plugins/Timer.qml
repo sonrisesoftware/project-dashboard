@@ -149,6 +149,7 @@ Plugin {
                             }
 
                             UbuntuShape {
+                                id: shape
                                 color: Qt.rgba(0,0,0,0.2)
                                 anchors {
                                     right: parent.right
@@ -165,6 +166,35 @@ Plugin {
 
                                     anchors.fill: parent
                                 }
+
+                                Item {
+                                    anchors.bottom: parent.bottom
+                                    height: footer.height
+                                    width: parent.width
+                                    clip: true
+                                    UbuntuShape {
+                                        anchors.bottom: parent.bottom
+                                        height: shape.height
+                                        width: parent.width
+                                        color: Qt.rgba(0,0,0,0.2)
+                                        Column {
+                                            id: footer
+                                            anchors {
+                                                left: parent.left
+                                                right: parent.right
+                                                bottom: parent.bottom
+                                            }
+
+                                            ListItem.ThinDivider {}
+                                            ListItem.SingleValue {
+                                                text: i18n.tr("Total Time")
+                                                value: DateUtils.friendlyDuration(allTime)
+                                                showDivider: false
+                                                height: units.gu(4.5)
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     },
@@ -180,6 +210,29 @@ Plugin {
                                 item: "list"
 
                                 anchors.fill: parent
+                            }
+
+                            Rectangle {
+                                anchors.fill: column
+                                color: Qt.rgba(0,0,0,0.2)
+                            }
+
+                            Column {
+                                id: column
+
+                                anchors {
+                                    left: parent.left
+                                    right: parent.right
+                                    bottom: parent.bottom
+                                }
+
+                                ListItem.ThinDivider {}
+                                ListItem.SingleValue {
+                                    text: i18n.tr("Total Time")
+                                    value: DateUtils.friendlyDuration(allTime)
+                                    showDivider: false
+                                    height: units.gu(4.5)
+                                }
                             }
                         }
                     }

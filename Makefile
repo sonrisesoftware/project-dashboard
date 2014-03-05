@@ -27,3 +27,8 @@ run:
 clean:
 	rm ~/.local/share/com.ubuntu.developer.mdspencer.project-dashboard/ -R
 
+backup: 
+	cp ~/.local/share/com.ubuntu.developer.mdspencer.project-dashboard/*.db .
+
+restore:
+	cp *.db ~/.local/share/com.ubuntu.developer.mdspencer.project-dashboard/

@@ -26,7 +26,7 @@ import "../ubuntu-ui-extras/dateutils.js" as DateUtils
 import "../ubuntu-ui-extras"
 
 Plugin {
-    id: root
+    id: plugin
 
     title: "Tasks"
     iconSource: "list"
@@ -40,7 +40,22 @@ Plugin {
     document: Document {
         id: doc
         docId: "tasks"
-        parent: root.project.document
+        parent: project.document
+    }
+
+    property int nextDocId: doc.get("nextDocId", 0)
+
+    function addTask(title) {
+        var docId = String(nextDocId)
+        doc.set("nextDocId", nextDocId + 1)
+        doc.newDoc(docId, {"title": title, "dueDate": ""})
+        print(JSON.stringify(doc.save()))
+        return docId
+    }
+
+    action: Action {
+        text: i18n.tr("Add")
+        onTriggered: PopupUtils.open(addPopover, value)
     }
 
     ListItem.Header {
@@ -53,7 +68,7 @@ Plugin {
         model: tasks
         delegate: ToDoListItem {
             docId: modelData
-            show: task.get("dueDate", "") !== "" && isDueThisWeek(new Date(task.get("dueDate", "")))
+            //show: task.get("dueDate", "") !== "" && isDueThisWeek(new Date(task.get("dueDate", "")))
             tasks: doc
 
             Document {
@@ -74,9 +89,49 @@ Plugin {
     summary: tasks.length > 0 ? i18n.tr("<b>%1</b> tasks").arg(tasks.length) : i18n.tr("No tasks")
 
     Component {
+        id: addPopover
+
+        Popover {
+            id: popover
+            contentHeight: textField.height + units.gu(2)
+
+            Component.onCompleted: textField.forceActiveFocus()
+
+            Item {
+                height: textField.height + units.gu(2)
+                width: parent.width
+                Button {
+                    id: button
+                    text: i18n.tr("Done")
+                    onTriggered: {
+                        PopupUtils.close(popover)
+                        addTask(textField.text)
+                    }
+
+                    anchors {
+                        verticalCenter: parent.verticalCenter
+                        right: parent.right
+                        margins: units.gu(1)
+                    }
+                }
+
+                TextField {
+                    id: textField
+                    anchors {
+                        verticalCenter: parent.verticalCenter
+                        left: parent.left
+                        right: button.left
+                        margins: units.gu(1)
+                    }
+                }
+            }
+        }
+    }
+
+    page: Component {
         id: todoPage
 
-        Page {
+        PluginPage {
             title: i18n.tr("Tasks")
 
             ListView {
@@ -93,13 +148,6 @@ Plugin {
                         parent: doc
                     }
                 }
-            }
-
-            tools: ToolbarItems {
-                opened: wideAspect
-                locked: wideAspect
-
-                onLockedChanged: opened = locked
             }
         }
     }

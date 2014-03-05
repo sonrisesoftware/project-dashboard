@@ -26,7 +26,7 @@ ListItem.Empty {
 
     id: root
 
-    property int docId
+    property string docId
     property Document tasks
 
     Document {
@@ -57,7 +57,7 @@ ListItem.Empty {
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
-            leftMargin: units.gu(2)
+            leftMargin: (parent.height - doneCheckBox.height)/2
         }
 
         style: SuruCheckBoxStyle {}
@@ -81,7 +81,7 @@ ListItem.Empty {
 
             width: parent.width
             elide: Text.ElideRight
-            text: doc.get("name", "")
+            text: doc.get("title", "")
 
             //font.bold: task.priority !== "low"
             color: selected ? UbuntuColors.orange : /*task.priority === "low" ? */Theme.palette.selected.backgroundText/* : priorityColor(task.priority)*/
