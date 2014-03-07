@@ -124,7 +124,7 @@ MainView {
      */
     GoogleAnalytics {
         id: analytics
-        trackingID: "UA-48604214-2"
+        trackingID: "UA-48604214-3"
         appName: "Project Dashboard"
         appVersion: "0.1"
         clientID: settings.getOrInit("clientId", generateID())
