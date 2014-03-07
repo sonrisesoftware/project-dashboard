@@ -47,7 +47,7 @@ ListItem.Empty {
         UbuntuNumberAnimation {}
     }
 
-    property bool show: true
+    property bool show: !doc.get("done", false)
 
     clip: true
 
@@ -59,6 +59,9 @@ ListItem.Empty {
             left: parent.left
             leftMargin: (parent.height - doneCheckBox.height)/2
         }
+
+        checked: doc.get("done", false)
+        onClicked: checked = doc.sync("done", checked)
 
         style: SuruCheckBoxStyle {}
     }
@@ -81,7 +84,7 @@ ListItem.Empty {
 
             width: parent.width
             elide: Text.ElideRight
-            text: doc.get("title", "")
+            text: formatText(doc.get("title", ""))
 
             //font.bold: task.priority !== "low"
             color: selected ? UbuntuColors.orange : /*task.priority === "low" ? */Theme.palette.selected.backgroundText/* : priorityColor(task.priority)*/
@@ -108,23 +111,47 @@ ListItem.Empty {
         id: editPopover
 
         Popover {
-            Column {
-                id: column
+            id: popover
+            contentHeight: textField.height + units.gu(2)
+
+            Component.onCompleted: textField.forceActiveFocus()
+
+            Item {
+                height: textField.height + units.gu(2)
                 width: parent.width
-                ListItem.SingleControl {
-                    control: TextField {
-                        text: doc.get("name")
-                        width: parent.width - units.gu(4)
+                Button {
+                    id: button
+                    text: i18n.tr("Done")
+                    onTriggered: {
+                        PopupUtils.close(popover)
+                        doc.set("title", textField.text)
                     }
-                    showDivider: false
+
+                    anchors {
+                        verticalCenter: parent.verticalCenter
+                        right: parent.right
+                        margins: units.gu(1)
+                    }
                 }
 
-                ListItem.Divider {}
-
-                ListItem.Standard {
-                    text: "Delete"
+                TextField {
+                    id: textField
+                    text: doc.get("title", "")
+                    anchors {
+                        verticalCenter: parent.verticalCenter
+                        left: parent.left
+                        right: button.left
+                        margins: units.gu(1)
+                    }
+                    onAccepted: button.trigger()
                 }
             }
         }
+    }
+
+    function formatText(text) {
+        var regex = /(\d\d?:\d\d\s*(PM|AM|pm|am))/gi
+        text = text.replace(regex, "<font color=\"" + colors["green"] + "\">$1</font>")
+        return text
     }
 }

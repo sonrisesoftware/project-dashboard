@@ -58,6 +58,7 @@ ListItem.Empty {
 
             height: visible ? implicitHeight: 0
             //color:  Theme.palette.normal.backgroundText
+            maximumLineCount: 1
             opacity: 0.65
             font.weight: Font.Light
             fontSize: "small"

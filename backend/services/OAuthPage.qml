@@ -62,23 +62,40 @@ Page {
 
     }
 
-    Column {
-        id: column
+    UbuntuShape {
         anchors.centerIn: parent
-        visible: webView.loading
-        spacing: units.gu(1)
+        width: column.width + units.gu(4)
+        height: column.height + units.gu(4)
+        color: Qt.rgba(0.2,0.2,0.2,0.8)
 
-        ActivityIndicator {
-            running: column.visible
-            implicitHeight: units.gu(5)
-            implicitWidth: implicitHeight
-            anchors.horizontalCenter: parent.horizontalCenter
+        opacity: webView.loading ? 1 : 0
+
+        Behavior on opacity {
+            UbuntuNumberAnimation {
+                duration: UbuntuAnimation.SlowDuration
+            }
         }
 
-        Label {
-            anchors.horizontalCenter: parent.horizontalCenter
-            fontSize: "large"
-            text: i18n.tr("Loading (%1%)").arg(webView.loadProgress)
+        Column {
+            id: column
+            anchors.centerIn: parent
+            spacing: units.gu(1)
+
+            Label {
+                anchors.horizontalCenter: parent.horizontalCenter
+                fontSize: "large"
+                text: webView.loading ? i18n.tr("Loading web page...")
+                                      : i18n.tr("Success!")
+            }
+
+            ProgressBar {
+                anchors.horizontalCenter: parent.horizontalCenter
+
+                width: units.gu(30)
+                maximumValue: 100
+                minimumValue: 0
+                value: webView.loadProgress
+            }
         }
     }
 

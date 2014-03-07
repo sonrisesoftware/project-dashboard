@@ -36,7 +36,7 @@ Plugin {
     property alias dates: doc.children
     property int totalTime: savedTime + currentTime
     property int currentTime: new Date() - startTime
-    property int savedTime: doc.get("savedTime", 0)
+    property int savedTime: today.get("savedTime", 0)
     property int otherTime: List.iter(doc.children, function(docId) {
         if (docId === today.docId)
             return 0
@@ -51,7 +51,7 @@ Plugin {
         text: startTime !== undefined ? i18n.tr("Stop") : i18n.tr("Start")
         onTriggered: {
             if (startTime) {
-                doc.set("savedTime", savedTime + (new Date() - startTime))
+                today.set("savedTime", savedTime + (new Date() - startTime))
                 currentTime =  0
                 doc.set("startTime", undefined)
             } else {
@@ -83,24 +83,6 @@ Plugin {
         docId: "timer"
         parent: project.document
     }
-
-//    ListItem.SingleValue {
-//        text: i18n.tr("Start time")
-//        value: startTime !== undefined ? Qt.formatDateTime(startTime) :  "None"
-
-//    }
-
-//    ListItem.SingleValue {
-//        text: i18n.tr("Saved time")
-//        value: DateUtils.friendlyDuration(savedTime)
-
-//    }
-
-//    ListItem.SingleValue {
-//        text: i18n.tr("Current time")
-//        value: DateUtils.friendlyDuration(currentTime)
-
-//    }
 
     ListItem.SingleValue {
         id: todayItem
@@ -177,21 +159,16 @@ Plugin {
                                         height: shape.height
                                         width: parent.width
                                         color: Qt.rgba(0,0,0,0.2)
-                                        Column {
-                                            id: footer
+                                        ItemLayout {
+                                            item: "footer"
+
                                             anchors {
                                                 left: parent.left
                                                 right: parent.right
                                                 bottom: parent.bottom
                                             }
 
-                                            ListItem.ThinDivider {}
-                                            ListItem.SingleValue {
-                                                text: i18n.tr("Total Time")
-                                                value: DateUtils.friendlyDuration(allTime)
-                                                showDivider: false
-                                                height: units.gu(4.5)
-                                            }
+                                            height: footer.height
                                         }
                                     }
                                 }
@@ -217,8 +194,9 @@ Plugin {
                                 color: Qt.rgba(0,0,0,0.2)
                             }
 
-                            Column {
+                            ItemLayout {
                                 id: column
+                                item: "footer"
 
                                 anchors {
                                     left: parent.left
@@ -226,19 +204,12 @@ Plugin {
                                     bottom: parent.bottom
                                 }
 
-                                ListItem.ThinDivider {}
-                                ListItem.SingleValue {
-                                    text: i18n.tr("Total Time")
-                                    value: DateUtils.friendlyDuration(allTime)
-                                    showDivider: false
-                                    height: units.gu(4.5)
-                                }
+                                height: footer.height
                             }
                         }
                     }
                 ]
 
-                // QML Element to draw the analogue clock face along with its hour, minute and second hands.
                 ListView {
                     Layouts.item: "list"
                     model: dates
@@ -268,19 +239,43 @@ Plugin {
                         anchors.horizontalCenter: parent.horizontalCenter
                     }
 
-                    Button {
+                    Row {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: startTime !== undefined ? i18n.tr("Stop") : i18n.tr("Start")
-                        onTriggered: {
-                            if (startTime) {
-                                doc.set("savedTime", savedTime + (new Date() - startTime))
-                                currentTime =  0
-                                doc.set("startTime", undefined)
-                            } else {
-                                doc.set("startTime", new Date().toJSON())
-                                currentTime = 0
+                        spacing: units.gu(1)
+
+                        Button {
+                            text: startTime !== undefined ? i18n.tr("Stop") : i18n.tr("Start")
+                            onTriggered: {
+                                if (startTime) {
+                                    today.set("savedTime", savedTime + (new Date() - startTime))
+                                    currentTime =  0
+                                    doc.set("startTime", undefined)
+                                } else {
+                                    doc.set("startTime", new Date().toJSON())
+                                    currentTime = 0
+                                }
                             }
                         }
+
+//                        Button {
+//                            text: i18n.tr("Edit")
+//                            onTriggered: PopupUtils.open(editDialog, todayItem, {docId: today.docId})
+//                        }
+                    }
+                }
+
+                Column {
+                    id: footer
+                    Layouts.item: "footer"
+
+                    width: units.gu(20)
+
+                    ListItem.ThinDivider {}
+                    ListItem.SingleValue {
+                        text: i18n.tr("Total Time")
+                        value: DateUtils.friendlyDuration(allTime)
+                        showDivider: false
+                        height: units.gu(4.5)
                     }
                 }
             }
@@ -293,7 +288,7 @@ Plugin {
         InputDialog {
             property alias docId: child.docId
 
-            title: i18n.tr("Edit")
+            title: i18n.tr("Edit Time")
             text: i18n.tr("Edit the time logged for <b>%1</b>").arg(DateUtils.formattedDate(new Date(child.get("date"))))
             value: modelData === today.docId ? DateUtils.friendlyDuration(totalTime)
                                              : DateUtils.friendlyDuration(child.get("time", 0))
@@ -301,18 +296,21 @@ Plugin {
             property bool running
 
             Component.onCompleted: {
-                if (docId == today.docId && startTime) {
-                    doc.set("savedTime", savedTime + (new Date() - startTime))
-                    currentTime =  0
-                    doc.set("startTime", undefined)
+                if (docId == today.docId ) {
+                    value = DateUtils.friendlyDuration(totalTime)
+                    if (startTime) {
+                        today.set("savedTime", savedTime + (new Date() - startTime))
+                        currentTime =  0
+                        doc.set("startTime", undefined)
 
-                    running = true
+                        running = true
+                    }
                 }
             }
 
             onAccepted: {
                 if (docId == today.docId) {
-                    doc.set("savedTime", DateUtils.parseDuration(value))
+                    today.set("savedTime", DateUtils.parseDuration(value))
 
                     if (running) {
                         doc.set("startTime", new Date().toJSON())

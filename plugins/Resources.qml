@@ -162,6 +162,8 @@ Plugin {
             title: i18n.tr("Add Link")
             text: i18n.tr("Enter the link you want to save in Resources:")
 
+            property alias url: textField.text
+
             TextField {
                 id: titleField
 

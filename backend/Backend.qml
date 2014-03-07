@@ -52,7 +52,7 @@ Object {
 
         ListElement {
             name: "notes"
-            type: ""
+            type: "Notes"
             title: "Notes"
         }
 

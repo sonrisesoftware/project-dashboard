@@ -32,9 +32,10 @@ Plugin {
     iconSource: "list"
     //unread: true
 
-    onTriggered: pageStack.push(todoPage)
-
     property alias tasks: doc.children
+    property var openTasks: List.filter(tasks, function(docId) {
+        return !doc.childrenData[docId].hasOwnProperty("done") || !doc.childrenData[docId]["done"]
+    })
     unread: tasks.length > 0
 
     document: Document {
@@ -60,33 +61,52 @@ Plugin {
 
     ListItem.Header {
         text: "Upcoming Tasks"
-        visible: tasks.length > 0
+        visible: upcomingTasks.height > 0
+    }
+
+    Column {
+        id: upcomingTasks
+        width: parent.width
+
+        Repeater {
+            id: repeater
+            model: tasks
+            delegate: ToDoListItem {
+                docId: modelData
+                show: !task.get("done", false) && task.get("dueDate", "") !== "" && isDueThisWeek(new Date(task.get("dueDate", "")))
+                tasks: doc
+
+                Document {
+                    id: task
+                    docId: modelData
+                    parent: doc
+                }
+            }
+        }
+    }
+
+    ListItem.Header {
+        text: "Recent Tasks"
+        visible: upcomingTasks.height === 0 && openTasks.length === 0
     }
 
     Repeater {
-        id: repeater
-        model: tasks
+        model: Math.min(4, openTasks.length)
         delegate: ToDoListItem {
-            docId: modelData
-            //show: task.get("dueDate", "") !== "" && isDueThisWeek(new Date(task.get("dueDate", "")))
+            docId: openTasks[openTasks.length - index - 1]
+            show: true
             tasks: doc
-
-            Document {
-                id: task
-                docId: modelData
-                parent: doc
-            }
         }
     }
 
     ListItem.Standard {
         enabled: false
-        visible: tasks.length === 0
-        text: "No upcoming tasks"
+        visible: openTasks.length === 0
+        text: "No tasks"
     }
 
     viewAllMessage:  "View all tasks"
-    summary: tasks.length > 0 ? i18n.tr("<b>%1</b> tasks").arg(tasks.length) : i18n.tr("No tasks")
+    summary: openTasks.length > 0 ? i18n.tr("<b>%1</b> tasks").arg(openTasks.length) : i18n.tr("No tasks")
 
     Component {
         id: addPopover
@@ -123,6 +143,7 @@ Plugin {
                         right: button.left
                         margins: units.gu(1)
                     }
+                    onAccepted: button.trigger()
                 }
             }
         }
