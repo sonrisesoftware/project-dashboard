@@ -51,9 +51,10 @@ MainView {
     height: units.gu(75)
 
     property var colors: {
-        "green": "#59B159",//"#859a01",
-        "red": "#db3131",
-        "yellow": "#b68b01",
+        "green": "#5cb85c",//"#59B159",//"#859a01",
+        "red": "#d9534f",//"#db3131",
+        "yellow": "#f0ad4e",//"#b68b01",
+        "blue": "#5bc0de",
         "default": Theme.palette.normal.baseText
     }
 
@@ -114,6 +115,35 @@ MainView {
 
     TravisCI {
         id: travisCI
+    }
+
+    /**
+     * Track install and usage count metrics
+     *
+     * TODO: Remove after the App Store supports this
+     */
+    GoogleAnalytics {
+        id: analytics
+        trackingID: "UA-48604214-2"
+        appName: "Project Dashboard"
+        appVersion: "0.1"
+        clientID: settings.getOrInit("clientId", generateID())
+    }
+
+    property bool activeState: Qt.application.active
+
+    onActiveStateChanged: {
+        if (activeState)
+            analytics.eventTriggered("App active")
+    }
+
+    Component.onCompleted: {
+        if (settings.get("existing", false)) {
+            analytics.eventTriggered("New installation")
+            settings.set("existing", true)
+        }
+
+        analytics.eventTriggered("App launched")
     }
 
     function getIcon(name) {
