@@ -70,8 +70,11 @@ Plugin {
 
 
 
-            //onClicked: pageStack.push(Qt.resolvedUrl("resources/WebPage.qml"), {resource: modelData})
+            onClicked: pageStack.push(notePage, {docId: note.docId})
             //onPressAndHold: PopupUtils.open(actionsPopover, item, {index: documents.length - index - 1})
+            removable: true
+            confirmRemoval: true
+            onItemRemoved: note.remove()
 
             Document {
                 id: note
@@ -139,6 +142,56 @@ Plugin {
                     onTriggered: {
                         pageStack.pop()
                         newNote(nameField.text, descriptionField.text)
+                    }
+                }
+            }
+        }
+    }
+
+    Component {
+        id: notePage
+
+        Page {
+            title: note.get("title")
+
+            property alias docId: note.docId
+
+            Document {
+                id: note
+                parent: doc
+            }
+
+            TextArea {
+                id: descriptionField
+                placeholderText: i18n.tr("Contents")
+                color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
+
+                text: note.get("contents")
+
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                    top: parent.top
+                    bottom: parent.bottom
+                    margins: units.gu(2)
+                }
+            }
+
+            Component.onDestruction: note.set("contents", descriptionField.text)
+
+            tools: ToolbarItems {
+                opened: wideAspect
+                locked: wideAspect
+
+                onLockedChanged: opened = locked
+
+                ToolbarButton {
+                    text: i18n.tr("Delete")
+                    iconSource: getIcon("delete")
+
+                    onTriggered: {
+                        pageStack.pop()
+                        note.remove()
                     }
                 }
             }
