@@ -32,6 +32,10 @@ Page {
     property string firstGet: "?access_token=" + token
     property string otherGet: "&access_token=" + token
 
+    property int index: 0
+    property var stack: []
+    property bool navAction: false
+
     actions: [
         Action {
             id: bookmarkAction
@@ -39,7 +43,38 @@ Page {
             iconSource: getIcon("favorite-unselected")
             enabled: webView.url != resource.text
             onTriggered: {
-                onTriggered: PopupUtils.open(addLinkDialog, webPage, {url: webView.url})
+                PopupUtils.open(addLinkDialog, webPage, {url: webView.url})
+            }
+        },
+
+        Action {
+            id: openAction
+            text: i18n.tr("Open Externally")
+            iconSource: getIcon("external-link")
+            onTriggered: {
+                Qt.openUrlExternally(webView.url)
+            }
+        },
+
+        Action {
+            id: backAction
+            enabled: index > 1
+            text: i18n.tr("Back")
+            iconSource: getIcon("go-previous")
+            onTriggered: {
+                navAction = true
+                webView.url = stack[--index]
+            }
+        },
+
+        Action {
+            id: forwardAction
+            enabled: index < stack.length
+            text: i18n.tr("Forward")
+            iconSource: getIcon("go-next")
+            onTriggered: {
+                navAction = true
+                webView.url = stack[index++]
             }
         }
 
@@ -60,6 +95,18 @@ Page {
             if (loadRequest.status === UbuntuWebView.LoadFailedStatus) {
                 error(i18n.tr("Connection Error"), i18n.tr("Unable to authenticate to GitHub. Check your connection and/or firewall settings."), pageStack.pop)
             }
+        }
+
+        onNavigationRequested: {
+            if (navAction) {
+                navAction = false
+                return
+            }
+
+            stack[index++] = webView.url
+            stack.splice(index, stack.length - index)
+            stack = stack
+            return UbuntuWebView.AcceptRequest
         }
 
     }
@@ -108,7 +155,16 @@ Page {
         onLockedChanged: opened = locked
 
         ToolbarButton {
-            action: bookmarkAction
+            action: backAction
+        }
+
+        ToolbarButton {
+            action: forwardAction
+        }
+
+        ToolbarButton {
+            action: openAction
+            width: units.gu(10)
         }
     }
 }
