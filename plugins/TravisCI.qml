@@ -43,20 +43,21 @@ Plugin {
     }
 
     BuildListItem {
-        number: info.last_build_number
-        status: info.last_build_result
-        built_at: info.last_build_finished_at
-        message: {
-            var build
+        number: plugin.info.last_build_number
+        status: plugin.info.last_build_result
+        built_at: plugin.info.last_build_finished_at
+        info: {
             for (var i = 0; i < builds.length; i++) {
-                if (builds[i].id === info.last_build_id) {
-                    build = builds[i]
-                    break
+                if (builds[i].id === plugin.info.last_build_id) {
+                    return builds[i]
                 }
             }
 
-            return build ? build.message : ""
+            return {}
         }
+
+        repo: repo
+        message: info.message ? info.message : ""
     }
 
     summary: i18n.tr("Build %1").arg(info.last_build_number)
@@ -115,8 +116,10 @@ Plugin {
                 delegate: BuildListItem {
                     number: modelData.number
                     message: modelData.message
+                    info: modelData
                     status: modelData.result != null ? modelData.result : -1
                     built_at:  modelData.finished_at != null ? modelData.finished_at : ""
+                    repo: repo
                 }
                 clip: true
             }

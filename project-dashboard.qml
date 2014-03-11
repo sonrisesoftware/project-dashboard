@@ -52,7 +52,7 @@ MainView {
 
     property var colors: {
         "green": "#5cb85c",//"#59B159",//"#859a01",
-        "red": "#d9534f",//"#db3131",
+        "red": "#db3131",//"#d9534f",//"#db3131",
         "yellow": "#f0ad4e",//"#b68b01",
         "blue": "#5bc0de",
         "default": Theme.palette.normal.baseText

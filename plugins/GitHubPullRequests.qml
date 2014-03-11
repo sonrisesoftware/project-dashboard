@@ -39,6 +39,10 @@ Plugin {
         visible: issues.length > 0
     }
 
+    action: Action {
+        text: i18n.tr("Open Pull Request")
+    }
+
     property var issues: doc.get("pullRequests", [])
 
     document: Document {

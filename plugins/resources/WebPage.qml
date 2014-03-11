@@ -41,9 +41,9 @@ Page {
             id: bookmarkAction
             text: i18n.tr("Bookmark")
             iconSource: getIcon("favorite-unselected")
-            enabled: webView.url != resource.text
+            enabled: index > 1
             onTriggered: {
-                PopupUtils.open(addLinkDialog, webPage, {url: webView.url})
+                PopupUtils.open(plugin.addLinkDialog, webPage, {url: webView.url})
             }
         },
 
@@ -160,6 +160,11 @@ Page {
 
         ToolbarButton {
             action: forwardAction
+        }
+
+        ToolbarButton {
+            action: bookmarkAction
+            width: units.gu(7)
         }
 
         ToolbarButton {

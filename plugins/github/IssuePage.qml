@@ -50,7 +50,8 @@ Page {
             text: i18n.tr("Close")
             iconSource: getIcon("close")
             onTriggered: {
-                busyDialog.title = i18n.tr("Closing Issue <b>#%1</b>").arg(issue.number)
+                busyDialog.title = i18n.tr("Closing Issue")
+                busyDialog.text = i18n.tr("Closing issue <b>#%1</b>").arg(issue.number)
                 busyDialog.show()
 
                 request = github.editIssue(plugin.repo, issue.number, {"state": "closed"}, function(response) {
@@ -182,6 +183,53 @@ Page {
                     onClicked: {
                         commentBox.text = ""
                         commentBox.show = false
+                    }
+
+                    Behavior on opacity {
+                        UbuntuNumberAnimation {}
+                    }
+                }
+
+                Button {
+                    text: i18n.tr("Comment and Close")
+                    color: colors["red"]
+
+                    opacity: commentBox.show ? 1 : 0
+
+                    onClicked: {
+                        busyDialog.title = i18n.tr("Creating Comment")
+                        busyDialog.text = i18n.tr("Creating a new comment for issue <b>%1</b>").arg(issue.number)
+                        busyDialog.show()
+
+                        var text = commentBox.text
+
+                        request = github.newIssueComment(plugin.repo, issue, commentBox.text, function(response) {
+                            busyDialog.hide()
+                            if (response === -1) {
+                                error(i18n.tr("Connection Error"), i18n.tr("Unable to create comment. Check your connection and/or firewall settings."))
+                            } else {
+                                comments.push({body: text, user: {login: github.user}, date: new Date().toISOString()})
+                                comments = comments
+
+                                commentBox.text = ""
+                                commentBox.show = false
+
+                                busyDialog.title = i18n.tr("Closing Issue")
+                                busyDialog.text = i18n.tr("Closing issue <b>#%1</b>").arg(issue.number)
+                                busyDialog.show()
+
+                                request = github.editIssue(plugin.repo, issue.number, {"state": "closed"}, function(response) {
+                                    busyDialog.hide()
+                                    if (response === -1) {
+                                        error(i18n.tr("Connection Error"), i18n.tr("Unable to close issue. Check your connection and/or firewall settings."))
+                                    } else {
+                                        issue.state = "closed"
+                                        issue = issue
+                                        plugin.reload()
+                                    }
+                                })
+                            }
+                        })
                     }
 
                     Behavior on opacity {
