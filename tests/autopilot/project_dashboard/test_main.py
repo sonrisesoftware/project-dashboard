@@ -2,14 +2,15 @@
 
 """Tests for the Hello World"""
 
-import os
+#import os
 
-from autopilot.matchers import Eventually
-from testtools.matchers import Equals
+#from autopilot.matchers import Eventually
+#from testtools.matchers import Equals
 from testtools.matchers import NotEquals
 
 import project_dashboard
 import project_dashboard.emulators
+
 
 class MainViewTestCase(project_dashboard.ClickAppTestCase):
     """Tests for Project Dashboard"""
