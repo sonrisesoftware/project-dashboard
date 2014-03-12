@@ -232,10 +232,18 @@ Page {
                 }
             }
 
-            Repeater {
-                model: allEvents
-                delegate: EventItem {
-                    event: modelData
+            Column {
+                id: eventColumn
+                width: parent.width
+                spacing: parent.spacing
+
+                Repeater {
+                    model: allEvents
+                    delegate: EventItem {
+                        id: eventItem
+                        event: modelData
+                        last: eventItem.y + eventItem.height == eventColumn.height
+                    }
                 }
             }
 

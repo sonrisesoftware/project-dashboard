@@ -9,6 +9,8 @@ Item {
     property string author: type === "comment" ? event.user.login : event.actor.login
     property string date: event.created_at
 
+    property bool last
+
     property string title: {
         if (type == "referenced") {
             return i18n.tr("<b>%1</b> referenced this issue from a commit %2").arg(author).arg(friendsUtils.createTimeString(date))
@@ -54,8 +56,8 @@ Item {
     Rectangle {
         width: 1
         x: units.gu(1.5)
-        y: -height
-        height: units.gu(1)
+        y: -units.gu(1)
+        height: units.gu(1) + (last || type === "comment" ? 0 : parent.height)
         z: -100
         //color: Qt.rgba(0.5,0.5,0.5,0.5)
         color: Qt.rgba(0.6,0.6,0.6,1)
