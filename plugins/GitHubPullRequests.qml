@@ -41,14 +41,16 @@ Plugin {
 
     action: Action {
         text: i18n.tr("Open Pull Request")
+        onTriggered: PopupUtils.open(Qt.resolvedUrl("github/NewPullRequestPage.qml"), plugin, {repo: repo, branches: branches, action: reload})
     }
 
     property var issues: doc.get("pullRequests", [])
+    property var branches: doc.get("branches", [])
 
     document: Document {
         id: doc
         docId: "github"
-        parent: plugin.project.document
+        parent: project.document
     }
 
     Repeater {
@@ -80,7 +82,7 @@ Plugin {
     }
 
     function reload() {
-        loading += 1
+        loading += 2
         github.getPullRequests(repo, function(has_error, status, response) {
             loading--
             if (has_error) {
@@ -108,6 +110,14 @@ Plugin {
                     })
                 }
             }
+        })
+
+        github.getBranches(repo, function(has_error, status, response) {
+            loading--
+            print("Branches:", response)
+            var json = JSON.parse(response)
+
+            doc.set("branches", json)
         })
     }
 }

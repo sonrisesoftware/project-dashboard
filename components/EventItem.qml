@@ -20,6 +20,11 @@ Item {
             return i18n.tr("<b>%1</b> reopened this %2").arg(author).arg(friendsUtils.createTimeString(date))
         } else if (type == "merged") {
             return i18n.tr("<b>%1</b> merged this %2").arg(author).arg(friendsUtils.createTimeString(date))
+        } else if (type == "commit") {
+            if (event.commits.length === 1)
+                return i18n.tr("<b>%1</b> pushed 1 commit %2").arg(author).arg(friendsUtils.createTimeString(date))
+            else
+                return i18n.tr("<b>%1</b> pushed %3 commits %2").arg(author).arg(friendsUtils.createTimeString(date)).arg(event.commits.length)
         } else {
             return ""
         }
@@ -36,13 +41,15 @@ Item {
             return "plus"
         } else if (type === "merged") {
             return "code-fork"
+        } else if (type === "commit") {
+            return "code"
         } else {
             return ""
         }
     }
 
     width: parent.width
-    height: type === "comment" ? comment.height : eventItem.height
+    height: type === "comment" ? comment.height : eventItem.height + commitsColumn.anchors.topMargin + commitsColumn.height
 
     Rectangle {
         width: 1
@@ -88,6 +95,43 @@ Item {
             id: titleLabel
             text: title
             anchors.verticalCenter: parent.verticalCenter
+        }
+    }
+
+    Column {
+        id: commitsColumn
+        anchors.top: eventItem.bottom
+        anchors.topMargin: units.gu(0.5)
+        width: parent.width - x
+        x: titleLabel.x
+
+        Repeater {
+            model: event.hasOwnProperty("commits") ? event.commits : []
+            delegate: Item {
+                id: commitItem
+                width: parent.width
+                height: msgLabel.height
+
+                Label {
+                    id: msgLabel
+                    text: " • " + modelData.commit.message
+                    font.family: "Monospaced"
+                    width: 0.8 * parent.width
+                    anchors.verticalCenter: parent.verticalCenter
+                    elide: Text.ElideRight
+                }
+
+                Label {
+                    id: shaLabel
+                    text: modelData.sha.substring(0, 7)
+                    font.family: "Monospaced"
+                    width: 0.2 * parent.width
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.right: parent.right
+                    color: Theme.palette.normal.backgroundText
+                    horizontalAlignment: Text.AlignRight
+                }
+            }
         }
     }
 }

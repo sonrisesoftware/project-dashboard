@@ -90,6 +90,10 @@ Service {
         return Http.post(github + "/repos/" + repo + "/issues", ["access_token=" + oauth], callback, undefined, {"Accept":"application/vnd.github.v3+json"}, JSON.stringify({ "title": title, "body": description }))
     }
 
+    function newPullRequest(repo, title, description, branch, callback) {
+        return Http.post(github + "/repos/" + repo + "/pulls", ["access_token=" + oauth], callback, undefined, {"Accept":"application/vnd.github.v3+json"}, JSON.stringify({ "title": title, "body": description, "head": branch, "base": "master" }))
+    }
+
     function getPullRequests(repo, callback) {
         return get("/repos/" + repo + "/pulls", callback)
     }
@@ -106,12 +110,20 @@ Service {
         return get("/repos/" + repo + "/labels", callback)
     }
 
+    function getBranches(repo, callback) {
+        return get("/repos/" + repo + "/branches", callback)
+    }
+
     function getRepository(repo, callback) {
         return get("/repos/" + repo, callback)
     }
 
     function getIssueComments(repo, issue, callback) {
         return get('/repos/' + repo + '/issues/' + issue.number + '/comments', callback)
+    }
+
+    function getPullCommits(repo, pull, callback) {
+        return get('/repos/' + repo + '/pulls/' + pull.number + '/commits', callback)
     }
 
     function getIssueEvents(repo, issue, callback) {

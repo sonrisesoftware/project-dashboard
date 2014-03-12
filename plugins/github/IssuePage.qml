@@ -25,19 +25,58 @@ import "../../components"
 Page {
     id: page
     
-    title: i18n.tr("Issue %1").arg(issue.number)
+    title: i18n.tr("%2 %1").arg(issue.number).arg(typeTitle)
+
+    property string type: isPullRequest ? "pull request" : "issue"
+    property bool isPullRequest: issue.hasOwnProperty("head")
+    property string typeCap: isPullRequest ? "Pull request" : "Issue"
+    property string typeTitle: isPullRequest ? "Pull Request" : "Issue"
 
     property var issue
     property var request
     property var plugin
     property var events: []
     property var comments: []
+    property var commits: []
     property int loadingEvents: 0
     property var allEvents: {
-        var allEvents = comments.concat(events)
+        var commitEvents = []
+        for (var i = 0; i < commits.length; i++) {
+            print("Adding a new commit event:", JSON.stringify(commits[i].author))
+            commitEvents.push({
+                "event": "commit",
+                "commits": [commits[i]],
+                "actor": commits[i].author,
+                "created_at": commits[i].commit.committer.date
+            })
+        }
+
+        print("Commit Events:", JSON.stringify(commitEvents))
+
+        var allEvents = comments.concat(events).concat(commitEvents)
         allEvents.sort(function(a, b) {
             return new Date(a.created_at) - new Date(b.created_at)
         })
+
+        var index = 0;
+        while (index < allEvents.length) {
+            var event = allEvents[index]
+            if (event.event === "commit") {
+                index++
+                var login = event.actor.login
+                while(index < allEvents.length && allEvents[index].event === "commit" && allEvents[index].actor.login === login) {
+                    var nextEvent = allEvents[index]
+                    print("Merging another commit: ", nextEvent.actor.login)
+                    event.commits = event.commits.concat(nextEvent.commits)
+                    allEvents.splice(index, 1)
+                }
+
+                index--
+            }
+
+            index++
+        }
+
         print(JSON.stringify(allEvents))
         return allEvents
     }
@@ -53,6 +92,15 @@ Page {
             loadingEvents--
             events = JSON.parse(response)
         })
+
+        if (isPullRequest) {
+            loadingEvents++
+            github.getPullCommits(plugin.repo, issue, function(has_error, status, response) {
+                loadingEvents--
+                print("COMMITS", response)
+                commits = JSON.parse(response)
+            })
+        }
     }
 
     actions: [
@@ -74,15 +122,15 @@ Page {
 
     function closeOrReopen() {
         if (issue.state === "open") {
-            busyDialog.title = i18n.tr("Closing Issue")
-            busyDialog.text = i18n.tr("Closing issue <b>#%1</b>").arg(issue.number)
+            busyDialog.title = i18n.tr("Closing %1").arg(typeCap)
+            busyDialog.text = i18n.tr("Closing %2 <b>#%1</b>").arg(issue.number).arg(type)
 
             busyDialog.show()
 
             request = github.editIssue(plugin.repo, issue.number, {"state": "closed"}, function(response) {
                 busyDialog.hide()
                 if (response === -1) {
-                    error(i18n.tr("Connection Error"), i18n.tr("Unable to close issue. Check your connection and/or firewall settings."))
+                    error(i18n.tr("Connection Error"), i18n.tr("Unable to close %1. Check your connection and/or firewall settings.").arg(type))
                 } else {
                     issue.state = "closed"
                     issue = issue
@@ -90,15 +138,15 @@ Page {
                 }
             })
         } else {
-            busyDialog.title = i18n.tr("Reopening Issue")
-            busyDialog.text = i18n.tr("Reopening issue <b>#%1</b>").arg(issue.number)
+            busyDialog.title = i18n.tr("Reopening %1").arg(typeCap)
+            busyDialog.text = i18n.tr("Reopening %2 <b>#%1</b>").arg(issue.number).arg(type)
 
             busyDialog.show()
 
             request = github.editIssue(plugin.repo, issue.number, {"state": "open"}, function(response) {
                 busyDialog.hide()
                 if (response === -1) {
-                    error(i18n.tr("Connection Error"), i18n.tr("Unable to reopen issue. Check your connection and/or firewall settings."))
+                    error(i18n.tr("Connection Error"), i18n.tr("Unable to reopen %1. Check your connection and/or firewall settings.").arg(type))
                 } else {
                     issue.state = "open"
                     issue = issue
@@ -156,7 +204,8 @@ Page {
                 }
 
                 Label {
-                    text: i18n.tr("<b>%1</b> opened this issue %2").arg(issue.user.login).arg(friendsUtils.createTimeString(issue.created_at))
+                    text: isPullRequest ? i18n.tr("<b>%1</b> wants to merge %2 commits").arg(issue.user.login).arg(commits.length)
+                                        : i18n.tr("<b>%1</b> opened this issue %2").arg(issue.user.login).arg(friendsUtils.createTimeString(issue.created_at))
                     anchors.verticalCenter: parent.verticalCenter
                 }
             }
@@ -314,7 +363,7 @@ Page {
     Sidebar {
         id: sidebar
         mode: "right"
-        expanded: wideAspect
+        expanded: wideAspect && !isPullRequest
 
         Column {
             width: parent.width
@@ -419,7 +468,7 @@ Page {
 
                         busyDialog.text = i18n.tr("Setting assignee to <b>%1</b>").arg(model[selectedIndex].login)
                     } else {
-                        busyDialog.text = i18n.tr("Removing assignee from the issue")
+                        busyDialog.text = i18n.tr("Removing assignee from the %1").arg(issue)
                     }
 
                     if (issue.assignee && issue.assignee.hasOwnProperty("login") && issue.assignee.login === login)

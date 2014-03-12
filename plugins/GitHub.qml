@@ -35,7 +35,7 @@ Plugin {
     property var milestones: doc.get("milestones", [])
     property var info: doc.get("repo", {})
     property var availableAssignees: doc.get("assignees", [])
-    property var releases: doc.get("releases", [])
+    property var branches: doc.get("branches", [])
     property var commitStats: doc.get("commit_stats", {})
 
     document: Document {
