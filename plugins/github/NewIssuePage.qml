@@ -37,7 +37,9 @@ ComposerSheet {
     property string repo
     property var action
 
-    onConfirmClicked: {
+    onConfirmClicked: createIssue()
+
+    function createIssue() {
         busyDialog.show()
         request = github.newIssue(repo, nameField.text, descriptionField.text, function(has_error, status, response) {
             busyDialog.hide()

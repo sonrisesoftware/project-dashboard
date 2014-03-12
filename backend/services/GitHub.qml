@@ -114,6 +114,10 @@ Service {
         return get('/repos/' + repo + '/issues/' + issue.number + '/comments', callback)
     }
 
+    function getIssueEvents(repo, issue, callback) {
+        return get('/repos/' + repo + '/issues/' + issue.number + '/events', callback)
+    }
+
     function newIssueComment(repo, issue, comment, callback) {
         return post("/repos/" + repo + "/issues/" + issue.number + "/comments", callback, undefined, JSON.stringify({body: comment}))
     }

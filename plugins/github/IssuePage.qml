@@ -30,11 +30,28 @@ Page {
     property var issue
     property var request
     property var plugin
+    property var events: []
     property var comments: []
+    property int loadingEvents: 0
+    property var allEvents: {
+        var allEvents = comments.concat(events)
+        allEvents.sort(function(a, b) {
+            return new Date(a.created_at) - new Date(b.created_at)
+        })
+        print(JSON.stringify(allEvents))
+        return allEvents
+    }
 
     Component.onCompleted: {
+        loadingEvents += 2
         github.getIssueComments(plugin.repo, issue, function(has_error, status, response) {
+            loadingEvents--
             comments = JSON.parse(response)
+        })
+
+        github.getIssueEvents(plugin.repo, issue, function(has_error, status, response) {
+            loadingEvents--
+            events = JSON.parse(response)
         })
     }
 
@@ -47,26 +64,49 @@ Page {
 
         Action {
             id: closeAction
-            text: i18n.tr("Close")
-            iconSource: getIcon("close")
+            text: issue.state === "open" ? i18n.tr("Close") : i18n.tr("Reopen")
+            iconSource: issue.state === "open" ? getIcon("close") : getIcon("reset")
             onTriggered: {
-                busyDialog.title = i18n.tr("Closing Issue")
-                busyDialog.text = i18n.tr("Closing issue <b>#%1</b>").arg(issue.number)
-                busyDialog.show()
-
-                request = github.editIssue(plugin.repo, issue.number, {"state": "closed"}, function(response) {
-                    busyDialog.hide()
-                    if (response === -1) {
-                        error(i18n.tr("Connection Error"), i18n.tr("Unable to close issue. Check your connection and/or firewall settings."))
-                    } else {
-                        issue.state = "closed"
-                        issue = issue
-                        plugin.reload()
-                    }
-                })
+                closeOrReopen()
             }
         }
     ]
+
+    function closeOrReopen() {
+        if (issue.state === "open") {
+            busyDialog.title = i18n.tr("Closing Issue")
+            busyDialog.text = i18n.tr("Closing issue <b>#%1</b>").arg(issue.number)
+
+            busyDialog.show()
+
+            request = github.editIssue(plugin.repo, issue.number, {"state": "closed"}, function(response) {
+                busyDialog.hide()
+                if (response === -1) {
+                    error(i18n.tr("Connection Error"), i18n.tr("Unable to close issue. Check your connection and/or firewall settings."))
+                } else {
+                    issue.state = "closed"
+                    issue = issue
+                    plugin.reload()
+                }
+            })
+        } else {
+            busyDialog.title = i18n.tr("Reopening Issue")
+            busyDialog.text = i18n.tr("Reopening issue <b>#%1</b>").arg(issue.number)
+
+            busyDialog.show()
+
+            request = github.editIssue(plugin.repo, issue.number, {"state": "open"}, function(response) {
+                busyDialog.hide()
+                if (response === -1) {
+                    error(i18n.tr("Connection Error"), i18n.tr("Unable to reopen issue. Check your connection and/or firewall settings."))
+                } else {
+                    issue.state = "open"
+                    issue = issue
+                    plugin.reload()
+                }
+            })
+        }
+    }
 
     flickable: sidebar.expanded ? null : mainFlickable
 
@@ -144,11 +184,9 @@ Page {
             }
 
             Repeater {
-                model: comments
-                delegate: CommentArea {
-                    author: modelData.user.login
-                    text: renderMarkdown(modelData.body)
-                    date: modelData.created_at
+                model: allEvents
+                delegate: EventItem {
+                    event: modelData
                 }
             }
 
@@ -170,77 +208,48 @@ Page {
                 }
             }
 
-            Row {
-                spacing: units.gu(1)
-                anchors.right: parent.right
+            Item {
+                width: parent.width
+                height: childrenRect.height
 
-                Button {
-                    text: i18n.tr("Cancel")
-                    color: "gray"
-
-                    opacity: commentBox.show ? 1 : 0
-
-                    onClicked: {
-                        commentBox.text = ""
-                        commentBox.show = false
+                ActivityIndicator {
+                    anchors {
+                        left: parent.left
+                        verticalCenter: parent.verticalCenter
                     }
-
-                    Behavior on opacity {
-                        UbuntuNumberAnimation {}
-                    }
+                    visible: loadingEvents > 0
+                    running: visible
                 }
 
-                Button {
-                    text: i18n.tr("Comment and Close")
-                    color: colors["red"]
+                Row {
+                    spacing: units.gu(1)
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
 
-                    opacity: commentBox.show ? 1 : 0
+                    Button {
+                        text: i18n.tr("Cancel")
+                        color: "gray"
 
-                    onClicked: {
-                        busyDialog.title = i18n.tr("Creating Comment")
-                        busyDialog.text = i18n.tr("Creating a new comment for issue <b>%1</b>").arg(issue.number)
-                        busyDialog.show()
+                        opacity: commentBox.show ? 1 : 0
 
-                        var text = commentBox.text
+                        onClicked: {
+                            commentBox.text = ""
+                            commentBox.show = false
+                        }
 
-                        request = github.newIssueComment(plugin.repo, issue, commentBox.text, function(response) {
-                            busyDialog.hide()
-                            if (response === -1) {
-                                error(i18n.tr("Connection Error"), i18n.tr("Unable to create comment. Check your connection and/or firewall settings."))
-                            } else {
-                                comments.push({body: text, user: {login: github.user}, date: new Date().toISOString()})
-                                comments = comments
-
-                                commentBox.text = ""
-                                commentBox.show = false
-
-                                busyDialog.title = i18n.tr("Closing Issue")
-                                busyDialog.text = i18n.tr("Closing issue <b>#%1</b>").arg(issue.number)
-                                busyDialog.show()
-
-                                request = github.editIssue(plugin.repo, issue.number, {"state": "closed"}, function(response) {
-                                    busyDialog.hide()
-                                    if (response === -1) {
-                                        error(i18n.tr("Connection Error"), i18n.tr("Unable to close issue. Check your connection and/or firewall settings."))
-                                    } else {
-                                        issue.state = "closed"
-                                        issue = issue
-                                        plugin.reload()
-                                    }
-                                })
-                            }
-                        })
+                        Behavior on opacity {
+                            UbuntuNumberAnimation {}
+                        }
                     }
 
-                    Behavior on opacity {
-                        UbuntuNumberAnimation {}
-                    }
-                }
+                    Button {
+                        text:  issue.state === "open" ? i18n.tr("Comment and Close") : i18n.tr("Comment and Reopen")
+                        color: issue.state === "open" ? colors["red"] : colors["green"]
 
-                Button {
-                    text: i18n.tr("Comment")
-                    onClicked: {
-                        if (commentBox.show) {
+                        opacity: commentBox.show ? 1 : 0
+                        enabled: commentBox.text !== ""
+
+                        onClicked: {
                             busyDialog.title = i18n.tr("Creating Comment")
                             busyDialog.text = i18n.tr("Creating a new comment for issue <b>%1</b>").arg(issue.number)
                             busyDialog.show()
@@ -257,11 +266,44 @@ Page {
 
                                     commentBox.text = ""
                                     commentBox.show = false
+
+                                    closeOrReopen()
                                 }
                             })
-                        } else {
-                            commentBox.show = true
-                            commentBox.forceActiveFocus()
+                        }
+
+                        Behavior on opacity {
+                            UbuntuNumberAnimation {}
+                        }
+                    }
+
+                    Button {
+                        text: i18n.tr("Comment")
+                        enabled: commentBox.text !== "" || !commentBox.show
+                        onClicked: {
+                            if (commentBox.show) {
+                                busyDialog.title = i18n.tr("Creating Comment")
+                                busyDialog.text = i18n.tr("Creating a new comment for issue <b>%1</b>").arg(issue.number)
+                                busyDialog.show()
+
+                                var text = commentBox.text
+
+                                request = github.newIssueComment(plugin.repo, issue, commentBox.text, function(response) {
+                                    busyDialog.hide()
+                                    if (response === -1) {
+                                        error(i18n.tr("Connection Error"), i18n.tr("Unable to create comment. Check your connection and/or firewall settings."))
+                                    } else {
+                                        comments.push({body: text, user: {login: github.user}, date: new Date().toISOString()})
+                                        comments = comments
+
+                                        commentBox.text = ""
+                                        commentBox.show = false
+                                    }
+                                })
+                            } else {
+                                commentBox.show = true
+                                commentBox.forceActiveFocus()
+                            }
                         }
                     }
                 }
@@ -371,7 +413,7 @@ Page {
                 }
 
                 onSelectedIndexChanged: {
-                    var login = undefined
+                    var login = ""
                     if (selectedIndex < model.length - 1) {
                         login = model[selectedIndex].login
 
@@ -520,8 +562,13 @@ Page {
         Popover {
             id: popover
             property var labels: JSON.parse(JSON.stringify(issue.labels))
+            property bool edited: false
 
-            Component.onDestruction: updateLabels(popover.labels)
+            Component.onDestruction: {
+                if (edited) {
+                    updateLabels(popover.labels)
+                }
+            }
 
             contentHeight: labelsColumn.height
             Column {
@@ -563,6 +610,7 @@ Page {
                             }
 
                             onClicked: {
+                                popover.edited = true
                                 for (var i = 0; i < popover.labels.length; i++) {
                                     var label = popover.labels[i]
 
