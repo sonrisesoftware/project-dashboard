@@ -21,13 +21,34 @@ import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
 import "../../backend/services"
 
-Page {
-    id: dialog
+ComposerSheet {
+    id: sheet
 
     title: i18n.tr("New Issue")
 
+    Component.onCompleted: {
+        sheet.__leftButton.text = i18n.tr("Cancel")
+        sheet.__leftButton.color = "gray"
+        sheet.__rightButton.text = i18n.tr("Create")
+        sheet.__rightButton.color = sheet.__rightButton.__styleInstance.defaultColor
+        sheet.__foreground.style = Theme.createStyleComponent(Qt.resolvedUrl("../../ubuntu-ui-extras/SuruSheetStyle.qml"), sheet)
+    }
+
     property string repo
     property var action
+
+    onConfirmClicked: {
+        busyDialog.show()
+        request = github.newIssue(repo, nameField.text, descriptionField.text, function(has_error, status, response) {
+            busyDialog.hide()
+            if (has_error) {
+                error(i18n.tr("Connection Error"), i18n.tr("Unable to create issue. Check your connection and/or firewall settings.\n\nError: %1").arg(status))
+            } else {
+                pageStack.pop()
+                dialog.action()
+            }
+        })
+    }
 
     TextField {
         id: nameField
@@ -36,7 +57,7 @@ Page {
             left: parent.left
             top: parent.top
             right: parent.right
-            margins: units.gu(2)
+            //margins: units.gu(1)
         }
 
         Keys.onTabPressed: descriptionField.forceActiveFocus()
@@ -51,41 +72,41 @@ Page {
             right: parent.right
             top: nameField.bottom
             bottom: parent.bottom
-            margins: units.gu(2)
+            topMargin: units.gu(1)
         }
     }
 
-    tools: ToolbarItems {
-        locked: true
-        opened: true
+//    tools: ToolbarItems {
+//        locked: true
+//        opened: true
 
-        back: ToolbarButton {
-            text: i18n.tr("Cancel")
-            iconSource: getIcon("back")
+//        back: ToolbarButton {
+//            text: i18n.tr("Cancel")
+//            iconSource: getIcon("back")
 
-            onTriggered: {
-                pageStack.pop()
-            }
-        }
+//            onTriggered: {
+//                pageStack.pop()
+//            }
+//        }
 
-        ToolbarButton {
-            text: i18n.tr("Create")
-            iconSource: getIcon("add")
+//        ToolbarButton {
+//            text: i18n.tr("Create")
+//            iconSource: getIcon("add")
 
-            onTriggered: {
-                busyDialog.show()
-                request = github.newIssue(repo, nameField.text, descriptionField.text, function(has_error, status, response) {
-                    busyDialog.hide()
-                    if (has_error) {
-                        error(i18n.tr("Connection Error"), i18n.tr("Unable to create issue. Check your connection and/or firewall settings.\n\nError: %1").arg(status))
-                    } else {
-                        pageStack.pop()
-                        dialog.action()
-                    }
-                })
-            }
-        }
-    }
+//            onTriggered: {
+//                busyDialog.show()
+//                request = github.newIssue(repo, nameField.text, descriptionField.text, function(has_error, status, response) {
+//                    busyDialog.hide()
+//                    if (has_error) {
+//                        error(i18n.tr("Connection Error"), i18n.tr("Unable to create issue. Check your connection and/or firewall settings.\n\nError: %1").arg(status))
+//                    } else {
+//                        pageStack.pop()
+//                        dialog.action()
+//                    }
+//                })
+//            }
+//        }
+//    }
 
     property var request
 

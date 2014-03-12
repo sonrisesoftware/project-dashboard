@@ -42,7 +42,7 @@ Plugin {
 
     action: Action {
         text: i18n.tr("New Issue")
-        onTriggered: pageStack.push(Qt.resolvedUrl("github/NewIssuePage.qml"), {repo: repo, action: reload})
+        onTriggered: PopupUtils.open(Qt.resolvedUrl("github/NewIssuePage.qml"), plugin, {repo: repo, action: reload})
     }
 
     property var milestones: doc.get("milestones", [])

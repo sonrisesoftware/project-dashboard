@@ -117,7 +117,7 @@ Plugin {
                     number: modelData.number
                     message: modelData.message
                     info: modelData
-                    status: modelData.result != null ? modelData.result : -1
+                    status: typeof(modelData.result) == "number" ? modelData.result : -1
                     built_at:  modelData.finished_at != null ? modelData.finished_at : ""
                     repo: repo
                 }

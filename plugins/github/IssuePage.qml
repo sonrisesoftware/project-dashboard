@@ -276,25 +276,6 @@ Page {
 
         Column {
             width: parent.width
-            ListItem.Header {
-                text: i18n.tr("Labels")
-            }
-
-            Repeater {
-                model: issue.labels
-                delegate: ListItem.Standard {
-                    Label {
-                        anchors {
-                            left: parent.left
-                            leftMargin: units.gu(2)
-                            verticalCenter: parent.verticalCenter
-                        }
-
-                        text: modelData.name
-                        color: "#" + modelData.color
-                    }
-                }
-            }
 
             ListItem.Standard {
                 enabled: false
@@ -311,8 +292,9 @@ Page {
                 visible: !plugin.hasPushAccess
             }
 
-            ListItem.ItemSelector {
+            SuruItemSelector {
                 model: plugin.milestones.concat(i18n.tr("No milestone"))
+
                 visible: plugin.hasPushAccess
                 selectedIndex: {
                     if (issue.milestone && issue.milestone.hasOwnProperty("number")) {
@@ -370,7 +352,7 @@ Page {
                 visible: !plugin.hasPushAccess
             }
 
-            ListItem.ItemSelector {
+            SuruItemSelector {
                 model: plugin.availableAssignees.concat(i18n.tr("No one assigned"))
                 visible: plugin.hasPushAccess
                 selectedIndex: {
@@ -419,6 +401,63 @@ Page {
                     })
                 }
             }
+
+            ListItem.Header {
+                id: labelsHeader
+                text: i18n.tr("Labels")
+            }
+
+            Repeater {
+                id: labelsRepeater
+
+                property bool editing
+
+                model: editing ? plugin.availableLabels : issue.labels
+                delegate: ListItem.Standard {
+                    height: units.gu(5)
+                    Label {
+                        anchors {
+                            left: parent.left
+                            leftMargin: units.gu(2)
+                            verticalCenter: parent.verticalCenter
+                        }
+
+                        text: modelData.name
+                        color: "#" + modelData.color
+                    }
+
+                    control: CheckBox {
+                        visible: labelsRepeater.editing
+
+                        checked: {
+                            for (var i = 0; i < issue.labels.length; i++) {
+                                var label = issue.labels[i]
+
+                                if (label.name === modelData.name)
+                                    return true
+                            }
+
+                            return false
+                        }
+
+                        //onClicked: checked = doc.sync("done", checked)
+
+                        style: SuruCheckBoxStyle {}
+                    }
+                }
+            }
+
+            ListItem.Standard {
+                text: i18n.tr("None Yet")
+                enabled: false
+                visible: issue.labels.length === 0
+            }
+
+            ListItem.Standard {
+                text: i18n.tr("Edit...")
+                visible: plugin.hasPushAccess
+                onClicked: PopupUtils.open(labelsPopover, labelsHeader)
+            }
         }
     }
 
@@ -431,6 +470,8 @@ Page {
         ToolbarButton { action: editAction }
         ToolbarButton { action: closeAction }
     }
+
+    property alias busyDialog: busyDialog
 
     Dialog {
         id: busyDialog
@@ -447,6 +488,97 @@ Page {
             onTriggered: {
                 request.abort()
                 busyDialog.hide()
+            }
+        }
+    }
+
+    function updateLabels(labels) {
+        var labelNames = []
+        for (var i = 0; i < labels.length; i++) {
+            labelNames.push(labels[i].name)
+        }
+
+        busyDialog.title = i18n.tr("Changing Labels")
+        busyDialog.text = i18n.tr("Changes the labels for the issue")
+        busyDialog.show()
+
+        request = github.editIssue(plugin.repo, issue.number, {"labels": labelNames}, function(response) {
+            busyDialog.hide()
+            if (response === -1) {
+                error(i18n.tr("Connection Error"), i18n.tr("Unable to change the labels. Check your connection and/or firewall settings."))
+            } else {
+                issue.labels = labels
+                issue = issue
+                plugin.reload()
+            }
+        })
+    }
+
+    Component {
+        id: labelsPopover
+
+        Popover {
+            id: popover
+            property var labels: JSON.parse(JSON.stringify(issue.labels))
+
+            Component.onDestruction: updateLabels(popover.labels)
+
+            contentHeight: labelsColumn.height
+            Column {
+                id: labelsColumn
+                width: parent.width
+
+                ListItem.Header {
+                    text: i18n.tr("Available Labels")
+                }
+
+                Repeater {
+                    id: repeater
+
+                    model: plugin.availableLabels
+                    delegate: ListItem.Standard {
+                        showDivider: index < repeater.count - 1
+                        height: units.gu(5)
+                        Label {
+                            anchors {
+                                left: parent.left
+                                leftMargin: units.gu(2)
+                                verticalCenter: parent.verticalCenter
+                            }
+
+                            text: modelData.name
+                            color: "#" + modelData.color
+                        }
+
+                        control: CheckBox {
+                            checked: {
+                                for (var i = 0; i < popover.labels.length; i++) {
+                                    var label = popover.labels[i]
+
+                                    if (label.name === modelData.name)
+                                        return true
+                                }
+
+                                return false
+                            }
+
+                            onClicked: {
+                                for (var i = 0; i < popover.labels.length; i++) {
+                                    var label = popover.labels[i]
+
+                                    if (label.name === modelData.name) {
+                                        popover.labels.splice(i, 1)
+                                        return
+                                    }
+                                }
+
+                                popover.labels.push(modelData)
+                            }
+
+                            style: SuruCheckBoxStyle {}
+                        }
+                    }
+                }
             }
         }
     }

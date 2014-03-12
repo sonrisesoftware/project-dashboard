@@ -53,7 +53,7 @@ PluginPage {
             id: newIssueAction
             iconSource: getIcon("add")
             text: i18n.tr("New Issue")
-            onTriggered: pageStack.push(Qt.resolvedUrl("NewIssuePage.qml"), {repo: plugin.repo, action: plugin.reload})
+            onTriggered: PopupUtils.open(Qt.resolvedUrl("NewIssuePage.qml"), plugin, {repo: repo, action: reload})
         },
 
         Action {
