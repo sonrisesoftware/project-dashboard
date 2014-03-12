@@ -94,8 +94,8 @@ Service {
         return Http.post(github + "/repos/" + repo + "/pulls", ["access_token=" + oauth], callback, undefined, {"Accept":"application/vnd.github.v3+json"}, JSON.stringify({ "title": title, "body": description, "head": branch, "base": "master" }))
     }
 
-    function getPullRequests(repo, callback) {
-        return get("/repos/" + repo + "/pulls", callback)
+    function getPullRequests(repo, state, callback) {
+        return get("/repos/" + repo + "/pulls", callback, ["state=" + state])
     }
 
     function getAssignees(repo, callback) {

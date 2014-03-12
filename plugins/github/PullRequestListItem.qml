@@ -21,13 +21,13 @@ import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
 import "../../components"
 
-SubtitledListItem {
+IssueListItem {
     id: listItem
 
-    onClicked: pageStack.push(Qt.resolvedUrl("IssuePage.qml"), {issue: modelData, plugin:plugin})
+    //onClicked: pageStack.push(Qt.resolvedUrl("IssuePage.qml"), {issue: modelData, plugin:plugin})
 
-    text: i18n.tr("<b>#%1</b> - %2").arg(modelData.number).arg(modelData.title)
-    subText: i18n.tr("%1 opened this pull request %2").arg(modelData.user.login).arg(friendsUtils.createTimeString(modelData.created_at))
+    //text: i18n.tr("<b>#%1</b> - %2").arg(modelData.number).arg(modelData.title)
+    //subText: i18n.tr("%1 opened this pull request %2").arg(modelData.user.login).arg(friendsUtils.createTimeString(modelData.created_at))
 
     property string status: modelData.hasOwnProperty("status") ? modelData.status.state : ""
 

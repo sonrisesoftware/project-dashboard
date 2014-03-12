@@ -26,6 +26,8 @@ ListItem.Standard {
     //property var modelData: plugin.issues[index]
     property bool showAssignee: true
 
+    property bool isPullRequest: modelData.hasOwnProperty("head")
+
     onClicked: pageStack.push(Qt.resolvedUrl("IssuePage.qml"), {issue: modelData, plugin:plugin})
 
     height: opacity === 0 ? 0 : (__height + units.dp(2))
@@ -68,18 +70,22 @@ ListItem.Standard {
             fontSize: "small"
             //font.italic: true
             text: {
-                var text = i18n.tr("%1 opened this issue %2").arg(modelData.user.login).arg(friendsUtils.createTimeString(modelData.created_at))
-                if (modelData.labels.length > 0) {
-                    text += " | "
-                    for (var i = 0; i < modelData.labels.length; i++) {
-                        var label = modelData.labels[i]
-                        text += '<font color="#' + label.color + '">' + label.name + '</font>'
-                        if (i < modelData.labels.length - 1)
-                            text += ', '
+                if (isPullRequest) {
+                    return i18n.tr("%1 opened this pull request %2").arg(modelData.user.login).arg(friendsUtils.createTimeString(modelData.created_at))
+                } else {
+                    var text = i18n.tr("%1 opened this issue %2").arg(modelData.user.login).arg(friendsUtils.createTimeString(modelData.created_at))
+                    if (modelData.labels.length > 0) {
+                        text += " | "
+                        for (var i = 0; i < modelData.labels.length; i++) {
+                            var label = modelData.labels[i]
+                            text += '<font color="#' + label.color + '">' + label.name + '</font>'
+                            if (i < modelData.labels.length - 1)
+                                text += ', '
+                        }
                     }
-                }
 
-                return text
+                    return text
+                }
             }
             visible: text !== ""
             elide: Text.ElideRight

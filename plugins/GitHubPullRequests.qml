@@ -45,7 +45,10 @@ Plugin {
     }
 
     property var issues: doc.get("pullRequests", [])
+    property var closedIssues: doc.get("closedPullRequests", [])
     property var branches: doc.get("branches", [])
+
+    page: Component { PullRequestsPage {} }
 
     document: Document {
         id: doc
@@ -74,16 +77,22 @@ Plugin {
     onRepoChanged: reload()
 
     property var pullRequests_TEMP: undefined
+    property var pullRequests_TEMP_2: undefined
     onLoadingChanged: {
         if (loading === 0 && pullRequests_TEMP !== undefined) {
             print("SETTING TO TEMP")
             doc.set("pullRequests", pullRequests_TEMP)
         }
+
+        if (loading === 0 && pullRequests_TEMP_2 !== undefined) {
+            print("SETTING TO TEMP")
+            doc.set("closedPullRequests", pullRequests_TEMP_2)
+        }
     }
 
     function reload() {
-        loading += 2
-        github.getPullRequests(repo, function(has_error, status, response) {
+        loading += 3
+        github.getPullRequests(repo, "open", function(has_error, status, response) {
             loading--
             if (has_error) {
                 error(i18n.tr("Connection Error"), i18n.tr("Unable to download list of pull requests. Check your connection and/or firewall settings.\n\nError: %1").arg(status))
@@ -105,6 +114,35 @@ Plugin {
                         print(issue.status.state)
 
                         pullRequests_TEMP = issues
+
+                        loading--
+                    })
+                }
+            }
+        })
+
+        github.getPullRequests(repo, "closed", function(has_error, status, response) {
+            loading--
+            if (has_error) {
+                error(i18n.tr("Connection Error"), i18n.tr("Unable to download list of pull requests. Check your connection and/or firewall settings.\n\nError: %1").arg(status))
+            } else {
+                //print("GitHub Results:", response)
+                var issues = JSON.parse(response)
+                pullRequests_TEMP_2 = issues
+
+                for (var i = 0; i < issues.length; i++) {
+                    var issue = issues[i]
+                    loading++
+                    github.get(issue._links.statuses.href, function(has_error, status, response) {
+                        print(response)
+                        if (JSON.parse(response)[0] === undefined) {
+                            issue.status = {"state": ""}
+                        } else {
+                            issue.status = JSON.parse(response)[0]
+                        }
+                        print(issue.status.state)
+
+                        pullRequests_TEMP_2 = issues
 
                         loading--
                     })
