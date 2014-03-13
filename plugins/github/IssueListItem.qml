@@ -23,17 +23,21 @@ import Ubuntu.Components.ListItems 0.1 as ListItem
 ListItem.Standard {
     id: listItem
 
-    //property var modelData: plugin.issues[index]
+    property alias number: issue.number
     property bool showAssignee: true
 
     property bool isPullRequest: modelData.hasOwnProperty("head")
 
-    onClicked: pageStack.push(Qt.resolvedUrl("IssuePage.qml"), {issue: modelData, plugin:plugin})
+    onClicked: pageStack.push(Qt.resolvedUrl("IssuePage.qml"), {number: issue.number, plugin:plugin})
 
     height: opacity === 0 ? 0 : (__height + units.dp(2))
 
     Behavior on height {
         UbuntuNumberAnimation {}
+    }
+
+    Issue {
+        id: issue
     }
 
     Column {
@@ -54,9 +58,9 @@ ListItem.Standard {
 
             width: parent.width
             elide: Text.ElideRight
-            text: i18n.tr("<b>#%1</b> - %2").arg(modelData.number).arg(modelData.title)
+            text: i18n.tr("<b>#%1</b> - %2").arg(issue.number).arg(issue.title)
 
-            font.strikeout: modelData.state === "closed"
+            font.strikeout: !issue.open
         }
 
         Label {
@@ -70,16 +74,16 @@ ListItem.Standard {
             fontSize: "small"
             //font.italic: true
             text: {
-                if (isPullRequest) {
-                    return i18n.tr("%1 opened this pull request %2").arg(modelData.user.login).arg(friendsUtils.createTimeString(modelData.created_at))
+                if (issue.isPullRequest) {
+                    return i18n.tr("%1 opened this pull request %2").arg(issue.user.login).arg(friendsUtils.createTimeString(issue.created_at))
                 } else {
-                    var text = i18n.tr("%1 opened this issue %2").arg(modelData.user.login).arg(friendsUtils.createTimeString(modelData.created_at))
-                    if (modelData.labels.length > 0) {
+                    var text = i18n.tr("%1 opened this issue %2").arg(issue.user.login).arg(friendsUtils.createTimeString(issue.created_at))
+                    if (issue.labels.length > 0) {
                         text += " | "
-                        for (var i = 0; i < modelData.labels.length; i++) {
-                            var label = modelData.labels[i]
+                        for (var i = 0; i < issue.labels.length; i++) {
+                            var label = issue.labels[i]
                             text += '<font color="#' + label.color + '">' + label.name + '</font>'
-                            if (i < modelData.labels.length - 1)
+                            if (i < issue.labels.length - 1)
                                 text += ', '
                         }
                     }
@@ -102,7 +106,7 @@ ListItem.Standard {
 
         width: units.gu(4)
         height: width
-        visible: modelData.hasOwnProperty("assignee") && modelData.assignee != undefined && modelData.assignee.hasOwnProperty("login") && modelData.assignee !== "" && showAssignee
+        visible: issue.hasOwnProperty("assignee") && issue.assignee != undefined && issue.assignee.hasOwnProperty("login") && issue.assignee !== "" && showAssignee
 
         UbuntuShape {
             anchors.fill: parent
@@ -122,7 +126,7 @@ ListItem.Standard {
         }
     }
 
-    opacity: show ? modelData.state === "open" ? 1 : 0.5 : 0
+    opacity: show ? issue.open ? 1 : 0.5 : 0
 
     Behavior on opacity {
         UbuntuNumberAnimation {}

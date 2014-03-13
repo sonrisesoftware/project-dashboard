@@ -27,7 +27,7 @@ Service {
     id: root
 
     name: "github"
-    type: ["GitHubIssues", "GitHubPullRequests", "GitHub"]
+    type: ["GitHubIssues"]//, "GitHubPullRequests", "GitHub"]
     title: i18n.tr("GitHub")
     authenticationStatus: oauth === "" ? "" : i18n.tr("Logged in as %1").arg(user)
     disabledMessage: i18n.tr("To connect to a GitHub project, please authenticate to GitHub from Settings")
@@ -47,7 +47,7 @@ Service {
     }
 
     function userLoaded(has_error, status, response) {
-        print("User:", response)
+        //print("User:", response)
         var json = JSON.parse(response)
 
         if (has_error && json.hasOwnProperty("message") && json.message === "Bad credentials") {
@@ -139,7 +139,7 @@ Service {
     }
 
     function connect(project) {
-        print("Connecting...")
+        //print("Connecting...")
         PopupUtils.open(githubDialog, mainView.pageStack.currentPage, {project: project})
     }
 

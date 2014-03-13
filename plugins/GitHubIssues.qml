@@ -30,27 +30,21 @@ Plugin {
 
     title: "Issues"
     iconSource: "bug"
-    unread: issues.length > 0
+    unread: openIssues.length > 0
     canReload: true
 
     page: Component { IssuesPage {} }
-
-    ListItem.Header {
-        text: "Recent Issues"
-        visible: issues.length > 0
-    }
 
     action: Action {
         text: i18n.tr("New Issue")
         onTriggered: PopupUtils.open(Qt.resolvedUrl("github/NewIssuePage.qml"), plugin, {repo: repo, action: reload})
     }
 
-    property var milestones: doc.get("milestones", [])
-    property var issues: doc.get("issues", [])
-    property var closedIssues: doc.get("closedIssues", [])
     property var info: doc.get("repo", {})
+    property var milestones: doc.get("milestones", [])
     property var availableAssignees: doc.get("assignees", [])
     property var availableLabels: doc.get("labels", [])
+    property var openIssues: issues.filteredChildren(function(doc) { return doc.info.state === "open" }).sort(function(a, b) { return Number(b) - Number(a) })
 
     document: Document {
         id: doc
@@ -58,21 +52,35 @@ Plugin {
         parent: project.document
     }
 
+    property alias issues: issues
+
+    Document {
+        id: issues
+
+        docId: "issues"
+        parent: doc
+    }
+
+    ListItem.Header {
+        text: "Recent Issues"
+        visible: openIssues.length > 0
+    }
+
     Repeater {
-        model: Math.min(issues.length, 4)
+        model: Math.min(openIssues.length, 4)
         delegate: IssueListItem {
-            property var modelData: issues[index]
+            number: Number(openIssues[index])
         }
     }
 
     ListItem.Standard {
         enabled: false
-        visible: !issues || !issues.hasOwnProperty("length") || issues.length === 0
+        visible: openIssues.length === 0
         text: i18n.tr("No open issues")
     }
 
     viewAllMessage: i18n.tr("View all issues")
-    summary: i18n.tr("<b>%1</b> open issues").arg(issues.length)
+    summary: i18n.tr("<b>%1</b> open issues").arg(openIssues.length)
 
     property string repo:  project.serviceValue("github")
     property bool hasPushAccess: info.hasOwnProperty("permissions") ? info.permissions.push : false
@@ -85,30 +93,39 @@ Plugin {
             loading--
             if (has_error)
                 error(i18n.tr("Connection Error"), i18n.tr("Unable to download list of issues. Check your connection and/or firewall settings.\n\nError: %1").arg(status))
-            //print("GitHub Results:", response)
             var json = JSON.parse(response)
-            var list = []
+
             for (var i = 0; i < json.length; i++) {
                 var item = json[i]
-                if (!item.hasOwnProperty("pull_request"))
-                    list.push(item)
-            }
+                if (item.hasOwnProperty("pull_request"))
+                    continue
 
-            doc.set("issues", list)
+                if (issues.hasChild(String(item.number))) {
+                    var issue = issues.getChild(String(item.number))
+                    issue.set("info", item)
+                } else {
+                    print("ISSUE DOES NOT EXIST:", item.number)
+                    issues.newDoc(String(item.number), {"info": item})
+                }
+            }
         })
 
         github.getIssues(repo, "closed", function(has_error, status, response) {
             loading--
-           // print("GitHub Results:", response)
             var json = JSON.parse(response)
-            var list = []
+
             for (var i = 0; i < json.length; i++) {
                 var item = json[i]
-                if (!item.hasOwnProperty("pull_request"))
-                    list.push(item)
-            }
+                if (item.hasOwnProperty("pull_request"))
+                    continue
 
-            doc.set("closedIssues", list)
+                if (issues.hasChild(item.number)) {
+                    var issue = issues.getChild(item.number)
+                    issue.set("info", item)
+                } else {
+                    issues.newDoc(item.number, {"info": item})
+                }
+            }
         })
     }
 }

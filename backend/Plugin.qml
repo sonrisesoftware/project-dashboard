@@ -54,7 +54,7 @@ UbuntuShape {
     Connections {
         target: project
         onReload: {
-            print("Reloading" + plugin.title)
+            //print("Reloading" + plugin.title)
             plugin.reload()
         }
     }

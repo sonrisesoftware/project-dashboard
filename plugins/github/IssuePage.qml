@@ -22,109 +22,39 @@ import Ubuntu.Components.ListItems 0.1 as ListItem
 import "../../ubuntu-ui-extras"
 import "../../components"
 import "../../backend/utils.js" as Utils
+import "../../backend/"
 
 Page {
     id: page
     
     title: i18n.tr("%2 %1").arg(issue.number).arg(typeTitle)
 
-    property string type: isPullRequest ? "pull request" : "issue"
-    property bool isPullRequest: issue.hasOwnProperty("head")
-    property string typeCap: isPullRequest ? "Pull request" : "Issue"
-    property string typeTitle: isPullRequest ? "Pull Request" : "Issue"
-    property bool merged: isPullRequest ? issue.merged : false
-    property bool mergeable: isPullRequest ? issue.mergeable : false
+    property string type: issue.isPullRequest ? "pull request" : "issue"
+    property string typeCap: issue.isPullRequest ? "Pull request" : "Issue"
+    property string typeTitle: issue.isPullRequest ? "Pull Request" : "Issue"
 
-    property var issue
+    property alias number: issue.number
+    property Plugin plugin
     property var request
-    property var plugin
-    property var events: issue.saved ? issue.saved.events : []
-    property var comments: issue.saved ? issue.saved.comments : []
-    property var commits: issue.saved ? issue.saved.commits : []
-    property int loadingEvents: 0
-    property var allEvents: {
-        var commitEvents = []
-        for (var i = 0; i < commits.length; i++) {
-            print("Adding a new commit event:", JSON.stringify(commits[i].author))
-            commitEvents.push({
-                "event": "commit",
-                "commits": [commits[i]],
-                "actor": commits[i].author,
-                "created_at": commits[i].commit.committer.date
-            })
+
+    Issue {
+        id: issue
+
+        Component.onCompleted: load()
+
+        onBusy: {
+            busyDialog.title = title
+            busyDialog.text = message
+            page.request = request
+
+            busyDialog.show()
         }
 
-        print("Commit Events:", JSON.stringify(commitEvents))
-
-        var allEvents = comments.concat(events).concat(commitEvents)
-        allEvents.sort(function(a, b) {
-            return new Date(a.created_at) - new Date(b.created_at)
-        })
-
-        var index = 0;
-        while (index < allEvents.length) {
-            var event = allEvents[index]
-
-            if (event.event === "commit") {
-                index++
-                var login = event.actor.login
-                while(index < allEvents.length && allEvents[index].event === "commit" && allEvents[index].actor.login === login) {
-                    var nextEvent = allEvents[index]
-                    print("Merging another commit: ", nextEvent.actor.login)
-                    event.commits = event.commits.concat(nextEvent.commits)
-                    allEvents.splice(index, 1)
-                }
-
-                index--
-            }
-
-            index++
+        onComplete: {
+            busyDialog.hide()
         }
 
-        print(JSON.stringify(allEvents))
-        return allEvents
-    }
-
-    Component.onCompleted: {
-        loadingEvents += 2
-
-        if (!issue.saved)
-            issue.saved = {}
-
-        if (isPullRequest) {
-            loadingEvents += 1
-            github.getPullRequest(plugin.repo, issue.number, function(has_error, status, response) {
-                loadingEvents--
-                issue = Utils.mergeObject(issue, JSON.parse(response))
-                plugin.save()
-                print("MERGEABLE", issue.mergeable)
-            })
-        }
-
-        github.getIssueComments(plugin.repo, issue, function(has_error, status, response) {
-            loadingEvents--
-            issue.saved.comments = JSON.parse(response)
-            issue = issue
-            plugin.save()
-        })
-
-        github.getIssueEvents(plugin.repo, issue, function(has_error, status, response) {
-            loadingEvents--
-            issue.saved.events = JSON.parse(response)
-            issue = issue
-            plugin.save()
-        })
-
-        if (isPullRequest) {
-            loadingEvents++
-            github.getPullCommits(plugin.repo, issue, function(has_error, status, response) {
-                loadingEvents--
-                print("COMMITS", response)
-                issue.saved.commits = JSON.parse(response)
-                issue = issue
-                plugin.save()
-            })
-        }
+        //onError: error(title, message)
     }
 
     actions: [
@@ -132,61 +62,28 @@ Page {
             id: editAction
             text: i18n.tr("Edit")
             iconSource: getIcon("edit")
+            enabled: false
         },
 
         Action {
             id: mergeAction
             text: i18n.tr("Merge")
             iconSource: getIcon("code-fork")
-            enabled: isPullRequest && !merged && mergeable
+            enabled: issue.isPullRequest && !issue.merged && issue.mergeable
         },
 
         Action {
             id: closeAction
-            text: issue.state === "open" ? i18n.tr("Close") : i18n.tr("Reopen")
-            iconSource: issue.state === "open" ? getIcon("close") : getIcon("reset")
-            enabled: !merged
+            text: issue.open ? i18n.tr("Close") : i18n.tr("Reopen")
+            iconSource: issue.open ? getIcon("close") : getIcon("reset")
+            enabled: !issue.merged
             onTriggered: {
                 closeOrReopen()
             }
         }
     ]
 
-    function closeOrReopen() {
-        if (issue.state === "open") {
-            busyDialog.title = i18n.tr("Closing %1").arg(typeCap)
-            busyDialog.text = i18n.tr("Closing %2 <b>#%1</b>").arg(issue.number).arg(type)
 
-            busyDialog.show()
-
-            request = github.editIssue(plugin.repo, issue.number, {"state": "closed"}, function(response) {
-                busyDialog.hide()
-                if (response === -1) {
-                    error(i18n.tr("Connection Error"), i18n.tr("Unable to close %1. Check your connection and/or firewall settings.").arg(type))
-                } else {
-                    issue.state = "closed"
-                    issue = issue
-                    plugin.reload()
-                }
-            })
-        } else {
-            busyDialog.title = i18n.tr("Reopening %1").arg(typeCap)
-            busyDialog.text = i18n.tr("Reopening %2 <b>#%1</b>").arg(issue.number).arg(type)
-
-            busyDialog.show()
-
-            request = github.editIssue(plugin.repo, issue.number, {"state": "open"}, function(response) {
-                busyDialog.hide()
-                if (response === -1) {
-                    error(i18n.tr("Connection Error"), i18n.tr("Unable to reopen %1. Check your connection and/or firewall settings.").arg(type))
-                } else {
-                    issue.state = "open"
-                    issue = issue
-                    plugin.reload()
-                }
-            })
-        }
-    }
 
     flickable: sidebar.expanded ? null : mainFlickable
 
@@ -225,18 +122,18 @@ Page {
                 UbuntuShape {
                     height: stateLabel.height + units.gu(1)
                     width: stateLabel.width + units.gu(2)
-                    color: merged ? colors["blue"] : issue.state === "open" ? colors["green"] : colors["red"]
+                    color: issue.merged ? colors["blue"] : issue.open ? colors["green"] : colors["red"]
                     anchors.verticalCenter: parent.verticalCenter
 
                     Label {
                         id: stateLabel
                         anchors.centerIn: parent
-                        text: merged ? i18n.tr("Merged") : issue.state === "open" ? i18n.tr("Open") : i18n.tr("Closed")
+                        text: issue.merged ? i18n.tr("Merged") : issue.open ? i18n.tr("Open") : i18n.tr("Closed")
                     }
                 }
 
                 Label {
-                    text: isPullRequest ? merged ? i18n.tr("<b>%1</b> merged %2 commits").arg(issue.user.login).arg(commits.length)
+                    text: issue.isPullRequest ? issue.merged ? i18n.tr("<b>%1</b> merged %2 commits").arg(issue.user.login).arg(commits.length)
                                                  : i18n.tr("<b>%1</b> wants to merge %2 commits").arg(issue.user.login).arg(commits.length)
                                         : i18n.tr("<b>%1</b> opened this issue %2").arg(issue.user.login).arg(friendsUtils.createTimeString(issue.created_at))
                     anchors.verticalCenter: parent.verticalCenter
@@ -271,7 +168,7 @@ Page {
                 spacing: parent.spacing
 
                 Repeater {
-                    model: allEvents
+                    model: issue.allEvents
                     delegate: EventItem {
                         id: eventItem
                         event: modelData
@@ -303,12 +200,23 @@ Page {
                 height: childrenRect.height
 
                 ActivityIndicator {
+                    id: eventLoadingIndicator
                     anchors {
                         left: parent.left
                         verticalCenter: parent.verticalCenter
                     }
-                    visible: loadingEvents > 0
+                    visible: issue.loading > 0
                     running: visible
+                }
+
+                Label {
+                    text: "Loading events..."
+                    anchors {
+                        left: eventLoadingIndicator.right
+                        leftMargin: units.gu(1)
+                        verticalCenter: parent.verticalCenter
+                    }
+                    visible: eventLoadingIndicator.visible
                 }
 
                 Row {
@@ -372,24 +280,10 @@ Page {
                         enabled: commentBox.text !== "" || !commentBox.show
                         onClicked: {
                             if (commentBox.show) {
-                                busyDialog.title = i18n.tr("Creating Comment")
-                                busyDialog.text = i18n.tr("Creating a new comment for issue <b>%1</b>").arg(issue.number)
-                                busyDialog.show()
+                                issue.comment(commentBox.text)
 
-                                var text = commentBox.text
-
-                                request = github.newIssueComment(plugin.repo, issue, commentBox.text, function(response) {
-                                    busyDialog.hide()
-                                    if (response === -1) {
-                                        error(i18n.tr("Connection Error"), i18n.tr("Unable to create comment. Check your connection and/or firewall settings."))
-                                    } else {
-                                        comments.push({body: text, user: {login: github.user}, date: new Date().toISOString()})
-                                        comments = comments
-
-                                        commentBox.text = ""
-                                        commentBox.show = false
-                                    }
-                                })
+                                commentBox.text = ""
+                                commentBox.show = false
                             } else {
                                 commentBox.show = true
                                 commentBox.forceActiveFocus()
@@ -404,7 +298,7 @@ Page {
     Sidebar {
         id: sidebar
         mode: "right"
-        expanded: wideAspect && !isPullRequest
+        expanded: wideAspect && !issue.isPullRequest
 
         Column {
             width: parent.width
@@ -438,34 +332,11 @@ Page {
                 }
 
                 onSelectedIndexChanged: {
-                    var number = undefined
-                    if (selectedIndex < model.length - 1) {
-                        number = model[selectedIndex].number
+                    var milestone = undefined
+                    if (selectedIndex < model.length - 1)
+                        milestone = model[selectedIndex]
 
-                        busyDialog.text = i18n.tr("Setting milestone to <b>%1</b>").arg(model[selectedIndex].title)
-                    } else {
-                        busyDialog.text = i18n.tr("Removing milestone from the %1").arg(type)
-                    }
-
-                    if (issue.milestone && issue.milestone.hasOwnProperty("number") && issue.milestone.number === number)
-                        return
-
-                    if (!(issue.milestone && issue.milestone.hasOwnProperty("number")) && number === undefined)
-                        return
-
-                    busyDialog.title = i18n.tr("Changing Milestone")
-                    busyDialog.show()
-
-                    request = github.editIssue(plugin.repo, issue.number, {"milestone": number}, function(response) {
-                        busyDialog.hide()
-                        if (response === -1) {
-                            error(i18n.tr("Connection Error"), i18n.tr("Unable to change milestone. Check your connection and/or firewall settings."))
-                        } else {
-                            issue.milestone = {"number": number}
-                            issue = issue
-                            plugin.reload()
-                        }
-                    })
+                    issue.setMilestone(milestone)
                 }
             }
 
@@ -596,7 +467,7 @@ Page {
         onLockedChanged: opened = locked
 
         ToolbarButton { action: editAction }
-        ToolbarButton { action: mergeAction; visible: isPullRequest }
+        ToolbarButton { action: mergeAction; visible: issue.isPullRequest }
         ToolbarButton { action: closeAction }
     }
 
@@ -619,28 +490,6 @@ Page {
                 busyDialog.hide()
             }
         }
-    }
-
-    function updateLabels(labels) {
-        var labelNames = []
-        for (var i = 0; i < labels.length; i++) {
-            labelNames.push(labels[i].name)
-        }
-
-        busyDialog.title = i18n.tr("Changing Labels")
-        busyDialog.text = i18n.tr("Changes the labels for the issue")
-        busyDialog.show()
-
-        request = github.editIssue(plugin.repo, issue.number, {"labels": labelNames}, function(response) {
-            busyDialog.hide()
-            if (response === -1) {
-                error(i18n.tr("Connection Error"), i18n.tr("Unable to change the labels. Check your connection and/or firewall settings."))
-            } else {
-                issue.labels = labels
-                issue = issue
-                plugin.reload()
-            }
-        })
     }
 
     Component {

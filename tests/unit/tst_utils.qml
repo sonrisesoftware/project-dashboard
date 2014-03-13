@@ -13,7 +13,7 @@ Item {
     id: root
 
     TestCase {
-        name: "Project"
+        name: "Utilities"
 
         function init() {
             console.debug(">> init");

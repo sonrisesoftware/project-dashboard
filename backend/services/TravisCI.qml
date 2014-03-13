@@ -48,7 +48,7 @@ Service {
     }
 
     function userLoaded(response) {
-        print("User:", response)
+        //print("User:", response)
         var json = JSON.parse(response)
 
         if (json.hasOwnProperty("message") && json.message === "Bad credentials") {
@@ -82,7 +82,7 @@ Service {
     }
 
     function connect(project) {
-        print("Connecting...")
+        //print("Connecting...")
         PopupUtils.open(travisDialog, mainView.pageStack.currentPage, {project: project})
     }
 

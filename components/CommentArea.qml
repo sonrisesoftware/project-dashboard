@@ -57,6 +57,17 @@ UbuntuShape {
                 leftMargin: units.gu(1)
             }
         }
+
+        Label {
+            text: i18n.tr("Owner")
+            visible: plugin.info.owner.login === author
+            font.italic: true
+            anchors {
+                verticalCenter: parent.verticalCenter
+                right: parent.right
+                rightMargin: units.gu(1)
+            }
+        }
     }
 
     ListItem.ThinDivider {

@@ -50,7 +50,7 @@ Plugin {
         var docId = String(nextDocId)
         doc.set("nextDocId", nextDocId + 1)
         doc.newDoc(docId, {"title": title, "dueDate": ""})
-        print(JSON.stringify(doc.save()))
+        //print(JSON.stringify(doc.save()))
         return docId
     }
 

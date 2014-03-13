@@ -48,6 +48,7 @@ Plugin {
     property var issues: doc.get("pullRequests", [])
     property var closedIssues: doc.get("closedPullRequests", [])
     property var branches: doc.get("branches", [])
+    property var info: doc.get("repo", {})
 
     page: Component { PullRequestsPage {} }
 
@@ -106,13 +107,13 @@ Plugin {
                     var issue = issues[i]
                     loading++
                     github.get(issue._links.statuses.href, function(has_error, status, response) {
-                        print(response)
+                        //print(response)
                         if (JSON.parse(response)[0] === undefined) {
                             issue.status = {"state": ""}
                         } else {
                             issue.status = JSON.parse(response)[0]
                         }
-                        print(issue.status.state)
+                        //print(issue.status.state)
 
                         loading--
                     })
@@ -135,13 +136,13 @@ Plugin {
                     var issue = issues[i]
                     loading++
                     github.get(issue._links.statuses.href, function(has_error, status, response) {
-                        print(response)
+                        //print(response)
                         if (JSON.parse(response)[0] === undefined) {
                             issue.status = {"state": ""}
                         } else {
                             issue.status = JSON.parse(response)[0]
                         }
-                        print(issue.status.state)
+                        //print(issue.status.state)
 
                         loading--
                     })
@@ -162,6 +163,6 @@ Plugin {
 
     function save() {
         doc.set("pullRequests", issues)
-        doc.set("closedullRequests", closedIssues)
+        doc.set("closedPullRequests", closedIssues)
     }
 }
