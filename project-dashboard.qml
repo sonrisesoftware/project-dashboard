@@ -117,35 +117,6 @@ MainView {
         id: travisCI
     }
 
-    /**
-     * Track install and usage count metrics
-     *
-     * TODO: Remove after the App Store supports this
-     */
-    GoogleAnalytics {
-        id: analytics
-        trackingID: "UA-48604214-3"
-        appName: "Project Dashboard"
-        appVersion: "0.1"
-        clientID: settings.getOrInit("clientId", generateID())
-    }
-
-    property bool activeState: Qt.application.active
-
-    onActiveStateChanged: {
-        if (activeState)
-            analytics.eventTriggered("App active")
-    }
-
-    Component.onCompleted: {
-        if (settings.get("existing", false)) {
-            analytics.eventTriggered("New installation")
-            settings.set("existing", true)
-        }
-
-        analytics.eventTriggered("App launched")
-    }
-
     function getIcon(name) {
         var mainView = "icons/"
         var ext = ".png"
