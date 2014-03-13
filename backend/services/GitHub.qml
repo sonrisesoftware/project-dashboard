@@ -98,6 +98,10 @@ Service {
         return get("/repos/" + repo + "/pulls", callback, ["state=" + state])
     }
 
+    function getPullRequest(repo, number, callback) {
+        return get("/repos/" + repo + "/pulls/" + number, callback)
+    }
+
     function getAssignees(repo, callback) {
         return get("/repos/" + repo + "/assignees", callback)
     }

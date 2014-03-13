@@ -31,6 +31,8 @@ Page {
     property bool isPullRequest: issue.hasOwnProperty("head")
     property string typeCap: isPullRequest ? "Pull request" : "Issue"
     property string typeTitle: isPullRequest ? "Pull Request" : "Issue"
+    property bool merged: isPullRequest ? issue.merged : false
+    property bool mergeable: isPullRequest ? issue.mergeable : false
 
     property var issue
     property var request
@@ -61,6 +63,7 @@ Page {
         var index = 0;
         while (index < allEvents.length) {
             var event = allEvents[index]
+
             if (event.event === "commit") {
                 index++
                 var login = event.actor.login
@@ -83,6 +86,16 @@ Page {
 
     Component.onCompleted: {
         loadingEvents += 2
+
+        if (isPullRequest) {
+            loadingEvents += 1
+            github.getPullRequest(plugin.repo, issue.number, function(has_error, status, response) {
+                loadingEvents--
+                issue = JSON.parse(response)
+                print("MERGEABLE", issue.mergeable)
+            })
+        }
+
         github.getIssueComments(plugin.repo, issue, function(has_error, status, response) {
             loadingEvents--
             comments = JSON.parse(response)
@@ -111,9 +124,17 @@ Page {
         },
 
         Action {
+            id: mergeAction
+            text: i18n.tr("Merge")
+            iconSource: getIcon("code-fork")
+            enabled: isPullRequest && !merged && mergeable
+        },
+
+        Action {
             id: closeAction
             text: issue.state === "open" ? i18n.tr("Close") : i18n.tr("Reopen")
             iconSource: issue.state === "open" ? getIcon("close") : getIcon("reset")
+            enabled: !merged
             onTriggered: {
                 closeOrReopen()
             }
@@ -193,18 +214,19 @@ Page {
                 UbuntuShape {
                     height: stateLabel.height + units.gu(1)
                     width: stateLabel.width + units.gu(2)
-                    color: issue.state === "open" ? colors["green"] : colors["red"]
+                    color: merged ? colors["blue"] : issue.state === "open" ? colors["green"] : colors["red"]
                     anchors.verticalCenter: parent.verticalCenter
 
                     Label {
                         id: stateLabel
                         anchors.centerIn: parent
-                        text: issue.state === "open" ? i18n.tr("Open") : i18n.tr("Closed")
+                        text: merged ? i18n.tr("Merged") : issue.state === "open" ? i18n.tr("Open") : i18n.tr("Closed")
                     }
                 }
 
                 Label {
-                    text: isPullRequest ? i18n.tr("<b>%1</b> wants to merge %2 commits").arg(issue.user.login).arg(commits.length)
+                    text: isPullRequest ? merged ? i18n.tr("<b>%1</b> merged %2 commits").arg(issue.user.login).arg(commits.length)
+                                                 : i18n.tr("<b>%1</b> wants to merge %2 commits").arg(issue.user.login).arg(commits.length)
                                         : i18n.tr("<b>%1</b> opened this issue %2").arg(issue.user.login).arg(friendsUtils.createTimeString(issue.created_at))
                     anchors.verticalCenter: parent.verticalCenter
                 }
@@ -376,12 +398,6 @@ Page {
         Column {
             width: parent.width
 
-            ListItem.Standard {
-                enabled: false
-                text: i18n.tr("None yet")
-                visible: issue.labels.length === 0
-            }
-
             ListItem.Header {
                 text: i18n.tr("Milestone")
             }
@@ -417,7 +433,7 @@ Page {
 
                         busyDialog.text = i18n.tr("Setting milestone to <b>%1</b>").arg(model[selectedIndex].title)
                     } else {
-                        busyDialog.text = i18n.tr("Removing milestone from the issue")
+                        busyDialog.text = i18n.tr("Removing milestone from the %1").arg(type)
                     }
 
                     if (issue.milestone && issue.milestone.hasOwnProperty("number") && issue.milestone.number === number)
@@ -460,6 +476,8 @@ Page {
                             if (model[i].login === issue.assignee.login)
                                 return i
                         }
+
+                        return model.length - 1
                     } else {
                         return model.length - 1
                     }
@@ -476,7 +494,7 @@ Page {
 
                         busyDialog.text = i18n.tr("Setting assignee to <b>%1</b>").arg(model[selectedIndex].login)
                     } else {
-                        busyDialog.text = i18n.tr("Removing assignee from the %1").arg(issue)
+                        busyDialog.text = i18n.tr("Removing assignee from the %1").arg(type)
                     }
 
                     if (issue.assignee && issue.assignee.hasOwnProperty("login") && issue.assignee.login === login)
@@ -567,6 +585,7 @@ Page {
         onLockedChanged: opened = locked
 
         ToolbarButton { action: editAction }
+        ToolbarButton { action: mergeAction; visible: isPullRequest }
         ToolbarButton { action: closeAction }
     }
 
