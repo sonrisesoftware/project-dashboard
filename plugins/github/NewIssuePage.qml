@@ -46,7 +46,7 @@ ComposerSheet {
             if (has_error) {
                 error(i18n.tr("Connection Error"), i18n.tr("Unable to create issue. Check your connection and/or firewall settings.\n\nError: %1").arg(status))
             } else {
-                pageStack.pop()
+                PopupUtils.close(sheet)
                 dialog.action()
             }
         })
@@ -111,6 +111,8 @@ ComposerSheet {
 //    }
 
     property var request
+
+    property alias busyDialog: busyDialog
 
     Dialog {
         id: busyDialog

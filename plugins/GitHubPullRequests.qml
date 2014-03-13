@@ -20,6 +20,7 @@ import Ubuntu.Components 0.1
 import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
 import "../backend"
+import "../backend/utils.js" as Utils
 import "../components"
 import "../backend/services"
 import "../ubuntu-ui-extras"
@@ -76,19 +77,19 @@ Plugin {
 
     onRepoChanged: reload()
 
-    property var pullRequests_TEMP: undefined
-    property var pullRequests_TEMP_2: undefined
-    onLoadingChanged: {
-        if (loading === 0 && pullRequests_TEMP !== undefined) {
-            print("SETTING TO TEMP")
-            doc.set("pullRequests", pullRequests_TEMP)
-        }
+//    property var pullRequests_TEMP: undefined
+//    property var pullRequests_TEMP_2: undefined
+//    onLoadingChanged: {
+//        if (loading === 0 && pullRequests_TEMP !== undefined) {
+//            print("SETTING TO TEMP")
+//            doc.set("pullRequests", pullRequests_TEMP)
+//        }
 
-        if (loading === 0 && pullRequests_TEMP_2 !== undefined) {
-            print("SETTING TO TEMP")
-            doc.set("closedPullRequests", pullRequests_TEMP_2)
-        }
-    }
+//        if (loading === 0 && pullRequests_TEMP_2 !== undefined) {
+//            print("SETTING TO TEMP")
+//            doc.set("closedPullRequests", pullRequests_TEMP_2)
+//        }
+//    }
 
     function reload() {
         loading += 3
@@ -99,7 +100,7 @@ Plugin {
             } else {
                 //print("GitHub Results:", response)
                 var issues = JSON.parse(response)
-                pullRequests_TEMP = issues
+                doc.set("pullRequests", Utils.mergeLists(plugin.issues, issues, "number", true))
 
                 for (var i = 0; i < issues.length; i++) {
                     var issue = issues[i]
@@ -113,11 +114,11 @@ Plugin {
                         }
                         print(issue.status.state)
 
-                        pullRequests_TEMP = issues
-
                         loading--
                     })
                 }
+
+                doc.set("pullRequests", Utils.mergeLists(plugin.issues, issues, "number", true))
             }
         })
 
@@ -128,7 +129,7 @@ Plugin {
             } else {
                 //print("GitHub Results:", response)
                 var issues = JSON.parse(response)
-                pullRequests_TEMP_2 = issues
+                doc.set("closedPullRequests", Utils.mergeLists(plugin.issues, issues, "number", true))
 
                 for (var i = 0; i < issues.length; i++) {
                     var issue = issues[i]
@@ -142,11 +143,11 @@ Plugin {
                         }
                         print(issue.status.state)
 
-                        pullRequests_TEMP_2 = issues
-
                         loading--
                     })
                 }
+
+                doc.set("closedPullRequests", Utils.mergeLists(plugin.issues, issues, "number", true))
             }
         })
 
@@ -157,5 +158,10 @@ Plugin {
 
             doc.set("branches", json)
         })
+    }
+
+    function save() {
+        doc.set("pullRequests", issues)
+        doc.set("closedullRequests", closedIssues)
     }
 }

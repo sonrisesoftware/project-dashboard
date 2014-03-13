@@ -21,6 +21,7 @@ import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
 import "../../ubuntu-ui-extras"
 import "../../components"
+import "../../backend/utils.js" as Utils
 
 Page {
     id: page
@@ -37,9 +38,9 @@ Page {
     property var issue
     property var request
     property var plugin
-    property var events: []
-    property var comments: []
-    property var commits: []
+    property var events: issue.saved ? issue.saved.events : []
+    property var comments: issue.saved ? issue.saved.comments : []
+    property var commits: issue.saved ? issue.saved.commits : []
     property int loadingEvents: 0
     property var allEvents: {
         var commitEvents = []
@@ -87,23 +88,31 @@ Page {
     Component.onCompleted: {
         loadingEvents += 2
 
+        if (!issue.saved)
+            issue.saved = {}
+
         if (isPullRequest) {
             loadingEvents += 1
             github.getPullRequest(plugin.repo, issue.number, function(has_error, status, response) {
                 loadingEvents--
-                issue = JSON.parse(response)
+                issue = Utils.mergeObject(issue, JSON.parse(response))
+                plugin.save()
                 print("MERGEABLE", issue.mergeable)
             })
         }
 
         github.getIssueComments(plugin.repo, issue, function(has_error, status, response) {
             loadingEvents--
-            comments = JSON.parse(response)
+            issue.saved.comments = JSON.parse(response)
+            issue = issue
+            plugin.save()
         })
 
         github.getIssueEvents(plugin.repo, issue, function(has_error, status, response) {
             loadingEvents--
-            events = JSON.parse(response)
+            issue.saved.events = JSON.parse(response)
+            issue = issue
+            plugin.save()
         })
 
         if (isPullRequest) {
@@ -111,7 +120,9 @@ Page {
             github.getPullCommits(plugin.repo, issue, function(has_error, status, response) {
                 loadingEvents--
                 print("COMMITS", response)
-                commits = JSON.parse(response)
+                issue.saved.commits = JSON.parse(response)
+                issue = issue
+                plugin.save()
             })
         }
     }
