@@ -22,7 +22,7 @@ Project {
         filter: "*.html"
     }
     Files {
-        filter: "Makefile"
+        filter: "Makefile;README.md;*json"
     }
     Files {
         directory: "html"

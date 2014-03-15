@@ -1,6 +1,6 @@
 {
     "architecture": "all",
-    "description": "description of project-dashboard",
+    "description": "Manage everything about your projects, in one convenient app",
     "framework": "ubuntu-sdk-13.10",
     "hooks": {
         "project-dashboard": {
@@ -10,6 +10,6 @@
     },
     "maintainer": "Michael Spencer <sonrisesoftware@gmail.com>",
     "name": "com.ubuntu.developer.mdspencer.project-dashboard",
-    "title": "project-dashboard",
+    "title": "Project Dashboard",
     "version": "0.1"
 }

@@ -23,6 +23,7 @@ import "../backend"
 import "../components"
 import "../backend/services"
 import "../ubuntu-ui-extras"
+import "../ubuntu-ui-extras/listutils.js" as List
 import "github"
 
 Plugin {
@@ -44,7 +45,7 @@ Plugin {
     property var milestones: doc.get("milestones", [])
     property var availableAssignees: doc.get("assignees", [])
     property var availableLabels: doc.get("labels", [])
-    property var openIssues: issues.filteredChildren(function(doc) { return doc.info.state === "open" }).sort(function(a, b) { return Number(b) - Number(a) })
+    property var openIssues: issues.children//.filteredChildren(function(doc) { print(JSON.stringify(doc.info.state/*["state"]*/)); return doc.info.state === "open" }).sort(function(a, b) { return parseInt(b) - parseInt(a) })
 
     document: Document {
         id: doc
@@ -119,11 +120,11 @@ Plugin {
                 if (item.hasOwnProperty("pull_request"))
                     continue
 
-                if (issues.hasChild(item.number)) {
-                    var issue = issues.getChild(item.number)
+                if (issues.hasChild(String(item.number))) {
+                    var issue = issues.getChild(String(item.number))
                     issue.set("info", item)
                 } else {
-                    issues.newDoc(item.number, {"info": item})
+                    issues.newDoc(String(item.number), {"info": item})
                 }
             }
         })

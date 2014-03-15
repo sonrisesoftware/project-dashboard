@@ -29,24 +29,17 @@ PluginPage {
 
     property string sort: doc.get("sort", "number")
 
-    onSortChanged: {
-        allIssues = Qt.binding(sortAllIssues)
-    }
-
-    property var allIssues: issues.concat(closedIssues)
-
-    function sortAllIssues() {
-        return issues.concat(closedIssues).sort(function sort(a1, a2) {
-            print("sorting", page.sort)
-            if (page.sort === "number") {
-                return a2.number - a1.number
-            } else if (page.sort === "assignee") {
-                return a2.assignee.login - a1.assignee.login
-            } else if (page.sort === "milestone") {
-                return a2.milestone.number - a1.milestone.number
-            }
-        })
-    }
+    property var allIssues: issues.sort(function sort(a1, a2) {
+        return Number(a2) - Number(a1)
+        print("sorting", page.sort)
+        if (page.sort === "number") {
+            return a2.number - a1.number
+        } else if (page.sort === "assignee") {
+            return a2.assignee.login - a1.assignee.login
+        } else if (page.sort === "milestone") {
+            return a2.milestone.number - a1.milestone.number
+        }
+    })
 
     actions: [
         Action {
@@ -92,8 +85,9 @@ PluginPage {
             top: parent.top
             bottom: parent.bottom
         }
-        model: allIssues
+        model: issues
         delegate: IssueListItem {
+            number: modelData
             show: selectedFilter(modelData)
         }
         clip: true

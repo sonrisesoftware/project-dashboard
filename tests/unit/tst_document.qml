@@ -57,6 +57,7 @@ Item {
             compare(document.children.length,1, "Document was not created correctly")
 
             compare(document.hasChild(docId), true, "Document doesn't show up")
+            compare(document.hasChild(21), false, "Document doesn't show up")
 
             var doc = document.getChild(docId)
             print(doc)

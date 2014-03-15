@@ -87,6 +87,16 @@ Page {
 
     flickable: sidebar.expanded ? null : mainFlickable
 
+    onFlickableChanged: {
+        if (flickable === null) {
+            mainFlickable.topMargin = 0
+            mainFlickable.contentY = 0
+        } else {
+            mainFlickable.topMargin = units.gu(9.5)
+            mainFlickable.contentY = -units.gu(9.5)
+        }
+    }
+
     Flickable {
         id: mainFlickable
         clip: true
