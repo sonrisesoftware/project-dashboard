@@ -46,15 +46,15 @@ Page {
         }
     ]
 
-    flickable: sidebar.expanded || project.enabledPlugins.length === 0 ? null : mainFlickable
+    flickable: sidebar.expanded || project.enabledPlugins.length === 0 ? null : listView
 
     onFlickableChanged: {
         if (flickable === null) {
-            mainFlickable.topMargin = 0
-            mainFlickable.contentY = 0
+            listView.topMargin = 0
+            listView.contentY = 0
         } else {
-            mainFlickable.topMargin = units.gu(9.5)
-            mainFlickable.contentY = -units.gu(9.5)
+            listView.topMargin = units.gu(9.5)
+            listView.contentY = -units.gu(9.5)
         }
     }
 
@@ -146,6 +146,23 @@ Page {
         property Plugin plugin: selectedPlugin
     }
 
+    ListView {
+        id: listView
+        anchors.fill: parent
+        visible: !sidebar.expanded
+        model: column.children
+        delegate: ListItem.SingleValue {
+            property var plugin: modelData.item
+            visible: modelData.hasOwnProperty("item")
+
+            text: plugin.title
+            value: plugin.value
+
+            progression: true
+            onClicked: displayPlugin(plugin)
+        }
+    }
+
     Flickable {
         id: mainFlickable
         anchors {
@@ -155,7 +172,7 @@ Page {
             bottom: parent.bottom
         }
         clip: wideAspect
-        visible: selectedPlugin == null
+        visible: selectedPlugin == null && sidebar.expanded
         contentHeight: contents.height
         contentWidth: width
 
@@ -202,70 +219,72 @@ Page {
 
     Sidebar {
         id: sidebar
-        expanded: false//wideAspect
+        expanded: wideAspect
         width: units.gu(8)
         color: Qt.rgba(0.2,0.2,0.2,0.8)
 
-//        Column {
-//            width: parent.width
+        Column {
+            width: parent.width
 
-//            ListItem.Standard {
-//                id: item
-//                height: width
-//                onClicked: selectedPlugin = null
-//                selected: selectedPlugin === null
+            ListItem.Standard {
+                id: item
+                height: width
+                onClicked: selectedPlugin = null
+                selected: selectedPlugin === null
 
-//                Column {
-//                    anchors.centerIn: parent
-//                    spacing: units.gu(0.5)
+                Column {
+                    anchors.centerIn: parent
+                    spacing: units.gu(0.5)
 
-//                    AwesomeIcon {
-//                        anchors.horizontalCenter: parent.horizontalCenter
-//                        name: "dashboard"
-//                        size: units.gu(3)
-//                        color: item.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
-//                    }
+                    AwesomeIcon {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        name: "dashboard"
+                        size: units.gu(3)
+                        color: item.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
+                    }
 
-//                    Label {
-//                        anchors.horizontalCenter: parent.horizontalCenter
-//                        text: i18n.tr("Pulse")
-//                        color: item.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
-//                    }
-//                }
-//            }
+                    Label {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: i18n.tr("Pulse")
+                        fontSize: "small"
+                        color: item.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
+                    }
+                }
+            }
 
-//            Repeater {
-//                model: column.children
-//                delegate: ListItem.Standard {
-//                    id: pluginSidebarItem
-//                    height: visible ? width : 0
-//                    visible: modelData.hasOwnProperty("item")
-//                    enabled: modelData.item.page
-//                    opacity: enabled ? 1 : 0.5
-//                    onClicked: selectedPlugin = modelData.item
-//                    selected: selectedPlugin === modelData.item
+            Repeater {
+                model: column.children
+                delegate: ListItem.Standard {
+                    id: pluginSidebarItem
+                    height: visible ? width : 0
+                    visible: modelData.hasOwnProperty("item")
+                    enabled: modelData.item.page
+                    opacity: enabled ? 1 : 0.5
+                    onClicked: selectedPlugin = modelData.item
+                    selected: selectedPlugin === modelData.item
 
-//                    Column {
-//                        anchors.centerIn: parent
-//                        spacing: units.gu(0.5)
+                    Column {
+                        anchors.centerIn: parent
+                        spacing: units.gu(0.5)
 
-//                        AwesomeIcon {
-//                            anchors.horizontalCenter: parent.horizontalCenter
-//                            name: modelData.item.iconSource
-//                            size: units.gu(3)
+                        AwesomeIcon {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            name: modelData.item.iconSource
+                            size: units.gu(3)
 
-//                            color: pluginSidebarItem.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
-//                        }
+                            color: pluginSidebarItem.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
+                        }
 
-//                        Label {
-//                            anchors.horizontalCenter: parent.horizontalCenter
-//                            text: modelData.item.shortTitle
-//                            color: pluginSidebarItem.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
-//                        }
-//                    }
-//                }
-//            }
-//        }
+                        Label {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            text: modelData.item.shortTitle
+                            color: pluginSidebarItem.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
+                            fontSize: "small"
+                        }
+                    }
+                }
+            }
+        }
     }
 
     Scrollbar {

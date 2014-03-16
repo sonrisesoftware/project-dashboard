@@ -37,6 +37,7 @@ UbuntuShape {
     property string viewAllMessage
     property string summary: viewAllMessage
     property string summaryValue
+    property string value: summaryValue
     property bool expanded: document.get("expanded" + title, true)
     property bool canReload: false
     function reload() {}

@@ -82,6 +82,7 @@ Plugin {
 
     viewAllMessage: i18n.tr("View all issues")
     summary: i18n.tr("<b>%1</b> open issues").arg(openIssues.length)
+    value: openIssues.length
 
     property string repo:  project.serviceValue("github")
     property bool hasPushAccess: info.hasOwnProperty("permissions") ? info.permissions.push : false
