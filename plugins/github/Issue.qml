@@ -71,7 +71,7 @@ Object {
             index++
         }
 
-        print("ALL EVENTS", allEvents.length)
+        //print("ALL EVENTS", allEvents.length)
 
         return allEvents
     }

@@ -45,7 +45,7 @@ Plugin {
     property var milestones: doc.get("milestones", [])
     property var availableAssignees: doc.get("assignees", [])
     property var availableLabels: doc.get("labels", [])
-    property var openIssues: issues.children//.filteredChildren(function(doc) { print(JSON.stringify(doc.info.state/*["state"]*/)); return doc.info.state === "open" }).sort(function(a, b) { return parseInt(b) - parseInt(a) })
+    property var openIssues: issues.filteredChildren(function(doc) { return doc.info.state === "open" }).sort(function(a, b) { return parseInt(b) - parseInt(a) })
 
     document: Document {
         id: doc

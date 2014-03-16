@@ -29,8 +29,8 @@ PluginPage {
 
     property string sort: doc.get("sort", "number")
 
-    property var allIssues: issues.sort(function sort(a1, a2) {
-        return Number(a2) - Number(a1)
+    property var allIssues: issues.children.sort(function(a, b) { return parseInt(b) - parseInt(a) })/*.sort(function sort(a1, a2) {
+        return Number(issues.childrenData[a2]["number"]) - Number(issues.childrenData[a2]["number"])
         print("sorting", page.sort)
         if (page.sort === "number") {
             return a2.number - a1.number
@@ -39,7 +39,7 @@ PluginPage {
         } else if (page.sort === "milestone") {
             return a2.milestone.number - a1.milestone.number
         }
-    })
+    })*/
 
     actions: [
         Action {
@@ -85,7 +85,7 @@ PluginPage {
             top: parent.top
             bottom: parent.bottom
         }
-        model: issues
+        model: allIssues
         delegate: IssueListItem {
             number: modelData
             show: selectedFilter(modelData)
@@ -95,15 +95,18 @@ PluginPage {
 
     property var selectedFilter: allFilter
 
-    property var allFilter: function(issue) {
+    property var allFilter: function(number) {
+        var issue = issues.childrenData[number].info
         return issue.state === "open" || settings.get("showClosedTickets", false)
     }
 
-    property var assignedFilter: function(issue) {
+    property var assignedFilter: function(number) {
+        var issue = issues.childrenData[number].info
         return issue.assignee && issue.assignee.login === github.user  && (issue.state === "open" || settings.get("showClosedTickets", false))
     }
 
-    property var createdFilter: function(issue) {
+    property var createdFilter: function(number) {
+        var issue = issues.childrenData[number].info
         return issue.user && issue.user.login === github.user && (issue.state === "open" || settings.get("showClosedTickets", false))
     }
 
