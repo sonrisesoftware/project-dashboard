@@ -220,7 +220,7 @@ Page {
     Sidebar {
         id: sidebar
         expanded: wideAspect
-        width: units.gu(8)
+        width: units.gu(9)
         color: Qt.rgba(0.2,0.2,0.2,0.8)
 
         Column {
@@ -228,7 +228,7 @@ Page {
 
             ListItem.Standard {
                 id: item
-                height: width
+                height: units.gu(7)//width
                 onClicked: selectedPlugin = null
                 selected: selectedPlugin === null
 
@@ -245,7 +245,7 @@ Page {
 
                     Label {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: i18n.tr("Pulse")
+                        text: i18n.tr("Overview")
                         fontSize: "small"
                         color: item.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
                     }
@@ -256,7 +256,7 @@ Page {
                 model: column.children
                 delegate: ListItem.Standard {
                     id: pluginSidebarItem
-                    height: visible ? width : 0
+                    height: visible ? units.gu(7) : 0
                     visible: modelData.hasOwnProperty("item")
                     enabled: modelData.item.page
                     opacity: enabled ? 1 : 0.5
