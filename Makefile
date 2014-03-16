@@ -15,7 +15,7 @@ autopilot:
 	tests/autopilot/run
 
 check:
-	qmltestrunner -input tests/unit
+	time qmltestrunner -input tests/unit
 
 python_check:
 	pep8 tests/autopilot/project_dashboard/

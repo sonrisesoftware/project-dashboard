@@ -181,22 +181,87 @@ Plugin {
                         when: !wideAspect
 
                         Item {
+                            id: regLayout
                             anchors.fill: parent
 
-                            ItemLayout {
-                                item: "list"
+                            property bool timerSelected: true
 
+                            Rectangle {
+                                anchors.bottom: parent.bottom
+                                anchors.bottomMargin: -units.gu(1.2)
+                                height: header.height - header.__styleInstance.contentHeight + units.gu(1)
+                                parent: header
+                                width: parent.width
+                                color: "#3e3e3e" //FIXME: This color is hard-coded based on the current app background color
+
+                                Image {
+                                    id: separatorBottom
+                                    anchors {
+                                        bottom: parent.bottom
+                                        left: parent.left
+                                        right: parent.right
+                                    }
+                                    source: getIcon("PageHeaderBaseDividerBottom.png")
+                                }
+
+                                Row {
+                                    anchors.centerIn: parent
+                                    anchors.verticalCenterOffset: units.gu(-0.1)
+                                    spacing: units.gu(1)
+
+                                    Label {
+                                        text: "Timer"
+                                        color: regLayout.timerSelected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            onClicked: regLayout.timerSelected = true
+                                        }
+                                    }
+
+                                    Label {
+                                        text: "|"
+                                    }
+
+                                    Label {
+                                        text: "History"
+                                        color: !regLayout.timerSelected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            onClicked: regLayout.timerSelected = false
+                                        }
+                                    }
+                                }
+                            }
+
+                            ItemLayout {
                                 anchors.fill: parent
+                                anchors.topMargin: units.gu(1)
+                                item: "list"
+                                visible: !regLayout.timerSelected
+                            }
+
+                            Item {
+                                anchors.fill: parent
+                                anchors.topMargin: units.gu(1) - header.height
+                                ItemLayout {
+                                    anchors.centerIn: parent
+                                    item: "timer"
+                                    width: timerView.width
+                                    height: timerView.height
+                                }
+                                visible: regLayout.timerSelected
                             }
 
                             Rectangle {
                                 anchors.fill: column
                                 color: Qt.rgba(0,0,0,0.2)
+                                visible: !regLayout.timerSelected
                             }
 
                             ItemLayout {
                                 id: column
                                 item: "footer"
+                                visible: !regLayout.timerSelected
 
                                 anchors {
                                     left: parent.left
