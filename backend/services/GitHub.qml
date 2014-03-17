@@ -29,20 +29,20 @@ Service {
     name: "github"
     type: ["GitHubIssues", "GitHubPullRequests", "GitHub"]
     title: i18n.tr("GitHub")
-    authenticationStatus: oauth === "" ? "" : i18n.tr("Logged in as %1").arg(user)
+    authenticationStatus: oauth === "" ? "" : i18n.tr("Logged in as %1").arg(user.login)
     disabledMessage: i18n.tr("To connect to a GitHub project, please authenticate to GitHub from Settings")
 
     enabled: oauth !== ""
 
     property string oauth:settings.get("githubToken", "")
     property string github: "https://api.github.com"
-    property string user: settings.get("githubUser", "")
+    property var user: settings.get("githubUser", "")
 
     onOauthChanged: {
         if (oauth !== "") {
             get("/user", userLoaded)
         } else {
-            settings.set("githubUser", "")
+            settings.set("githubUser", undefined)
         }
     }
 
@@ -54,7 +54,7 @@ Service {
             settings.set("githubToken", "")
             PopupUtils.open(accessRevokedDialog, mainView.pageStack.currentPage)
         } else {
-            settings.set("githubUser", json.login)
+            settings.set("githubUser", json)
         }
     }
 
@@ -92,6 +92,10 @@ Service {
 
     function newPullRequest(repo, title, description, branch, callback) {
         return Http.post(github + "/repos/" + repo + "/pulls", ["access_token=" + oauth], callback, undefined, {"Accept":"application/vnd.github.v3+json"}, JSON.stringify({ "title": title, "body": description, "head": branch, "base": "master" }))
+    }
+
+    function mergePullRequest(repo, number) {
+        return Http.put(github + "/repos/" + repo + "/pulls" + number + "/merge", ["access_token=" + oauth], callback, undefined, {"Accept":"application/vnd.github.v3+json"})
     }
 
     function getPullRequests(repo, state, callback) {

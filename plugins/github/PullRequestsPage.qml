@@ -98,8 +98,9 @@ PluginPage {
 
     Label {
         anchors.centerIn: listView
-        text: settings.get("showClosedTickets", false) ? i18n.tr("No issues") : i18n.tr("No open issues")
-        visible: List.filteredCount(allIssues, selectedFilter)
+        text: settings.get("showClosedTickets", false) ? i18n.tr("No pull requests") : i18n.tr("No open pull requests")
+        visible: List.filteredCount(allIssues, selectedFilter) === 0
+        fontSize: "large"
         opacity: 0.5
     }
 

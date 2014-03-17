@@ -70,16 +70,17 @@ Page {
             id: mergeAction
             text: i18n.tr("Merge")
             iconSource: getIcon("code-fork")
-            enabled: issue.isPullRequest && !issue.merged && issue.mergeable && plugin.hasPushAccess
+            enabled: plugin.hasPushAccess && issue.isPullRequest && !issue.merged && issue.mergeable
+            onTriggered: issue.merge()
         },
 
         Action {
             id: closeAction
             text: issue.open ? i18n.tr("Close") : i18n.tr("Reopen")
             iconSource: issue.open ? getIcon("close") : getIcon("reset")
-            enabled: !issue.merged
+            enabled: !issue.merged && plugin.hasPushAccess
             onTriggered: {
-                closeOrReopen()
+                issue.closeOrReopen()
             }
         }
     ]

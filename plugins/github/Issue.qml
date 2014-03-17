@@ -1,11 +1,13 @@
 import QtQuick 2.0
 import Ubuntu.Components 0.1
 import "../../ubuntu-ui-extras"
+import "../../backend/utils.js" as Utils
 
 Object {
     id: issue
 
     property var info: doc.get("info", {})
+    property var pull: doc.get("pull", {})
     property var events: doc.get("events", [])
     property var comments: doc.get("comments", [])
     property var commits: doc.get("commits", [])
@@ -20,8 +22,8 @@ Object {
     property int loading
 
     property bool isPullRequest: info.hasOwnProperty("head") //TODO: Is this the best way to handle it?
-    property bool merged: isPullRequest ? info.merged : false
-    property bool mergeable: isPullRequest ? info.mergeable : false
+    property bool merged: isPullRequest ? pull.merged : false
+    property bool mergeable: isPullRequest ? pull.mergeable : false
     property bool open: info.state === "open"
     property var assignee: info.assignee
     property var milestone: info.milestone
@@ -41,6 +43,17 @@ Object {
     signal complete()
 
     property bool loaded
+
+    function newEvent(type, actor) {
+        if (actor === undefined)
+            actor = github.user
+        events.push({
+                        event: type,
+                        actor: actor,
+                        created_at: new Date().toJSON()
+                    })
+        doc.set("events", events)
+    }
 
     property var allEvents: {
         if (!loaded)
@@ -115,7 +128,9 @@ Object {
             loading += 2
             github.getPullRequest(plugin.repo, number, function(has_error, status, response) {
                 loading--
-                doc.set("info", Utils.mergeObject(info, JSON.parse(response)))
+                doc.set("pull", JSON.parse(response))
+                print("MERGED:", JSON.parse(response).merged, pull.merged)
+                print("MERGEABLE:", JSON.parse(response).mergeable, pull.mergeable)
             })
 
             github.getPullCommits(plugin.repo, issue, function(has_error, status, response) {
@@ -134,6 +149,24 @@ Object {
             loading--
             doc.set("events", JSON.parse(response))
         })
+    }
+
+    function merge() {
+        var request = github.mergePullRequest(plugin.repo, number, function(response) {
+            complete()
+            if (response === -1) {
+                error(i18n.tr("Connection Error"), i18n.tr("Unable to merge %1. Check your connection and/or firewall settings.").arg(type))
+            } else {
+                info.state = "closed"
+                doc.set("info", info)
+                newEvent("merged")
+                newEvent("closed")
+            }
+        })
+
+        busy(i18n.tr("Merging %1").arg(typeCap),
+             i18n.tr("Merging %2 <b>#%1</b>").arg(number).arg(type),
+             request)
     }
 
     function closeOrReopen() {
@@ -208,6 +241,7 @@ Object {
                 if (login) {
                     info.assignee = assignee
                     doc.set("info", info)
+                    newEvent("assigned", assignee)
                 } else {
                     info.assignee = undefined
                     doc.set("info", info)
