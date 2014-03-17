@@ -512,7 +512,7 @@ Page {
 
             Component.onDestruction: {
                 if (edited) {
-                    updateLabels(popover.labels)
+                    issue.updateLabels(popover.labels)
                 }
             }
 

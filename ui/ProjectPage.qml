@@ -152,11 +152,11 @@ Page {
         visible: !sidebar.expanded
         model: column.children
         delegate: ListItem.SingleValue {
-            property var plugin: modelData.item
+            property var plugin: visible ? modelData.item : null
             visible: modelData.hasOwnProperty("item")
 
-            text: plugin.title
-            value: plugin.value
+            text: visible ? plugin.title : ""
+            value: visible ? plugin.value : ""
 
             progression: true
             onClicked: displayPlugin(plugin)

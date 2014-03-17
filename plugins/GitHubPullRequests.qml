@@ -35,20 +35,23 @@ Plugin {
     unread: issues.length > 0
     canReload: true
 
-    ListItem.Header {
-        text: "Recent Pull Requests"
-        visible: issues.length > 0
-    }
-
     action: Action {
         text: i18n.tr("Open Pull Request")
         onTriggered: PopupUtils.open(Qt.resolvedUrl("github/NewPullRequestPage.qml"), plugin, {repo: repo, branches: branches, action: reload})
     }
 
-    property var issues: doc.get("pullRequests", [])
-    property var closedIssues: doc.get("closedPullRequests", [])
+    property var openIssues: issues.filteredChildren(function(doc) { return doc.info.state === "open" }).sort(function(a, b) { return parseInt(b) - parseInt(a) })
     property var branches: doc.get("branches", [])
     property var info: doc.get("repo", {})
+
+    property alias issues: issues
+
+    Document {
+        id: issues
+
+        docId: "pullRequests"
+        parent: doc
+    }
 
     page: Component { PullRequestsPage {} }
 
@@ -58,21 +61,26 @@ Plugin {
         parent: project.document
     }
 
+    ListItem.Header {
+        text: "Recent Pull Requests"
+        visible: openIssues.length > 0
+    }
+
     Repeater {
-        model: Math.min(issues.length, 4)
+        model: Math.min(openIssues.length, 4)
         delegate: PullRequestListItem {
-            property var modelData: issues[index]
+            number: Number(openIssues[index])
         }
     }
 
     ListItem.Standard {
         enabled: false
-        visible: !issues || !issues.hasOwnProperty("length") || issues.length === 0
+        visible: openIssues.length === 0
         text: i18n.tr("No open pull requests")
     }
 
     viewAllMessage: i18n.tr("View all pull requests")
-    summary: i18n.tr("<b>%1</b> open pull requests").arg(issues.length)
+    summary: i18n.tr("<b>%1</b> open pull requests").arg(openIssues.length)
 
     property string repo:  project.serviceValue("github")
 
@@ -100,26 +108,23 @@ Plugin {
                 error(i18n.tr("Connection Error"), i18n.tr("Unable to download list of pull requests. Check your connection and/or firewall settings.\n\nError: %1").arg(status))
             } else {
                 //print("GitHub Results:", response)
-                var issues = JSON.parse(response)
-                doc.set("pullRequests", Utils.mergeLists(plugin.issues, issues, "number", true))
+                var json = JSON.parse(response)
 
-                for (var i = 0; i < issues.length; i++) {
-                    var issue = issues[i]
-                    loading++
-                    github.get(issue._links.statuses.href, function(has_error, status, response) {
-                        //print(response)
-                        if (JSON.parse(response)[0] === undefined) {
-                            issue.status = {"state": ""}
-                        } else {
-                            issue.status = JSON.parse(response)[0]
-                        }
-                        //print(issue.status.state)
+                for (var i = 0; i < json.length; i++) {
+                    var item = json[i]
+                    if (item.hasOwnProperty("pull_request"))
+                        continue
 
-                        loading--
-                    })
+                    if (issues.hasChild(String(item.number))) {
+                        var issue = issues.getChild(String(item.number))
+                        issue.set("info", item)
+                    } else {
+                        newUnreadItem(i18n.tr("<b>%1</b> opened issue %2").arg(item.user.login).arg(item.number),
+                                      "",
+                                      info.created_at)
+                        issues.newDoc(String(item.number), {"info": item})
+                    }
                 }
-
-                doc.set("pullRequests", Utils.mergeLists(plugin.issues, issues, "number", true))
             }
         })
 
@@ -129,26 +134,26 @@ Plugin {
                 error(i18n.tr("Connection Error"), i18n.tr("Unable to download list of pull requests. Check your connection and/or firewall settings.\n\nError: %1").arg(status))
             } else {
                 //print("GitHub Results:", response)
-                var issues = JSON.parse(response)
-                doc.set("closedPullRequests", Utils.mergeLists(plugin.issues, issues, "number", true))
+                var json = JSON.parse(response)
 
-                for (var i = 0; i < issues.length; i++) {
-                    var issue = issues[i]
-                    loading++
-                    github.get(issue._links.statuses.href, function(has_error, status, response) {
-                        //print(response)
-                        if (JSON.parse(response)[0] === undefined) {
-                            issue.status = {"state": ""}
-                        } else {
-                            issue.status = JSON.parse(response)[0]
-                        }
-                        //print(issue.status.state)
+                for (var i = 0; i < json.length; i++) {
+                    var item = json[i]
+                    if (item.hasOwnProperty("pull_request"))
+                        continue
 
-                        loading--
-                    })
+                    if (issues.hasChild(String(item.number))) {
+                        var issue = issues.getChild(String(item.number))
+                        issue.set("info", item)
+                    } else {
+                        newUnreadItem(i18n.tr("<b>%1</b> opened issue %2").arg(item.user.login).arg(item.number),
+                                      "",
+                                      info.created_at)
+                        newUnreadItem(i18n.tr("<b>%1</b> closed issue %2").arg(item.assignee.login).arg(item.number),
+                                      "",
+                                      info.closed_at)
+                        issues.newDoc(String(item.number), {"info": item})
+                    }
                 }
-
-                doc.set("closedPullRequests", Utils.mergeLists(plugin.issues, issues, "number", true))
             }
         })
 
