@@ -57,6 +57,17 @@ Page {
         onError: mainView.error(title, message)
     }
 
+    InputDialog {
+        id: mergeDialog
+        title: i18n.tr("Merge Pull Request")
+        text: i18n.tr("Enter the commit message for the merge")
+
+        onAccepted: {
+            mergeDialog.hide()
+            issue.merge(value)
+        }
+    }
+
     actions: [
         Action {
             id: editAction
@@ -71,7 +82,7 @@ Page {
             text: i18n.tr("Merge")
             iconSource: getIcon("code-fork")
             enabled: plugin.hasPushAccess && issue.isPullRequest && !issue.merged && issue.mergeable
-            onTriggered: issue.merge()
+            onTriggered: mergeDialog.show()
         },
 
         Action {

@@ -151,12 +151,10 @@ Object {
         })
     }
 
-    function merge() {
-        var request = github.mergePullRequest(plugin.repo, number, function(has_error, status, response) {
+    function merge(message) {
+        var request = github.mergePullRequest(plugin.repo, number, message, function(has_error, status, response) {
             complete()
-            if (has_error) {
-                error(i18n.tr("Connection Error"), i18n.tr("Unable to close %1. Check your connection and/or firewall settings.").arg(type))
-            } else {
+            try {
                 var json = JSON.parse(response)
                 if (json.merged) {
                     info.state = "closed"
@@ -164,8 +162,10 @@ Object {
                     newEvent("merged")
                     newEvent("closed")
                 } else {
-                    error(i18n.tr("Connection Error"), i18n.tr("Unable to merge %1:\n\n%2").arg(type).arg(response.message))
+                    error(i18n.tr("Connection Error"), i18n.tr("Unable to merge %1:\n\n%2").arg(type).arg(json.message))
                 }
+            } catch (e) {
+               error(i18n.tr("Connection Error"), i18n.tr("Unable to merge %1. Check your connection and/or firewall settings.").arg(type))
             }
         })
 
