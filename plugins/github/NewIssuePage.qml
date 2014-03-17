@@ -61,6 +61,7 @@ ComposerSheet {
             right: parent.right
             //margins: units.gu(1)
         }
+        color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
 
         Keys.onTabPressed: descriptionField.forceActiveFocus()
     }
@@ -68,6 +69,7 @@ ComposerSheet {
     TextArea {
         id: descriptionField
         placeholderText: i18n.tr("Description")
+        color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
 
         anchors {
             left: parent.left

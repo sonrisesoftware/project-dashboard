@@ -28,6 +28,8 @@ Object {
     property var labels: info.labels
     property var user: info.user
     property var created_at: info.created_at
+    property string body: info.hasOwnProperty("body") ? renderMarkdown(info.body, plugin.repo) : ""
+    property string bodyMarkdown: info.hasOwnProperty("body") ? info.body : ""
 
     signal error(var title, var message)
     signal busy(var title, var message, var request)
@@ -170,6 +172,22 @@ Object {
                 error(i18n.tr("Connection Error"), i18n.tr("Unable to change the labels. Check your connection and/or firewall settings."))
             } else {
                 info.labels = labels
+                doc.set("info", info)
+            }
+        })
+
+        busy(i18n.tr("Changing Labels"), i18n.tr("Changes the labels for the issue"), request)
+    }
+
+    function edit(title, body) {
+
+        var request = github.editIssue(plugin.repo, issue.number, {"title": title, "body": body}, function(response) {
+            complete()
+            if (response === -1) {
+                error(i18n.tr("Connection Error"), i18n.tr("Unable to edit. Check your connection and/or firewall settings."))
+            } else {
+                info.title = title
+                info.body = body
                 doc.set("info", info)
             }
         })

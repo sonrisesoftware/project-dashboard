@@ -62,7 +62,8 @@ Page {
             id: editAction
             text: i18n.tr("Edit")
             iconSource: getIcon("edit")
-            enabled: false
+            enabled: plugin.hasPushAccess
+            onTriggered: PopupUtils.open(editSheet, page)
         },
 
         Action {
@@ -153,7 +154,7 @@ Page {
             TextArea {
                 id: textArea
                 width: parent.width
-                text: issue.hasOwnProperty("body") ? renderMarkdown(issue.body, plugin.repo) : ""
+                text: issue.body
                 height: Math.min(__internal.linesHeight(15), Math.max(__internal.linesHeight(4), edit.height + textArea.__internal.frameSpacing * 2))
                 placeholderText: i18n.tr("No description set.")
                 readOnly: true
@@ -379,36 +380,35 @@ Page {
                     text: modelData.login
                 }
 
-                onSelectedIndexChanged: {
-                    var login = ""
-                    if (selectedIndex < model.length - 1) {
-                        login = model[selectedIndex].login
+//                onSelectedIndexChanged: {
+//                    var login = ""
+//                    if (selectedIndex < model.length - 1) {
+//                        login = model[selectedIndex].login
 
-                        busyDialog.text = i18n.tr("Setting assignee to <b>%1</b>").arg(model[selectedIndex].login)
-                    } else {
-                        busyDialog.text = i18n.tr("Removing assignee from the %1").arg(type)
-                    }
+//                        busyDialog.text = i18n.tr("Setting assignee to <b>%1</b>").arg(model[selectedIndex].login)
+//                    } else {
+//                        busyDialog.text = i18n.tr("Removing assignee from the %1").arg(type)
+//                    }
 
-                    if (issue.assignee && issue.assignee.hasOwnProperty("login") && issue.assignee.login === login)
-                        return
+//                    if (issue.assignee && issue.assignee.hasOwnProperty("login") && issue.assignee.login === login)
+//                        return
 
-                    if (!(issue.assignee && issue.assignee.hasOwnProperty("login")) && login === undefined)
-                        return
+//                    if (!(issue.assignee && issue.assignee.hasOwnProperty("login")) && login === undefined)
+//                        return
 
-                    busyDialog.title = i18n.tr("Changing Assignee")
-                    busyDialog.show()
+//                    busyDialog.title = i18n.tr("Changing Assignee")
+//                    busyDialog.show()
 
-                    request = github.editIssue(plugin.repo, issue.number, {"assignee": login}, function(response) {
-                        busyDialog.hide()
-                        if (response === -1) {
-                            error(i18n.tr("Connection Error"), i18n.tr("Unable to change assignee. Check your connection and/or firewall settings."))
-                        } else {
-                            issue.assignee = {"login": login}
-                            issue = issue
-                            plugin.reload()
-                        }
-                    })
-                }
+//                    request = github.editIssue(plugin.repo, issue.number, {"assignee": login}, function(response) {
+//                        busyDialog.hide()
+//                        if (response === -1) {
+//                            error(i18n.tr("Connection Error"), i18n.tr("Unable to change assignee. Check your connection and/or firewall settings."))
+//                        } else {
+//                            issue.assignee = {"login": login}
+//                            plugin.reload()
+//                        }
+//                    })
+//                }
             }
 
             ListItem.Header {
@@ -575,5 +575,74 @@ Page {
                 }
             }
         }
+    }
+
+    Component {
+        id: editSheet
+        ComposerSheet {
+            id: sheet
+
+            title: i18n.tr("Edit Issue")
+
+            Component.onCompleted: {
+                sheet.__leftButton.text = i18n.tr("Cancel")
+                sheet.__leftButton.color = "gray"
+                sheet.__rightButton.text = i18n.tr("Update")
+                sheet.__rightButton.color = sheet.__rightButton.__styleInstance.defaultColor
+                sheet.__foreground.style = Theme.createStyleComponent(Qt.resolvedUrl("../../ubuntu-ui-extras/SuruSheetStyle.qml"), sheet)
+            }
+
+            property string repo
+            property var action
+
+            onConfirmClicked: {
+                PopupUtils.close(sheet)
+                issue.edit(nameField.text, descriptionField.text)
+            }
+
+            function createIssue() {
+                busyDialog.show()
+                request = github.newIssue(repo, nameField.text, descriptionField.text, function(has_error, status, response) {
+                    busyDialog.hide()
+                    if (has_error) {
+                        error(i18n.tr("Connection Error"), i18n.tr("Unable to create issue. Check your connection and/or firewall settings.\n\nError: %1").arg(status))
+                    } else {
+                        PopupUtils.close(sheet)
+                        dialog.action()
+                    }
+                })
+            }
+
+            TextField {
+                id: nameField
+                placeholderText: i18n.tr("Title")
+                anchors {
+                    left: parent.left
+                    top: parent.top
+                    right: parent.right
+                    //margins: units.gu(1)
+                }
+                text: issue.title
+                color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
+
+                Keys.onTabPressed: descriptionField.forceActiveFocus()
+            }
+
+            TextArea {
+                id: descriptionField
+                placeholderText: i18n.tr("Description")
+                text: issue.bodyMarkdown
+                color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
+
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                    top: nameField.bottom
+                    bottom: parent.bottom
+                    topMargin: units.gu(1)
+                }
+            }
+        }
+
     }
 }
