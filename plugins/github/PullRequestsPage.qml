@@ -29,11 +29,7 @@ PluginPage {
 
     property string sort: doc.get("sort", "number")
 
-    onSortChanged: {
-        allIssues = Qt.binding(sortAllIssues)
-    }
-
-    property var allIssues: sortAllIssues()
+    property var allIssues: issues.children.sort(function(a, b) { return parseInt(b) - parseInt(a) })//sortAllIssues()
 
     function sortAllIssues() {
         return issues.concat(closedIssues).sort(function sort(a1, a2) {
@@ -93,7 +89,8 @@ PluginPage {
             bottom: parent.bottom
         }
         model: allIssues
-        delegate: PullRequestListItem {
+        delegate: IssueListItem {
+            number: modelData
             show: selectedFilter(modelData)
         }
         clip: true

@@ -194,6 +194,7 @@ Page {
                     height: loader.height + units.gu(2)
 
                     property alias item: loader.item
+                    visible: loader.status == Loader.Ready
 
                     Loader {
                         id: loader
@@ -203,6 +204,8 @@ Page {
                         onLoaded: {
                             column.reEvalColumns()
                         }
+                        asynchronous: true
+
 
                         onHeightChanged: column.reEvalColumns()
                     }

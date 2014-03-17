@@ -45,7 +45,7 @@ Plugin {
     property var milestones: doc.get("milestones", [])
     property var availableAssignees: doc.get("assignees", [])
     property var availableLabels: doc.get("labels", [])
-    property var openIssues: issues.filteredChildren(function(doc) { return doc.info.state === "open" }).sort(function(a, b) { return parseInt(b) - parseInt(a) })
+    property var openIssues: issues.filteredChildren(function(doc) { return doc.info && doc.info.state === "open" }).sort(function(a, b) { return parseInt(b) - parseInt(a) })
 
     document: Document {
         id: doc
@@ -130,9 +130,10 @@ Plugin {
                     newUnreadItem(i18n.tr("<b>%1</b> opened issue %2").arg(item.user.login).arg(item.number),
                                   "",
                                   info.created_at)
-                    newUnreadItem(i18n.tr("<b>%1</b> closed issue %2").arg(item.assignee.login).arg(item.number),
-                                  "",
-                                  info.closed_at)
+                    if (info.closed_at)
+                        newUnreadItem(i18n.tr("<b>%1</b> closed issue %2").arg(item.assignee.login).arg(item.number),
+                                      "",
+                                      info.closed_at)
                     issues.newDoc(String(item.number), {"info": item})
                 }
             }
