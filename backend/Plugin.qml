@@ -32,7 +32,7 @@ UbuntuShape {
     property alias title: titleLabel.text
     property string shortTitle: title
     property alias iconSource: iconImage.name
-    property bool unread
+    property bool unread: unreadItems.length > 0
     property int loading: 0
     property string viewAllMessage
     property string summary: viewAllMessage
@@ -41,6 +41,17 @@ UbuntuShape {
     property bool expanded: document.get("expanded" + title, true)
     property bool canReload: false
     function reload() {}
+
+    property var unreadItems: document.get("unreadItems", [])
+
+    function newUnreadItem(title, message, date) {
+        unreadItems.push({
+                             "title": title,
+                             "date": date,
+                             "message": message
+                         })
+        doc.set("unreadItems", unreadItems)
+    }
 
     property Component page
 
