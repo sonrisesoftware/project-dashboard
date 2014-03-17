@@ -96,13 +96,22 @@ PluginPage {
         clip: true
     }
 
+    Label {
+        anchors.centerIn: listView
+        text: settings.get("showClosedTickets", false) ? i18n.tr("No issues") : i18n.tr("No open issues")
+        visible: List.filteredCount(allIssues, selectedFilter)
+        opacity: 0.5
+    }
+
     property var selectedFilter: allFilter
 
-    property var allFilter: function(issue) {
+    property var allFilter: function(number) {
+        var issue = issues.childrenData[String(number)].info
         return issue.state === "open" || settings.get("showClosedTickets", false)
     }
 
-    property var createdFilter: function(issue) {
+    property var createdFilter: function(number) {
+        var issue = issues.childrenData[String(number)].info
         return issue.user && issue.user.login === github.user && (issue.state === "open" || settings.get("showClosedTickets", false))
     }
 

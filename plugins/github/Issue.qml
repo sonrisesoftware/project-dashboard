@@ -30,6 +30,7 @@ Object {
     property var user: info.user
     property var created_at: info.created_at
     property string body: typeof(info.body) == "string" ? info.body : ""
+    property string status: doc.get("status", "")
 
     function renderBody() {
         return renderMarkdown(body, plugin.repo)
@@ -88,6 +89,22 @@ Object {
         //print("ALL EVENTS", allEvents.length)
 
         return allEvents
+    }
+
+    Component.onCompleted: {
+        if (isPullRequest) {
+            loading++
+            github.get(info._links.statuses.href, function(has_error, status, response) {
+                                 print(response)
+                                 if (JSON.parse(response)[0] === undefined) {
+                                     doc.set("status", "")
+                                 } else {
+                                     doc.set("status", JSON.parse(response)[0].state)
+                                 }
+
+                                 loading--
+                             })
+        }
     }
 
     function load() {

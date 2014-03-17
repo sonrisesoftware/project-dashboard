@@ -93,6 +93,13 @@ PluginPage {
         clip: true
     }
 
+    Label {
+        anchors.centerIn: listView
+        text: settings.get("showClosedTickets", false) ? i18n.tr("No issues") : i18n.tr("No open issues")
+        visible: List.filteredCount(allIssues, selectedFilter)
+        opacity: 0.5
+    }
+
     property var selectedFilter: allFilter
 
     property var allFilter: function(number) {

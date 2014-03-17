@@ -36,7 +36,7 @@ ListItem.Standard {
         UbuntuNumberAnimation {}
     }
 
-    Issue {
+    property Issue issue: Issue {
         id: issue
     }
 
