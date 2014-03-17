@@ -28,14 +28,22 @@ Object {
     property var labels: info.labels
     property var user: info.user
     property var created_at: info.created_at
-    property string body: info.hasOwnProperty("body") ? renderMarkdown(info.body, plugin.repo) : ""
-    property string bodyMarkdown: info.hasOwnProperty("body") ? info.body : ""
+    property string body: info.hasOwnProperty("body") ? info.body : ""
+
+    function renderBody() {
+        return renderMarkdown(body, plugin.repo)
+    }
 
     signal error(var title, var message)
     signal busy(var title, var message, var request)
     signal complete()
 
+    property bool loaded
+
     property var allEvents: {
+        if (!loaded)
+            return []
+
         // Turn the list of commits into events
         var commitEvents = []
         for (var i = 0; i < commits.length; i++) {
@@ -80,6 +88,8 @@ Object {
 
     function load() {
         print("LOADING>>>>>>>>>")
+        loaded = true
+
         if (isPullRequest) {
             loading += 2
             github.getPullRequest(plugin.repo, number, function(has_error, status, response) {

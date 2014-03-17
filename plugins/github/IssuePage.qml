@@ -154,7 +154,7 @@ Page {
             TextArea {
                 id: textArea
                 width: parent.width
-                text: issue.body
+                text: issue.renderBody()
                 height: Math.min(__internal.linesHeight(15), Math.max(__internal.linesHeight(4), edit.height + textArea.__internal.frameSpacing * 2))
                 placeholderText: i18n.tr("No description set.")
                 readOnly: true
@@ -631,7 +631,7 @@ Page {
             TextArea {
                 id: descriptionField
                 placeholderText: i18n.tr("Description")
-                text: issue.bodyMarkdown
+                text: issue.body
                 color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
 
                 anchors {
