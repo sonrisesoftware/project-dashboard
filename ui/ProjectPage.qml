@@ -220,7 +220,7 @@ Page {
     Sidebar {
         id: sidebar
         expanded: wideAspect
-        width: units.gu(9)
+        width: units.gu(6)
         color: Qt.rgba(0.2,0.2,0.2,0.8)
 
         Column {
@@ -228,7 +228,7 @@ Page {
 
             ListItem.Standard {
                 id: item
-                height: units.gu(7)//width
+                height: width
                 onClicked: selectedPlugin = null
                 selected: selectedPlugin === null
 
@@ -239,24 +239,72 @@ Page {
                     AwesomeIcon {
                         anchors.horizontalCenter: parent.horizontalCenter
                         name: "dashboard"
-                        size: units.gu(3)
+                        size: units.gu(3.5)
                         color: item.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
                     }
 
-                    Label {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: i18n.tr("Overview")
-                        fontSize: "small"
-                        color: item.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
-                    }
+//                    Label {
+//                        anchors.horizontalCenter: parent.horizontalCenter
+//                        text: i18n.tr("Overview")
+//                        fontSize: "small"
+//                        color: item.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
+//                    }
                 }
             }
+
+//            ListItem.Standard {
+//                id: inboxItem
+//                height: units.gu(7)//width
+//                onClicked: selectedPlugin = null
+//                selected: selectedPlugin === null
+
+//                Column {
+//                    anchors.centerIn: parent
+//                    spacing: units.gu(0.5)
+
+//                    AwesomeIcon {
+//                        anchors.horizontalCenter: parent.horizontalCenter
+//                        name: "inbox"
+//                        size: units.gu(3)
+//                        color: inboxItem.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
+
+//                        Rectangle {
+//                            color: colors["red"]
+//                            width: label.text.length == 1 ? height: label.width + units.gu(1.2)
+//                            height: units.gu(2.5)
+//                            radius: height/2
+//                            border.color: Qt.darker(colors["red"])
+//                            antialiasing: true
+
+//                            Label {
+//                                id: label
+//                                anchors.centerIn: parent
+//                                text: "23"
+//                            }
+
+//                            anchors {
+//                                horizontalCenter: parent.right
+//                                verticalCenter: parent.top
+//                                verticalCenterOffset: units.gu(1)
+//                                horizontalCenterOffset: units.gu(0.5)
+//                            }
+//                        }
+//                    }
+
+//                    Label {
+//                        anchors.horizontalCenter: parent.horizontalCenter
+//                        text: i18n.tr("Inbox")
+//                        fontSize: "small"
+//                        color: inboxItem.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
+//                    }
+//                }
+//            }
 
             Repeater {
                 model: column.children
                 delegate: ListItem.Standard {
                     id: pluginSidebarItem
-                    height: visible ? units.gu(7) : 0
+                    height: visible ? width : 0
                     visible: modelData.hasOwnProperty("item")
                     enabled: modelData.item.page
                     opacity: enabled ? 1 : 0.5
@@ -270,17 +318,17 @@ Page {
                         AwesomeIcon {
                             anchors.horizontalCenter: parent.horizontalCenter
                             name: modelData.item.iconSource
-                            size: units.gu(3)
+                            size: units.gu(3.5)
 
                             color: pluginSidebarItem.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
                         }
 
-                        Label {
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            text: modelData.item.shortTitle
-                            color: pluginSidebarItem.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
-                            fontSize: "small"
-                        }
+//                        Label {
+//                            anchors.horizontalCenter: parent.horizontalCenter
+//                            text: modelData.item.shortTitle
+//                            color: pluginSidebarItem.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
+//                            fontSize: "small"
+//                        }
                     }
                 }
             }
