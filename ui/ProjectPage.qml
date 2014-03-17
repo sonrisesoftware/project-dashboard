@@ -153,7 +153,9 @@ Page {
         model: column.children
         delegate: ListItem.SingleValue {
             property var plugin: visible ? modelData.item : null
-            visible: modelData.hasOwnProperty("item") && modelData.visible
+            visible: modelData.hasOwnProperty("item") && modelData.item != null
+            enabled: plugin.page
+            height: visible? implicitHeight : 0
 
             text: visible ? plugin.title : ""
             value: visible ? plugin.value : ""
@@ -208,6 +210,7 @@ Page {
                         anchors.centerIn: parent
                         width: parent.width - units.gu(2)
                         source: Qt.resolvedUrl("../plugins/" + modelData + ".qml")
+                        active: true
                         onLoaded: {
                             column.reEvalColumns()
                         }
@@ -315,7 +318,7 @@ Page {
                 delegate: ListItem.Standard {
                     id: pluginSidebarItem
                     height: visible ? width : 0
-                    visible: modelData.hasOwnProperty("item") && modelData.visible
+                    visible: modelData.hasOwnProperty("item") && modelData.item != null
                     enabled: modelData.item.page
                     opacity: enabled ? 1 : 0.5
                     onClicked: selectedPlugin = modelData.item

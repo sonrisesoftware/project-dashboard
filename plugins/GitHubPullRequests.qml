@@ -81,6 +81,7 @@ Plugin {
 
     viewAllMessage: i18n.tr("View all pull requests")
     summary: i18n.tr("<b>%1</b> open pull requests").arg(openIssues.length)
+    value: openIssues.length
 
     property string repo:  project.serviceValue("github")
 

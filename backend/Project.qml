@@ -36,6 +36,8 @@ Object {
     signal reload
 
     function enablePlugin(name, value) {
+        var beforeValue = hasPlugin(name)
+
         //print("Setting state of", name, "to:", value)
         plugins[name] = value
         doc.set("plugins", plugins)
@@ -43,19 +45,21 @@ Object {
         var plugin = backend.getPlugin(name)
         var type = plugin.type
 
-        if (hasPlugin(name)) {
-            if (typeof(type) == "object") {
-                for (var j = 0; j < type.length; j++) {
-                    enabledPlugins.append({"type": type[j]})
+        if (hasPlugin(name) !== beforeValue) {
+            if (hasPlugin(name)) {
+                if (typeof(type) == "object") {
+                    for (var j = 0; j < type.length; j++) {
+                        enabledPlugins.append({"type": type[j]})
+                    }
+                } else {
+                    enabledPlugins.append({"type": type})
                 }
             } else {
-                enabledPlugins.append({"type": type})
-            }
-        } else {
-            for (var i = 0; i < enabledPlugins.count; i++) {
-                if ((typeof(type) === "object" && type.indexOf(enabledPlugins.get(i).type)) ||
-                     (enabledPlugins.get(i).type === type)) {
-                    enabledPlugins.remove(i)
+                for (var i = 0; i < enabledPlugins.count; i++) {
+                    if ((typeof(type) === "object" && type.indexOf(enabledPlugins.get(i).type)) ||
+                         (enabledPlugins.get(i).type === type)) {
+                        enabledPlugins.remove(i)
+                    }
                 }
             }
         }
