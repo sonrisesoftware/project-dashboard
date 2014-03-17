@@ -106,7 +106,10 @@ Page {
             title: i18n.tr("Create New Project")
             text: i18n.tr("Please enter a name for your new project.")
             placeholderText: i18n.tr("Name")
-            onAccepted: backend.newProject(value)
+            onAccepted: {
+                var docId = backend.newProject(value)
+                pageStack.push(Qt.resolvedUrl("ProjectPage.qml"), {docId: docId})
+            }
         }
     }
 }

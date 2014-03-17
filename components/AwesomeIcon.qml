@@ -38,6 +38,8 @@ Item {
                 "github": "",
                 "file": "",
                 "clock": "",
+                "bookmark-o": "",
+                "user": "",
         "ellipse-h": "",
         "ellipse-v": "",
         "save": "",

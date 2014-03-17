@@ -45,7 +45,7 @@ Page {
                 control: TextField {
                     color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
                     text: project.name
-                    onTextChanged: project.name = text
+                    Component.onDestruction: project.name = text
                 }
             }
 

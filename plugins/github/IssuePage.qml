@@ -21,21 +21,51 @@ import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
 import "../../ubuntu-ui-extras"
 import "../../components"
+import "../../backend/utils.js" as Utils
+import "../../backend/"
 
 Page {
     id: page
     
-    title: i18n.tr("Issue %1").arg(issue.number)
+    title: i18n.tr("%2 %1").arg(issue.number).arg(typeTitle)
 
-    property var issue
+    property string type: issue.isPullRequest ? "pull request" : "issue"
+    property string typeCap: issue.isPullRequest ? "Pull request" : "Issue"
+    property string typeTitle: issue.isPullRequest ? "Pull Request" : "Issue"
+
+    property alias number: issue.number
+    property Plugin plugin
     property var request
-    property var plugin
-    property var comments: []
 
-    Component.onCompleted: {
-        github.getIssueComments(plugin.repo, issue, function(has_error, status, response) {
-            comments = JSON.parse(response)
-        })
+    Issue {
+        id: issue
+
+        Component.onCompleted: load()
+
+        onBusy: {
+            busyDialog.title = title
+            busyDialog.text = message
+            page.request = request
+
+            busyDialog.show()
+        }
+
+        onComplete: {
+            busyDialog.hide()
+        }
+
+        onError: mainView.error(title, message)
+    }
+
+    InputDialog {
+        id: mergeDialog
+        title: i18n.tr("Merge Pull Request")
+        text: i18n.tr("Enter the commit message for the merge")
+
+        onAccepted: {
+            mergeDialog.hide()
+            issue.merge(value)
+        }
     }
 
     actions: [
@@ -43,31 +73,42 @@ Page {
             id: editAction
             text: i18n.tr("Edit")
             iconSource: getIcon("edit")
+            enabled: plugin.hasPushAccess
+            onTriggered: PopupUtils.open(editSheet, page)
+        },
+
+        Action {
+            id: mergeAction
+            text: i18n.tr("Merge")
+            iconSource: getIcon("code-fork")
+            enabled: plugin.hasPushAccess && issue.isPullRequest && !issue.merged && issue.mergeable
+            onTriggered: mergeDialog.show()
         },
 
         Action {
             id: closeAction
-            text: i18n.tr("Close")
-            iconSource: getIcon("close")
+            text: issue.open ? i18n.tr("Close") : i18n.tr("Reopen")
+            iconSource: issue.open ? getIcon("close") : getIcon("reset")
+            enabled: !issue.merged && plugin.hasPushAccess
             onTriggered: {
-                busyDialog.title = i18n.tr("Closing Issue <b>#%1</b>").arg(issue.number)
-                busyDialog.show()
-
-                request = github.editIssue(plugin.repo, issue.number, {"state": "closed"}, function(response) {
-                    busyDialog.hide()
-                    if (response === -1) {
-                        error(i18n.tr("Connection Error"), i18n.tr("Unable to close issue. Check your connection and/or firewall settings."))
-                    } else {
-                        issue.state = "closed"
-                        issue = issue
-                        plugin.reload()
-                    }
-                })
+                issue.closeOrReopen()
             }
         }
     ]
 
+
+
     flickable: sidebar.expanded ? null : mainFlickable
+
+    onFlickableChanged: {
+        if (flickable === null) {
+            mainFlickable.topMargin = 0
+            mainFlickable.contentY = 0
+        } else {
+            mainFlickable.topMargin = units.gu(9.5)
+            mainFlickable.contentY = -units.gu(9.5)
+        }
+    }
 
     Flickable {
         id: mainFlickable
@@ -104,18 +145,20 @@ Page {
                 UbuntuShape {
                     height: stateLabel.height + units.gu(1)
                     width: stateLabel.width + units.gu(2)
-                    color: issue.state === "open" ? colors["green"] : colors["red"]
+                    color: issue.merged ? colors["blue"] : issue.open ? colors["green"] : colors["red"]
                     anchors.verticalCenter: parent.verticalCenter
 
                     Label {
                         id: stateLabel
                         anchors.centerIn: parent
-                        text: issue.state === "open" ? i18n.tr("Open") : i18n.tr("Closed")
+                        text: issue.merged ? i18n.tr("Merged") : issue.open ? i18n.tr("Open") : i18n.tr("Closed")
                     }
                 }
 
                 Label {
-                    text: i18n.tr("<b>%1</b> opened this issue %2").arg(issue.user.login).arg(friendsUtils.createTimeString(issue.created_at))
+                    text: issue.isPullRequest ? issue.merged ? i18n.tr("<b>%1</b> merged %2 commits").arg(issue.user.login).arg(issue.commits.length)
+                                                 : i18n.tr("<b>%1</b> wants to merge %2 commits").arg(issue.user.login).arg(issue.commits.length)
+                                        : i18n.tr("<b>%1</b> opened this issue %2").arg(issue.user.login).arg(friendsUtils.createTimeString(issue.created_at))
                     anchors.verticalCenter: parent.verticalCenter
                 }
             }
@@ -123,7 +166,7 @@ Page {
             TextArea {
                 id: textArea
                 width: parent.width
-                text: issue.hasOwnProperty("body") ? renderMarkdown(issue.body, plugin.repo) : ""
+                text: issue.renderBody()
                 height: Math.min(__internal.linesHeight(15), Math.max(__internal.linesHeight(4), edit.height + textArea.__internal.frameSpacing * 2))
                 placeholderText: i18n.tr("No description set.")
                 readOnly: true
@@ -142,12 +185,18 @@ Page {
                 }
             }
 
-            Repeater {
-                model: comments
-                delegate: CommentArea {
-                    author: modelData.user.login
-                    text: renderMarkdown(modelData.body)
-                    date: modelData.created_at
+            Column {
+                id: eventColumn
+                width: parent.width
+                spacing: parent.spacing
+
+                Repeater {
+                    model: issue.allEvents
+                    delegate: EventItem {
+                        id: eventItem
+                        event: modelData
+                        last: eventItem.y + eventItem.height == eventColumn.height
+                    }
                 }
             }
 
@@ -169,30 +218,59 @@ Page {
                 }
             }
 
-            Row {
-                spacing: units.gu(1)
-                anchors.right: parent.right
+            Item {
+                width: parent.width
+                height: childrenRect.height
 
-                Button {
-                    text: i18n.tr("Cancel")
-                    color: "gray"
-
-                    opacity: commentBox.show ? 1 : 0
-
-                    onClicked: {
-                        commentBox.text = ""
-                        commentBox.show = false
+                ActivityIndicator {
+                    id: eventLoadingIndicator
+                    anchors {
+                        left: parent.left
+                        verticalCenter: parent.verticalCenter
                     }
-
-                    Behavior on opacity {
-                        UbuntuNumberAnimation {}
-                    }
+                    visible: issue.loading > 0
+                    running: visible
                 }
 
-                Button {
-                    text: i18n.tr("Comment")
-                    onClicked: {
-                        if (commentBox.show) {
+                Label {
+                    text: "Loading events..."
+                    anchors {
+                        left: eventLoadingIndicator.right
+                        leftMargin: units.gu(1)
+                        verticalCenter: parent.verticalCenter
+                    }
+                    visible: eventLoadingIndicator.visible
+                }
+
+                Row {
+                    spacing: units.gu(1)
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    Button {
+                        text: i18n.tr("Cancel")
+                        color: "gray"
+
+                        opacity: commentBox.show ? 1 : 0
+
+                        onClicked: {
+                            commentBox.text = ""
+                            commentBox.show = false
+                        }
+
+                        Behavior on opacity {
+                            UbuntuNumberAnimation {}
+                        }
+                    }
+
+                    Button {
+                        text:  issue.state === "open" ? i18n.tr("Comment and Close") : i18n.tr("Comment and Reopen")
+                        color: issue.state === "open" ? colors["red"] : colors["green"]
+
+                        opacity: commentBox.show ? 1 : 0
+                        enabled: commentBox.text !== ""
+
+                        onClicked: {
                             busyDialog.title = i18n.tr("Creating Comment")
                             busyDialog.text = i18n.tr("Creating a new comment for issue <b>%1</b>").arg(issue.number)
                             busyDialog.show()
@@ -209,11 +287,30 @@ Page {
 
                                     commentBox.text = ""
                                     commentBox.show = false
+
+                                    closeOrReopen()
                                 }
                             })
-                        } else {
-                            commentBox.show = true
-                            commentBox.forceActiveFocus()
+                        }
+
+                        Behavior on opacity {
+                            UbuntuNumberAnimation {}
+                        }
+                    }
+
+                    Button {
+                        text: i18n.tr("Comment")
+                        enabled: commentBox.text !== "" || !commentBox.show
+                        onClicked: {
+                            if (commentBox.show) {
+                                issue.comment(commentBox.text)
+
+                                commentBox.text = ""
+                                commentBox.show = false
+                            } else {
+                                commentBox.show = true
+                                commentBox.forceActiveFocus()
+                            }
                         }
                     }
                 }
@@ -224,35 +321,10 @@ Page {
     Sidebar {
         id: sidebar
         mode: "right"
-        expanded: wideAspect
+        expanded: wideAspect && !issue.isPullRequest
 
         Column {
             width: parent.width
-            ListItem.Header {
-                text: i18n.tr("Labels")
-            }
-
-            Repeater {
-                model: issue.labels
-                delegate: ListItem.Standard {
-                    Label {
-                        anchors {
-                            left: parent.left
-                            leftMargin: units.gu(2)
-                            verticalCenter: parent.verticalCenter
-                        }
-
-                        text: modelData.name
-                        color: "#" + modelData.color
-                    }
-                }
-            }
-
-            ListItem.Standard {
-                enabled: false
-                text: i18n.tr("None yet")
-                visible: issue.labels.length === 0
-            }
 
             ListItem.Header {
                 text: i18n.tr("Milestone")
@@ -263,8 +335,9 @@ Page {
                 visible: !plugin.hasPushAccess
             }
 
-            ListItem.ItemSelector {
+            SuruItemSelector {
                 model: plugin.milestones.concat(i18n.tr("No milestone"))
+
                 visible: plugin.hasPushAccess
                 selectedIndex: {
                     if (issue.milestone && issue.milestone.hasOwnProperty("number")) {
@@ -282,34 +355,11 @@ Page {
                 }
 
                 onSelectedIndexChanged: {
-                    var number = undefined
-                    if (selectedIndex < model.length - 1) {
-                        number = model[selectedIndex].number
+                    var milestone = undefined
+                    if (selectedIndex < model.length - 1)
+                        milestone = model[selectedIndex]
 
-                        busyDialog.text = i18n.tr("Setting milestone to <b>%1</b>").arg(model[selectedIndex].title)
-                    } else {
-                        busyDialog.text = i18n.tr("Removing milestone from the issue")
-                    }
-
-                    if (issue.milestone && issue.milestone.hasOwnProperty("number") && issue.milestone.number === number)
-                        return
-
-                    if (!(issue.milestone && issue.milestone.hasOwnProperty("number")) && number === undefined)
-                        return
-
-                    busyDialog.title = i18n.tr("Changing Milestone")
-                    busyDialog.show()
-
-                    request = github.editIssue(plugin.repo, issue.number, {"milestone": number}, function(response) {
-                        busyDialog.hide()
-                        if (response === -1) {
-                            error(i18n.tr("Connection Error"), i18n.tr("Unable to change milestone. Check your connection and/or firewall settings."))
-                        } else {
-                            issue.milestone = {"number": number}
-                            issue = issue
-                            plugin.reload()
-                        }
-                    })
+                    issue.setMilestone(milestone)
                 }
             }
 
@@ -322,15 +372,18 @@ Page {
                 visible: !plugin.hasPushAccess
             }
 
-            ListItem.ItemSelector {
+            SuruItemSelector {
                 model: plugin.availableAssignees.concat(i18n.tr("No one assigned"))
                 visible: plugin.hasPushAccess
                 selectedIndex: {
+                    print("ASSIGNEE:", JSON.stringify(issue.assignee))
                     if (issue.assignee && issue.assignee.hasOwnProperty("login")) {
                         for (var i = 0; i < model.length; i++) {
                             if (model[i].login === issue.assignee.login)
                                 return i
                         }
+
+                        return model.length - 1
                     } else {
                         return model.length - 1
                     }
@@ -341,35 +394,69 @@ Page {
                 }
 
                 onSelectedIndexChanged: {
-                    var login = undefined
-                    if (selectedIndex < model.length - 1) {
-                        login = model[selectedIndex].login
+                    var assignee = undefined
+                    if (selectedIndex < model.length - 1)
+                        assignee = model[selectedIndex]
 
-                        busyDialog.text = i18n.tr("Setting assignee to <b>%1</b>").arg(model[selectedIndex].login)
-                    } else {
-                        busyDialog.text = i18n.tr("Removing assignee from the issue")
+                    issue.setAssignee(assignee)
+                }
+            }
+
+            ListItem.Header {
+                id: labelsHeader
+                text: i18n.tr("Labels")
+            }
+
+            Repeater {
+                id: labelsRepeater
+
+                property bool editing
+
+                model: editing ? plugin.availableLabels : issue.labels
+                delegate: ListItem.Standard {
+                    height: units.gu(5)
+                    Label {
+                        anchors {
+                            left: parent.left
+                            leftMargin: units.gu(2)
+                            verticalCenter: parent.verticalCenter
+                        }
+
+                        text: modelData.name
+                        color: "#" + modelData.color
                     }
 
-                    if (issue.assignee && issue.assignee.hasOwnProperty("login") && issue.assignee.login === login)
-                        return
+                    control: CheckBox {
+                        visible: labelsRepeater.editing
 
-                    if (!(issue.assignee && issue.assignee.hasOwnProperty("login")) && login === undefined)
-                        return
+                        checked: {
+                            for (var i = 0; i < issue.labels.length; i++) {
+                                var label = issue.labels[i]
 
-                    busyDialog.title = i18n.tr("Changing Assignee")
-                    busyDialog.show()
+                                if (label.name === modelData.name)
+                                    return true
+                            }
 
-                    request = github.editIssue(plugin.repo, issue.number, {"assignee": login}, function(response) {
-                        busyDialog.hide()
-                        if (response === -1) {
-                            error(i18n.tr("Connection Error"), i18n.tr("Unable to change assignee. Check your connection and/or firewall settings."))
-                        } else {
-                            issue.assignee = {"login": login}
-                            issue = issue
-                            plugin.reload()
+                            return false
                         }
-                    })
+
+                        //onClicked: checked = doc.sync("done", checked)
+
+                        style: SuruCheckBoxStyle {}
+                    }
                 }
+            }
+
+            ListItem.Standard {
+                text: i18n.tr("None Yet")
+                enabled: false
+                visible: issue.labels.length === 0
+            }
+
+            ListItem.Standard {
+                text: i18n.tr("Edit...")
+                visible: plugin.hasPushAccess
+                onClicked: PopupUtils.open(labelsPopover, labelsHeader)
             }
         }
     }
@@ -381,8 +468,11 @@ Page {
         onLockedChanged: opened = locked
 
         ToolbarButton { action: editAction }
+        ToolbarButton { action: mergeAction; visible: issue.isPullRequest }
         ToolbarButton { action: closeAction }
     }
+
+    property alias busyDialog: busyDialog
 
     Dialog {
         id: busyDialog
@@ -401,5 +491,149 @@ Page {
                 busyDialog.hide()
             }
         }
+    }
+
+    Component {
+        id: labelsPopover
+
+        Popover {
+            id: popover
+            property var labels: JSON.parse(JSON.stringify(issue.labels))
+            property bool edited: false
+
+            Component.onDestruction: {
+                if (edited) {
+                    issue.updateLabels(popover.labels)
+                }
+            }
+
+            contentHeight: labelsColumn.height
+            Column {
+                id: labelsColumn
+                width: parent.width
+
+                ListItem.Header {
+                    text: i18n.tr("Available Labels")
+                }
+
+                Repeater {
+                    id: repeater
+
+                    model: plugin.availableLabels
+                    delegate: ListItem.Standard {
+                        showDivider: index < repeater.count - 1
+                        height: units.gu(5)
+                        Label {
+                            anchors {
+                                left: parent.left
+                                leftMargin: units.gu(2)
+                                verticalCenter: parent.verticalCenter
+                            }
+
+                            text: modelData.name
+                            color: "#" + modelData.color
+                        }
+
+                        control: CheckBox {
+                            checked: {
+                                for (var i = 0; i < popover.labels.length; i++) {
+                                    var label = popover.labels[i]
+
+                                    if (label.name === modelData.name)
+                                        return true
+                                }
+
+                                return false
+                            }
+
+                            onClicked: {
+                                popover.edited = true
+                                for (var i = 0; i < popover.labels.length; i++) {
+                                    var label = popover.labels[i]
+
+                                    if (label.name === modelData.name) {
+                                        popover.labels.splice(i, 1)
+                                        return
+                                    }
+                                }
+
+                                popover.labels.push(modelData)
+                            }
+
+                            style: SuruCheckBoxStyle {}
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    Component {
+        id: editSheet
+        ComposerSheet {
+            id: sheet
+
+            title: i18n.tr("Edit Issue")
+
+            Component.onCompleted: {
+                sheet.__leftButton.text = i18n.tr("Cancel")
+                sheet.__leftButton.color = "gray"
+                sheet.__rightButton.text = i18n.tr("Update")
+                sheet.__rightButton.color = sheet.__rightButton.__styleInstance.defaultColor
+                sheet.__foreground.style = Theme.createStyleComponent(Qt.resolvedUrl("../../ubuntu-ui-extras/SuruSheetStyle.qml"), sheet)
+            }
+
+            property string repo
+            property var action
+
+            onConfirmClicked: {
+                PopupUtils.close(sheet)
+                issue.edit(nameField.text, descriptionField.text)
+            }
+
+            function createIssue() {
+                busyDialog.show()
+                request = github.newIssue(repo, nameField.text, descriptionField.text, function(has_error, status, response) {
+                    busyDialog.hide()
+                    if (has_error) {
+                        error(i18n.tr("Connection Error"), i18n.tr("Unable to create issue. Check your connection and/or firewall settings.\n\nError: %1").arg(status))
+                    } else {
+                        PopupUtils.close(sheet)
+                        dialog.action()
+                    }
+                })
+            }
+
+            TextField {
+                id: nameField
+                placeholderText: i18n.tr("Title")
+                anchors {
+                    left: parent.left
+                    top: parent.top
+                    right: parent.right
+                    //margins: units.gu(1)
+                }
+                text: issue.title
+                color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
+
+                Keys.onTabPressed: descriptionField.forceActiveFocus()
+            }
+
+            TextArea {
+                id: descriptionField
+                placeholderText: i18n.tr("Description")
+                text: issue.body
+                color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
+
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                    top: nameField.bottom
+                    bottom: parent.bottom
+                    topMargin: units.gu(1)
+                }
+            }
+        }
+
     }
 }

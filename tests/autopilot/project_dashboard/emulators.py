@@ -16,11 +16,11 @@
 
 """Project Dashboard autopilot emulators."""
 
-import re
-import time
+#import re
+#import time
 
-from autopilot import input
-from autopilot.introspection import dbus
+#from autopilot import input
+#from autopilot.introspection import dbus
 
 from ubuntuuitoolkit import emulators as toolkit_emulators
 
@@ -32,9 +32,11 @@ class MainView(toolkit_emulators.MainView):
         page.main_view = self
         return page
 
+
 class ProjectsPage(toolkit_emulators.UbuntuUIToolkitEmulatorBase):
     def get_new_project_dialog(self):
         pass
+
 
 class SettingsPage(toolkit_emulators.UbuntuUIToolkitEmulatorBase):
     pass

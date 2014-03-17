@@ -35,8 +35,9 @@ Plugin {
     property var milestones: doc.get("milestones", [])
     property var info: doc.get("repo", {})
     property var availableAssignees: doc.get("assignees", [])
-    property var releases: doc.get("releases", [])
+    property var branches: doc.get("branches", [])
     property var commitStats: doc.get("commit_stats", {})
+    property var releases: doc.get("releases", [])
 
     document: Document {
         id: doc
@@ -97,7 +98,7 @@ Plugin {
 
         github.getAssignees(repo, function(has_error, status, response) {
             loading--
-            print("Repository:", response)
+            //print("Repository:", response)
             var json = JSON.parse(response)
 
             doc.set("assignees", json)
@@ -105,7 +106,7 @@ Plugin {
 
         github.getLabels(repo, function(has_error, status, response) {
             loading--
-            print("Labels:", response)
+            //print("Labels:", response)
             var json = JSON.parse(response)
 
             doc.set("labels", json)

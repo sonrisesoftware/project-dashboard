@@ -29,32 +29,32 @@ Service {
     name: "github"
     type: ["GitHubIssues", "GitHubPullRequests", "GitHub"]
     title: i18n.tr("GitHub")
-    authenticationStatus: oauth === "" ? "" : i18n.tr("Logged in as %1").arg(user)
+    authenticationStatus: oauth === "" ? "" : i18n.tr("Logged in as %1").arg(user.login)
     disabledMessage: i18n.tr("To connect to a GitHub project, please authenticate to GitHub from Settings")
 
     enabled: oauth !== ""
 
     property string oauth:settings.get("githubToken", "")
     property string github: "https://api.github.com"
-    property string user: settings.get("githubUser", "")
+    property var user: settings.get("githubUser", "")
 
     onOauthChanged: {
         if (oauth !== "") {
             get("/user", userLoaded)
         } else {
-            settings.set("githubUser", "")
+            settings.set("githubUser", undefined)
         }
     }
 
     function userLoaded(has_error, status, response) {
-        print("User:", response)
+        //print("User:", response)
         var json = JSON.parse(response)
 
         if (has_error && json.hasOwnProperty("message") && json.message === "Bad credentials") {
             settings.set("githubToken", "")
             PopupUtils.open(accessRevokedDialog, mainView.pageStack.currentPage)
         } else {
-            settings.set("githubUser", json.login)
+            settings.set("githubUser", json)
         }
     }
 
@@ -90,8 +90,20 @@ Service {
         return Http.post(github + "/repos/" + repo + "/issues", ["access_token=" + oauth], callback, undefined, {"Accept":"application/vnd.github.v3+json"}, JSON.stringify({ "title": title, "body": description }))
     }
 
-    function getPullRequests(repo, callback) {
-        return get("/repos/" + repo + "/pulls", callback)
+    function newPullRequest(repo, title, description, branch, callback) {
+        return Http.post(github + "/repos/" + repo + "/pulls", ["access_token=" + oauth], callback, undefined, {"Accept":"application/vnd.github.v3+json"}, JSON.stringify({ "title": title, "body": description, "head": branch, "base": "master" }))
+    }
+
+    function mergePullRequest(repo, number, message, callback) {
+        return Http.put(github + "/repos/" + repo + "/pulls/" + number + "/merge", ["access_token=" + oauth], callback, undefined, {"Accept":"application/vnd.github.v3+json"}, JSON.stringify({ "commit_message": message }))
+    }
+
+    function getPullRequests(repo, state, callback) {
+        return get("/repos/" + repo + "/pulls", callback, ["state=" + state])
+    }
+
+    function getPullRequest(repo, number, callback) {
+        return get("/repos/" + repo + "/pulls/" + number, callback)
     }
 
     function getAssignees(repo, callback) {
@@ -106,6 +118,10 @@ Service {
         return get("/repos/" + repo + "/labels", callback)
     }
 
+    function getBranches(repo, callback) {
+        return get("/repos/" + repo + "/branches", callback)
+    }
+
     function getRepository(repo, callback) {
         return get("/repos/" + repo, callback)
     }
@@ -114,12 +130,20 @@ Service {
         return get('/repos/' + repo + '/issues/' + issue.number + '/comments', callback)
     }
 
+    function getPullCommits(repo, pull, callback) {
+        return get('/repos/' + repo + '/pulls/' + pull.number + '/commits', callback)
+    }
+
+    function getIssueEvents(repo, issue, callback) {
+        return get('/repos/' + repo + '/issues/' + issue.number + '/events', callback)
+    }
+
     function newIssueComment(repo, issue, comment, callback) {
         return post("/repos/" + repo + "/issues/" + issue.number + "/comments", callback, undefined, JSON.stringify({body: comment}))
     }
 
     function connect(project) {
-        print("Connecting...")
+        //print("Connecting...")
         PopupUtils.open(githubDialog, mainView.pageStack.currentPage, {project: project})
     }
 

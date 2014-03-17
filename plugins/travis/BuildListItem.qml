@@ -25,6 +25,8 @@ ListItem.SingleValue {
     property int status
     property string message
     property string built_at
+    property var info
+    property var repo
 
     Column {
         id: labels
@@ -64,4 +66,6 @@ ListItem.SingleValue {
     }
 
     value: buildStatus(status)
+
+    //onClicked: pageStack.push(Qt.resolvedUrl("BuildPage.qml"), {number: number, build: info, repo: repo})
 }

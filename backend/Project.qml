@@ -31,14 +31,42 @@ Object {
 
     property alias document: doc
 
-    property var plugins: doc.get("plugins", {"tasks": true})
+    property var plugins: doc.get("plugins", {"notes": true})
 
     signal reload
 
     function enablePlugin(name, value) {
+        var beforeValue = hasPlugin(name)
+
         //print("Setting state of", name, "to:", value)
         plugins[name] = value
         doc.set("plugins", plugins)
+
+        var plugin = backend.getPlugin(name)
+        var type = plugin.type
+
+        if (hasPlugin(name) !== beforeValue) {
+            if (hasPlugin(name)) {
+                if (typeof(type) == "object") {
+                    for (var j = 0; j < type.length; j++) {
+                        enabledPlugins.append({"type": type[j]})
+                    }
+                } else {
+                    enabledPlugins.append({"type": type})
+                }
+            } else {
+                for (var i = 0; i < enabledPlugins.count; i++) {
+                    if ((typeof(type) === "object" && type.indexOf(enabledPlugins.get(i).type)) ||
+                         (enabledPlugins.get(i).type === type)) {
+                        enabledPlugins.remove(i)
+                    }
+                }
+            }
+        }
+    }
+
+    property ListModel enabledPlugins: ListModel {
+
     }
 
     function hasPlugin(name) {
@@ -49,7 +77,10 @@ Object {
         return plugins.hasOwnProperty(name) ? plugins[name] : ""
     }
 
-    property var enabledPlugins: {
+    //property var enabledPlugins: []
+
+
+    function loadPlugins() {
         var list = []
 
         var pluginObjects = []
@@ -61,8 +92,8 @@ Object {
             pluginObjects.push(plugin)
         }
 
-        pluginObjects.sort(function(item1, item2) {
-            return item1.docId - item2.docId
+        pluginObjects = pluginObjects.sort(function(item1, item2) {
+            return item1.name - item2.name
         })
 
         for (var i = 0; i < pluginObjects.length; i++) {
@@ -71,18 +102,20 @@ Object {
             //print("Type:", typeof(type))
 
             if (typeof(type) == "object") {
-                list = list.concat(type)
+                for (var j = 0; j < type.length; j++) {
+                    enabledPlugins.append({"type": type[j]})
+                }
             } else {
-                list.push(type)
+                enabledPlugins.append({"type": type})
             }
         }
-
-        return list
     }
 
     Document {
         id: doc
         parent: backend.document
+
+        Component.onCompleted: loadPlugins()
     }
 
     function remove() {

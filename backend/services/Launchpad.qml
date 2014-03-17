@@ -48,7 +48,7 @@ Service {
     }
 
     function userLoaded(has_error, status, response) {
-        print("User:", response)
+        //print("User:", response)
         var json = JSON.parse(response)
 
         if (has_error && json.hasOwnProperty("message") && json.message === "Bad credentials") {
@@ -78,7 +78,7 @@ Service {
     }
 
     function connect(project) {
-        print("Connecting...")
+        //print("Connecting...")
         PopupUtils.open(launchpadDialog, mainView.pageStack.currentPage, {project: project})
     }
 

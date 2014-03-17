@@ -26,9 +26,15 @@ UbuntuShape {
     width: parent.width
     height: childrenRect.height
 
-    property string author
-    property string date
-    property string text
+    property var event
+
+    property string author: type === "comment" ? event.user.login : event.actor.login
+    property string date: event.created_at
+    property string text: event.hasOwnProperty("body") ? renderMarkdown(event.body)
+                                                       : ""
+    property string type: event.hasOwnProperty("event") ? event.event : "comment"
+
+    property string title: i18n.tr("<b>%1</b> commented %2").arg(author).arg(friendsUtils.createTimeString(date))
 
     Item {
         id: titleItem
@@ -44,11 +50,22 @@ UbuntuShape {
 
         Label {
             id: label
-            text: i18n.tr("<b>%1</b> commented %2").arg(author).arg(friendsUtils.createTimeString(date))
+            text: title
             anchors {
                 verticalCenter: parent.verticalCenter
                 left: parent.left
                 leftMargin: units.gu(1)
+            }
+        }
+
+        Label {
+            text: i18n.tr("Owner")
+            visible: plugin.info.owner.login === author
+            font.italic: true
+            anchors {
+                verticalCenter: parent.verticalCenter
+                right: parent.right
+                rightMargin: units.gu(1)
             }
         }
     }
@@ -56,13 +73,14 @@ UbuntuShape {
     ListItem.ThinDivider {
         id: divider
         anchors.top: titleItem.bottom
+        visible: event.hasOwnProperty("body")
     }
 
     Item {
         id: commentArea
         anchors.top: divider.bottom
         width: parent.width
-        height: contents.implicitHeight + units.gu(2.1)
+        height: event.hasOwnProperty("body") ? contents.implicitHeight + units.gu(2.1) : 0
 
         Label {
             id: contents

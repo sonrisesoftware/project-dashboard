@@ -109,7 +109,7 @@ Plugin {
     viewAllMessage: i18n.tr("View all resources")
     summary: i18n.tr("<b>%1</b> resources").arg(documents.length)
 
-    Component {
+    property Component addPopover: Component {
         id: addPopover
 
         ActionSelectionPopover {

@@ -46,15 +46,15 @@ Page {
         }
     ]
 
-    flickable: sidebar.expanded || project.enabledPlugins.length === 0 ? null : mainFlickable
+    flickable: sidebar.expanded || project.enabledPlugins.length === 0 ? null : listView
 
     onFlickableChanged: {
         if (flickable === null) {
-            mainFlickable.topMargin = 0
-            mainFlickable.contentY = 0
+            listView.topMargin = 0
+            listView.contentY = 0
         } else {
-            mainFlickable.topMargin = units.gu(9.5)
-            mainFlickable.contentY = -units.gu(9.5)
+            listView.topMargin = units.gu(9.5)
+            listView.contentY = -units.gu(9.5)
         }
     }
 
@@ -146,6 +146,25 @@ Page {
         property Plugin plugin: selectedPlugin
     }
 
+    ListView {
+        id: listView
+        anchors.fill: parent
+        visible: !sidebar.expanded
+        model: column.children
+        delegate: ListItem.SingleValue {
+            property var plugin: visible ? modelData.item : null
+            visible: modelData.hasOwnProperty("item") && modelData.item != null
+            enabled: plugin.page
+            height: visible? implicitHeight : 0
+
+            text: visible ? plugin.title : ""
+            value: visible ? plugin.value : ""
+
+            progression: true
+            onClicked: displayPlugin(plugin)
+        }
+    }
+
     Flickable {
         id: mainFlickable
         anchors {
@@ -155,7 +174,7 @@ Page {
             bottom: parent.bottom
         }
         clip: wideAspect
-        visible: selectedPlugin == null
+        visible: selectedPlugin == null && sidebar.expanded
         contentHeight: contents.height
         contentWidth: width
 
@@ -177,15 +196,26 @@ Page {
                     height: loader.height + units.gu(2)
 
                     property alias item: loader.item
+                    visible: loader.status == Loader.Ready
+                    opacity: visible ? 1 : 0
+
+                    Behavior on opacity {
+                        UbuntuNumberAnimation {
+                            duration: UbuntuAnimation.SlowDuration
+                        }
+                    }
 
                     Loader {
                         id: loader
                         anchors.centerIn: parent
                         width: parent.width - units.gu(2)
                         source: Qt.resolvedUrl("../plugins/" + modelData + ".qml")
+                        active: true
                         onLoaded: {
                             column.reEvalColumns()
                         }
+                        asynchronous: true
+
 
                         onHeightChanged: column.reEvalColumns()
                     }
@@ -202,16 +232,42 @@ Page {
 
     Sidebar {
         id: sidebar
-        expanded: false//wideAspect
-        width: units.gu(8)
+        expanded: wideAspect
+        width: units.gu(6)
         color: Qt.rgba(0.2,0.2,0.2,0.8)
 
-//        Column {
-//            width: parent.width
+        Column {
+            width: parent.width
+
+            ListItem.Standard {
+                id: item
+                height: width
+                onClicked: selectedPlugin = null
+                selected: selectedPlugin === null
+
+                Column {
+                    anchors.centerIn: parent
+                    spacing: units.gu(0.5)
+
+                    AwesomeIcon {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        name: "dashboard"
+                        size: units.gu(3.5)
+                        color: item.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
+                    }
+
+//                    Label {
+//                        anchors.horizontalCenter: parent.horizontalCenter
+//                        text: i18n.tr("Overview")
+//                        fontSize: "small"
+//                        color: item.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
+//                    }
+                }
+            }
 
 //            ListItem.Standard {
-//                id: item
-//                height: width
+//                id: inboxItem
+//                height: units.gu(7)//width
 //                onClicked: selectedPlugin = null
 //                selected: selectedPlugin === null
 
@@ -221,51 +277,75 @@ Page {
 
 //                    AwesomeIcon {
 //                        anchors.horizontalCenter: parent.horizontalCenter
-//                        name: "dashboard"
+//                        name: "inbox"
 //                        size: units.gu(3)
-//                        color: item.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
+//                        color: inboxItem.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
+
+//                        Rectangle {
+//                            color: colors["red"]
+//                            width: label.text.length == 1 ? height: label.width + units.gu(1.2)
+//                            height: units.gu(2.5)
+//                            radius: height/2
+//                            border.color: Qt.darker(colors["red"])
+//                            antialiasing: true
+
+//                            Label {
+//                                id: label
+//                                anchors.centerIn: parent
+//                                text: "23"
+//                            }
+
+//                            anchors {
+//                                horizontalCenter: parent.right
+//                                verticalCenter: parent.top
+//                                verticalCenterOffset: units.gu(1)
+//                                horizontalCenterOffset: units.gu(0.5)
+//                            }
+//                        }
 //                    }
 
 //                    Label {
 //                        anchors.horizontalCenter: parent.horizontalCenter
-//                        text: i18n.tr("Pulse")
-//                        color: item.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
+//                        text: i18n.tr("Inbox")
+//                        fontSize: "small"
+//                        color: inboxItem.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
 //                    }
 //                }
 //            }
 
-//            Repeater {
-//                model: column.children
-//                delegate: ListItem.Standard {
-//                    id: pluginSidebarItem
-//                    height: visible ? width : 0
-//                    visible: modelData.hasOwnProperty("item")
-//                    enabled: modelData.item.page
-//                    opacity: enabled ? 1 : 0.5
-//                    onClicked: selectedPlugin = modelData.item
-//                    selected: selectedPlugin === modelData.item
+            Repeater {
+                model: column.children
+                delegate: ListItem.Standard {
+                    id: pluginSidebarItem
+                    height: visible ? width : 0
+                    visible: modelData.hasOwnProperty("item") && modelData.item != null
+                    enabled: modelData.item.page
+                    opacity: enabled ? 1 : 0.5
+                    onClicked: selectedPlugin = modelData.item
+                    selected: selectedPlugin === modelData.item
 
-//                    Column {
-//                        anchors.centerIn: parent
-//                        spacing: units.gu(0.5)
+                    Column {
+                        anchors.centerIn: parent
+                        spacing: units.gu(0.5)
 
-//                        AwesomeIcon {
-//                            anchors.horizontalCenter: parent.horizontalCenter
-//                            name: modelData.item.iconSource
-//                            size: units.gu(3)
+                        AwesomeIcon {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            name: modelData.item.iconSource
+                            size: units.gu(3.5)
 
-//                            color: pluginSidebarItem.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
-//                        }
+                            color: pluginSidebarItem.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
+                        }
 
 //                        Label {
 //                            anchors.horizontalCenter: parent.horizontalCenter
 //                            text: modelData.item.shortTitle
 //                            color: pluginSidebarItem.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
+//                            fontSize: "small"
 //                        }
-//                    }
-//                }
-//            }
-//        }
+                    }
+                }
+            }
+        }
     }
 
     Scrollbar {

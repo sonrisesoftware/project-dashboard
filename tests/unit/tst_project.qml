@@ -12,7 +12,7 @@ import "../../ubuntu-ui-extras/listutils.js" as List
 //   qmltestrunner
 
 Item {
-    id: root
+    id: mainView
 
     // The objects
     Backend {
@@ -40,7 +40,7 @@ Item {
 
     function newObject(type, args) {
         var component = Qt.createComponent(type);
-        return component.createObject(root, args);
+        return component.createObject(mainView, args);
     }
 
     TestCase {
@@ -58,6 +58,7 @@ Item {
 
         function initTestCase() {
             console.debug(">> initTestCase");
+            settings.set("name", "value")
             compare(backend.projects.length,0,"No projects should exist beforehand");
             console.debug("<< initTestCase");
         }
@@ -118,7 +119,9 @@ Item {
             compare(backend.projects.length,orig_length + 1, "Project was not created correctly")
             compare(List.objectKeys(backend.document.save().children).length, orig_length + 1, "Project doesn't show when saved")
 
+            print(List.objectKeys(db.document.save().children))
             compare(List.objectKeys(db.document.save().children).length, 2, "Backend and settings aren't being saved")
+
         }
     }
 }
