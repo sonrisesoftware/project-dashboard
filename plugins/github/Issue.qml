@@ -197,7 +197,7 @@ Object {
         var request = github.editIssue(plugin.repo, issue.number, {"title": title, "body": body}, function(response) {
             complete()
             if (response === -1) {
-                error(i18n.tr("Connection Error"), i18n.tr("Unable to edit. Check your connection and/or firewall settings."))
+                error(i18n.tr("Connection Error"), i18n.tr("Unable to update issue. Check your connection and/or firewall settings."))
             } else {
                 info.title = title
                 info.body = body
@@ -205,7 +205,7 @@ Object {
             }
         })
 
-        busy(i18n.tr("Changing Labels"), i18n.tr("Changes the labels for the issue"), request)
+        busy(i18n.tr("Updating Issue"), i18n.tr("Updating the title and body of the issue"), request)
     }
 
     function comment(text) {
