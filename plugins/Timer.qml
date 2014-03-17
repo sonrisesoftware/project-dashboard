@@ -35,7 +35,7 @@ Plugin {
 
     property alias dates: doc.children
     property int totalTime: savedTime + currentTime
-    property int currentTime: new Date() - startTime
+    property int currentTime: 0//new Date() - startTime
     property int savedTime: today.get("savedTime", 0)
     property int otherTime: List.iter(doc.children, function(docId) {
         if (docId === today.docId)
@@ -72,10 +72,14 @@ Plugin {
 
     Document {
         id: today
-        docId: new Date(new Date().toDateString()).toJSON()
+        docId: {
+            var today = DateUtils.today
+            return today.toJSON()
+        }
+
         parent: doc
 
-        Component.onCompleted: today.set("date", new Date().toJSON())
+        Component.onCompleted: today.set("date", DateUtils.formattedDate(new Date()))
     }
 
     document: Document {
@@ -280,7 +284,7 @@ Plugin {
                     model: dates
                     delegate: ListItem.SingleValue {
                         id: item
-                        text: DateUtils.formattedDate(new Date(child.get("date", "")))
+                        text: child.get("date", "")///*DateUtils.formattedDate(*/new Date(child.get("date", ""))//)
                         value: modelData === today.docId ? DateUtils.friendlyDuration(totalTime)
                                                          : DateUtils.friendlyDuration(child.get("time", 0))
                         onClicked: PopupUtils.open(editDialog, item, {docId: modelData})
