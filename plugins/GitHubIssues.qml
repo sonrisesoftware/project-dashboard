@@ -93,10 +93,12 @@ Plugin {
         loading += 2
         github.getIssues(repo, "open", function(has_error, status, response) {
             loading--
+
             if (has_error)
                 error(i18n.tr("Connection Error"), i18n.tr("Unable to download list of issues. Check your connection and/or firewall settings.\n\nError: %1").arg(status))
             var json = JSON.parse(response)
 
+            issues.startGroup()
             for (var i = 0; i < json.length; i++) {
                 var item = json[i]
                 if (item.hasOwnProperty("pull_request"))
@@ -112,12 +114,14 @@ Plugin {
                     issues.newDoc(String(item.number), {"info": item})
                 }
             }
+            issues.endGroup()
         })
 
         github.getIssues(repo, "closed", function(has_error, status, response) {
             loading--
             var json = JSON.parse(response)
 
+            issues.startGroup()
             for (var i = 0; i < json.length; i++) {
                 var item = json[i]
                 if (item.hasOwnProperty("pull_request"))
@@ -137,6 +141,7 @@ Plugin {
                     issues.newDoc(String(item.number), {"info": item})
                 }
             }
+            issues.endGroup()
         })
     }
 }

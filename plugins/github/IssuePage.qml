@@ -70,7 +70,7 @@ Page {
             id: mergeAction
             text: i18n.tr("Merge")
             iconSource: getIcon("code-fork")
-            enabled: issue.isPullRequest && !issue.merged && issue.mergeable
+            enabled: issue.isPullRequest && !issue.merged && issue.mergeable && plugin.hasPushAccess
         },
 
         Action {
@@ -144,8 +144,8 @@ Page {
                 }
 
                 Label {
-                    text: issue.isPullRequest ? issue.merged ? i18n.tr("<b>%1</b> merged %2 commits").arg(issue.user.login).arg(commits.length)
-                                                 : i18n.tr("<b>%1</b> wants to merge %2 commits").arg(issue.user.login).arg(commits.length)
+                    text: issue.isPullRequest ? issue.merged ? i18n.tr("<b>%1</b> merged %2 commits").arg(issue.user.login).arg(issue.commits.length)
+                                                 : i18n.tr("<b>%1</b> wants to merge %2 commits").arg(issue.user.login).arg(issue.commits.length)
                                         : i18n.tr("<b>%1</b> opened this issue %2").arg(issue.user.login).arg(friendsUtils.createTimeString(issue.created_at))
                     anchors.verticalCenter: parent.verticalCenter
                 }

@@ -40,7 +40,7 @@ Plugin {
         onTriggered: PopupUtils.open(Qt.resolvedUrl("github/NewPullRequestPage.qml"), plugin, {repo: repo, branches: branches, action: reload})
     }
 
-    property var openIssues: issues.filteredChildren(function(doc) { return doc.info.state === "open" }).sort(function(a, b) { return parseInt(b) - parseInt(a) })
+    property var openIssues: issues.filteredChildren(function(doc) { return doc.info && doc.info.hasOwnProperty("head") && doc.info.state === "open" }).sort(function(a, b) { return parseInt(b) - parseInt(a) })
     property var branches: doc.get("branches", [])
     property var info: doc.get("repo", {})
 

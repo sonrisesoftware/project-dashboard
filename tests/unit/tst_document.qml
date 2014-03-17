@@ -12,7 +12,7 @@ import "../../ubuntu-ui-extras/listutils.js" as List
 //   qmltestrunner
 
 Item {
-    id: root
+    id: mainView
 
     Document {
         id: document
@@ -21,7 +21,7 @@ Item {
 
     function newObject(type, args) {
         var component = Qt.createComponent(type);
-        return component.createObject(root, args);
+        return component.createObject(mainView, args);
     }
 
     TestCase {
