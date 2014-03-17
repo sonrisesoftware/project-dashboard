@@ -95,7 +95,7 @@ Service {
     }
 
     function mergePullRequest(repo, number, callback) {
-        return Http.put(github + "/repos/" + repo + "/pulls" + number + "/merge", ["access_token=" + oauth], callback, undefined, {"Accept":"application/vnd.github.v3+json"})
+        return Http.put(github + "/repos/" + repo + "/pulls/" + number + "/merge", ["access_token=" + oauth], callback, undefined, {"Accept":"application/vnd.github.v3+json"})
     }
 
     function getPullRequests(repo, state, callback) {

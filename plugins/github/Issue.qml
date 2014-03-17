@@ -152,7 +152,7 @@ Object {
     }
 
     function merge() {
-        var request = github.mergePullRequest(plugin.repo, number, function(hass_error, status, response) {
+        var request = github.mergePullRequest(plugin.repo, number, function(has_error, status, response) {
             complete()
             if (has_error) {
                 error(i18n.tr("Connection Error"), i18n.tr("Unable to close %1. Check your connection and/or firewall settings.").arg(type))

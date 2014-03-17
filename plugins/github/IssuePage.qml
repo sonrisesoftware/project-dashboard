@@ -54,7 +54,7 @@ Page {
             busyDialog.hide()
         }
 
-        //onError: error(title, message)
+        onError: mainView.error(title, message)
     }
 
     actions: [
