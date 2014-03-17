@@ -153,7 +153,7 @@ Page {
         model: column.children
         delegate: ListItem.SingleValue {
             property var plugin: visible ? modelData.item : null
-            visible: modelData.hasOwnProperty("item")
+            visible: modelData.hasOwnProperty("item") && modelData.visible
 
             text: visible ? plugin.title : ""
             value: visible ? plugin.value : ""
@@ -195,6 +195,13 @@ Page {
 
                     property alias item: loader.item
                     visible: loader.status == Loader.Ready
+                    opacity: visible ? 1 : 0
+
+                    Behavior on opacity {
+                        UbuntuNumberAnimation {
+                            duration: UbuntuAnimation.SlowDuration
+                        }
+                    }
 
                     Loader {
                         id: loader
@@ -308,7 +315,7 @@ Page {
                 delegate: ListItem.Standard {
                     id: pluginSidebarItem
                     height: visible ? width : 0
-                    visible: modelData.hasOwnProperty("item")
+                    visible: modelData.hasOwnProperty("item") && modelData.visible
                     enabled: modelData.item.page
                     opacity: enabled ? 1 : 0.5
                     onClicked: selectedPlugin = modelData.item
