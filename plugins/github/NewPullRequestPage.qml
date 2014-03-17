@@ -35,6 +35,16 @@ ComposerSheet {
         sheet.__foreground.style = Theme.createStyleComponent(Qt.resolvedUrl("../../ubuntu-ui-extras/SuruSheetStyle.qml"), sheet)
     }
 
+    // FIXME: A hack to ensure that the sheet remains until after the issue is created,
+    // since the sheet going away prematurely was causing the app to crash when HttpLib
+    // called the callback function
+    __rightButton: Button {
+        objectName: "confirmButton"
+        onClicked: {
+            confirmClicked()
+        }
+    }
+
     onConfirmClicked: createPullRequest()
 
     property string repo
@@ -117,7 +127,7 @@ ComposerSheet {
                 error(i18n.tr("Connection Error"), i18n.tr("Unable to create pull request. Check your connection and/or firewall settings.\n\nError: %1").arg(status))
             } else {
                 PopupUtils.close(sheet)
-                dialog.action()
+                sheet.action()
             }
         })
     }
