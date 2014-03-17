@@ -152,15 +152,20 @@ Object {
     }
 
     function merge() {
-        var request = github.mergePullRequest(plugin.repo, number, function(response) {
+        var request = github.mergePullRequest(plugin.repo, number, function(hass_error, status, response) {
             complete()
-            if (response === -1) {
-                error(i18n.tr("Connection Error"), i18n.tr("Unable to merge %1. Check your connection and/or firewall settings.").arg(type))
+            if (has_error) {
+                error(i18n.tr("Connection Error"), i18n.tr("Unable to close %1. Check your connection and/or firewall settings.").arg(type))
             } else {
-                info.state = "closed"
-                doc.set("info", info)
-                newEvent("merged")
-                newEvent("closed")
+                var json = JSON.parse(response)
+                if (json.merged) {
+                    info.state = "closed"
+                    doc.set("info", info)
+                    newEvent("merged")
+                    newEvent("closed")
+                } else {
+                    error(i18n.tr("Connection Error"), i18n.tr("Unable to merge %1:\n\n%2").arg(type).arg(response.message))
+                }
             }
         })
 

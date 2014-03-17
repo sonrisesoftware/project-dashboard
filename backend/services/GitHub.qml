@@ -94,7 +94,7 @@ Service {
         return Http.post(github + "/repos/" + repo + "/pulls", ["access_token=" + oauth], callback, undefined, {"Accept":"application/vnd.github.v3+json"}, JSON.stringify({ "title": title, "body": description, "head": branch, "base": "master" }))
     }
 
-    function mergePullRequest(repo, number) {
+    function mergePullRequest(repo, number, callback) {
         return Http.put(github + "/repos/" + repo + "/pulls" + number + "/merge", ["access_token=" + oauth], callback, undefined, {"Accept":"application/vnd.github.v3+json"})
     }
 
