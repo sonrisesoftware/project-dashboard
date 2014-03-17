@@ -136,7 +136,9 @@ MainView {
         if (typeof(text) != "string") {
             return ""
         } if (markdownCache.hasOwnProperty(text)) {
-            return markdownCache[text]
+            var response = markdownCache[text].replace(/<a(.*?)>(.*?)</g, "<a $1><font color=\"" + colors["blue"] + "\">$2</font><")
+            print("RETURNING: ", response)
+            return response
         } else {
             print("Calling Markdown API")
             Http.post(github.github + "/markdown", ["access_token=" + github.oauth], function(has_error, status, response) {
