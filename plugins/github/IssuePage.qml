@@ -364,6 +364,7 @@ Page {
                 model: plugin.availableAssignees.concat(i18n.tr("No one assigned"))
                 visible: plugin.hasPushAccess
                 selectedIndex: {
+                    print("ASSIGNEE:", JSON.stringify(issue.assignee))
                     if (issue.assignee && issue.assignee.hasOwnProperty("login")) {
                         for (var i = 0; i < model.length; i++) {
                             if (model[i].login === issue.assignee.login)
@@ -380,35 +381,13 @@ Page {
                     text: modelData.login
                 }
 
-//                onSelectedIndexChanged: {
-//                    var login = ""
-//                    if (selectedIndex < model.length - 1) {
-//                        login = model[selectedIndex].login
+                onSelectedIndexChanged: {
+                    var assignee = undefined
+                    if (selectedIndex < model.length - 1)
+                        assignee = model[selectedIndex]
 
-//                        busyDialog.text = i18n.tr("Setting assignee to <b>%1</b>").arg(model[selectedIndex].login)
-//                    } else {
-//                        busyDialog.text = i18n.tr("Removing assignee from the %1").arg(type)
-//                    }
-
-//                    if (issue.assignee && issue.assignee.hasOwnProperty("login") && issue.assignee.login === login)
-//                        return
-
-//                    if (!(issue.assignee && issue.assignee.hasOwnProperty("login")) && login === undefined)
-//                        return
-
-//                    busyDialog.title = i18n.tr("Changing Assignee")
-//                    busyDialog.show()
-
-//                    request = github.editIssue(plugin.repo, issue.number, {"assignee": login}, function(response) {
-//                        busyDialog.hide()
-//                        if (response === -1) {
-//                            error(i18n.tr("Connection Error"), i18n.tr("Unable to change assignee. Check your connection and/or firewall settings."))
-//                        } else {
-//                            issue.assignee = {"login": login}
-//                            plugin.reload()
-//                        }
-//                    })
-//                }
+                    issue.setAssignee(assignee)
+                }
             }
 
             ListItem.Header {

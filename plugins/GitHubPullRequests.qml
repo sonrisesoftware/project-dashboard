@@ -117,8 +117,9 @@ Plugin {
                         continue
 
                     if (issues.hasChild(String(item.number))) {
-                        var issue = issues.getChild(String(item.number))
-                        issue.set("info", item)
+                        issues.childrenData[String(item.number)].info = item
+                        //var issue = issues.getChild(String(item.number))
+                        //issue.set("info", item)
                     } else {
                         newUnreadItem(i18n.tr("<b>%1</b> opened issue %2").arg(item.user.login).arg(item.number),
                                       "",
@@ -143,15 +144,17 @@ Plugin {
                         continue
 
                     if (issues.hasChild(String(item.number))) {
-                        var issue = issues.getChild(String(item.number))
-                        issue.set("info", item)
+                        issues.childrenData[String(item.number)].info = item
+                        //var issue = issues.getChild(String(item.number))
+                        //issue.set("info", item)
                     } else {
                         newUnreadItem(i18n.tr("<b>%1</b> opened issue %2").arg(item.user.login).arg(item.number),
                                       "",
                                       info.created_at)
-                        newUnreadItem(i18n.tr("<b>%1</b> closed issue %2").arg(item.assignee.login).arg(item.number),
-                                      "",
-                                      info.closed_at)
+                        if (info.closed_at)
+                            newUnreadItem(i18n.tr("<b>%1</b> closed issue %2").arg(item.assignee.login).arg(item.number),
+                                          "",
+                                          info.closed_at)
                         issues.newDoc(String(item.number), {"info": item})
                     }
                 }

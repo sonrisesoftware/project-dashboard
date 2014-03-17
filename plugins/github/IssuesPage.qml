@@ -96,17 +96,17 @@ PluginPage {
     property var selectedFilter: allFilter
 
     property var allFilter: function(number) {
-        var issue = issues.childrenData[number].info
+        var issue = issues.childrenData[String(number)].info
         return issue.state === "open" || settings.get("showClosedTickets", false)
     }
 
     property var assignedFilter: function(number) {
-        var issue = issues.childrenData[number].info
+        var issue = issues.childrenData[String(number)].info
         return issue.assignee && issue.assignee.login === github.user  && (issue.state === "open" || settings.get("showClosedTickets", false))
     }
 
     property var createdFilter: function(number) {
-        var issue = issues.childrenData[number].info
+        var issue = issues.childrenData[String(number)].info
         return issue.user && issue.user.login === github.user && (issue.state === "open" || settings.get("showClosedTickets", false))
     }
 

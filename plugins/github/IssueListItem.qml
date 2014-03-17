@@ -121,7 +121,7 @@ ListItem.Standard {
             anchors.fill: parent
 
             image: Image {
-                source: assigneeIndicator.visible ? modelData.assignee.avatar_url : ""
+                source: assigneeIndicator.visible ? issue.assignee.avatar_url : ""
             }
         }
     }

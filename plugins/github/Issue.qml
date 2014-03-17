@@ -23,12 +23,13 @@ Object {
     property bool merged: isPullRequest ? info.merged : false
     property bool mergeable: isPullRequest ? info.mergeable : false
     property bool open: info.state === "open"
+    property var assignee: info.assignee
     property var milestone: info.milestone
     property string title: info.title
     property var labels: info.labels
     property var user: info.user
     property var created_at: info.created_at
-    property string body: info.hasOwnProperty("body") ? info.body : ""
+    property string body: typeof(info.body) == "string" ? info.body : ""
 
     function renderBody() {
         return renderMarkdown(body, plugin.repo)
@@ -162,7 +163,7 @@ Object {
             if (response === -1) {
                 error(i18n.tr("Connection Error"), i18n.tr("Unable to change milestone. Check your connection and/or firewall settings."))
             } else {
-                info.milestone = {"number": number}
+                info.milestone = milestone
                 doc.set("info", info)
             }
         })
@@ -171,6 +172,39 @@ Object {
             busy(i18n.tr("Changing Milestone"), i18n.tr("Removing milestone from the %1").arg(type), request)
         else
             busy(i18n.tr("Changing Milestone"), i18n.tr("Setting milestone to <b>%1</b>").arg(milestone.title), request)
+    }
+
+    function setAssignee(assignee) {
+        var login = assignee ? assignee.login : undefined
+
+        if (issue.assignee && issue.assignee.hasOwnProperty("login") && issue.assignee.login === login)
+            return
+
+        if (!(issue.assignee && issue.assignee.hasOwnProperty("login")) && login === undefined)
+            return
+
+        var request = github.editIssue(plugin.repo, issue.number, {"assignee": login}, function(response) {
+            complete()
+            if (response === -1) {
+                error(i18n.tr("Connection Error"), i18n.tr("Unable to change assignee. Check your connection and/or firewall settings."))
+            } else {
+                if (login) {
+                    info.assignee = assignee
+                    doc.set("info", info)
+                } else {
+                    info.assignee = undefined
+                    doc.set("info", info)
+                }
+
+                // TODO: Inject event for assignee change
+            }
+        })
+
+        if (login) {
+            busy(i18n.tr("Changing Assignee"), i18n.tr("Setting assignee to <b>%1</b>").arg(login), request)
+        } else {
+            busy(i18n.tr("Changing Assignee"), i18n.tr("Removing assignee from %1").arg(type), request)
+        }
     }
 
     function updateLabels(labels) {
