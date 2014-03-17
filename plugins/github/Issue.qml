@@ -63,16 +63,19 @@ Object {
 
         // Group together adjacent commits
         var index = 0;
+        var count = 0;
         while (index < allEvents.length) {
             var event = allEvents[index]
 
             if (event && event.event && event.event === "commit") {
                 index++
                 var login = event.actor.login
-                while(index < allEvents.length && allEvents[index].event === "commit" && allEvents[index].actor.login === login) {
+                count = 0
+                while(count <= 5 && index < allEvents.length && allEvents[index].event === "commit" && allEvents[index].actor.login === login) {
                     var nextEvent = allEvents[index]
                     event.commits = event.commits.concat(nextEvent.commits)
                     allEvents.splice(index, 1)
+                    count++
                 }
 
                 index--
