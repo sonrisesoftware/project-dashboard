@@ -8,7 +8,7 @@ Item {
     property string type: event.hasOwnProperty("event") ? event.event : "comment"
     visible: (title !== "" || type === "comment") && (wideAspect ? true: bodyText !== "")
     property string author: type === "comment" ? event.user.login : event.actor.login
-    property string date: event.created_at
+    property string date: event.created_at ? event.created_at : ""
 
     property bool last
 
@@ -28,7 +28,15 @@ Item {
                 return i18n.tr("<b>%1</b> pushed 1 commit %2").arg(author).arg(friendsUtils.createTimeString(date))
             else
                 return i18n.tr("<b>%1</b> pushed %3 commits %2").arg(author).arg(friendsUtils.createTimeString(date)).arg(event.commits.length)
-        } else {if (type == "mentioned") {}
+        } else if (type == "testing") {
+            var color =  event.status == "success" ? colors["green"]
+                                             : event.status == "failure" ? colors["red"]
+                                                                   : event.status == "error" ? colors["yellow"] : "white"
+            if (color === "white")
+                return event.statusDescription
+            else
+                return "<font color=\"" + color + "\">" + event.statusDescription + "</font>"
+        } else {
             return ""
         }
     }
@@ -48,7 +56,15 @@ Item {
             return ""
         } else if (type == "comment") {
             return root.event.hasOwnProperty("body") ? renderMarkdown(root.event.body) : ""
-        } else {if (type == "mentioned") {}
+        } else if (type === "testing") {
+            var color =  event.status == "success" ? colors["green"]
+                                             : event.status == "failure" ? colors["red"]
+                                                                   : event.status == "error" ? colors["yellow"] : "white"
+            if (color === "white")
+                return event.statusDescription
+            else
+                return "<font color=\"" + color + "\">" + event.statusDescription + "</font>"
+        } else {
             return ""
         }
     }
@@ -68,6 +84,8 @@ Item {
             return "code"
         } else if (type === "comment") {
             return "comments-o"
+        } else if (type === "testing") {
+            return wideAspect ? "check" : "check-circle"
         } else {
             return ""
         }
@@ -120,7 +138,7 @@ Item {
                 top: parent.top; topMargin: row.anchors.topMargin
             }
             font.italic: true
-            text: friendsUtils.createTimeString(date)
+            text: type === "testing" ? "" : friendsUtils.createTimeString(date)
         }
 
         Label {
@@ -133,7 +151,7 @@ Item {
                 topMargin: units.gu(0.1)
             }
             text: bodyText
-            textFormat: type == "comment" ? Text.RichText : Text.PlainText
+            textFormat: type == "comment" || type === "testing" ? Text.RichText : Text.PlainText
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
             opacity: 0.7
         }
@@ -183,6 +201,7 @@ Item {
                 id: titleLabel
                 text: title
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                textFormat: Text.RichText
                 anchors.verticalCenter: parent.verticalCenter
             }
         }

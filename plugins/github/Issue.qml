@@ -33,6 +33,7 @@ Object {
     property var created_at: info.created_at
     property string body: typeof(info.body) == "string" ? info.body : ""
     property string status: doc.get("status", "")
+    property string statusDescription: doc.get("statusDescription", "")
 
     function renderBody() {
         return renderMarkdown(body, plugin.repo)
@@ -113,15 +114,17 @@ Object {
         if (isPullRequest) {
             loading++
             github.get(info._links.statuses.href, function(has_error, status, response) {
-                                 print(response)
-                                 if (JSON.parse(response)[0] === undefined) {
-                                     doc.set("status", "")
-                                 } else {
-                                     doc.set("status", JSON.parse(response)[0].state)
-                                 }
+                 print(response)
+                 if (JSON.parse(response)[0] === undefined) {
+                     doc.set("status", "")
+                     doc.set("statusDescription", "")
+                 } else {
+                     doc.set("status", JSON.parse(response)[0].state)
+                     doc.set("statusDescription", JSON.parse(response)[0].description)
+                 }
 
-                                 loading--
-                             })
+                 loading--
+             })
         }
     }
 

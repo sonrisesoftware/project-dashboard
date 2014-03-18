@@ -348,6 +348,19 @@ Page {
                         last: eventItem.y + eventItem.height == eventColumn.height
                     }
                 }
+
+                EventItem {
+                    event: {
+                        "event": "testing",
+                        "actor": {
+                            "login": i18n.tr("Continous Integration")
+                        },
+                        "statusDescription": issue.statusDescription,
+                        "status": issue.status
+                    }
+                    last: true
+                    visible: issue.status !== ""
+                }
             }
 
             TextArea {

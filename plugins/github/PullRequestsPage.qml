@@ -89,7 +89,7 @@ PluginPage {
             bottom: parent.bottom
         }
         model: allIssues
-        delegate: IssueListItem {
+        delegate: PullRequestListItem {
             number: modelData
             show: selectedFilter(modelData)
         }
