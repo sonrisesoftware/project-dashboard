@@ -19,6 +19,8 @@ Item {
         loaded: true
     }
 
+    property var filteredList: document.filteredChildren(function (doc) { return doc.done && doc.done === true})
+
     function newObject(type, args) {
         var component = Qt.createComponent(type);
         return component.createObject(mainView, args);
@@ -80,6 +82,26 @@ Item {
             var list = document.filteredChildren(function (doc) { return doc.number === 1})
             compare(list.length,1, "Filter isn't working")
             compare(list[0],"item1", "Filter isn't working")
+        }
+
+        function test_filterBinding() {
+            var obj1 = {"number": 1, "value": "Test", "done": true}
+            var obj2 = {"number": 2, "value": "Blah"}
+
+            document.removeChildren()
+            compare(document.children.length,0, "Document was not erased")
+            compare(filteredList.length, 0, "Filtered list is not empty")
+
+            document.newDoc("item1", obj1)
+            document.newDoc("item2", obj2)
+
+            compare(document.children.length,2, "Documents were not created correctly")
+            compare(filteredList.length,1, "Filter isn't working")
+
+            var doc = document.getChild("item1")
+            doc.set("done", false)
+
+            compare(filteredList.length,0, "Filter doesn't work with child changes")
         }
     }
 }
