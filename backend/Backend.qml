@@ -44,11 +44,11 @@ Object {
     }
 
     property ListModel availablePlugins: ListModel {
-        ListElement {
-            name: "tasks"
-            type: "ToDo"
-            title: "Tasks"
-        }
+//        ListElement {
+//            name: "tasks"
+//            type: "ToDo"
+//            title: "Tasks"
+//        }
 
         ListElement {
             name: "notes"
@@ -56,11 +56,11 @@ Object {
             title: "Notes"
         }
 
-        ListElement {
-            name: "drawings"
-            type: ""
-            title: "Drawings"
-        }
+//        ListElement {
+//            name: "drawings"
+//            type: ""
+//            title: "Drawings"
+//        }
 
         ListElement {
             name: "resources"
