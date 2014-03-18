@@ -29,7 +29,8 @@ Page {
     
     title: i18n.tr("%2 %1").arg(issue.number).arg(typeTitle)
 
-    property string type: issue.isPullRequest ? "pull request" : "issue"
+    property string type: typeRegular
+    property string typeRegular: issue.isPullRequest ? "pull request" : "issue"
     property string typeCap: issue.isPullRequest ? "Pull request" : "Issue"
     property string typeTitle: issue.isPullRequest ? "Pull Request" : "Issue"
 
@@ -120,7 +121,7 @@ Page {
             bottom: parent.bottom
         }
 
-        contentHeight: column.height + units.gu(4)
+        contentHeight: column.height + (sidebar.expanded ? units.gu(4) : units.gu(2))
         contentWidth: width
 
         Column {
@@ -128,6 +129,7 @@ Page {
             width: parent.width
             anchors {
                 top: parent.top
+                topMargin: sidebar.expanded ? units.gu(2) : units.gu(1)
                 margins: units.gu(2)
                 left: parent.left
                 right: parent.right
@@ -163,6 +165,45 @@ Page {
                 }
             }
 
+            Column {
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                    margins: units.gu(-2)
+                }
+
+                opacity: sidebar.expanded || issue.isPullRequest ? 0 : 1
+                height: sidebar.expanded || issue.isPullRequest ? 0 : implicitHeight
+
+                Behavior on height {
+                    UbuntuNumberAnimation {}
+                }
+
+                Behavior on opacity {
+                    UbuntuNumberAnimation {}
+                }
+
+                ListItem.ThinDivider {}
+
+                ListItem.Standard {
+                    text: "No milestone"
+                    height: units.gu(4)
+                    progression: plugin.hasPushAccess
+                }
+
+                ListItem.Standard {
+                    text: "No one assigned"
+                    height: units.gu(4)
+                    progression: plugin.hasPushAccess
+                }
+
+                ListItem.Standard {
+                    text: "No labels"
+                    height: units.gu(4)
+                    progression: plugin.hasPushAccess
+                }
+            }
+
             TextArea {
                 id: textArea
                 width: parent.width
@@ -187,14 +228,24 @@ Page {
 
             Column {
                 id: eventColumn
-                width: parent.width
-                spacing: parent.spacing
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                    margins: wideAspect ? 0 : units.gu(-2)
+                }
+
+                spacing: wideAspect ? parent.spacing : 0
+
+                ListItem.ThinDivider {
+                    visible: !wideAspect
+                }
 
                 Repeater {
                     model: issue.allEvents
                     delegate: EventItem {
                         id: eventItem
                         event: modelData
+                        //displayCommit: wideAspect
                         last: eventItem.y + eventItem.height == eventColumn.height
                     }
                 }
@@ -267,6 +318,7 @@ Page {
                         text:  issue.state === "open" ? i18n.tr("Comment and Close") : i18n.tr("Comment and Reopen")
                         color: issue.state === "open" ? colors["red"] : colors["green"]
 
+                        visible: wideAspect
                         opacity: commentBox.show ? 1 : 0
                         enabled: commentBox.text !== ""
 
@@ -282,13 +334,12 @@ Page {
                                 if (response === -1) {
                                     error(i18n.tr("Connection Error"), i18n.tr("Unable to create comment. Check your connection and/or firewall settings."))
                                 } else {
-                                    comments.push({body: text, user: {login: github.user}, date: new Date().toISOString()})
-                                    comments = comments
+                                    issue.newComment(text)
 
                                     commentBox.text = ""
                                     commentBox.show = false
 
-                                    closeOrReopen()
+                                    issue.closeOrReopen()
                                 }
                             })
                         }

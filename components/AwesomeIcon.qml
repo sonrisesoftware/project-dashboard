@@ -40,6 +40,7 @@ Item {
                 "clock": "",
                 "bookmark-o": "",
                 "user": "",
+                "comments-o": "",
         "ellipse-h": "",
         "ellipse-v": "",
         "save": "",

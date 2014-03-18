@@ -55,6 +55,11 @@ Object {
         doc.set("events", events)
     }
 
+    function newComment(text) {
+        comments.push({body: text, user: github.user, date: new Date().toISOString()})
+        doc.set("comments", comments)
+    }
+
     property var allEvents: {
         if (!loaded)
             return []
@@ -302,8 +307,7 @@ Object {
             if (response === -1) {
                 error(i18n.tr("Connection Error"), i18n.tr("Unable to create comment. Check your connection and/or firewall settings."))
             } else {
-                comments.push({body: text, user: {login: github.user}, created_at: new Date().toISOString()})
-                doc.set("comments", comments)
+                newComment(text)
             }
         })
 

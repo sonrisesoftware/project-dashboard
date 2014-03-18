@@ -47,8 +47,8 @@ MainView {
 
     backgroundColor: Qt.rgba(0.3,0.3,0.3,1)
 
-    width: units.gu(100)
-    height: units.gu(75)
+    width: units.gu(42)
+    height: units.gu(67)
 
     property var colors: {
         "green": "#5cb85c",//"#59B159",//"#859a01",
