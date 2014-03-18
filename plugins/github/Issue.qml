@@ -188,6 +188,7 @@ Object {
                 } else {
                     info.state = "closed"
                     doc.set("info", info)
+                    newEvent("closed")
                 }
             })
 
@@ -202,6 +203,7 @@ Object {
                 } else {
                     info.state = "open"
                     doc.set("info", info)
+                    newEvent("reopened")
                 }
             })
 
@@ -218,7 +220,7 @@ Object {
         if (!(issue.milestone && issue.milestone.hasOwnProperty("number")) && !milestone)
             return
 
-        var request = github.editIssue(plugin.repo, issue.number, {"milestone": milestone.number}, function(response) {
+        var request = github.editIssue(plugin.repo, issue.number, {"milestone": milestone ? milestone.number : ""}, function(response) {
             complete()
             if (response === -1) {
                 error(i18n.tr("Connection Error"), i18n.tr("Unable to change milestone. Check your connection and/or firewall settings."))

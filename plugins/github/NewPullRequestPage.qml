@@ -73,6 +73,7 @@ ComposerSheet {
                 placeholderText: i18n.tr("Title")
                 width: parent.width
 
+                color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
                 Keys.onTabPressed: descriptionField.forceActiveFocus()
             }
 
@@ -120,6 +121,7 @@ ComposerSheet {
 
                 height: flickable.height - nameField.height * 2 - branchLabel.height - units.gu(6)
                 width: parent.width
+                color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
             }
         }
     }
@@ -145,7 +147,7 @@ ComposerSheet {
         id: busyDialog
         title: i18n.tr("Creating Pull Request")
 
-        text: i18n.tr("Creating pull request for <b>'%1'</b>").arg(branchPicker.selectedValue)
+        text: i18n.tr("Creating pull request into <b>'%1'</b>").arg(branchPicker.model[branchPicker.selectedIndex].name)
 
         ActivityIndicator {
             running: busyDialog.visible

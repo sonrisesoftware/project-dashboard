@@ -28,8 +28,8 @@ Item {
                 return i18n.tr("<b>%1</b> pushed 1 commit %2").arg(author).arg(friendsUtils.createTimeString(date))
             else
                 return i18n.tr("<b>%1</b> pushed %3 commits %2").arg(author).arg(friendsUtils.createTimeString(date)).arg(event.commits.length)
-        } else {
-            return "Unknown event: " + title
+        } else {if (type == "mentioned") {}
+            return ""
         }
     }
 
@@ -48,8 +48,8 @@ Item {
             return ""
         } else if (type == "comment") {
             return root.event.hasOwnProperty("body") ? renderMarkdown(root.event.body) : ""
-        } else {
-            return "Unknown event: " + title
+        } else {if (type == "mentioned") {}
+            return ""
         }
     }
 

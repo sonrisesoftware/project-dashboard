@@ -207,8 +207,8 @@ Page {
             TextArea {
                 id: textArea
                 width: parent.width
-                text: JSON.stringify(issue.info.state)//renderBody()
-                height: Math.min(__internal.linesHeight(15), Math.max(__internal.linesHeight(4), edit.height + textArea.__internal.frameSpacing * 2))
+                text: issue.renderBody()
+                height: Math.max(__internal.linesHeight(4), edit.height + textArea.__internal.frameSpacing * 2)
                 placeholderText: i18n.tr("No description set.")
                 readOnly: true
                 textFormat: Text.RichText
@@ -245,7 +245,6 @@ Page {
                     delegate: EventItem {
                         id: eventItem
                         event: modelData
-                        //displayCommit: wideAspect
                         last: eventItem.y + eventItem.height == eventColumn.height
                     }
                 }
@@ -626,7 +625,7 @@ Page {
         ComposerSheet {
             id: sheet
 
-            title: i18n.tr("Edit Issue")
+            title: issue.isPullRequest ? i18n.tr("Edit Pull") : i18n.tr("Edit Issue")
 
             Component.onCompleted: {
                 sheet.__leftButton.text = i18n.tr("Cancel")
