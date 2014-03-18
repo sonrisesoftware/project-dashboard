@@ -332,6 +332,14 @@ Page {
                     visible: !wideAspect
                 }
 
+                ListItem.Standard {
+                    text: i18n.tr("Commits")
+                    progression: true
+                    height: visible ? units.gu(5) : 0
+                    visible: issue.isPullRequest && !wideAspect
+                    onClicked: pageStack.push(commitsPage)
+                }
+
                 Repeater {
                     model: issue.allEvents
                     delegate: EventItem {
@@ -633,6 +641,23 @@ Page {
             onTriggered: {
                 request.abort()
                 busyDialog.hide()
+            }
+        }
+    }
+
+    Component {
+        id: commitsPage
+
+        Page {
+            title: i18n.tr("Commits")
+
+            ListView {
+                anchors.fill: parent
+                model: issue.commits
+                delegate: SubtitledListItem {
+                    text: modelData.commit.message
+                    subText: i18n.tr("%1 - %2 - %3").arg(modelData.sha.substring(0, 7)).arg(modelData.author.login).arg(friendsUtils.createTimeString(modelData.commit.committer.date))
+                }
             }
         }
     }
