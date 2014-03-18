@@ -207,13 +207,13 @@ Object {
     }
 
     function setMilestone(milestone) {
-        if (issue.milestone && issue.milestone.hasOwnProperty("number") && issue.milestone.number === milestone.number)
+        if (issue.milestone && issue.milestone.hasOwnProperty("number") && milestone && issue.milestone.number === milestone.number)
             return
 
-        if (!(issue.milestone && issue.milestone.hasOwnProperty("number")) && milestone.number === undefined)
+        if (!(issue.milestone && issue.milestone.hasOwnProperty("number")) && !milestone)
             return
 
-        var request = github.editIssue(plugin.repo, issue.number, {"milestone": number}, function(response) {
+        var request = github.editIssue(plugin.repo, issue.number, {"milestone": milestone.number}, function(response) {
             complete()
             if (response === -1) {
                 error(i18n.tr("Connection Error"), i18n.tr("Unable to change milestone. Check your connection and/or firewall settings."))
