@@ -166,41 +166,133 @@ Page {
             }
 
             Column {
+                id: optionsColumn
                 anchors {
                     left: parent.left
                     right: parent.right
                     margins: units.gu(-2)
                 }
 
-                opacity: sidebar.expanded || issue.isPullRequest ? 0 : 1
-                height: sidebar.expanded || issue.isPullRequest ? 0 : implicitHeight
+                property bool hide: sidebar.expanded || issue.isPullRequest
 
-                Behavior on height {
-                    UbuntuNumberAnimation {}
-                }
+                states: [
+                    State {
+                        when: optionsColumn.hide
+                        PropertyChanges {
+                            restoreEntryValues: true
+                            target: optionsColumn
+                            height: 0
+                            opacity: 0
+                        }
+                    }
 
-                Behavior on opacity {
-                    UbuntuNumberAnimation {}
-                }
+                ]
+
+                transitions: [
+                    Transition {
+                        from: "*"
+                        to: "*"
+                        UbuntuNumberAnimation {
+                            target: optionsColumn
+                            properties: ["height", "opacity"]
+                        }
+                    }
+                ]
 
                 ListItem.ThinDivider {}
 
                 ListItem.Standard {
-                    text: "No milestone"
-                    height: units.gu(4)
-                    progression: plugin.hasPushAccess
+                    text: issue.milestone && issue.milestone.hasOwnProperty("number") ? issue.milestone.title : i18n.tr("No milestone")
+                    visible: !plugin.hasPushAccess
+                    height: units.gu(5)
+                }
+
+                SuruItemSelector {
+                    model: plugin.milestones.concat(i18n.tr("No milestone"))
+
+                    visible: plugin.hasPushAccess
+                    selectedIndex: {
+                        if (issue.milestone && issue.milestone.hasOwnProperty("number")) {
+                            for (var i = 0; i < model.length; i++) {
+                                if (model[i].number === issue.milestone.number)
+                                    return i
+                            }
+                        } else {
+                            return model.length - 1
+                        }
+                    }
+
+                    delegate: OptionSelectorDelegate {
+                        text: modelData.title
+                    }
+
+                    onSelectedIndexChanged: {
+                        var milestone = undefined
+                        if (selectedIndex < model.length - 1)
+                            milestone = model[selectedIndex]
+
+                        issue.setMilestone(milestone)
+                    }
                 }
 
                 ListItem.Standard {
-                    text: "No one assigned"
-                    height: units.gu(4)
-                    progression: plugin.hasPushAccess
+                    text: issue.assignee && issue.assignee.hasOwnProperty("login") ? issue.assignee.login : i18n.tr("No one assigned")
+                    visible: !plugin.hasPushAccess
+                    height: units.gu(5)
+                }
+
+                SuruItemSelector {
+                    model: plugin.availableAssignees.concat(i18n.tr("No one assigned"))
+                    visible: plugin.hasPushAccess
+                    selectedIndex: {
+                        print("ASSIGNEE:", JSON.stringify(issue.assignee))
+                        if (issue.assignee && issue.assignee.hasOwnProperty("login")) {
+                            for (var i = 0; i < model.length; i++) {
+                                if (model[i].login === issue.assignee.login) {
+                                    print("Assignee Index:", i)
+                                    return i
+                                }
+                            }
+
+                            return model.length - 1
+                        } else {
+                            return model.length - 1
+                        }
+                    }
+
+                    delegate: OptionSelectorDelegate {
+                        text: modelData.login
+                    }
+
+                    onSelectedIndexChanged: {
+                        var assignee = undefined
+                        if (selectedIndex < model.length - 1)
+                            assignee = model[selectedIndex]
+
+                        issue.setAssignee(assignee)
+                    }
                 }
 
                 ListItem.Standard {
-                    text: "No labels"
-                    height: units.gu(4)
+                    id: labelsItem
+                    text: {
+                        if (issue.labels.length > 0) {
+                            var text = ""
+                            for (var i = 0; i < issue.labels.length; i++) {
+                                var label = issue.labels[i]
+                                text += '<font color="#' + label.color + '">' + label.name + '</font>'
+                                if (i < issue.labels.length - 1)
+                                    text += ', '
+                            }
+                            return text
+                        } else {
+                            return i18n.tr("No labels")
+                        }
+                    }
+
+                    height: units.gu(5)
                     progression: plugin.hasPushAccess
+                    onClicked: PopupUtils.open(labelsPopover, labelsItem)
                 }
             }
 
@@ -548,75 +640,128 @@ Page {
     Component {
         id: labelsPopover
 
-        Popover {
+        SelectorSheet {
             id: popover
             property var labels: JSON.parse(JSON.stringify(issue.labels))
             property bool edited: false
 
-            Component.onDestruction: {
+            title: i18n.tr("Labels")
+
+            onConfirmClicked: {
                 if (edited) {
                     issue.updateLabels(popover.labels)
                 }
             }
 
-            contentHeight: labelsColumn.height
-            Column {
-                id: labelsColumn
-                width: parent.width
+            model: plugin.availableLabels
+            delegate: ListItem.Standard {
+                showDivider: index < repeater.count - 1
+                height: units.gu(5)
+                Label {
+                    anchors {
+                        left: parent.left
+                        leftMargin: units.gu(2)
+                        verticalCenter: parent.verticalCenter
+                    }
 
-                ListItem.Header {
-                    text: i18n.tr("Available Labels")
+                    text: modelData.name
+                    color: "#" + modelData.color
                 }
 
-                Repeater {
-                    id: repeater
+                control: CheckBox {
+                    checked: {
+                        for (var i = 0; i < popover.labels.length; i++) {
+                            var label = popover.labels[i]
 
-                    model: plugin.availableLabels
-                    delegate: ListItem.Standard {
-                        showDivider: index < repeater.count - 1
-                        height: units.gu(5)
-                        Label {
-                            anchors {
-                                left: parent.left
-                                leftMargin: units.gu(2)
-                                verticalCenter: parent.verticalCenter
-                            }
-
-                            text: modelData.name
-                            color: "#" + modelData.color
+                            if (label.name === modelData.name)
+                                return true
                         }
 
-                        control: CheckBox {
-                            checked: {
-                                for (var i = 0; i < popover.labels.length; i++) {
-                                    var label = popover.labels[i]
-
-                                    if (label.name === modelData.name)
-                                        return true
-                                }
-
-                                return false
-                            }
-
-                            onClicked: {
-                                popover.edited = true
-                                for (var i = 0; i < popover.labels.length; i++) {
-                                    var label = popover.labels[i]
-
-                                    if (label.name === modelData.name) {
-                                        popover.labels.splice(i, 1)
-                                        return
-                                    }
-                                }
-
-                                popover.labels.push(modelData)
-                            }
-
-                            style: SuruCheckBoxStyle {}
-                        }
+                        return false
                     }
+
+                    onClicked: {
+                        popover.edited = true
+                        for (var i = 0; i < popover.labels.length; i++) {
+                            var label = popover.labels[i]
+
+                            if (label.name === modelData.name) {
+                                popover.labels.splice(i, 1)
+                                return
+                            }
+                        }
+
+                        popover.labels.push(modelData)
+                    }
+
+                    style: SuruCheckBoxStyle {}
                 }
             }
+
+//            Component.onDestruction: {
+//                if (edited) {
+//                    issue.updateLabels(popover.labels)
+//                }
+//            }
+
+//            contentHeight: labelsColumn.height
+//            Column {
+//                id: labelsColumn
+//                width: parent.width
+
+//                ListItem.Header {
+//                    text: i18n.tr("Available Labels")
+//                }
+
+//                Repeater {
+//                    id: repeater
+
+//                    model: plugin.availableLabels
+//                    delegate: ListItem.Standard {
+//                        showDivider: index < repeater.count - 1
+//                        height: units.gu(5)
+//                        Label {
+//                            anchors {
+//                                left: parent.left
+//                                leftMargin: units.gu(2)
+//                                verticalCenter: parent.verticalCenter
+//                            }
+
+//                            text: modelData.name
+//                            color: "#" + modelData.color
+//                        }
+
+//                        control: CheckBox {
+//                            checked: {
+//                                for (var i = 0; i < popover.labels.length; i++) {
+//                                    var label = popover.labels[i]
+
+//                                    if (label.name === modelData.name)
+//                                        return true
+//                                }
+
+//                                return false
+//                            }
+
+//                            onClicked: {
+//                                popover.edited = true
+//                                for (var i = 0; i < popover.labels.length; i++) {
+//                                    var label = popover.labels[i]
+
+//                                    if (label.name === modelData.name) {
+//                                        popover.labels.splice(i, 1)
+//                                        return
+//                                    }
+//                                }
+
+//                                popover.labels.push(modelData)
+//                            }
+
+//                            style: SuruCheckBoxStyle {}
+//                        }
+//                    }
+//                }
+//            }
         }
     }
 
