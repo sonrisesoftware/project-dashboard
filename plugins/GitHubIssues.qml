@@ -45,7 +45,7 @@ Plugin {
     property var milestones: doc.get("milestones", [])
     property var availableAssignees: doc.get("assignees", [])
     property var availableLabels: doc.get("labels", [])
-    property var openIssues: issues.filteredChildren(function(doc) { return doc.info && doc.info.state === "open" }).sort(function(a, b) { return parseInt(b) - parseInt(a) })
+    property var openIssues: issues.filteredChildren(function(doc) { return doc.info && !doc.info.head && doc.info.state === "open" }).sort(function(a, b) { return parseInt(b) - parseInt(a) })
 
     document: Document {
         id: doc
@@ -105,6 +105,7 @@ Plugin {
                     continue
 
                 if (issues.hasChild(String(item.number))) {
+                    print("Updating existing item...")
                     issues.childrenData[String(item.number)].info = item
                     //var issue = issues.getChild(String(item.number))
                     //issue.set("info", item)

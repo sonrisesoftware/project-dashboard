@@ -159,8 +159,8 @@ Object {
                 if (json.merged) {
                     info.state = "closed"
                     doc.set("info", info)
-                    newEvent("merged")
                     newEvent("closed")
+                    newEvent("merged")
                 } else {
                     error(i18n.tr("Connection Error"), i18n.tr("Unable to merge %1:\n\n%2").arg(type).arg(json.message))
                 }
