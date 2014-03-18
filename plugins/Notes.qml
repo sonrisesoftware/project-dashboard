@@ -46,6 +46,8 @@ Plugin {
     }
 
     action: Action {
+        id: newNoteAction
+        iconSource: getIcon("add")
         text: i18n.tr("Add")
         onTriggered: pageStack.push(newNotePage)
     }
@@ -88,6 +90,45 @@ Plugin {
         enabled: false
         visible: notes.length === 0
         text: "No notes"
+    }
+
+    page: PluginPage {
+        title: i18n.tr("Notes")
+
+        ListView {
+            id: listView
+            anchors.fill: parent
+            model: notes
+            delegate: SubtitledListItem {
+                text: noteDoc.get("title") + " <font color=\"" + colors["green"] + "\">" + Qt.formatDate(new Date(noteDoc.get("date"))) + "</font>"
+                subText: noteDoc.get("contents")
+
+                onClicked: pageStack.push(notePage, {docId: noteDoc.docId})
+                removable: true
+                confirmRemoval: true
+                onItemRemoved: noteDoc.remove()
+
+                Document {
+                    id: noteDoc
+                    docId: modelData
+                    parent: doc
+                }
+            }
+        }
+
+        Scrollbar {
+            flickableItem: listView
+        }
+
+        Label {
+            anchors.centerIn: parent
+            visible: notes.length === 0
+            text: "No notes"
+            opacity: 0.5
+            fontSize: "large"
+        }
+
+        actions: newNoteAction
     }
 
     Component {
