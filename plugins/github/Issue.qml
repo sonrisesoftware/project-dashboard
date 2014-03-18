@@ -230,12 +230,12 @@ Object {
     }
 
     function setAssignee(assignee) {
-        var login = assignee ? assignee.login : undefined
+        var login = assignee ? assignee.login : ""
 
         if (issue.assignee && issue.assignee.hasOwnProperty("login") && issue.assignee.login === login)
             return
 
-        if (!(issue.assignee && issue.assignee.hasOwnProperty("login")) && login === undefined)
+        if (!(issue.assignee && issue.assignee.hasOwnProperty("login")) && login === "")
             return
 
         var request = github.editIssue(plugin.repo, issue.number, {"assignee": login}, function(response) {
@@ -243,7 +243,7 @@ Object {
             if (response === -1) {
                 error(i18n.tr("Connection Error"), i18n.tr("Unable to change assignee. Check your connection and/or firewall settings."))
             } else {
-                if (login) {
+                if (login !== "") {
                     info.assignee = assignee
                     doc.set("info", info)
                     newEvent("assigned", assignee)
@@ -251,8 +251,6 @@ Object {
                     info.assignee = undefined
                     doc.set("info", info)
                 }
-
-                // TODO: Inject event for assignee change
             }
         })
 

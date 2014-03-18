@@ -166,7 +166,7 @@ Page {
             TextArea {
                 id: textArea
                 width: parent.width
-                text: issue.renderBody()
+                text: JSON.stringify(issue.info.state)//renderBody()
                 height: Math.min(__internal.linesHeight(15), Math.max(__internal.linesHeight(4), edit.height + textArea.__internal.frameSpacing * 2))
                 placeholderText: i18n.tr("No description set.")
                 readOnly: true
@@ -379,8 +379,10 @@ Page {
                     print("ASSIGNEE:", JSON.stringify(issue.assignee))
                     if (issue.assignee && issue.assignee.hasOwnProperty("login")) {
                         for (var i = 0; i < model.length; i++) {
-                            if (model[i].login === issue.assignee.login)
+                            if (model[i].login === issue.assignee.login) {
+                                print("Assignee Index:", i)
                                 return i
+                            }
                         }
 
                         return model.length - 1
