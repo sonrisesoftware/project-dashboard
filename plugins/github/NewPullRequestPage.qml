@@ -51,71 +51,76 @@ ComposerSheet {
     property var action
     property var branches
 
-    TextField {
-        id: nameField
-        placeholderText: i18n.tr("Title")
-        anchors {
-            left: parent.left
-            top: parent.top
-            right: parent.right
-        }
+    Flickable {
+        id: flickable
+        anchors.fill: parent
+        anchors.topMargin: -units.gu(1)
+        anchors.bottomMargin: -units.gu(1)
+        topMargin: units.gu(1)
+        clip: true
 
-        Keys.onTabPressed: descriptionField.forceActiveFocus()
-    }
+        contentHeight: column.height
+        contentWidth: column.width
 
-    Label {
-        id: branchLabel
-        anchors {
-            top: nameField.bottom
-            left: parent.left//branchLabel.right
-            //right: parent.right
-            //leftMargin: units.gu(1)
-            topMargin: units.gu(1)
-        }
+        interactive: contentHeight > height - units.gu(2)
 
-        text: i18n.tr("Branch to merge:")
-    }
+        Column {
+            id: column
+            width: flickable.width
+            spacing: units.gu(1)
+            TextField {
+                id: nameField
+                placeholderText: i18n.tr("Title")
+                width: parent.width
 
-    OptionSelector {
-        id: branchPicker
-        //text: i18n.tr("Branch to merge:")
-        anchors {
-            top: branchLabel.bottom
-            left: parent.left//branchLabel.right
-            right: parent.right
-            //leftMargin: units.gu(1)
-            topMargin: units.gu(1)
-        }
-
-        model: {
-            var list = branches
-            print(JSON.stringify(list))
-            for (var i = 0; i < list.length; i++) {
-                if (list[i].name === "master")
-                    list.splice(i, 1)
+                Keys.onTabPressed: descriptionField.forceActiveFocus()
             }
-            return list
-        }
 
-        width: units.gu(20)
-        selectedIndex: 0
-        delegate: OptionSelectorDelegate {
-            text: modelData.name
-        }
+            Label {
+                id: branchLabel
+                width: parent.width
 
-        //style: Theme.createStyleComponent(Qt.resolvedUrl("../../ubuntu-ui-extras/SuruPickerStyle.qml"), branchPicker)
-    }
+                text: i18n.tr("Branch to merge:")
+            }
 
-    TextArea {
-        id: descriptionField
-        placeholderText: i18n.tr("Description")
+            OptionSelector {
+                id: branchPicker
+                //text: i18n.tr("Branch to merge:")
+                width: parent.width
 
-        anchors {
-            left: parent.left
-            right: parent.right
-            top: branchPicker.bottom
-            bottom: parent.bottom
-            topMargin: units.gu(1)
+                model: {
+                    var list = branches
+                    print(JSON.stringify(list))
+                    for (var i = 0; i < list.length; i++) {
+                        if (list[i].name === "master")
+                            list.splice(i, 1)
+                    }
+                    return list
+                }
+
+                selectedIndex: 0
+                delegate: OptionSelectorDelegate {
+                    text: modelData.name
+                }
+
+                onHeightChanged: {
+                    print("CHANGING HEIGHT:", (branchPicker.y + branchPicker.height), flickable.height)
+                    if (((branchPicker.y + branchPicker.height) > flickable.height - units.gu(2))) {
+                        print("Going to expansion", flickable.height - (branchPicker.y + branchPicker.height))
+                        flickable.contentY = -(flickable.height - units.gu(1)) + branchPicker.y + branchPicker.height
+                    }
+                }
+
+                //style: Theme.createStyleComponent(Qt.resolvedUrl("../../ubuntu-ui-extras/SuruPickerStyle.qml"), branchPicker)
+            }
+
+            TextArea {
+                id: descriptionField
+                placeholderText: i18n.tr("Description")
+
+                height: flickable.height - nameField.height * 2 - branchLabel.height - units.gu(6)
+                width: parent.width
+            }
         }
     }
 
