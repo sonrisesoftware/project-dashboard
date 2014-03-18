@@ -33,6 +33,7 @@ Object {
     property var created_at: info.created_at
     property string body: typeof(info.body) == "string" ? info.body : ""
     property string status: doc.get("status", "")
+    property string statusDescription: doc.get("statusDescription", "")
 
     function renderBody() {
         return renderMarkdown(body, plugin.repo)
@@ -53,6 +54,11 @@ Object {
                         created_at: new Date().toJSON()
                     })
         doc.set("events", events)
+    }
+
+    function newComment(text) {
+        comments.push({body: text, user: github.user, date: new Date().toISOString()})
+        doc.set("comments", comments)
     }
 
     property var allEvents: {
@@ -108,15 +114,17 @@ Object {
         if (isPullRequest) {
             loading++
             github.get(info._links.statuses.href, function(has_error, status, response) {
-                                 print(response)
-                                 if (JSON.parse(response)[0] === undefined) {
-                                     doc.set("status", "")
-                                 } else {
-                                     doc.set("status", JSON.parse(response)[0].state)
-                                 }
+                 print(response)
+                 if (JSON.parse(response)[0] === undefined) {
+                     doc.set("status", "")
+                     doc.set("statusDescription", "")
+                 } else {
+                     doc.set("status", JSON.parse(response)[0].state)
+                     doc.set("statusDescription", JSON.parse(response)[0].description)
+                 }
 
-                                 loading--
-                             })
+                 loading--
+             })
         }
     }
 
@@ -159,8 +167,8 @@ Object {
                 if (json.merged) {
                     info.state = "closed"
                     doc.set("info", info)
-                    newEvent("merged")
                     newEvent("closed")
+                    newEvent("merged")
                 } else {
                     error(i18n.tr("Connection Error"), i18n.tr("Unable to merge %1:\n\n%2").arg(type).arg(json.message))
                 }
@@ -183,6 +191,7 @@ Object {
                 } else {
                     info.state = "closed"
                     doc.set("info", info)
+                    newEvent("closed")
                 }
             })
 
@@ -197,6 +206,7 @@ Object {
                 } else {
                     info.state = "open"
                     doc.set("info", info)
+                    newEvent("reopened")
                 }
             })
 
@@ -207,13 +217,13 @@ Object {
     }
 
     function setMilestone(milestone) {
-        if (issue.milestone && issue.milestone.hasOwnProperty("number") && issue.milestone.number === milestone.number)
+        if (issue.milestone && issue.milestone.hasOwnProperty("number") && milestone && issue.milestone.number === milestone.number)
             return
 
-        if (!(issue.milestone && issue.milestone.hasOwnProperty("number")) && milestone.number === undefined)
+        if (!(issue.milestone && issue.milestone.hasOwnProperty("number")) && !milestone)
             return
 
-        var request = github.editIssue(plugin.repo, issue.number, {"milestone": number}, function(response) {
+        var request = github.editIssue(plugin.repo, issue.number, {"milestone": milestone ? milestone.number : ""}, function(response) {
             complete()
             if (response === -1) {
                 error(i18n.tr("Connection Error"), i18n.tr("Unable to change milestone. Check your connection and/or firewall settings."))
@@ -230,12 +240,12 @@ Object {
     }
 
     function setAssignee(assignee) {
-        var login = assignee ? assignee.login : undefined
+        var login = assignee ? assignee.login : ""
 
         if (issue.assignee && issue.assignee.hasOwnProperty("login") && issue.assignee.login === login)
             return
 
-        if (!(issue.assignee && issue.assignee.hasOwnProperty("login")) && login === undefined)
+        if (!(issue.assignee && issue.assignee.hasOwnProperty("login")) && login === "")
             return
 
         var request = github.editIssue(plugin.repo, issue.number, {"assignee": login}, function(response) {
@@ -243,7 +253,7 @@ Object {
             if (response === -1) {
                 error(i18n.tr("Connection Error"), i18n.tr("Unable to change assignee. Check your connection and/or firewall settings."))
             } else {
-                if (login) {
+                if (login !== "") {
                     info.assignee = assignee
                     doc.set("info", info)
                     newEvent("assigned", assignee)
@@ -251,8 +261,6 @@ Object {
                     info.assignee = undefined
                     doc.set("info", info)
                 }
-
-                // TODO: Inject event for assignee change
             }
         })
 
@@ -304,8 +312,7 @@ Object {
             if (response === -1) {
                 error(i18n.tr("Connection Error"), i18n.tr("Unable to create comment. Check your connection and/or firewall settings."))
             } else {
-                comments.push({body: text, user: {login: github.user}, created_at: new Date().toISOString()})
-                doc.set("comments", comments)
+                newComment(text)
             }
         })
 

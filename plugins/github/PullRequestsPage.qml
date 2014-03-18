@@ -29,7 +29,7 @@ PluginPage {
 
     property string sort: doc.get("sort", "number")
 
-    property var allIssues: issues.children.sort(function(a, b) { return parseInt(b) - parseInt(a) })//sortAllIssues()
+    property var allIssues: issues.filteredChildren(function(doc) { return doc.info && doc.info.head }).sort(function(a, b) { return parseInt(b) - parseInt(a) })
 
     function sortAllIssues() {
         return issues.concat(closedIssues).sort(function sort(a1, a2) {
@@ -89,7 +89,7 @@ PluginPage {
             bottom: parent.bottom
         }
         model: allIssues
-        delegate: IssueListItem {
+        delegate: PullRequestListItem {
             number: modelData
             show: selectedFilter(modelData)
         }
@@ -113,7 +113,7 @@ PluginPage {
 
     property var createdFilter: function(number) {
         var issue = issues.childrenData[String(number)].info
-        return issue.user && issue.user.login === github.user && (issue.state === "open" || settings.get("showClosedTickets", false))
+        return issue.user && issue.user.login === github.user.login && (issue.state === "open" || settings.get("showClosedTickets", false))
     }
 
     Scrollbar {

@@ -29,17 +29,7 @@ PluginPage {
 
     property string sort: doc.get("sort", "number")
 
-    property var allIssues: issues.children.sort(function(a, b) { return parseInt(b) - parseInt(a) })/*.sort(function sort(a1, a2) {
-        return Number(issues.childrenData[a2]["number"]) - Number(issues.childrenData[a2]["number"])
-        print("sorting", page.sort)
-        if (page.sort === "number") {
-            return a2.number - a1.number
-        } else if (page.sort === "assignee") {
-            return a2.assignee.login - a1.assignee.login
-        } else if (page.sort === "milestone") {
-            return a2.milestone.number - a1.milestone.number
-        }
-    })*/
+    property var allIssues: issues.filteredChildren(function(doc) { return doc.info && !doc.info.head }).sort(function(a, b) { return parseInt(b) - parseInt(a) })
 
     actions: [
         Action {
@@ -110,12 +100,12 @@ PluginPage {
 
     property var assignedFilter: function(number) {
         var issue = issues.childrenData[String(number)].info
-        return issue.assignee && issue.assignee.login === github.user  && (issue.state === "open" || settings.get("showClosedTickets", false))
+        return issue.assignee && issue.assignee.login === github.user.login  && (issue.state === "open" || settings.get("showClosedTickets", false))
     }
 
     property var createdFilter: function(number) {
         var issue = issues.childrenData[String(number)].info
-        return issue.user && issue.user.login === github.user && (issue.state === "open" || settings.get("showClosedTickets", false))
+        return issue.user && issue.user.login === github.user.login && (issue.state === "open" || settings.get("showClosedTickets", false))
     }
 
     Scrollbar {

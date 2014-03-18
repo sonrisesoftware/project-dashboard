@@ -29,7 +29,8 @@ Page {
     
     title: i18n.tr("%2 %1").arg(issue.number).arg(typeTitle)
 
-    property string type: issue.isPullRequest ? "pull request" : "issue"
+    property string type: typeRegular
+    property string typeRegular: issue.isPullRequest ? "pull request" : "issue"
     property string typeCap: issue.isPullRequest ? "Pull request" : "Issue"
     property string typeTitle: issue.isPullRequest ? "Pull Request" : "Issue"
 
@@ -120,7 +121,7 @@ Page {
             bottom: parent.bottom
         }
 
-        contentHeight: column.height + units.gu(4)
+        contentHeight: column.height + (sidebar.expanded ? units.gu(4) : units.gu(2))
         contentWidth: width
 
         Column {
@@ -128,6 +129,7 @@ Page {
             width: parent.width
             anchors {
                 top: parent.top
+                topMargin: sidebar.expanded ? units.gu(2) : units.gu(1)
                 margins: units.gu(2)
                 left: parent.left
                 right: parent.right
@@ -163,11 +165,142 @@ Page {
                 }
             }
 
+            Column {
+                id: optionsColumn
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                    margins: units.gu(-2)
+                }
+
+                property bool hide: sidebar.expanded || issue.isPullRequest
+
+                states: [
+                    State {
+                        when: optionsColumn.hide
+                        PropertyChanges {
+                            restoreEntryValues: true
+                            target: optionsColumn
+                            height: 0
+                            opacity: 0
+                        }
+                    }
+
+                ]
+
+                transitions: [
+                    Transition {
+                        from: "*"
+                        to: "*"
+                        UbuntuNumberAnimation {
+                            target: optionsColumn
+                            properties: ["height", "opacity"]
+                        }
+                    }
+                ]
+
+                ListItem.ThinDivider {}
+
+                ListItem.Standard {
+                    text: issue.milestone && issue.milestone.hasOwnProperty("number") ? issue.milestone.title : i18n.tr("No milestone")
+                    visible: !plugin.hasPushAccess
+                    height: units.gu(5)
+                }
+
+                SuruItemSelector {
+                    model: plugin.milestones.concat(i18n.tr("No milestone"))
+
+                    visible: plugin.hasPushAccess
+                    selectedIndex: {
+                        if (issue.milestone && issue.milestone.hasOwnProperty("number")) {
+                            for (var i = 0; i < model.length; i++) {
+                                if (model[i].number === issue.milestone.number)
+                                    return i
+                            }
+                        } else {
+                            return model.length - 1
+                        }
+                    }
+
+                    delegate: OptionSelectorDelegate {
+                        text: modelData.title
+                    }
+
+                    onSelectedIndexChanged: {
+                        var milestone = undefined
+                        if (selectedIndex < model.length - 1)
+                            milestone = model[selectedIndex]
+
+                        issue.setMilestone(milestone)
+                    }
+                }
+
+                ListItem.Standard {
+                    text: issue.assignee && issue.assignee.hasOwnProperty("login") ? issue.assignee.login : i18n.tr("No one assigned")
+                    visible: !plugin.hasPushAccess
+                    height: units.gu(5)
+                }
+
+                SuruItemSelector {
+                    model: plugin.availableAssignees.concat(i18n.tr("No one assigned"))
+                    visible: plugin.hasPushAccess
+                    selectedIndex: {
+                        print("ASSIGNEE:", JSON.stringify(issue.assignee))
+                        if (issue.assignee && issue.assignee.hasOwnProperty("login")) {
+                            for (var i = 0; i < model.length; i++) {
+                                if (model[i].login === issue.assignee.login) {
+                                    print("Assignee Index:", i)
+                                    return i
+                                }
+                            }
+
+                            return model.length - 1
+                        } else {
+                            return model.length - 1
+                        }
+                    }
+
+                    delegate: OptionSelectorDelegate {
+                        text: modelData.login
+                    }
+
+                    onSelectedIndexChanged: {
+                        var assignee = undefined
+                        if (selectedIndex < model.length - 1)
+                            assignee = model[selectedIndex]
+
+                        issue.setAssignee(assignee)
+                    }
+                }
+
+                ListItem.Standard {
+                    id: labelsItem
+                    text: {
+                        if (issue.labels.length > 0) {
+                            var text = ""
+                            for (var i = 0; i < issue.labels.length; i++) {
+                                var label = issue.labels[i]
+                                text += '<font color="#' + label.color + '">' + label.name + '</font>'
+                                if (i < issue.labels.length - 1)
+                                    text += ', '
+                            }
+                            return text
+                        } else {
+                            return i18n.tr("No labels")
+                        }
+                    }
+
+                    height: units.gu(5)
+                    progression: plugin.hasPushAccess
+                    onClicked: PopupUtils.open(labelsPopover, labelsItem)
+                }
+            }
+
             TextArea {
                 id: textArea
                 width: parent.width
                 text: issue.renderBody()
-                height: Math.min(__internal.linesHeight(15), Math.max(__internal.linesHeight(4), edit.height + textArea.__internal.frameSpacing * 2))
+                height: Math.max(__internal.linesHeight(4), edit.height + textArea.__internal.frameSpacing * 2)
                 placeholderText: i18n.tr("No description set.")
                 readOnly: true
                 textFormat: Text.RichText
@@ -187,8 +320,25 @@ Page {
 
             Column {
                 id: eventColumn
-                width: parent.width
-                spacing: parent.spacing
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                    margins: wideAspect ? 0 : units.gu(-2)
+                }
+
+                spacing: wideAspect ? parent.spacing : 0
+
+                ListItem.ThinDivider {
+                    visible: !wideAspect
+                }
+
+                ListItem.Standard {
+                    text: i18n.tr("Commits")
+                    progression: true
+                    height: visible ? units.gu(5) : 0
+                    visible: issue.isPullRequest && !wideAspect
+                    onClicked: pageStack.push(commitsPage)
+                }
 
                 Repeater {
                     model: issue.allEvents
@@ -197,6 +347,19 @@ Page {
                         event: modelData
                         last: eventItem.y + eventItem.height == eventColumn.height
                     }
+                }
+
+                EventItem {
+                    event: {
+                        "event": "testing",
+                        "actor": {
+                            "login": i18n.tr("Continous Integration")
+                        },
+                        "statusDescription": issue.statusDescription,
+                        "status": issue.status
+                    }
+                    last: true
+                    visible: issue.status !== ""
                 }
             }
 
@@ -267,6 +430,7 @@ Page {
                         text:  issue.state === "open" ? i18n.tr("Comment and Close") : i18n.tr("Comment and Reopen")
                         color: issue.state === "open" ? colors["red"] : colors["green"]
 
+                        visible: wideAspect
                         opacity: commentBox.show ? 1 : 0
                         enabled: commentBox.text !== ""
 
@@ -282,13 +446,12 @@ Page {
                                 if (response === -1) {
                                     error(i18n.tr("Connection Error"), i18n.tr("Unable to create comment. Check your connection and/or firewall settings."))
                                 } else {
-                                    comments.push({body: text, user: {login: github.user}, date: new Date().toISOString()})
-                                    comments = comments
+                                    issue.newComment(text)
 
                                     commentBox.text = ""
                                     commentBox.show = false
 
-                                    closeOrReopen()
+                                    issue.closeOrReopen()
                                 }
                             })
                         }
@@ -379,8 +542,10 @@ Page {
                     print("ASSIGNEE:", JSON.stringify(issue.assignee))
                     if (issue.assignee && issue.assignee.hasOwnProperty("login")) {
                         for (var i = 0; i < model.length; i++) {
-                            if (model[i].login === issue.assignee.login)
+                            if (model[i].login === issue.assignee.login) {
+                                print("Assignee Index:", i)
                                 return i
+                            }
                         }
 
                         return model.length - 1
@@ -494,77 +659,147 @@ Page {
     }
 
     Component {
+        id: commitsPage
+
+        Page {
+            title: i18n.tr("Commits")
+
+            ListView {
+                anchors.fill: parent
+                model: issue.commits
+                delegate: SubtitledListItem {
+                    text: modelData.commit.message
+                    subText: i18n.tr("%1 - %2 - %3").arg(modelData.sha.substring(0, 7)).arg(modelData.author.login).arg(friendsUtils.createTimeString(modelData.commit.committer.date))
+                }
+            }
+        }
+    }
+
+    Component {
         id: labelsPopover
 
-        Popover {
+        SelectorSheet {
             id: popover
             property var labels: JSON.parse(JSON.stringify(issue.labels))
             property bool edited: false
 
-            Component.onDestruction: {
+            title: i18n.tr("Labels")
+
+            onConfirmClicked: {
                 if (edited) {
                     issue.updateLabels(popover.labels)
                 }
             }
 
-            contentHeight: labelsColumn.height
-            Column {
-                id: labelsColumn
-                width: parent.width
+            model: plugin.availableLabels
+            delegate: ListItem.Standard {
+                showDivider: index < repeater.count - 1
+                height: units.gu(5)
+                Label {
+                    anchors {
+                        left: parent.left
+                        leftMargin: units.gu(2)
+                        verticalCenter: parent.verticalCenter
+                    }
 
-                ListItem.Header {
-                    text: i18n.tr("Available Labels")
+                    text: modelData.name
+                    color: "#" + modelData.color
                 }
 
-                Repeater {
-                    id: repeater
+                control: CheckBox {
+                    checked: {
+                        for (var i = 0; i < popover.labels.length; i++) {
+                            var label = popover.labels[i]
 
-                    model: plugin.availableLabels
-                    delegate: ListItem.Standard {
-                        showDivider: index < repeater.count - 1
-                        height: units.gu(5)
-                        Label {
-                            anchors {
-                                left: parent.left
-                                leftMargin: units.gu(2)
-                                verticalCenter: parent.verticalCenter
-                            }
-
-                            text: modelData.name
-                            color: "#" + modelData.color
+                            if (label.name === modelData.name)
+                                return true
                         }
 
-                        control: CheckBox {
-                            checked: {
-                                for (var i = 0; i < popover.labels.length; i++) {
-                                    var label = popover.labels[i]
-
-                                    if (label.name === modelData.name)
-                                        return true
-                                }
-
-                                return false
-                            }
-
-                            onClicked: {
-                                popover.edited = true
-                                for (var i = 0; i < popover.labels.length; i++) {
-                                    var label = popover.labels[i]
-
-                                    if (label.name === modelData.name) {
-                                        popover.labels.splice(i, 1)
-                                        return
-                                    }
-                                }
-
-                                popover.labels.push(modelData)
-                            }
-
-                            style: SuruCheckBoxStyle {}
-                        }
+                        return false
                     }
+
+                    onClicked: {
+                        popover.edited = true
+                        for (var i = 0; i < popover.labels.length; i++) {
+                            var label = popover.labels[i]
+
+                            if (label.name === modelData.name) {
+                                popover.labels.splice(i, 1)
+                                return
+                            }
+                        }
+
+                        popover.labels.push(modelData)
+                    }
+
+                    style: SuruCheckBoxStyle {}
                 }
             }
+
+//            Component.onDestruction: {
+//                if (edited) {
+//                    issue.updateLabels(popover.labels)
+//                }
+//            }
+
+//            contentHeight: labelsColumn.height
+//            Column {
+//                id: labelsColumn
+//                width: parent.width
+
+//                ListItem.Header {
+//                    text: i18n.tr("Available Labels")
+//                }
+
+//                Repeater {
+//                    id: repeater
+
+//                    model: plugin.availableLabels
+//                    delegate: ListItem.Standard {
+//                        showDivider: index < repeater.count - 1
+//                        height: units.gu(5)
+//                        Label {
+//                            anchors {
+//                                left: parent.left
+//                                leftMargin: units.gu(2)
+//                                verticalCenter: parent.verticalCenter
+//                            }
+
+//                            text: modelData.name
+//                            color: "#" + modelData.color
+//                        }
+
+//                        control: CheckBox {
+//                            checked: {
+//                                for (var i = 0; i < popover.labels.length; i++) {
+//                                    var label = popover.labels[i]
+
+//                                    if (label.name === modelData.name)
+//                                        return true
+//                                }
+
+//                                return false
+//                            }
+
+//                            onClicked: {
+//                                popover.edited = true
+//                                for (var i = 0; i < popover.labels.length; i++) {
+//                                    var label = popover.labels[i]
+
+//                                    if (label.name === modelData.name) {
+//                                        popover.labels.splice(i, 1)
+//                                        return
+//                                    }
+//                                }
+
+//                                popover.labels.push(modelData)
+//                            }
+
+//                            style: SuruCheckBoxStyle {}
+//                        }
+//                    }
+//                }
+//            }
         }
     }
 
@@ -573,7 +808,7 @@ Page {
         ComposerSheet {
             id: sheet
 
-            title: i18n.tr("Edit Issue")
+            title: issue.isPullRequest ? i18n.tr("Edit Pull") : i18n.tr("Edit Issue")
 
             Component.onCompleted: {
                 sheet.__leftButton.text = i18n.tr("Cancel")

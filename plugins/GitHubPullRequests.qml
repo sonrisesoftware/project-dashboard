@@ -40,7 +40,7 @@ Plugin {
         onTriggered: PopupUtils.open(Qt.resolvedUrl("github/NewPullRequestPage.qml"), plugin, {repo: repo, branches: branches, action: reload})
     }
 
-    property var openIssues: issues.filteredChildren(function(doc) { return doc.info && doc.info.hasOwnProperty("head") && doc.info.state === "open" }).sort(function(a, b) { return parseInt(b) - parseInt(a) })
+    property var openIssues: issues.filteredChildren(function(doc) { return doc.info && doc.info.head && doc.info.state === "open" }).sort(function(a, b) { return parseInt(b) - parseInt(a) })
     property var branches: doc.get("branches", [])
     property var info: doc.get("repo", {})
 
@@ -49,7 +49,7 @@ Plugin {
     Document {
         id: issues
 
-        docId: "pullRequests"
+        docId: "issues"
         parent: doc
     }
 
@@ -111,6 +111,7 @@ Plugin {
                 //print("GitHub Results:", response)
                 var json = JSON.parse(response)
 
+                issues.startGroup()
                 for (var i = 0; i < json.length; i++) {
                     var item = json[i]
                     if (item.hasOwnProperty("pull_request"))
@@ -127,6 +128,7 @@ Plugin {
                         issues.newDoc(String(item.number), {"info": item})
                     }
                 }
+                issues.endGroup()
             }
         })
 
@@ -138,12 +140,14 @@ Plugin {
                 //print("GitHub Results:", response)
                 var json = JSON.parse(response)
 
+                issues.startGroup()
                 for (var i = 0; i < json.length; i++) {
                     var item = json[i]
                     if (item.hasOwnProperty("pull_request"))
                         continue
 
                     if (issues.hasChild(String(item.number))) {
+                        print("STATE:",JSON.stringify(item.state))
                         issues.childrenData[String(item.number)].info = item
                         //var issue = issues.getChild(String(item.number))
                         //issue.set("info", item)
@@ -158,6 +162,7 @@ Plugin {
                         issues.newDoc(String(item.number), {"info": item})
                     }
                 }
+                issues.endGroup()
             }
         })
 
