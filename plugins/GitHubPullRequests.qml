@@ -118,13 +118,18 @@ Plugin {
                         continue
 
                     if (issues.hasChild(String(item.number))) {
+                        if (issues.childrenData[String(item.number)].info.state === "closed") {
+                            //FIXME: Wrong reopened at date
+                            project.newMessage("github", "bug", i18n.tr("<b>%1</b> reopened pull request %2").arg(item.user.login).arg(item.number), item.title, item.created_at, item)
+                        }
+
                         issues.childrenData[String(item.number)].info = item
                         //var issue = issues.getChild(String(item.number))
                         //issue.set("info", item)
                     } else {
-                        newUnreadItem(i18n.tr("<b>%1</b> opened issue %2").arg(item.user.login).arg(item.number),
-                                      "",
-                                      info.created_at)
+                        if (!firstLoad) {
+                            project.newMessage("github", "bug", i18n.tr("<b>%1</b> opened pull request %2").arg(item.user.login).arg(item.number), item.title, item.created_at, item)
+                        }
                         issues.newDoc(String(item.number), {"info": item})
                     }
                 }
@@ -148,17 +153,18 @@ Plugin {
 
                     if (issues.hasChild(String(item.number))) {
                         print("STATE:",JSON.stringify(item.state))
+                        if (issues.childrenData[String(item.number)].info.state === "open") {
+                            project.newMessage("github", "bug", i18n.tr("<b>%1</b> closed pull request %2").arg(item.user.login).arg(item.number), item.title, item.closed_at, item)
+                        }
+
                         issues.childrenData[String(item.number)].info = item
                         //var issue = issues.getChild(String(item.number))
                         //issue.set("info", item)
                     } else {
-                        newUnreadItem(i18n.tr("<b>%1</b> opened issue %2").arg(item.user.login).arg(item.number),
-                                      "",
-                                      info.created_at)
-                        if (info.closed_at)
-                            newUnreadItem(i18n.tr("<b>%1</b> closed issue %2").arg(item.assignee.login).arg(item.number),
-                                          "",
-                                          info.closed_at)
+                        if (!firstLoad) {
+                            project.newMessage("github", "bug", i18n.tr("<b>%1</b> opened pull request %2").arg(item.user.login).arg(item.number), item.title, item.created_at, item)
+                            project.newMessage("github", "bug", i18n.tr("<b>%1</b> closed pull request %2").arg(item.user.login).arg(item.number), item.title, item.closed_at, item)
+                        }
                         issues.newDoc(String(item.number), {"info": item})
                     }
                 }

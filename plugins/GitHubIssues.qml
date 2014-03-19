@@ -113,6 +113,10 @@ Plugin {
 
                 if (issues.hasChild(String(item.number))) {
                     print("Updating existing item...")
+                    if (issues.childrenData[String(item.number)].info.state === "closed") {
+                        project.newMessage("github", "bug", i18n.tr("<b>%1</b> reopened issue %2").arg(item.user.login).arg(item.number), item.title, item.created_at, item)
+                    }
+
                     issues.childrenData[String(item.number)].info = item
                     //var issue = issues.getChild(String(item.number))
                     //issue.set("info", item)
@@ -138,6 +142,10 @@ Plugin {
 
                 if (issues.hasChild(String(item.number))) {
                     //TODO: Add closed message if previously open?
+                    if (issues.childrenData[String(item.number)].info.state === "open") {
+                        project.newMessage("github", "bug", i18n.tr("<b>%1</b> closed issue %2").arg(item.user.login).arg(item.number), item.title, item.closed_at, item)
+                    }
+
                     issues.childrenData[String(item.number)].info = item
                     //var issue = issues.getChild(String(item.number))
                     //issue.set("info", item)
