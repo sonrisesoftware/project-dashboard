@@ -98,8 +98,8 @@ Service {
         return Http.put(github + "/repos/" + repo + "/pulls/" + number + "/merge", ["access_token=" + oauth], callback, undefined, {"Accept":"application/vnd.github.v3+json"}, JSON.stringify({ "commit_message": message }))
     }
 
-    function getPullRequests(repo, state, callback) {
-        return get("/repos/" + repo + "/pulls", callback, ["state=" + state])
+    function getPullRequests(repo, state, since, callback) {
+        return get("/repos/" + repo + "/pulls", callback, ["state=" + state, "since=" + since])
     }
 
     function getPullRequest(repo, number, callback) {

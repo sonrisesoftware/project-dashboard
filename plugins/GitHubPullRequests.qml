@@ -102,8 +102,10 @@ Plugin {
 //    }
 
     function reload() {
+        var lastRefreshed = doc.get("pullsLastRefreshed", "")
+
         loading += 3
-        github.getPullRequests(repo, "open", function(has_error, status, response) {
+        github.getPullRequests(repo, "open", lastRefreshed, function(has_error, status, response) {
             loading--
             if (has_error) {
                 error(i18n.tr("Connection Error"), i18n.tr("Unable to download list of pull requests. Check your connection and/or firewall settings.\n\nError: %1").arg(status))
@@ -111,29 +113,31 @@ Plugin {
                 //print("GitHub Results:", response)
                 var json = JSON.parse(response)
 
-                issues.startGroup()
-                for (var i = 0; i < json.length; i++) {
-                    var item = json[i]
-                    if (item.hasOwnProperty("pull_request"))
-                        continue
+                if (json.length > 0) {
+                    issues.startGroup()
+                    for (var i = 0; i < json.length; i++) {
+                        var item = json[i]
+                        if (item.hasOwnProperty("pull_request"))
+                            continue
 
-                    if (issues.hasChild(String(item.number))) {
-                        if (issues.childrenData[String(item.number)].info.state === "closed") {
-                            //FIXME: Wrong reopened at date
-                            project.newMessage("github", "bug", i18n.tr("<b>%1</b> reopened pull request %2").arg(item.user.login).arg(item.number), item.title, item.created_at, item)
-                        }
+                        if (issues.hasChild(String(item.number))) {
+                            if (issues.childrenData[String(item.number)].info.state === "closed") {
+                                //FIXME: Wrong reopened at date
+                                project.newMessage("github", "bug", i18n.tr("<b>%1</b> reopened pull request %2").arg(item.user.login).arg(item.number), item.title, item.created_at, item)
+                            }
 
-                        issues.childrenData[String(item.number)].info = item
-                        //var issue = issues.getChild(String(item.number))
-                        //issue.set("info", item)
-                    } else {
-                        if (!firstLoad) {
-                            project.newMessage("github", "bug", i18n.tr("<b>%1</b> opened pull request %2").arg(item.user.login).arg(item.number), item.title, item.created_at, item)
+                            issues.childrenData[String(item.number)].info = item
+                            //var issue = issues.getChild(String(item.number))
+                            //issue.set("info", item)
+                        } else {
+                            if (!firstLoad) {
+                                project.newMessage("github", "bug", i18n.tr("<b>%1</b> opened pull request %2").arg(item.user.login).arg(item.number), item.title, item.created_at, item)
+                            }
+                            issues.newDoc(String(item.number), {"info": item})
                         }
-                        issues.newDoc(String(item.number), {"info": item})
                     }
+                    issues.endGroup()
                 }
-                issues.endGroup()
             }
         })
 
@@ -145,30 +149,32 @@ Plugin {
                 //print("GitHub Results:", response)
                 var json = JSON.parse(response)
 
-                issues.startGroup()
-                for (var i = 0; i < json.length; i++) {
-                    var item = json[i]
-                    if (item.hasOwnProperty("pull_request"))
-                        continue
+                if (json.length > 0) {
+                    issues.startGroup()
+                    for (var i = 0; i < json.length; i++) {
+                        var item = json[i]
+                        if (item.hasOwnProperty("pull_request"))
+                            continue
 
-                    if (issues.hasChild(String(item.number))) {
-                        print("STATE:",JSON.stringify(item.state))
-                        if (issues.childrenData[String(item.number)].info.state === "open") {
-                            project.newMessage("github", "bug", i18n.tr("<b>%1</b> closed pull request %2").arg(item.user.login).arg(item.number), item.title, item.closed_at, item)
-                        }
+                        if (issues.hasChild(String(item.number))) {
+                            print("STATE:",JSON.stringify(item.state))
+                            if (issues.childrenData[String(item.number)].info.state === "open") {
+                                project.newMessage("github", "bug", i18n.tr("<b>%1</b> closed pull request %2").arg(item.user.login).arg(item.number), item.title, item.closed_at, item)
+                            }
 
-                        issues.childrenData[String(item.number)].info = item
-                        //var issue = issues.getChild(String(item.number))
-                        //issue.set("info", item)
-                    } else {
-                        if (!firstLoad) {
-                            project.newMessage("github", "bug", i18n.tr("<b>%1</b> opened pull request %2").arg(item.user.login).arg(item.number), item.title, item.created_at, item)
-                            project.newMessage("github", "bug", i18n.tr("<b>%1</b> closed pull request %2").arg(item.user.login).arg(item.number), item.title, item.closed_at, item)
+                            issues.childrenData[String(item.number)].info = item
+                            //var issue = issues.getChild(String(item.number))
+                            //issue.set("info", item)
+                        } else {
+                            if (!firstLoad) {
+                                project.newMessage("github", "bug", i18n.tr("<b>%1</b> opened pull request %2").arg(item.user.login).arg(item.number), item.title, item.created_at, item)
+                                project.newMessage("github", "bug", i18n.tr("<b>%1</b> closed pull request %2").arg(item.user.login).arg(item.number), item.title, item.closed_at, item)
+                            }
+                            issues.newDoc(String(item.number), {"info": item})
                         }
-                        issues.newDoc(String(item.number), {"info": item})
                     }
+                    issues.endGroup()
                 }
-                issues.endGroup()
             }
         })
 
@@ -179,6 +185,8 @@ Plugin {
 
             doc.set("branches", json)
         })
+
+        doc.set("pullsLastRefreshed", new Date().toJSON())
     }
 
     function save() {
