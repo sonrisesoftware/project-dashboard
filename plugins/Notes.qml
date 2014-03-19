@@ -41,8 +41,13 @@ Plugin {
         var docId = String(nextDocId)
         doc.set("nextDocId", nextDocId + 1)
         doc.newDoc(docId, {"title": title, "contents": contents, "date": new Date().toJSON()})
+        project.newMessage("notes", "pencil-square-o", "You created a new note", title, new Date().toJSON(), docId)
         //print(JSON.stringify(doc.save()))
         return docId
+    }
+
+    function displayMessage(message) {
+        pageStack.push(notePage, {docId: message.data})
     }
 
     action: Action {

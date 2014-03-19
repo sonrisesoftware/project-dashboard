@@ -39,6 +39,14 @@ Page {
         },
 
         Action {
+            id: inboxAction
+            text: i18n.tr("Inbox")
+            iconSource: enabled ? getIcon("bell") : getIcon("bell-o")
+            enabled: project.inbox.length > 0
+            onTriggered: pageStack.push(Qt.resolvedUrl("InboxPage.qml"), {project: project, projectPage: page})
+        },
+
+        Action {
             id: refreshAction
             text: i18n.tr("Refresh")
             iconSource: getIcon("reload")
@@ -79,6 +87,24 @@ Page {
         } else {
             pageStack.push(pushedPage, {plugin: plugin})
         }
+    }
+
+    function displayMessage(message) {
+        var pluginName = message.plugin
+        var plugin = null
+        for (var i = 0; i < column.children.length; i++) {
+            var item = column.children[i]
+            print(item.item.document.docId)
+            if (item.item && item.item.document.docId === pluginName) {
+                plugin = item.item
+                break
+            }
+        }
+
+        if (!plugin)
+            throw "Unable to find plugin named: " + pluginName
+
+        plugin.displayMessage(message)
     }
 
     Component {
@@ -378,6 +404,10 @@ Page {
 
         ToolbarButton {
             action: refreshAction
+        }
+
+        ToolbarButton {
+            action: inboxAction
         }
 
         ToolbarButton {

@@ -46,6 +46,7 @@ Plugin {
     property var availableAssignees: doc.get("assignees", [])
     property var availableLabels: doc.get("labels", [])
     property var openIssues: issues.filteredChildren(function(doc) { return doc.info && !doc.info.head && doc.info.state === "open" }).sort(function(a, b) { return parseInt(b) - parseInt(a) })
+    property bool firstLoad: doc.get("firstLoad", true)
 
     document: Document {
         id: doc
@@ -53,7 +54,13 @@ Plugin {
         parent: project.document
     }
 
+    Component.onDestruction: doc.set("firstLoad", false)
+
     property alias issues: issues
+
+    function displayMessage(message) {
+        pageStack.push(Qt.resolvedUrl("github/IssuePage.qml"), {number: message.data.number, plugin:plugin})
+    }
 
     Document {
         id: issues
@@ -110,9 +117,9 @@ Plugin {
                     //var issue = issues.getChild(String(item.number))
                     //issue.set("info", item)
                 } else {
-                    newUnreadItem(i18n.tr("<b>%1</b> opened issue %2").arg(item.user.login).arg(item.number),
-                                  "",
-                                  info.created_at)
+                    if (!firstLoad) {
+                        project.newMessage("github", "bug", i18n.tr("<b>%1</b> opened issue %2").arg(item.user.login).arg(item.number), item.title, item.created_at, item)
+                    }
                     issues.newDoc(String(item.number), {"info": item})
                 }
             }
@@ -130,17 +137,15 @@ Plugin {
                     continue
 
                 if (issues.hasChild(String(item.number))) {
+                    //TODO: Add closed message if previously open?
                     issues.childrenData[String(item.number)].info = item
                     //var issue = issues.getChild(String(item.number))
                     //issue.set("info", item)
                 } else {
-                    newUnreadItem(i18n.tr("<b>%1</b> opened issue %2").arg(item.user.login).arg(item.number),
-                                  "",
-                                  info.created_at)
-                    if (info.closed_at)
-                        newUnreadItem(i18n.tr("<b>%1</b> closed issue %2").arg(item.assignee.login).arg(item.number),
-                                      "",
-                                      info.closed_at)
+                    if (!firstLoad) {
+                        project.newMessage("github", "bug", i18n.tr("<b>%1</b> opened issue %2").arg(item.user.login).arg(item.number), item.title, item.created_at, item)
+                    }
+                    //TODO: Add closed message?
                     issues.newDoc(String(item.number), {"info": item})
                 }
             }

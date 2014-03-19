@@ -78,8 +78,6 @@ Plugin {
         }
 
         parent: doc
-
-        Component.onCompleted: today.set("date", DateUtils.formattedDate(new Date()))
     }
 
     document: Document {
@@ -284,7 +282,7 @@ Plugin {
                     model: dates
                     delegate: ListItem.SingleValue {
                         id: item
-                        text: child.get("date", "")///*DateUtils.formattedDate(*/new Date(child.get("date", ""))//)
+                        text: DateUtils.formattedDate(new Date(child.docId))
                         value: modelData === today.docId ? DateUtils.friendlyDuration(totalTime)
                                                          : DateUtils.friendlyDuration(child.get("time", 0))
                         onClicked: PopupUtils.open(editDialog, item, {docId: modelData})
@@ -358,7 +356,7 @@ Plugin {
             property alias docId: child.docId
 
             title: i18n.tr("Edit Time")
-            text: i18n.tr("Edit the time logged for <b>%1</b>").arg(DateUtils.formattedDate(new Date(child.get("date"))))
+            text: i18n.tr("Edit the time logged for <b>%1</b>").arg(DateUtils.formattedDate(new Date(child.docId)))
             value: modelData === today.docId ? DateUtils.friendlyDuration(totalTime)
                                              : DateUtils.friendlyDuration(child.get("time", 0))
 

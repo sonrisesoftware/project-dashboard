@@ -31,6 +31,8 @@ Object {
 
     property alias document: doc
 
+    property var inbox: doc.get("inbox", [])
+
     property var plugins: doc.get("plugins", {"notes": true})
 
     signal reload
@@ -109,6 +111,23 @@ Object {
                 enabledPlugins.append({"type": type})
             }
         }
+    }
+
+    function newMessage(plugin, icon, title, message, date, data) {
+        inbox.push({
+                       "plugin": plugin,
+                       "icon": icon,
+                       "title": title,
+                       "message": message,
+                       "date": date,
+                       "data": data
+                   })
+        doc.set("inbox", inbox)
+    }
+
+    function removeMessage(id) {
+        inbox.splice(id, 1)
+        doc.set("inbox", inbox)
     }
 
     Document {

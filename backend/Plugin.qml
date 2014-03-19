@@ -42,16 +42,7 @@ UbuntuShape {
     property bool canReload: false
     function reload() {}
 
-    property var unreadItems: document.get("unreadItems", [])
-
-    function newUnreadItem(title, message, date) {
-        unreadItems.push({
-                             "title": title,
-                             "date": date,
-                             "message": message
-                         })
-        doc.set("unreadItems", unreadItems)
-    }
+    function displayMessage(message) {}
 
     property Component page
 
