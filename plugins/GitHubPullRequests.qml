@@ -141,7 +141,7 @@ Plugin {
             }
         })
 
-        github.getPullRequests(repo, "closed", function(has_error, status, response) {
+        github.getPullRequests(repo, "closed", lastRefreshed, function(has_error, status, response) {
             loading--
             if (has_error) {
                 error(i18n.tr("Connection Error"), i18n.tr("Unable to download list of pull requests. Check your connection and/or firewall settings.\n\nError: %1").arg(status))
