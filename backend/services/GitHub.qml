@@ -78,8 +78,8 @@ Service {
         return Http.post(request, ["access_token=" + oauth].concat(options), callback, undefined, {"Accept":"application/vnd.github.v3+json"}, body)
     }
 
-    function getIssues(repo, state, callback) {
-        return get("/repos/" + repo + "/issues", callback, ["state=" + state])
+    function getIssues(repo, state, since, callback) {
+        return get("/repos/" + repo + "/issues", callback, ["state=" + state, "since=" + since])
     }
 
     function editIssue(repo, number, issue, callback) {
