@@ -17,6 +17,7 @@
  */
 import QtQuick 2.0
 import Ubuntu.Components 0.1
+import Ubuntu.PerformanceMetrics 0.1
 import Ubuntu.Components.Popups 0.1
 import "components"
 import "ui"
@@ -44,6 +45,8 @@ MainView {
      when the device is rotated. The default is false.
     */
     automaticOrientation: true
+
+    anchorToKeyboard: true
 
     backgroundColor: Qt.rgba(0.3,0.3,0.3,1)
 
@@ -86,8 +89,49 @@ MainView {
         }
     }
 
+    property bool busy: queue.busy
+
+    onBusyChanged: {
+        if (busy) {
+            header.show()
+        }
+    }
+
+    Item {
+        anchors.fill: parent
+        anchors.bottomMargin: header.height - header.__styleInstance.contentHeight
+        parent: header
+
+        ActivityIndicator {
+            anchors {
+                right: parent.right
+                verticalCenter: parent.verticalCenter
+                rightMargin: (parent.height - height)/2
+            }
+
+            height: units.gu(4)
+            width: height
+            running: opacity > 0
+            opacity: busy ? 1 : 0
+
+            Behavior on opacity {
+                UbuntuNumberAnimation {
+                    duration: UbuntuAnimation.SlowDuration
+                }
+            }
+        }
+    }
+
     FriendsUtils {
         id: friendsUtils
+    }
+
+    SyncQueue {
+        id: queue
+
+        onError: {
+            mainView.error(i18n.tr("Connection Error"), i18n.tr("Unable to complete the sync opperation:\n\n%1").arg(args))
+        }
     }
 
     Backend {
@@ -97,12 +141,25 @@ MainView {
     Database {
         id: db
         path: "project-dashboard.db"
+
+        onLoaded: {
+            backend.fromJSON(db.get("backend", {}))
+            settings.fromJSON(db.get("settings", {}))
+        }
+
+        onSave: {
+            print("Saving...")
+            db.set("backend", backend.toJSON())
+            db.set("settings", settings.toJSON())
+        }
     }
 
     Document {
         id: settings
-        docId: "settings"
-        parent: db.document
+
+        onSave: {
+            settings.set("markdownCache", markdownCache)
+        }
     }
 
     GitHub {
@@ -131,20 +188,21 @@ MainView {
         return Qt.resolvedUrl(name)
     }
 
+    /*!
+     * Render markdown using the GitHub markdown API
+     */
     function renderMarkdown(text, context) {
-        print("MARKDOWN:", typeof(text))
         if (typeof(text) != "string") {
             return ""
         } if (markdownCache.hasOwnProperty(text)) {
+            /// Custom color for links
             var response = markdownCache[text].replace(/<a(.*?)>(.*?)</g, "<a $1><font color=\"" + colors["blue"] + "\">$2</font><")
-            print("RETURNING: ", response)
             return response
         } else {
             print("Calling Markdown API")
             Http.post(github.github + "/markdown", ["access_token=" + github.oauth], function(has_error, status, response) {
-                print("MARKDOWN", response)
                 markdownCache[text] = response
-                settings.set("markdownCache", markdownCache)
+                markdownCache = markdownCache
             }, undefined, undefined, JSON.stringify({
                 "text": text,
                 "mode": context !== undefined ? "gfm" : "markdown",
@@ -152,9 +210,14 @@ MainView {
               }))
             return "Loading..."
         }
+    }
 
-        //var converter = new Markdown.Markdown.Converter();
-        //return converter.makeHtml(text)
+    function newObject(type, args) {
+        if (!args)
+            args = {}
+        print(type)
+        var component = Qt.createComponent(type);
+        return component.createObject(mainView, args);
     }
 
     property var markdownCache: settings.get("markdownCache", {})
@@ -166,5 +229,9 @@ MainView {
                             text: message,
                             action:action
                         })
+    }
+
+    PerformanceOverlay {
+
     }
 }

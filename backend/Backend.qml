@@ -25,22 +25,64 @@ import "services"
 Object {
     id: root
 
-    property alias projects: doc.children
+    function toJSON() { return doc.toJSON() }
+    function fromJSON(json) { doc.fromJSON(json) }
 
-    property alias document: doc
-    property int nextDocId: doc.get("nextDocId", 0)
+    property int nextIndex: 0
 
     Document {
         id: doc
-        docId: "backend"
-        parent: db.document
+
+        onSave: {
+            // Save projects
+            var list = []
+            for (var i = 0; i < projects.count; i++) {
+                var project = projects.get(i).modelData
+                list.push(project.toJSON())
+            }
+
+            doc.set("projects", list)
+        }
+
+        onLoaded: {
+            var list = doc.get("projects", [])
+            for (var i = 0; i < list.length; i++) {
+                var project = projectComponent.createObject(mainView, {index: nextIndex++})
+                project.fromJSON(list[i])
+                projects.append({"modelData": project})
+            }
+        }
+    }
+
+    property ListModel projects: ListModel {
+
     }
 
     function newProject(name) {
-        var docId = String(nextDocId)
-        doc.set("nextDocId", nextDocId + 1)
-        doc.newDoc(docId, {"name": name})
-        return docId
+        var project = projectComponent.createObject(mainView, {index: nextIndex++})
+        project.name = name
+        projects.append({"modelData": project})
+        return project
+    }
+
+    function removeProject(index) {
+        for (var i = 0; i < projects.count; i++) {
+            var project = projects.get(i).modelData
+
+            if (project.index === index) {
+                projects.remove(i)
+                project.destroy(1000)
+                return
+            }
+        }
+    }
+
+    Component {
+        id: projectComponent
+
+        Project {
+
+        }
     }
 
     property ListModel availablePlugins: ListModel {

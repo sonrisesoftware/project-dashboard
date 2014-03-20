@@ -45,12 +45,23 @@ Page {
         delegate: ListItem.Standard {
             id: projectDelegate
             text: project.name
-            onClicked: pageStack.push(Qt.resolvedUrl("ProjectPage.qml"), {docId: modelData})
+            onClicked: pageStack.push(Qt.resolvedUrl("ProjectPage.qml"), {project: project})
             onPressAndHold: PopupUtils.open(projectActionPopover, projectDelegate, {project: project})
 
-            Project {
-                id: project
-                docId: modelData
+            property Project project: modelData
+        }
+
+        remove: Transition {
+            SequentialAnimation {
+                UbuntuNumberAnimation { property: "opacity"; to: 0 }
+                UbuntuNumberAnimation { property: "height"; to: 0 }
+            }
+        }
+
+        removeDisplaced: Transition {
+            SequentialAnimation {
+                PauseAnimation { duration: UbuntuAnimation.FastDuration } // Pause while the opacity goes to zero
+                UbuntuNumberAnimation { property: "y" } // Move up as the item gets removed
             }
         }
     }
@@ -107,8 +118,9 @@ Page {
             text: i18n.tr("Please enter a name for your new project.")
             placeholderText: i18n.tr("Name")
             onAccepted: {
-                var docId = backend.newProject(value)
-                pageStack.push(Qt.resolvedUrl("ProjectPage.qml"), {docId: docId})
+                var project = backend.newProject(value)
+                // FIXME: Reenable once the ProjectPage is fixed
+                //pageStack.push(Qt.resolvedUrl("ProjectPage.qml"), {project: project})
             }
         }
     }

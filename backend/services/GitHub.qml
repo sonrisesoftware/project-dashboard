@@ -68,22 +68,22 @@ Service {
         return Http.get(request, ["access_token=" + oauth].concat(options), callback, undefined, {"Accept":"application/vnd.github.v3+json"})
     }
 
-    function post(request, callback, options, body) {
+    function post(request, options, body) {
         if (oauth === "")
             return undefined
         if (options === undefined)
             options = []
         if (request && request.indexOf(github) !== 0)
             request = github + request
-        return Http.post(request, ["access_token=" + oauth].concat(options), callback, undefined, {"Accept":"application/vnd.github.v3+json"}, body)
+        queue.http("POST", request, ["access_token=" + oauth].concat(options), {"Accept":"application/vnd.github.v3+json"}, body)
     }
 
     function getIssues(repo, state, since, callback) {
         return get("/repos/" + repo + "/issues", callback, ["state=" + state, "since=" + since])
     }
 
-    function editIssue(repo, number, issue, callback) {
-        return Http.patch(github + "/repos/" + repo + "/issues/" + number, ["access_token=" + oauth], callback, undefined, {"Accept":"application/vnd.github.v3+json"}, JSON.stringify(issue))
+    function editIssue(repo, number, issue) {
+        post("/repos/" + repo + "/issues/" + number, undefined, JSON.stringify(issue), i18n.tr("Update issue <b>%1</b>").arg(number))
     }
 
     function newIssue(repo, title, description, callback) {
@@ -138,8 +138,8 @@ Service {
         return get('/repos/' + repo + '/issues/' + issue.number + '/events', callback)
     }
 
-    function newIssueComment(repo, issue, comment, callback) {
-        return post("/repos/" + repo + "/issues/" + issue.number + "/comments", callback, undefined, JSON.stringify({body: comment}))
+    function newIssueComment(repo, issue, comment) {
+        post("/repos/" + repo + "/issues/" + issue.number + "/comments", undefined, JSON.stringify({body: comment}), i18n.tr("Comment on issue <b>%1</b>").arg(issue.number))
     }
 
     function connect(project) {
