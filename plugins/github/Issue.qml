@@ -6,18 +6,30 @@ import "../../backend/utils.js" as Utils
 Object {
     id: issue
 
+    function toJSON() { return doc.toJSON() }
+    function fromJSON(json) { doc.fromJSON(json) }
+
+    Document {
+        id: doc
+
+        onSave: {
+            doc.set("info", info)
+            doc.set("pull", pull)
+            doc.set("events", events)
+            doc.set("comments", comments)
+            doc.set("commits", commits)
+            doc.set("status", status)
+            doc.set("statusDescription", statusDescription)
+        }
+    }
+
     property var info: doc.get("info", {})
     property var pull: doc.get("pull", {})
     property var events: doc.get("events", [])
     property var comments: doc.get("comments", [])
     property var commits: doc.get("commits", [])
 
-    property int number
-    Document {
-        id: doc
-        docId: String(number)
-        parent: plugin.issues
-    }
+    property int number: info.number
 
     property int loading
 
@@ -110,23 +122,23 @@ Object {
         return allEvents
     }
 
-    Component.onCompleted: {
-        if (isPullRequest) {
-            loading++
-            github.get(info._links.statuses.href, function(has_error, status, response) {
-                 print(response)
-                 if (JSON.parse(response)[0] === undefined) {
-                     doc.set("status", "")
-                     doc.set("statusDescription", "")
-                 } else {
-                     doc.set("status", JSON.parse(response)[0].state)
-                     doc.set("statusDescription", JSON.parse(response)[0].description)
-                 }
+//    Component.onCompleted: {
+//        if (isPullRequest) {
+//            loading++
+//            github.get(info._links.statuses.href, function(has_error, status, response) {
+//                 print(response)
+//                 if (JSON.parse(response)[0] === undefined) {
+//                     doc.set("status", "")
+//                     doc.set("statusDescription", "")
+//                 } else {
+//                     doc.set("status", JSON.parse(response)[0].state)
+//                     doc.set("statusDescription", JSON.parse(response)[0].description)
+//                 }
 
-                 loading--
-             })
-        }
-    }
+//                 loading--
+//             })
+//        }
+//    }
 
     function load() {
         print("LOADING>>>>>>>>>")

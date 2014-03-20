@@ -23,20 +23,27 @@ import "../backend"
 import "../components"
 import "../backend/services"
 import "../ubuntu-ui-extras"
+import "../ubuntu-ui-extras/listutils.js" as List
 import "github"
 
 Plugin {
-    id: plugin
+    id: githubPlugin
 
     name: "github"
     canReload: false
 
+    property ListModel issues: ListModel {
+
+    }
+
     items: [
         PluginItem {
             title: "Issues"
-            value: "5"
-            page: Page {
-                title: "Issues"
+            value: List.filteredCount(issues, function (issue) {
+                return issue.open
+            }) + " (" + issues.count + ")"
+            page: IssuesPage {
+                plugin: githubPlugin
             }
         },
 
@@ -44,4 +51,63 @@ Plugin {
             title: "Pull Requests"
         }
     ]
+
+    onSave: {
+        // Save projects
+        var list = []
+        for (var i = 0; i < issues.count; i++) {
+            var issue = issues.get(i).modelData
+            list.push(issue.toJSON())
+        }
+
+        doc.set("issues", list)
+    }
+
+    onLoaded: {
+        print("Loading!")
+
+        var list = doc.get("issues", [])
+        for (var i = 0; i < list.length; i++) {
+            var issue = issueComponent.createObject(mainView, {info: list[i].info})
+            issue.fromJSON(list[i])
+            issues.append({"modelData": issue})
+        }
+
+        var lastRefreshed = doc.get("lastRefreshed", "")
+
+        var handler = function(response) {
+            //print(response)
+            var json = JSON.parse(response)
+            print("LENGTH:", json.length)
+            for (var i = 0; i < json.length; i++) {
+                var found = false
+                for (var j = 0; j < issues.count; j++) {
+                    print(issues.get(j).modelData.number + " === " + json[i].number)
+                    if (issues.get(j).modelData.number === json[i].number) {
+                        issues.get(j).modelData.info = json[i]
+                        found = true
+                        break
+                    }
+                }
+
+                if (!found) {
+                    var issue = issueComponent.createObject(mainView, {info: json[i]})
+                    issues.append({"modelData": issue})
+                }
+            }
+        }
+
+        github.getIssues("iBeliever/project-dashboard", "open", lastRefreshed, handler)
+        github.getIssues("iBeliever/project-dashboard", "closed", lastRefreshed, handler)
+
+        doc.set("lastRefreshed", new Date().toJSON())
+    }
+
+    Component {
+        id: issueComponent
+
+        Issue {
+
+        }
+    }
 }

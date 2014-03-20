@@ -48,9 +48,11 @@ Object {
             var pluginList = []
             for (i = 0; i < plugins.count; i++) {
                 var plugin = plugins.get(i).modelData
-                pluginList.push(plugin.toJSON())
+                var json = plugin.toJSON()
+                json.type = plugin.type
+                pluginList.push(json)
             }
-            doc.set("plugin", pluginList)
+            doc.set("plugins", pluginList)
         }
 
         onLoaded: {
@@ -66,13 +68,16 @@ Object {
             for (i = 0; i < pluginList.length; i++) {
                 var plugin = newObject(pluginList[i].type)
                 plugin.project = project
+                plugin.type = Qt.resolvedUrl("../plugins/GitHub.qml")
                 plugin.fromJSON(pluginList[i])
                 plugins.append({"modelData": plugin})
             }
 
             //TODO: Remove once the config page works!
             if (plugins.count === 0) {
+                print("Adding first plugin!")
                 plugin = newObject(Qt.resolvedUrl("../plugins/GitHub.qml"))
+                plugin.type = Qt.resolvedUrl("../plugins/GitHub.qml")
                 plugin.project = project
                 plugins.append({"modelData": plugin})
             }

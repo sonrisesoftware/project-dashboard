@@ -26,6 +26,7 @@ Object {
     id: plugin
 
     property string name
+    property string type
     property Project project
 
     property bool canReload: false
@@ -39,8 +40,7 @@ Object {
     signal save()
     signal loaded()
 
-    Document {
-        id: doc
+    property Document doc: Document {
 
         onSave: plugin.save()
         onLoaded: plugin.loaded()

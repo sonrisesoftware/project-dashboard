@@ -22,14 +22,17 @@ import Ubuntu.Components.ListItems 0.1 as ListItem
 import "../../components"
 import "../../ubuntu-ui-extras"
 import "../../ubuntu-ui-extras/listutils.js" as List
+import ".."
 
 PluginPage {
     id: page
     title: i18n.tr("Issues")
 
-    property string sort: doc.get("sort", "number")
+    property var plugin
 
-    property var allIssues: issues.filteredChildren(function(doc) { return doc.info && !doc.info.head }).sort(function(a, b) { return parseInt(b) - parseInt(a) })
+    property var allIssues: List.filter(plugin.issues, function(issue) {
+        return !issue.isPullRequest
+    }).sort(function(a, b) { return b.number - a.number })
 
     actions: [
         Action {
@@ -77,7 +80,7 @@ PluginPage {
         }
         model: allIssues
         delegate: IssueListItem {
-            number: modelData
+            issue: modelData
             show: selectedFilter(modelData)
         }
         clip: true
@@ -93,19 +96,16 @@ PluginPage {
 
     property var selectedFilter: allFilter
 
-    property var allFilter: function(number) {
-        var issue = issues.childrenData[String(number)].info
-        return issue.state === "open" || settings.get("showClosedTickets", false)
+    property var allFilter: function(issue) {
+        return issue.open || settings.get("showClosedTickets", false)
     }
 
-    property var assignedFilter: function(number) {
-        var issue = issues.childrenData[String(number)].info
-        return issue.assignee && issue.assignee.login === github.user.login  && (issue.state === "open" || settings.get("showClosedTickets", false))
+    property var assignedFilter: function(issue) {
+        return issue.assignee && issue.assignee.login === github.user.login  && (issue.open || settings.get("showClosedTickets", false))
     }
 
-    property var createdFilter: function(number) {
-        var issue = issues.childrenData[String(number)].info
-        return issue.user && issue.user.login === github.user.login && (issue.state === "open" || settings.get("showClosedTickets", false))
+    property var createdFilter: function(issue) {
+        return issue.user && issue.user.login === github.user.login && (issue.open || settings.get("showClosedTickets", false))
     }
 
     Scrollbar {

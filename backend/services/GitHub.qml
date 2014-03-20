@@ -46,29 +46,31 @@ Service {
         }
     }
 
-    function userLoaded(has_error, status, response) {
+    function userLoaded(response) {
         //print("User:", response)
         var json = JSON.parse(response)
 
-        if (has_error && json.hasOwnProperty("message") && json.message === "Bad credentials") {
-            settings.set("githubToken", "")
-            PopupUtils.open(accessRevokedDialog, mainView.pageStack.currentPage)
-        } else {
+//        if (has_error && json.hasOwnProperty("message") && json.message === "Bad credentials") {
+//            settings.set("githubToken", "")
+//            PopupUtils.open(accessRevokedDialog, mainView.pageStack.currentPage)
+//        } else {
             settings.set("githubUser", json)
-        }
+//        }
     }
 
     function get(request, callback, options) {
+        print("OAuth", oauth)
         if (oauth === "")
             return undefined
         if (options === undefined)
             options = []
         if (request && request.indexOf(github) !== 0)
             request = github + request
-        return Http.get(request, ["access_token=" + oauth].concat(options), callback, undefined, {"Accept":"application/vnd.github.v3+json"})
+        queue.httpGet(request,["access_token=" + oauth].concat(options), {"Accept":"application/vnd.github.v3+json"}, callback, undefined)
     }
 
     function post(request, options, body) {
+        print("OAuth", oauth)
         if (oauth === "")
             return undefined
         if (options === undefined)

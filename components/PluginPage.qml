@@ -20,16 +20,14 @@ import Ubuntu.Components 0.1
 import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
 
-Item {
+Page {
     id: page
-    width: 100
-    height: 62
 
-    property string title
+    //property string title
 
     property list<Action> actions
 
-    property Flickable flickable
+    //property Flickable flickable
 
 //    property int loading: plugin.loading
 
@@ -57,4 +55,21 @@ Item {
 //            visible: loading > 0
 //        }
 //    }
+
+    tools: ToolbarItems {
+        opened: wideAspect
+        locked: wideAspect
+
+        onLockedChanged: opened = locked
+
+        Repeater {
+            model: page.actions
+            delegate: ToolbarButton {
+                id: toolbarButton
+                action: modelData
+                visible: action.visible
+                function trigger(value) { action.triggered(toolbarButton) }
+            }
+        }
+    }
 }

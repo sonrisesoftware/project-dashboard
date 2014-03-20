@@ -93,7 +93,7 @@ MainView {
 
     onBusyChanged: {
         if (busy) {
-            header.show()
+            //header.show()
         }
     }
 
@@ -126,14 +126,6 @@ MainView {
         id: friendsUtils
     }
 
-    SyncQueue {
-        id: queue
-
-        onError: {
-            mainView.error(i18n.tr("Connection Error"), i18n.tr("Unable to complete the sync opperation:\n\n%1").arg(args))
-        }
-    }
-
     Backend {
         id: backend
     }
@@ -143,8 +135,8 @@ MainView {
         path: "project-dashboard.db"
 
         onLoaded: {
-            backend.fromJSON(db.get("backend", {}))
             settings.fromJSON(db.get("settings", {}))
+            backend.fromJSON(db.get("backend", {}))
         }
 
         onSave: {
@@ -159,6 +151,14 @@ MainView {
 
         onSave: {
             settings.set("markdownCache", markdownCache)
+        }
+    }
+
+    SyncQueue {
+        id: queue
+
+        onError: {
+            mainView.error(i18n.tr("Connection Error"), i18n.tr("Unable to complete the sync opperation:\n\n%1").arg(args))
         }
     }
 
