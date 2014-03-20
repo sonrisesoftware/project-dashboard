@@ -81,7 +81,7 @@ PluginPage {
         model: allIssues
         delegate: IssueListItem {
             issue: modelData
-            show: selectedFilter(modelData)
+            show: selectedFilter(issue)
         }
         clip: true
     }
@@ -101,7 +101,7 @@ PluginPage {
     }
 
     property var assignedFilter: function(issue) {
-        return issue.assignee && issue.assignee.login === github.user.login  && (issue.open || settings.get("showClosedTickets", false))
+        return issue.assignee !== undefined && issue.assignee.login === github.user.login  && (issue.open || settings.get("showClosedTickets", false))
     }
 
     property var createdFilter: function(issue) {
