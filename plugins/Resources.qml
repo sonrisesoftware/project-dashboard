@@ -23,283 +23,216 @@ import "../backend"
 import "../components"
 import "../backend/services"
 import "../ubuntu-ui-extras"
-import "github"
 
 Plugin {
     id: plugin
 
-    title: "Resources"
-    iconSource: "file"
-
     property var documents: doc.get("resources", [])
 
-    action: Action {
-        id: addAction
-        iconSource: getIcon("add")
-        text: i18n.tr("Add")
-        onTriggered: PopupUtils.open(addLinkDialog, value)
+    onSave: {
+        doc.set("resources", documents)
     }
 
-    document: Document {
-        id: doc
-        docId: "resources"
-        parent: project.document
-    }
+    items: PluginItem {
+        title: "Resources"
+        icon: "file"
 
-    ListItem.Header {
-        text: i18n.tr("Recently Saved")
-        visible: documents.length > 0
-    }
-
-    ListItem.Standard {
-        text: i18n.tr("No saved resources")
-        visible: documents.length === 0
-        enabled: false
-    }
-
-    Repeater {
-        model: Math.min(documents.length, 4)
-        delegate: ListItem.Subtitled {
-            id: item
-            property var modelData: documents[documents.length - index - 1]
-            text: modelData.title
-            subText: modelData.text
-
-            onClicked: pageStack.push(Qt.resolvedUrl("resources/WebPage.qml"), {resource: modelData})
-            onPressAndHold: PopupUtils.open(actionsPopover, item, {index: documents.length - index - 1})
+        action: Action {
+            id: addAction
+            text: i18n.tr("Add Resource")
+            description: i18n.tr("Bookmark a link for referencing later")
+            onTriggered: PopupUtils.open(Qt.resolvedUrl("resources/AddLinkDialog.qml"), value, {plugin: plugin})
         }
-    }
 
-    page: Component {
-        PluginPage {
-            title: i18n.tr("Resources")
-            actions: [addAction]
-
-            flickable: listView.count === 0 ? null : listView
-            ListView {
-                id: listView
-                anchors.fill: parent
-
-                model: documents.length
-                delegate: ListItem.Subtitled {
-                    id: item
-                    property var modelData: documents[documents.length - index - 1]
-                    text: modelData.title
-                    subText: modelData.text
-
-                    onClicked: pageStack.push(Qt.resolvedUrl("resources/WebPage.qml"), {resource: modelData})
-                    onPressAndHold: PopupUtils.open(actionsPopover, item, {index: documents.length - index - 1})
-                }
-            }
-
-            Scrollbar {
-                flickableItem: listView
-            }
-
-            Label {
-                anchors.centerIn: parent
-                visible: listView.count == 0
-                opacity: 0.5
-                fontSize: "large"
-                text: i18n.tr("No saved resources")
-            }
-        }
-    }
-
-    viewAllMessage: i18n.tr("View all resources")
-    summary: i18n.tr("<b>%1</b> resources").arg(documents.length)
-
-    property Component addPopover: Component {
-        id: addPopover
-
-        ActionSelectionPopover {
-            actions: ActionList {
-                Action {
-                    text: i18n.tr("Link")
-                    onTriggered: PopupUtils.open(addLinkDialog)
+        page: Component {
+            PluginPage {
+                title: i18n.tr("Resources")
+                actions: Action {
+                    id: addAction
+                    iconSource: getIcon("add")
+                    text: i18n.tr("Add")
+                    description: i18n.tr("Bookmark a link for referencing later")
+                    onTriggered: PopupUtils.open(Qt.resolvedUrl("resources/AddLinkDialog.qml"), value, {plugin: plugin})
                 }
 
-                Action {
-                    text: i18n.tr("Content from other apps")
-                }
-            }
-        }
-    }
+                flickable: listView.count === 0 ? null : listView
+                ListView {
+                    id: listView
+                    anchors.fill: parent
 
-    Component {
-        id: actionsPopover
+                    model: documents.length
+                    delegate: ListItem.Subtitled {
+                        id: item
+                        property var modelData: documents[documents.length - index - 1]
+                        text: modelData.title
+                        subText: modelData.text
 
-        ActionSelectionPopover {
-            id: actionsPopoverItem
-            property int index
-
-            actions: ActionList {
-                Action {
-                    text: i18n.tr("Remove")
-                    onTriggered: {
-                        documents.splice(actionsPopoverItem.index, 1)
-                        doc.set("resources", documents)
+                        onClicked: pageStack.push(Qt.resolvedUrl("resources/WebPage.qml"), {resource: modelData})
+                        onPressAndHold: PopupUtils.open(actionsPopover, item, {index: documents.length - index - 1})
                     }
                 }
 
-                Action {
-                    text: i18n.tr("Edit")
-                    onTriggered: {
-                        if (documents[actionsPopoverItem.index].type === "link")
-                            PopupUtils.open(editLinkDialog, plugin, {index: actionsPopoverItem.index})
-                    }
+                Scrollbar {
+                    flickableItem: listView
                 }
-            }
-        }
-    }
 
-    Component {
-        id: addLinkDialog
-
-        Dialog {
-            id: root
-
-            title: i18n.tr("Add Link")
-            text: i18n.tr("Enter the link you want to save in Resources:")
-
-            property alias url: textField.text
-
-            TextField {
-                id: titleField
-
-                placeholderText: i18n.tr("Title")
-
-                onAccepted: textField.forceActiveFocus()
-                Keys.onTabPressed: textField.forceActiveFocus()
-                color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
-            }
-
-            TextField {
-                id: textField
-
-                placeholderText: i18n.tr("Link")
-
-                onAccepted: okButton.clicked()
-                color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
-                validator: RegExpValidator {
-                    regExp: /.+/
+                Label {
+                    anchors.centerIn: parent
+                    visible: listView.count == 0
+                    opacity: 0.5
+                    fontSize: "large"
+                    text: i18n.tr("No saved resources")
                 }
-            }
 
-            Item {
-                width: parent.width
-                height: childrenRect.height
-                Button {
-                    id: okButton
-                    objectName: "okButton"
-                    anchors {
-                        left: parent.left
-                        right: parent.horizontalCenter
-                        rightMargin: units.gu(1)
-                    }
+                Component {
+                    id: actionsPopover
 
-                    text: i18n.tr("Ok")
-                    enabled: textField.acceptableInput
+                    ActionSelectionPopover {
+                        id: actionsPopoverItem
+                        property int index
 
-                    onClicked: {
-                        PopupUtils.close(root)
-                        documents.push({"title": titleField.text, "type": "link", "text": textField.text})
-                        doc.set("resources", documents)
+                        actions: ActionList {
+                            Action {
+                                text: i18n.tr("Remove")
+                                onTriggered: {
+                                    documents.splice(actionsPopoverItem.index, 1)
+                                    documents = documents
+                                }
+                            }
+
+                            Action {
+                                text: i18n.tr("Edit")
+                                onTriggered: {
+                                    if (documents[actionsPopoverItem.index].type === "link")
+                                        PopupUtils.open(editLinkDialog, plugin, {index: actionsPopoverItem.index})
+                                }
+                            }
+                        }
                     }
                 }
 
-                Button {
-                    objectName: "cancelButton"
-                    text: i18n.tr("Cancel")
-                    anchors {
-                        left: parent.horizontalCenter
-                        right: parent.right
-                        leftMargin: units.gu(1)
-                    }
+                Component {
+                    id: editLinkDialog
 
-                    color: "gray"
+                    Dialog {
+                        id: root
 
-                    onClicked: {
-                        PopupUtils.close(root)
+                        property int index
+
+                        title: i18n.tr("Edit Link")
+                        text: i18n.tr("Edit the title or link:")
+
+                        TextField {
+                            id: titleField
+
+                            placeholderText: i18n.tr("Title")
+                            text: documents[index].title
+
+                            onAccepted: textField.forceActiveFocus()
+                            Keys.onTabPressed: descriptionField.forceActiveFocus()
+                            color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
+                        }
+
+                        TextField {
+                            id: textField
+
+                            placeholderText: i18n.tr("Link")
+                            text: documents[index].text
+                            color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
+
+                            onAccepted: okButton.clicked()
+                            validator: RegExpValidator {
+                                regExp: /.+/
+                            }
+                        }
+
+                        Item {
+                            width: parent.width
+                            height: childrenRect.height
+                            Button {
+                                id: okButton
+                                objectName: "okButton"
+                                anchors {
+                                    left: parent.left
+                                    right: parent.horizontalCenter
+                                    rightMargin: units.gu(1)
+                                }
+
+                                text: i18n.tr("Ok")
+                                enabled: textField.acceptableInput
+
+                                onClicked: {
+                                    PopupUtils.close(root)
+                                    documents[index] = {"title": titleField.text, "type": "link", "text": textField.text}
+                                    documents = documents
+                                }
+                            }
+
+                            Button {
+                                objectName: "cancelButton"
+                                text: i18n.tr("Cancel")
+                                anchors {
+                                    left: parent.horizontalCenter
+                                    right: parent.right
+                                    leftMargin: units.gu(1)
+                                }
+
+                                color: "gray"
+
+                                onClicked: {
+                                    PopupUtils.close(root)
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
     }
 
-    Component {
-        id: editLinkDialog
+//    ListItem.Header {
+//        text: i18n.tr("Recently Saved")
+//        visible: documents.length > 0
+//    }
 
-        Dialog {
-            id: root
+//    ListItem.Standard {
+//        text: i18n.tr("No saved resources")
+//        visible: documents.length === 0
+//        enabled: false
+//    }
 
-            property int index
+//    Repeater {
+//        model: Math.min(documents.length, 4)
+//        delegate: ListItem.Subtitled {
+//            id: item
+//            property var modelData: documents[documents.length - index - 1]
+//            text: modelData.title
+//            subText: modelData.text
 
-            title: i18n.tr("Edit Link")
-            text: i18n.tr("Edit the title or link:")
+//            onClicked: pageStack.push(Qt.resolvedUrl("resources/WebPage.qml"), {resource: modelData})
+//            onPressAndHold: PopupUtils.open(actionsPopover, item, {index: documents.length - index - 1})
+//        }
+//    }
 
-            TextField {
-                id: titleField
 
-                placeholderText: i18n.tr("Title")
-                text: documents[index].title
 
-                onAccepted: textField.forceActiveFocus()
-                Keys.onTabPressed: descriptionField.forceActiveFocus()
-                color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
-            }
+//    viewAllMessage: i18n.tr("View all resources")
+//    summary: i18n.tr("<b>%1</b> resources").arg(documents.length)
 
-            TextField {
-                id: textField
+//    property Component addPopover: Component {
+//        id: addPopover
 
-                placeholderText: i18n.tr("Link")
-                text: documents[index].text
-                color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
+//        ActionSelectionPopover {
+//            actions: ActionList {
+//                Action {
+//                    text: i18n.tr("Link")
+//                    onTriggered: PopupUtils.open(addLinkDialog)
+//                }
 
-                onAccepted: okButton.clicked()
-                validator: RegExpValidator {
-                    regExp: /.+/
-                }
-            }
-
-            Item {
-                width: parent.width
-                height: childrenRect.height
-                Button {
-                    id: okButton
-                    objectName: "okButton"
-                    anchors {
-                        left: parent.left
-                        right: parent.horizontalCenter
-                        rightMargin: units.gu(1)
-                    }
-
-                    text: i18n.tr("Ok")
-                    enabled: textField.acceptableInput
-
-                    onClicked: {
-                        PopupUtils.close(root)
-                        documents[index] = {"title": titleField.text, "type": "link", "text": textField.text}
-                        doc.set("resources", documents)
-                    }
-                }
-
-                Button {
-                    objectName: "cancelButton"
-                    text: i18n.tr("Cancel")
-                    anchors {
-                        left: parent.horizontalCenter
-                        right: parent.right
-                        leftMargin: units.gu(1)
-                    }
-
-                    color: "gray"
-
-                    onClicked: {
-                        PopupUtils.close(root)
-                    }
-                }
-            }
-        }
-    }
+//                Action {
+//                    text: i18n.tr("Content from other apps")
+//                }
+//            }
+//        }
+//    }
 }

@@ -87,17 +87,23 @@ Object {
     }
 
     property ListModel availablePlugins: ListModel {
+        ListElement {
+            name: "github"
+            type: "GitHub"
+            title: "GitHub"
+        }
+
 //        ListElement {
 //            name: "tasks"
 //            type: "ToDo"
 //            title: "Tasks"
 //        }
 
-        ListElement {
-            name: "notes"
-            type: "Notes"
-            title: "Notes"
-        }
+//        ListElement {
+//            name: "notes"
+//            type: "Notes"
+//            title: "Notes"
+//        }
 
 //        ListElement {
 //            name: "drawings"
@@ -111,26 +117,18 @@ Object {
             title: "Resources"
         }
 
-        ListElement {
-            name: "timer"
-            type: "Timer"
-            title: "Timer"
-        }
+//        ListElement {
+//            name: "timer"
+//            type: "Timer"
+//            title: "Timer"
+//        }
     }
-
-    property var availableServices: [github, travisCI]
 
     function getPlugin(name) {
         for (var i = 0; i < availablePlugins.count;i++) {
             var plugin = availablePlugins.get(i)
             if (plugin.name === name)
                 return plugin
-        }
-
-        for (i = 0; i < availableServices.length;i++) {
-            var service = availableServices[i]
-            if (service.name === name)
-                return service
         }
     }
 }

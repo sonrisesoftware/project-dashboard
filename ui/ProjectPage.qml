@@ -59,15 +59,15 @@ TabbedPage {
             text: i18n.tr("Actions")
             iconSource: getIcon("navigation-menu")
             onTriggered: PopupUtils.open(actionMenu, value)
-        },
+        }//,
 
         // TODO: Is there a way to enable auto-refresh in a useable and efficient manner?
-        Action {
-            id: refreshAction
-            text: i18n.tr("Refresh")
-            iconSource: getIcon("reload")
-            onTriggered: project.reload()
-        }
+//        Action {
+//            id: refreshAction
+//            text: i18n.tr("Refresh")
+//            iconSource: getIcon("reload")
+//            onTriggered: project.reload()
+//        }
     ]
 
     Item {
@@ -147,12 +147,25 @@ TabbedPage {
             }
         }
 
-        Label {
+        Column {
             anchors.centerIn: parent
+            width: parent.width - units.gu(3)
             visible: project.plugins.count === 0
-            opacity: 0.5
-            fontSize: "large"
-            text: i18n.tr("No plugins")
+            //opacity: 0.7
+
+            Label {
+                anchors.horizontalCenter: parent.horizontalCenter
+                fontSize: "large"
+                font.bold: true
+                text: i18n.tr("No plugins")
+            }
+
+            Label {
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                width: parent.width
+                text: i18n.tr("Add some plugins by tapping \"Edit\" in the toolbar.")
+            }
         }
     }
 
@@ -537,7 +550,7 @@ TabbedPage {
                                 enabled: visible ? modelData.action.enabled : false
                                 onClicked: {
                                     PopupUtils.close(actionsPopover)
-                                    modelData.action.triggered(actionListItem)
+                                    modelData.action.triggered(mainView)
                                 }
 
                                 AwesomeIcon {
@@ -584,7 +597,7 @@ TabbedPage {
                                         height: visible ? implicitHeight: 0
                                         //color:  Theme.palette.normal.backgroundText
                                         maximumLineCount: 1
-                                        opacity: 0.65
+                                        opacity: 0.75
                                         font.weight: Font.Light
                                         fontSize: "small"
                                         text: actionListItem.visible ? modelData.action.description : ""

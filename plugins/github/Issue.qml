@@ -33,7 +33,7 @@ Object {
 
     property int loading
 
-    property bool isPullRequest: info.hasOwnProperty("head") //TODO: Is this the best way to handle it?
+    property bool isPullRequest: info.hasOwnProperty("pull_request") || info.hasOwnProperty("head") //TODO: Is this the best way to handle it?
     property bool merged: isPullRequest ? pull && pull.merged  ? pull.merged : false
                                         : false
     property bool mergeable: isPullRequest ? pull && pull.mergeable ? pull.mergeable : false

@@ -32,6 +32,8 @@ Object {
 
     property int selectedTab: doc.get("selectedTab", 0)
 
+    property bool loadedSuccessfully: false
+
     Document {
         id: doc
 
@@ -39,7 +41,10 @@ Object {
             doc.set("name", name)
             doc.set("selectedTab", selectedTab)
 
-            // Save projects
+            if (!loadedSuccessfully)
+                print("WARNING: Not saving project because it wasn't loaded succesfully!")
+
+            // Save messages
             var inboxList = []
             for (var i = 0; i < inbox.count; i++) {
                 var item = inbox.get(i).modelData
@@ -47,7 +52,7 @@ Object {
             }
             doc.set("inbox", inboxList)
 
-            // Save projects
+            // Save plugins
             var pluginList = []
             for (i = 0; i < plugins.count; i++) {
                 var plugin = plugins.get(i).modelData
@@ -69,22 +74,20 @@ Object {
             // Load plugins
             var pluginList = doc.get("plugins", [])
             for (i = 0; i < pluginList.length; i++) {
-                var plugin = newObject(pluginList[i].type)
+                var plugin = newObject(Qt.resolvedUrl("../plugins/" + pluginList[i].type + ".qml"))
                 plugin.project = project
-                plugin.type = Qt.resolvedUrl("../plugins/GitHub.qml")
+                plugin.type = pluginList[i].type
                 plugin.fromJSON(pluginList[i])
                 plugins.append({"modelData": plugin})
             }
 
             //TODO: Remove once the config page works!
-            if (plugins.count === 0) {
-                print("Adding first plugin!")
-                plugin = newObject(Qt.resolvedUrl("../plugins/GitHub.qml"))
-                plugin.type = Qt.resolvedUrl("../plugins/GitHub.qml")
-                plugin.project = project
-                plugins.append({"modelData": plugin})
-                plugin.setup()
-            }
+//            if (plugins.count === 0) {
+//                print("Adding first plugin!")
+//                addPlugin("Resources")
+//            }
+
+            loadedSuccessfully = true
         }
     }
 
@@ -128,93 +131,49 @@ Object {
 
     }
 
-//    property var plugins: doc.get("plugins", {"notes": true})
+    function addPlugin(type) {
+        if (hasPlugin(type))
+            return
 
-//    signal reload
+        var plugin = newObject(Qt.resolvedUrl("../plugins/" + type + ".qml"))
+        plugin.type = type
+        plugin.project = project
+        plugins.append({"modelData": plugin})
+        plugin.setup()
+    }
 
-//    function enablePlugin(name, value) {
-//        var beforeValue = hasPlugin(name)
+    function hasPlugin(type) {
+        for (var i = 0; i < plugins.count; i++) {
+            var plugin = plugins.get(i).modelData
+            if (plugin.type === type)
+                return true
+        }
 
-//        //print("Setting state of", name, "to:", value)
-//        plugins[name] = value
-//        doc.set("plugins", plugins)
+        return false
+    }
 
-//        var plugin = backend.getPlugin(name)
-//        var type = plugin.type
+    function getPlugin(type) {
+        for (var i = 0; i < plugins.count; i++) {
+            var plugin = plugins.get(i).modelData
+            if (plugin.type === type)
+                return plugin
+        }
 
-//        if (hasPlugin(name) !== beforeValue) {
-//            if (hasPlugin(name)) {
-//                if (typeof(type) == "object") {
-//                    for (var j = 0; j < type.length; j++) {
-//                        enabledPlugins.append({"type": type[j]})
-//                    }
-//                } else {
-//                    enabledPlugins.append({"type": type})
-//                }
-//            } else {
-//                for (var i = 0; i < enabledPlugins.count; i++) {
-//                    if ((typeof(type) === "object" && type.indexOf(enabledPlugins.get(i).type)) ||
-//                         (enabledPlugins.get(i).type === type)) {
-//                        enabledPlugins.remove(i)
-//                    }
-//                }
-//            }
-//        }
-//    }
+        return null
+    }
 
-//    property ListModel enabledPlugins: ListModel {
+    function enablePlugin(type, enabled) {
+        if (enabled)
+            addPlugin(type)
+        else
+            removePlugin(type)
+    }
 
-//    }
-
-//    function hasPlugin(name) {
-//        return plugins.hasOwnProperty(name) && (plugins[name] === true || (plugins[name] !== false && plugins[name] !== ""))
-//    }
-
-//    function serviceValue(name) {
-//        return plugins.hasOwnProperty(name) ? plugins[name] : ""
-//    }
-
-//    //property var enabledPlugins: []
-
-
-//    function loadPlugins() {
-//        var list = []
-
-//        var pluginObjects = []
-//        for (var name in plugins) {
-//            if (!hasPlugin(name))
-//                continue
-//            var plugin = backend.getPlugin(name)
-//            //print(plugin.name)
-//            pluginObjects.push(plugin)
-//        }
-
-//        pluginObjects = pluginObjects.sort(function(item1, item2) {
-//            return item1.name - item2.name
-//        })
-
-//        for (var i = 0; i < pluginObjects.length; i++) {
-//            plugin = pluginObjects[i]
-//            var type = plugin.type
-//            //print("Type:", typeof(type))
-
-//            if (typeof(type) == "object") {
-//                for (var j = 0; j < type.length; j++) {
-//                    enabledPlugins.append({"type": type[j]})
-//                }
-//            } else {
-//                enabledPlugins.append({"type": type})
-//            }
-//        }
-//   }
-
-//    Document {
-//        id: doc
-
-//        Component.onCompleted: loadPlugins()
-//    }
-
-//    function remove() {
-//        doc.remove()
-//    }
+    function removePlugin(type) {
+        for (var i = 0; i < plugins.count; i++) {
+            var plugin = plugins.get(i).modelData
+            if (plugin.type === type)
+                plugins.remove(i)
+        }
+    }
 }

@@ -33,7 +33,7 @@ Plugin {
 
     name: "github"
     canReload: false
-    configuration: repo ? i18n.tr("Connected to <b>%1</b>").arg(repo) : "Not connected to a repository"
+    configuration: repo ? repo : "Not connected to a repository"
 
     property string repo: doc.get("repoName", "")
     property bool hasPushAccess: true
@@ -90,6 +90,10 @@ Plugin {
                 description: i18n.tr("Open a new pull request")
                 enabled: false
                 onTriggered: PopupUtils.open(Qt.resolvedUrl("github/NewPullRequestPage.qml"), mainView, {repo: repo, action: refresh})
+            }
+
+            page: PullRequestsPage {
+                plugin: githubPlugin
             }
 
             pulseItem: PulseItem {

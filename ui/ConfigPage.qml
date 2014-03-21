@@ -20,6 +20,7 @@ import Ubuntu.Components 0.1
 import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
 import "../backend"
+import "../components"
 import "../ubuntu-ui-extras"
 
 Page {
@@ -50,73 +51,19 @@ Page {
             }
 
             ListItem.Header {
-                text: i18n.tr("Local Plugins")
+                text: i18n.tr("Plugins")
             }
 
             Repeater {
                 model: backend.availablePlugins
 
-                delegate: ListItem.Standard {
+                delegate: SubtitledListItem {
                     text: title
+                    subText: project.hasPlugin(type) ? project.getPlugin(type).configuration : ""
                     enabled: type !== ""
                     control: Switch {
-                        checked: project.hasPlugin(name)
-                        onCheckedChanged: project.enablePlugin(name, checked)
-                    }
-                }
-            }
-
-            ListItem.Header {
-                text: i18n.tr("Services")
-            }
-
-            Repeater {
-                model: backend.availableServices
-
-                delegate: ListItem.Standard {
-                    enabled: modelData.enabled
-                    Column {
-                        spacing: units.gu(0.1)
-                        opacity: parent.enabled ? 1 :0.5
-
-                        anchors {
-                            verticalCenter: parent.verticalCenter
-                            left: parent.left
-                            leftMargin: units.gu(2)
-                            rightMargin: units.gu(1)
-                            right: parent.right
-                        }
-
-                        Label {
-                            width: parent.width
-                            elide: Text.ElideRight
-                            text: modelData.title
-                        }
-
-                        Label {
-                            width: parent.width
-
-                            height: visible ? implicitHeight: 0
-                            color:  Theme.palette.normal.backgroundText
-                            fontSize: "small"
-                            //font.italic: true
-                            text: project.hasPlugin(modelData.name) ? modelData.status(project.serviceValue(modelData.name)) : ""
-                            visible: text !== ""
-                            elide: Text.ElideRight
-                        }
-                    }
-                    control: Switch {
-                        checked: project.hasPlugin(modelData.name)
-                        onCheckedChanged: {
-                            if (checked) {
-                                if (!project.hasPlugin(modelData.name)) {
-                                    modelData.connect(project)
-                                }
-                            } else {
-                                project.enablePlugin(modelData.name, "")
-                            }
-                            checked = Qt.binding(function() { return project.hasPlugin(modelData.name) })
-                        }
+                        checked: project.hasPlugin(type)
+                        onCheckedChanged: project.enablePlugin(type, checked)
                     }
                 }
             }
@@ -133,16 +80,5 @@ Page {
         locked: wideAspect
 
         onLockedChanged: opened = locked
-    }
-
-    Component {
-        id: launchpadDialog
-
-        InputDialog {
-            title: i18n.tr("Connect to Launchpad")
-            text: i18n.tr("Enter the name of repository on Launchpad you would like to add to your project")
-            placeholderText: i18n.tr("name")
-            onAccepted: project.enabledPlugin("launchpad", value)
-        }
     }
 }

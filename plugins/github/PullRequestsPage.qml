@@ -22,35 +22,27 @@ import Ubuntu.Components.ListItems 0.1 as ListItem
 import "../../components"
 import "../../ubuntu-ui-extras"
 import "../../ubuntu-ui-extras/listutils.js" as List
+import ".."
 
 PluginPage {
     id: page
 
     title: i18n.tr("Pull Requests")
 
+    property var plugin
+
     property string sort: doc.get("sort", "number")
 
-    property var allIssues: issues.filteredChildren(function(doc) { return doc.info && doc.info.head }).sort(function(a, b) { return parseInt(b) - parseInt(a) })
-
-    function sortAllIssues() {
-        return issues.concat(closedIssues).sort(function sort(a1, a2) {
-            print("sorting", page.sort)
-            if (page.sort === "number") {
-                return a2.number - a1.number
-            } else if (page.sort === "assignee") {
-                return a2.assignee.login - a1.assignee.login
-            } else if (page.sort === "milestone") {
-                return a2.milestone.number - a1.milestone.number
-            }
-        })
-    }
+    property var allIssues: List.filter(plugin.issues, function(issue) {
+        return issue.isPullRequest
+    }).sort(function(a, b) { return b.number - a.number })
 
     actions: [
         Action {
             id: newIssueAction
             iconSource: getIcon("add")
             text: i18n.tr("New Pull")
-            onTriggered: PopupUtils.open(Qt.resolvedUrl("NewPullRequestPage.qml"), plugin, {repo: repo, branches: plugin.branches, action: reload})
+            onTriggered: PopupUtils.open(Qt.resolvedUrl("NewPullRequestsPage.qml"), plugin, {repo: repo, action: reload})
         },
 
         Action {
@@ -107,14 +99,12 @@ PluginPage {
 
     property var selectedFilter: allFilter
 
-    property var allFilter: function(number) {
-        var issue = issues.childrenData[String(number)].info
-        return issue.state === "open" || settings.get("showClosedTickets", false)
+    property var allFilter: function(issue) {
+        return issue.open || settings.get("showClosedTickets", false)
     }
 
-    property var createdFilter: function(number) {
-        var issue = issues.childrenData[String(number)].info
-        return issue.user && issue.user.login === github.user.login && (issue.state === "open" || settings.get("showClosedTickets", false))
+    property var createdFilter: function(issue) {
+        return issue.user && issue.user.login === github.user.login && (issue.open || settings.get("showClosedTickets", false))
     }
 
     Scrollbar {
