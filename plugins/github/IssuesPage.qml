@@ -167,21 +167,21 @@ PluginPage {
                     }
                 }
 
-                ListItem.ValueSelector {
-                    text: i18n.tr("Sort By")
-                    values: [i18n.tr("Number"), i18n.tr("Assignee"), i18n.tr("Milestone")]
-                    selectedIndex: {
-                        if (sort === "number") return 0
-                        if (sort === "assignee") return 1
-                        if (sort === "milestone") return 2
-                    }
+//                ListItem.ValueSelector {
+//                    text: i18n.tr("Sort By")
+//                    values: [i18n.tr("Number"), i18n.tr("Assignee"), i18n.tr("Milestone")]
+//                    selectedIndex: {
+//                        if (sort === "number") return 0
+//                        if (sort === "assignee") return 1
+//                        if (sort === "milestone") return 2
+//                    }
 
-                    onSelectedIndexChanged: {
-                        if (selectedIndex === 0) doc.set("sort", "number")
-                        if (selectedIndex === 1) doc.set("sort", "assignee")
-                        if (selectedIndex === 2) doc.set("sort", "milestone")
-                    }
-                }
+//                    onSelectedIndexChanged: {
+//                        if (selectedIndex === 0) doc.set("sort", "number")
+//                        if (selectedIndex === 1) doc.set("sort", "assignee")
+//                        if (selectedIndex === 2) doc.set("sort", "milestone")
+//                    }
+//                }
             }
         }
     }

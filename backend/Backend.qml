@@ -62,6 +62,7 @@ Object {
         var project = projectComponent.createObject(mainView, {index: nextIndex++})
         project.name = name
         projects.append({"modelData": project})
+        project.fromJSON({})
         return project
     }
 

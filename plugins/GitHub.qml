@@ -34,16 +34,21 @@ Plugin {
     name: "github"
     canReload: false
 
+    property string repo: doc.get("repoName", "")
+    property bool hasPushAccess: true
+    property var milestones: []
+    property var availableAssignees: []
+
     property ListModel issues: ListModel {
 
     }
 
     items: [
         PluginItem {
-            title: "Issues"
+            title: i18n.tr("Issues")
             value: List.filteredCount(issues, function (issue) {
-                return issue.open
-            }) + " (" + issues.count + ")"
+                return !issue.isPullRequest && issue.open
+            })
             page: IssuesPage {
                 plugin: githubPlugin
             }
@@ -66,7 +71,25 @@ Plugin {
         },
 
         PluginItem {
-            title: "Pull Requests"
+            title: i18n.tr("Pull Requests")
+            value: List.filteredCount(issues, function (issue) {
+                return issue.isPullRequest && issue.open
+            })
+
+            pulseItem: PulseItem {
+                title: i18n.tr("Open Pull Requests")
+                visible: pullsRepeater.count > 0
+
+                Repeater {
+                    id: pullsRepeater
+                    model: List.filter(issues, function(issue) {
+                        return issue.isPullRequest && issue.open
+                    }).sort(function(a, b) { return b.number - a.number })
+                    delegate: PullRequestListItem {
+                        issue: modelData
+                    }
+                }
+            }
         }
     ]
 
@@ -94,7 +117,15 @@ Plugin {
         refresh()
     }
 
+    function setup() {
+        PopupUtils.open(Qt.resolvedUrl("github/RepositorySelectionSheet.qml"), mainView, {plugin: plugin})
+    }
+
     function refresh() {
+        print("Refreshing")
+        if (!repo)
+            return
+
         var lastRefreshed = doc.get("lastRefreshed", "")
 
         var handler = function(status, response) {
@@ -103,7 +134,7 @@ Plugin {
 
             //print(response)
             var json = JSON.parse(response)
-            print("LENGTH:", json.length)
+            //print("LENGTH:", json.length)
             for (var i = 0; i < json.length; i++) {
                 var found = false
                 for (var j = 0; j < issues.count; j++) {
@@ -119,14 +150,21 @@ Plugin {
                     var issue = issueComponent.createObject(mainView, {info: json[i]})
                     issues.append({"modelData": issue})
 
-                    if (lastRefreshed !== "")
-                        project.newMessage("github", "bug", i18n.tr("<b>%1</b> opened issue %2").arg(issue.user.login).arg(issue.number), issue.title, issue.created_at, issue.info)
+                    if (lastRefreshed !== "") {
+                        if (issue.isPullRequest) {
+                            project.newMessage("github", "code-fork", i18n.tr("<b>%1</b> opened pull request %2").arg(issue.user.login).arg(issue.number), issue.title, issue.created_at, issue.info)
+                        } else {
+                            project.newMessage("github", "bug", i18n.tr("<b>%1</b> opened issue %2").arg(issue.user.login).arg(issue.number), issue.title, issue.created_at, issue.info)
+                        }
+                    }
                 }
             }
         }
 
-        github.getIssues("iBeliever/project-dashboard", "open", lastRefreshed,  handler)
-        github.getIssues("iBeliever/project-dashboard", "closed", lastRefreshed, handler)
+        github.getIssues(repo, "open", lastRefreshed,  handler)
+        github.getIssues(repo, "closed", lastRefreshed, handler)
+        github.getPullRequests(repo, "open", lastRefreshed,  handler)
+        github.getPullRequests(repo, "closed", lastRefreshed, handler)
 
         doc.set("lastRefreshed", new Date().toJSON())
     }

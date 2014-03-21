@@ -30,7 +30,8 @@ Object {
     property Project project
 
     property bool canReload: false
-    function reload() {}
+    function refresh() {}
+    function setup() {}
 
     function displayMessage(message) {}
 

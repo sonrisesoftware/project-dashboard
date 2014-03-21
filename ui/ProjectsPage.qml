@@ -119,8 +119,7 @@ Page {
             placeholderText: i18n.tr("Name")
             onAccepted: {
                 var project = backend.newProject(value)
-                // FIXME: Reenable once the ProjectPage is fixed
-                //pageStack.push(Qt.resolvedUrl("ProjectPage.qml"), {project: project})
+                pageStack.push(Qt.resolvedUrl("ProjectPage.qml"), {project: project})
             }
         }
     }

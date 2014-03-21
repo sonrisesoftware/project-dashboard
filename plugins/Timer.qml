@@ -29,11 +29,9 @@ import "../ubuntu-ui-extras"
 Plugin {
     id: root
 
-    title: "Timer"
-    iconSource: "clock"
-    //unread: true
+    name: "timer"
 
-    property alias dates: doc.children
+    property var dates: doc.get("dates", [])
     property int totalTime: savedTime + currentTime
     property int currentTime: 0//new Date() - startTime
     property int savedTime: today.get("savedTime", 0)

@@ -37,10 +37,14 @@ Service {
     property string oauth:settings.get("githubToken", "")
     property string github: "https://api.github.com"
     property var user: settings.get("githubUser", "")
+    property var repos: settings.get("githubRepos", [])
 
     onOauthChanged: {
         if (oauth !== "") {
             get("/user", userLoaded)
+            get("/user/repos", function(status, response) {
+                settings.set("githubRepos", JSON.parse(response))
+            })
         } else {
             settings.set("githubUser", undefined)
         }
@@ -59,7 +63,7 @@ Service {
     }
 
     function get(request, callback, options) {
-        print("OAuth", oauth)
+        //print("OAuth", oauth)
         if (oauth === "")
             return undefined
         if (options === undefined)
@@ -69,15 +73,15 @@ Service {
         queue.httpGet(request,["access_token=" + oauth].concat(options), {"Accept":"application/vnd.github.v3+json"}, callback, undefined)
     }
 
-    function post(request, options, body) {
-        print("OAuth", oauth)
+    function post(request, options, body, message) {
+        //print("OAuth", oauth)
         if (oauth === "")
             return undefined
         if (options === undefined)
             options = []
         if (request && request.indexOf(github) !== 0)
             request = github + request
-        queue.http("POST", request, ["access_token=" + oauth].concat(options), {"Accept":"application/vnd.github.v3+json"}, body)
+        queue.http("POST", request, ["access_token=" + oauth].concat(options), {"Accept":"application/vnd.github.v3+json"}, body, message)
     }
 
     function getIssues(repo, state, since,callback) {

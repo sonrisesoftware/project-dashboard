@@ -24,7 +24,7 @@ Object {
     }
 
     property var info: doc.get("info", {})
-    property var pull: doc.get("pull", {})
+    property var pull: doc.get("pull", undefined)
     property var events: doc.get("events", [])
     property var comments: doc.get("comments", [])
     property var commits: doc.get("commits", [])
@@ -34,8 +34,10 @@ Object {
     property int loading
 
     property bool isPullRequest: info.hasOwnProperty("head") //TODO: Is this the best way to handle it?
-    property bool merged: isPullRequest ? pull.merged : false
-    property bool mergeable: isPullRequest ? pull.mergeable : false
+    property bool merged: isPullRequest ? pull && pull.merged  ? pull.merged : false
+                                        : false
+    property bool mergeable: isPullRequest ? pull && pull.mergeable ? pull.mergeable : false
+                                           : false
     property bool open: info.state === "open"
     property var assignee: info.assignee
     property bool assignedToMe: {
@@ -73,17 +75,17 @@ Object {
                         actor: actor,
                         created_at: new Date().toJSON()
                     })
-        doc.set("events", events)
+        events = events
     }
 
     function newComment(text) {
         comments.push({body: text, user: github.user, date: new Date().toISOString()})
-        doc.set("comments", comments)
+        comments = comments
     }
 
     property var allEvents: {
-        if (!loaded)
-            return []
+//        if (!loaded)
+//            return []
 
         // Turn the list of commits into events
         var commitEvents = []
@@ -206,13 +208,13 @@ Object {
         if (open) {
             github.editIssue(plugin.repo, number, {"state": "closed"})
             info.state = "closed"
-            doc.set("info", info)
+            info = info
             newEvent("closed")
         } else {
             github.editIssue(plugin.repo, number, {"state": "open"})
 
             info.state = "open"
-            doc.set("info", info)
+            info = info
             newEvent("reopened")
         }
     }

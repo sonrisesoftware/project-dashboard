@@ -158,6 +158,7 @@ MainView {
         id: queue
 
         onError: {
+            print("Error", status, response, args)
             mainView.error(i18n.tr("Connection Error"), i18n.tr("Unable to complete the sync opperation:\n\n%1").arg(args))
         }
     }

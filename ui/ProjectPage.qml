@@ -32,6 +32,12 @@ TabbedPage {
 
     property Project project
 
+    selectedIndex: project.selectedTab
+
+    onSelectedIndexChanged: {
+        project.selectedTab = selectedIndex
+    }
+
     actions: [
         Action {
             id: configAction
@@ -155,7 +161,7 @@ TabbedPage {
 
         oldFlickable = flickable
 
-        if (flickable !== null) {
+        if (flickable != null) {
             flickable.topMargin = header.height
             flickable.contentY = -header.height
         }
@@ -497,9 +503,9 @@ TabbedPage {
 //            }
 //        }
 
-        ToolbarButton {
-            action: refreshAction
-        }
+//        ToolbarButton {
+//            action: refreshAction
+//        }
 
         ToolbarButton {
             action: inboxAction

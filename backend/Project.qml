@@ -30,11 +30,14 @@ Object {
     function toJSON() { return doc.toJSON() }
     function fromJSON(json) { doc.fromJSON(json) }
 
+    property int selectedTab: doc.get("selectedTab", 0)
+
     Document {
         id: doc
 
         onSave: {
             doc.set("name", name)
+            doc.set("selectedTab", selectedTab)
 
             // Save projects
             var inboxList = []
@@ -79,8 +82,8 @@ Object {
                 plugin = newObject(Qt.resolvedUrl("../plugins/GitHub.qml"))
                 plugin.type = Qt.resolvedUrl("../plugins/GitHub.qml")
                 plugin.project = project
-                plugin.fromJSON({})
                 plugins.append({"modelData": plugin})
+                plugin.setup()
             }
         }
     }
