@@ -28,6 +28,7 @@ Object {
     property string name
     property string type
     property Project project
+    property string configuration
 
     property bool canReload: false
     function refresh() {}

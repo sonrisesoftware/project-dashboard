@@ -232,7 +232,7 @@ MainView {
                         })
     }
 
-    PerformanceOverlay {
+//    PerformanceOverlay {
 
-    }
+//    }
 }

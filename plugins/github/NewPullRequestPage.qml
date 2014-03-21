@@ -27,6 +27,8 @@ ComposerSheet {
 
     title: i18n.tr("New Pull Request")
 
+    contentsHeight: wideAspect ? units.gu(40) : mainView.height
+
     Component.onCompleted: {
         sheet.__leftButton.text = i18n.tr("Cancel")
         sheet.__leftButton.color = "gray"

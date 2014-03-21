@@ -25,6 +25,7 @@ import "../../ubuntu-ui-extras/listutils.js" as List
 
 PluginPage {
     id: page
+
     title: i18n.tr("Pull Requests")
 
     property string sort: doc.get("sort", "number")

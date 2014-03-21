@@ -54,6 +54,13 @@ TabbedPage {
             onTriggered: pageStack.push(Qt.resolvedUrl("InboxPage.qml"), {project: project})
         },
 
+        Action {
+            id: actionsAction
+            text: i18n.tr("Actions")
+            iconSource: getIcon("navigation-menu")
+            onTriggered: PopupUtils.open(actionMenu, value)
+        },
+
         // TODO: Is there a way to enable auto-refresh in a useable and efficient manner?
         Action {
             id: refreshAction
@@ -487,6 +494,113 @@ TabbedPage {
 //        visible: project.enabledPlugins.length === 0
 //    }
 
+    Component {
+        id: actionMenu
+
+        Popover {
+            id: actionsPopover
+            Column {
+                width: parent.width
+
+                Item {
+                    width: parent.width
+                    height: noneLabel.height + units.gu(4)
+
+                    visible: actionsColumn.height === 0
+
+                    Label {
+                        id: noneLabel
+                        anchors.centerIn: parent
+
+                        width: parent.width - units.gu(4)
+                        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                        horizontalAlignment: Text.AlignHCenter
+
+                        text: i18n.tr("No available actions")
+                        color: Theme.palette.normal.overlayText
+                    }
+                }
+
+                Column {
+                    id: actionsColumn
+
+                    width: parent.width
+
+                    Repeater {
+                        model: project.plugins
+                        delegate: Repeater {
+                            model: modelData.items
+                            delegate: ListItem.Standard {
+                                id: actionListItem
+                                showDivider: actionListItem.y + actionListItem.height < actionsColumn.height
+                                visible: modelData.action
+                                enabled: visible ? modelData.action.enabled : false
+                                onClicked: {
+                                    PopupUtils.close(actionsPopover)
+                                    modelData.action.triggered(actionListItem)
+                                }
+
+                                AwesomeIcon {
+                                    id: icon
+                                    name: modelData.icon
+                                    size: units.gu(3.5)
+                                    anchors {
+                                        verticalCenter: parent.verticalCenter
+                                        left: parent.left
+                                        leftMargin: units.gu(1.5)
+                                    }
+                                    opacity: actionListItem.enabled ? 1 : 0.5
+
+                                    color: Theme.palette.normal.overlayText
+                                }
+
+                                Column {
+                                    id: labels
+                                    opacity: actionListItem.enabled ? 1 : 0.5
+
+                                    spacing: units.gu(0.1)
+
+                                    anchors {
+                                        verticalCenter: parent.verticalCenter
+                                        left: icon.right
+                                        leftMargin: units.gu(1.5)
+                                        rightMargin: units.gu(2)
+                                        right: parent.right
+                                    }
+
+                                    Label {
+                                        id: titleLabel
+
+                                        width: parent.width
+                                        elide: Text.ElideRight
+                                        text: actionListItem.visible ? modelData.action.text : ""
+                                        color: Theme.palette.normal.overlayText
+                                    }
+
+                                    Label {
+                                        id: subLabel
+                                        width: parent.width
+
+                                        height: visible ? implicitHeight: 0
+                                        //color:  Theme.palette.normal.backgroundText
+                                        maximumLineCount: 1
+                                        opacity: 0.65
+                                        font.weight: Font.Light
+                                        fontSize: "small"
+                                        text: actionListItem.visible ? modelData.action.description : ""
+                                        visible: text !== ""
+                                        elide: Text.ElideRight
+                                        color: Theme.palette.normal.overlayText
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     tools: ToolbarItems {
         opened: wideAspect
         locked: wideAspect
@@ -509,6 +623,12 @@ TabbedPage {
 
         ToolbarButton {
             action: inboxAction
+        }
+
+        ToolbarButton {
+            id: actionsButton
+            action: actionsAction
+            function trigger(value) { action.triggered(actionsButton) }
         }
 
         ToolbarButton {

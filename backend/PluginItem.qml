@@ -10,4 +10,6 @@ Object {
     property Component page
 
     property Component pulseItem
+
+    property Action action
 }

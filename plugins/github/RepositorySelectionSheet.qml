@@ -42,6 +42,44 @@ DefaultSheet {
         id: repos
         model: github.repos
         clip: true
+
+        header: ListItem.Empty {
+            TextField {
+                id: textField
+                placeholderText: i18n.tr("Repository name")
+                anchors {
+                    left: parent.left
+                    leftMargin: units.gu(2)
+                    right: okButton.left
+                    rightMargin: units.gu(1)
+                    verticalCenter: parent.verticalCenter
+                }
+                onAccepted: okButton.trigger()
+
+                validator: RegExpValidator {
+                    regExp: /.+/
+                }
+            }
+
+            Button {
+                id: okButton
+                text: i18n.tr("Use")
+                anchors {
+                    right: parent.right
+                    rightMargin: units.gu(2)
+                    verticalCenter: parent.verticalCenter
+                }
+
+                enabled: textField.acceptableInput
+
+                onTriggered: {
+                    plugin.doc.set("repoName", textField.text)
+                    plugin.refresh()
+                    PopupUtils.close(configureSheet)
+                }
+            }
+        }
+
         delegate: ListItem.Subtitled {
             text: modelData.description
             subText: modelData.full_name

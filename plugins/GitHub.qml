@@ -33,6 +33,7 @@ Plugin {
 
     name: "github"
     canReload: false
+    configuration: repo ? i18n.tr("Connected to <b>%1</b>").arg(repo) : "Not connected to a repository"
 
     property string repo: doc.get("repoName", "")
     property bool hasPushAccess: true
@@ -45,12 +46,19 @@ Plugin {
 
     items: [
         PluginItem {
+            icon: "bug"
             title: i18n.tr("Issues")
             value: List.filteredCount(issues, function (issue) {
                 return !issue.isPullRequest && issue.open
             })
             page: IssuesPage {
                 plugin: githubPlugin
+            }
+
+            action: Action {
+                text: i18n.tr("New Issue")
+                description: i18n.tr("Create new issue")
+                onTriggered: PopupUtils.open(Qt.resolvedUrl("github/NewIssuePage.qml"), mainView, {repo: repo, action: refresh})
             }
 
             pulseItem: PulseItem {
@@ -71,10 +79,18 @@ Plugin {
         },
 
         PluginItem {
+            icon: "code-fork"
             title: i18n.tr("Pull Requests")
             value: List.filteredCount(issues, function (issue) {
                 return issue.isPullRequest && issue.open
             })
+
+            action: Action {
+                text: i18n.tr("Open Pull Request")
+                description: i18n.tr("Open a new pull request")
+                enabled: false
+                onTriggered: PopupUtils.open(Qt.resolvedUrl("github/NewPullRequestPage.qml"), mainView, {repo: repo, action: refresh})
+            }
 
             pulseItem: PulseItem {
                 title: i18n.tr("Open Pull Requests")
