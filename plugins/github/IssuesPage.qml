@@ -101,7 +101,7 @@ PluginPage {
     }
 
     property var assignedFilter: function(issue) {
-        return issue.assignee !== undefined && issue.assignee.login === github.user.login  && (issue.open || settings.get("showClosedTickets", false))
+        return issue.assignedToMe && (issue.open || settings.get("showClosedTickets", false))
     }
 
     property var createdFilter: function(issue) {

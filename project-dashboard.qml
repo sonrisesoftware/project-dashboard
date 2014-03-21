@@ -89,7 +89,7 @@ MainView {
         }
     }
 
-    property bool busy: queue.busy
+    property bool busy: false//queue.busy
 
     onBusyChanged: {
         if (busy) {

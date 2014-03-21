@@ -79,6 +79,7 @@ Object {
                 plugin = newObject(Qt.resolvedUrl("../plugins/GitHub.qml"))
                 plugin.type = Qt.resolvedUrl("../plugins/GitHub.qml")
                 plugin.project = project
+                plugin.fromJSON({})
                 plugins.append({"modelData": plugin})
             }
         }
@@ -111,7 +112,7 @@ Object {
 
     function displayMessage(message) {
         var name = message.plugin
-        for (i = 0; i < plugins.count; i++) {
+        for (var i = 0; i < plugins.count; i++) {
             var plugin = plugins.get(i).modelData
             if (plugin.name === name) {
                 plugin.displayMessage(message)

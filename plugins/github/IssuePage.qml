@@ -34,29 +34,10 @@ Page {
     property string typeCap: issue.isPullRequest ? "Pull request" : "Issue"
     property string typeTitle: issue.isPullRequest ? "Pull Request" : "Issue"
 
-    property alias number: issue.number
     property Plugin plugin
     property var request
 
-    Issue {
-        id: issue
-
-        Component.onCompleted: load()
-
-        onBusy: {
-            busyDialog.title = title
-            busyDialog.text = message
-            page.request = request
-
-            busyDialog.show()
-        }
-
-        onComplete: {
-            busyDialog.hide()
-        }
-
-        onError: mainView.error(title, message)
-    }
+    property Issue issue
 
     InputDialog {
         id: mergeDialog

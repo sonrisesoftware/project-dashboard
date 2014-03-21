@@ -26,9 +26,9 @@ ListItem.Standard {
     property int number: issue.number
     property bool showAssignee: true
 
-    property bool isPullRequest: modelData.hasOwnProperty("head")
+    property bool isPullRequest: issue.isPullRequest
 
-    onClicked: pageStack.push(Qt.resolvedUrl("IssuePage.qml"), {number: issue.number, plugin:plugin})
+    onClicked: pageStack.push(Qt.resolvedUrl("IssuePage.qml"), {issue: issue, plugin:plugin})
 
     height: opacity === 0 ? 0 : (__height + units.dp(2))
 

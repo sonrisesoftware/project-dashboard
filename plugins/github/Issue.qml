@@ -38,6 +38,14 @@ Object {
     property bool mergeable: isPullRequest ? pull.mergeable : false
     property bool open: info.state === "open"
     property var assignee: info.assignee
+    property bool assignedToMe: {
+        var result = issue.assignee && issue.assignee.login && issue.assignee.login === github.user.login
+        if (result === undefined)
+            return false
+        else
+            return result
+    }
+
     property var milestone: info.milestone
     property string title: info.title
     property var labels: info.labels

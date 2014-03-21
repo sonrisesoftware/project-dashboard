@@ -23,10 +23,12 @@ import "../backend"
 import "../ubuntu-ui-extras"
 import "../components"
 
-Page {
+TabbedPage {
     id: page
     
     title: project.name
+
+    tabs: [i18n.tr("Pulse"), i18n.tr("Overview")]
 
     property Project project
 
@@ -55,46 +57,109 @@ Page {
         }
     ]
 
-    ListView {
-        anchors.fill:parent
-        model: project.plugins
-        delegate: Column {
-            property Plugin plugin: modelData
-            width: parent.width
-            Repeater {
-                model: plugin.items
-                delegate: ListItem.SingleValue {
-                    text: modelData.title
-                    value: modelData.value
-                    progression: modelData.page
-                    onClicked: {
-                        if (modelData.page)
-                            pageStack.push(modelData.page)
+    Item {
+        anchors {
+            left: parent.left
+            top: parent.top
+            bottom: parent.bottom
+            leftMargin: show ? 0 : -width
+
+            Behavior on leftMargin {
+                UbuntuNumberAnimation {}
+            }
+        }
+
+        width: parent.width
+
+        property bool show: selectedTab === i18n.tr("Pulse")
+
+        ListView {
+            id: pulseListView
+
+            topMargin: units.gu(12)
+            anchors.fill: parent
+
+            model: project.plugins
+            delegate: Column {
+                property Plugin plugin: modelData
+                width: parent.width
+                Repeater {
+                    model: plugin.items
+                    delegate: Loader {
+                        width: parent.width
+                        sourceComponent: modelData.pulseItem
                     }
                 }
             }
         }
     }
 
-    Label {
-        anchors.centerIn: parent
-        visible: project.plugins.count === 0
-        opacity: 0.5
-        fontSize: "large"
-        text: i18n.tr("No plugins")
+    Item {
+        anchors {
+            right: parent.right
+            top: parent.top
+            bottom: parent.bottom
+            rightMargin: show ? 0 : -width
+
+            Behavior on rightMargin {
+                UbuntuNumberAnimation {}
+            }
+        }
+
+        width: parent.width
+
+        property bool show: selectedTab === i18n.tr("Overview")
+
+        ListView {
+            id: listView
+
+            anchors.fill: parent
+
+            model: project.plugins
+            delegate: Column {
+                property Plugin plugin: modelData
+                width: parent.width
+                Repeater {
+                    model: plugin.items
+                    delegate: ListItem.SingleValue {
+                        text: modelData.title
+                        value: modelData.value
+                        progression: modelData.page
+                        onClicked: {
+                            if (modelData.page)
+                                pageStack.push(modelData.page)
+                        }
+                    }
+                }
+            }
+        }
+
+        Label {
+            anchors.centerIn: parent
+            visible: project.plugins.count === 0
+            opacity: 0.5
+            fontSize: "large"
+            text: i18n.tr("No plugins")
+        }
     }
 
-//    flickable: sidebar.expanded || project.enabledPlugins.length === 0 ? null : listView
+    property Flickable oldFlickable
 
-//    onFlickableChanged: {
-//        if (flickable === null) {
-//            listView.topMargin = 0
-//            listView.contentY = 0
-//        } else {
-//            listView.topMargin = units.gu(9.5)
-//            listView.contentY = -units.gu(9.5)
-//        }
-//    }
+    flickable: selectedTab === i18n.tr("Pulse") ? pulseListView : listView
+
+    onFlickableChanged: {
+        if (oldFlickable && wideAspect) {
+            oldFlickable.topMargin = 0
+            oldFlickable.contentY = 0
+        }
+
+        oldFlickable = flickable
+
+        if (flickable !== null) {
+            flickable.topMargin = header.height
+            flickable.contentY = -header.height
+        }
+    }
 
 //    Project {
 //        id: project

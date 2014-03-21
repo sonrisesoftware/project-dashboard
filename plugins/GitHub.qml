@@ -27,7 +27,9 @@ import "../ubuntu-ui-extras/listutils.js" as List
 import "github"
 
 Plugin {
-    id: githubPlugin
+    id: plugin
+
+    property alias githubPlugin: plugin
 
     name: "github"
     canReload: false
@@ -44,6 +46,22 @@ Plugin {
             }) + " (" + issues.count + ")"
             page: IssuesPage {
                 plugin: githubPlugin
+            }
+
+            pulseItem: PulseItem {
+                title: i18n.tr("Issues Assigned to Me")
+                visible: repeater.count > 0
+
+                Repeater {
+                    id: repeater
+                    model: List.filter(issues, function(issue) {
+                        return !issue.isPullRequest && issue.assignedToMe && issue.open
+                    }).sort(function(a, b) { return b.number - a.number })
+                    delegate: IssueListItem {
+                        showAssignee: false
+                        issue: modelData
+                    }
+                }
             }
         },
 
@@ -73,16 +91,23 @@ Plugin {
             issues.append({"modelData": issue})
         }
 
+        refresh()
+    }
+
+    function refresh() {
         var lastRefreshed = doc.get("lastRefreshed", "")
 
-        var handler = function(response) {
+        var handler = function(status, response) {
+            if (status === 304)
+                return
+
             //print(response)
             var json = JSON.parse(response)
             print("LENGTH:", json.length)
             for (var i = 0; i < json.length; i++) {
                 var found = false
                 for (var j = 0; j < issues.count; j++) {
-                    print(issues.get(j).modelData.number + " === " + json[i].number)
+                    //print(issues.get(j).modelData.number + " === " + json[i].number)
                     if (issues.get(j).modelData.number === json[i].number) {
                         issues.get(j).modelData.info = json[i]
                         found = true
@@ -93,11 +118,14 @@ Plugin {
                 if (!found) {
                     var issue = issueComponent.createObject(mainView, {info: json[i]})
                     issues.append({"modelData": issue})
+
+                    if (lastRefreshed !== "")
+                        project.newMessage("github", "bug", i18n.tr("<b>%1</b> opened issue %2").arg(issue.user.login).arg(issue.number), issue.title, issue.created_at, issue.info)
                 }
             }
         }
 
-        github.getIssues("iBeliever/project-dashboard", "open", lastRefreshed, handler)
+        github.getIssues("iBeliever/project-dashboard", "open", lastRefreshed,  handler)
         github.getIssues("iBeliever/project-dashboard", "closed", lastRefreshed, handler)
 
         doc.set("lastRefreshed", new Date().toJSON())
@@ -109,5 +137,12 @@ Plugin {
         Issue {
 
         }
+    }
+
+    Timer {
+        interval: 2 * 60 * 1000 // 2 minutes
+        running: true
+        repeat: true
+        onTriggered: refresh()
     }
 }

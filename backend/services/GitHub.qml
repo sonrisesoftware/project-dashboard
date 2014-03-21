@@ -46,7 +46,7 @@ Service {
         }
     }
 
-    function userLoaded(response) {
+    function userLoaded(status, response) {
         //print("User:", response)
         var json = JSON.parse(response)
 
@@ -80,7 +80,7 @@ Service {
         queue.http("POST", request, ["access_token=" + oauth].concat(options), {"Accept":"application/vnd.github.v3+json"}, body)
     }
 
-    function getIssues(repo, state, since, callback) {
+    function getIssues(repo, state, since,callback) {
         return get("/repos/" + repo + "/issues", callback, ["state=" + state, "since=" + since])
     }
 

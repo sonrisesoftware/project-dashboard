@@ -8,4 +8,6 @@ Object {
     property string value
 
     property Component page
+
+    property Component pulseItem
 }

@@ -80,9 +80,8 @@ Object {
             if (has_error) {
                 error(status, response, data.args)
             } else {
-                //print("RESPONSE:", JSON.parse(response).length)
                 if (data.callback)
-                    data.callback(response, data.args)
+                    data.callback(status, response, data.args)
             }
         }, undefined, data.headers, undefined)
     }
