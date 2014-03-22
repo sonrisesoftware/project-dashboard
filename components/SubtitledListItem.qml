@@ -50,6 +50,7 @@ ListItem.Standard {
 
             width: parent.width
             elide: Text.ElideRight
+            maximumLineCount: 1
         }
 
         Label {
