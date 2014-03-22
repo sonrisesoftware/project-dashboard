@@ -163,9 +163,6 @@ Plugin {
 
                     //print(issues.get(j).modelData.number + " === " + json[i].number)
                     if (issue.number === json[i].number) {
-//                      if (issue.open && json[i].state === "closed") {
-                        //project.newMessage("github", "bug", i18n.tr("<b>%1</b> closed issue %2").arg(issue.user.login).arg(issue.number), issue.title, issue.created_at, issue.info)
-
                         issue.info = json[i]
                         found = true
                         break
@@ -175,14 +172,6 @@ Plugin {
                 if (!found) {
                     var issue = issueComponent.createObject(mainView, {info: json[i]})
                     issues.append({"modelData": issue})
-
-//                    if (lastRefreshed !== "") {
-//                        if (issue.isPullRequest) {
-//                            project.newMessage("github", "code-fork", i18n.tr("<b>%1</b> opened pull request %2").arg(issue.user.login).arg(issue.number), issue.title, issue.created_at, issue.info)
-//                        } else {
-//                            project.newMessage("github", "bug", i18n.tr("<b>%1</b> opened issue %2").arg(issue.user.login).arg(issue.number), issue.title, issue.created_at, issue.info)
-//                        }
-//                    }
                 }
             }
         }

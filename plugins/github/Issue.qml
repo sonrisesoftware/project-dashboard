@@ -130,7 +130,10 @@ Object {
         return allEvents
     }
 
-    Component.onCompleted: {
+    Component.onCompleted: load()
+
+    function load() {
+
         if (isPullRequest) {
             github.get(info._links.statuses.href, function(status, response) {
                 if (status === 304)
@@ -145,14 +148,7 @@ Object {
                      doc.set("statusDescription", JSON.parse(response)[0].description)
                  }
              })
-        }
 
-        load()
-    }
-
-    function load() {
-
-        if (isPullRequest) {
             github.getPullRequest(plugin.repo, number, function(status, response) {
                 if (status === 304)
                     return
@@ -279,12 +275,19 @@ Object {
 
         info.title = title
         info.body = body
-        doc.set("info", info)
+        info = info
     }
 
     function comment(text) {
         github.newIssueComment(plugin.repo, issue, text)
 
         newComment(text)
+    }
+
+    Timer {
+        interval: 2 * 60 * 1000 // 2 minutes
+        running: true
+        repeat: true
+        onTriggered: load()
     }
 }
