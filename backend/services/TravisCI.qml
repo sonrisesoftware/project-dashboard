@@ -27,42 +27,26 @@ Service {
     id: root
 
     name: "travis"
-    type: ["TravisCI"]
+    type: "TravisCI"
     title: i18n.tr("Travis CI")
-    authenticationStatus: oauth === "" ? "" : i18n.tr("Logged in as %1").arg(user)
-    disabledMessage: i18n.tr("To connect to a Travis CI project, please authenticate to Travis CI from Settings")
+    disabledMessage: i18n.tr("To enable Travis CI results, connect to a project on GitHub")
     authenticationRequired: false
 
-    enabled: true//oauth !== ""
-
-    property string oauth:settings.get("travisToken", "")
     property string travis: "https://api.travis-ci.org"
-    property string user: settings.get("travisUser", "")
 
-    onOauthChanged: {
-        if (oauth !== "") {
-            get("/user", userLoaded)
+    function isEnabled(project) {
+        if (project.hasPlugin("GitHub")) {
+            return ""
         } else {
-            settings.set("travisUser", "")
-        }
-    }
-
-    function userLoaded(response) {
-        //print("User:", response)
-        var json = JSON.parse(response)
-
-        if (json.hasOwnProperty("message") && json.message === "Bad credentials") {
-            settings.set("travisToken", "")
-            PopupUtils.open(accessRevokedDialog, mainView.pageStack.currentPage)
-        } else {
-            settings.set("travisUser", json.login)
+            return disabledMessage
         }
     }
 
     function get(request, callback, options) {
         if (options === undefined)
             options = []
-        return Http.get(travis + request,options, callback, undefined)
+        // httpGet(path, options, headers, callback, args) {
+        return queue.httpGet(travis + request,options, {}, callback)
     }
 
     function getRepo(repo, callback) {
@@ -79,62 +63,5 @@ Service {
 
     function getLog(job, callback) {
         return get("/jobs/" + job + "/log", callback)
-    }
-
-    function connect(project) {
-        //print("Connecting...")
-        PopupUtils.open(travisDialog, mainView.pageStack.currentPage, {project: project})
-    }
-
-    function authenticate() {
-        pageStack.push(Qt.resolvedUrl("OAuthPage.qml"))
-    }
-
-    function revoke() {
-        settings.set("travisToken", "")
-    }
-
-    function status(value) {
-        return i18n.tr("Connected to %1").arg(value)
-    }
-
-    Component {
-        id: travisDialog
-
-        InputDialog {
-            property var project
-
-            title: i18n.tr("Connect to Travis CI")
-            text: i18n.tr("Enter the name of repository on Travis CI you would like to add to your project")
-            placeholderText: i18n.tr("owner/repo")
-            onAccepted: {
-                project.enablePlugin("travis", value)
-            }
-        }
-    }
-
-    Component {
-        id: accessRevokedDialog
-
-        Dialog {
-
-            title: i18n.tr("Travis CI Access Revoked")
-            text: i18n.tr("You will no longer be able to access any projects on Travis CI. Go to Settings to re-enable Travic CI integration.")
-
-            Button {
-                text: i18n.tr("Ok")
-                onTriggered: {
-                    PopupUtils.close(accessRevokedDialog)
-                }
-            }
-
-            Button {
-                text: i18n.tr("Open Settings")
-                onTriggered: {
-                    PopupUtils.close(accessRevokedDialog)
-                    pageStack.push(Qt.resolvedUrl("ui/SettingsPage.qml"))
-                }
-            }
-        }
     }
 }

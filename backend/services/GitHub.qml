@@ -27,10 +27,10 @@ Service {
     id: root
 
     name: "github"
-    type: ["GitHubIssues", "GitHubPullRequests"]//, "GitHub"]
+    type: "GitHub"
     title: i18n.tr("GitHub")
     authenticationStatus: oauth === "" ? "" : i18n.tr("Logged in as %1").arg(user.login)
-    disabledMessage: i18n.tr("To connect to a GitHub project, please authenticate to GitHub from Settings")
+    disabledMessage: i18n.tr("Authenticate to GitHub in Settings")
 
     enabled: oauth !== ""
 
@@ -38,6 +38,14 @@ Service {
     property string github: "https://api.github.com"
     property var user: settings.get("githubUser", "")
     property var repos: settings.get("githubRepos", [])
+
+    function isEnabled(project) {
+        if (enabled) {
+            return ""
+        } else {
+            return disabledMessage
+        }
+    }
 
     onOauthChanged: {
         if (oauth !== "") {

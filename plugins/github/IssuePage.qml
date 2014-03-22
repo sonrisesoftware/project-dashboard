@@ -39,6 +39,8 @@ Page {
 
     property Issue issue
 
+    Component.onCompleted: issue.load()
+
     InputDialog {
         id: mergeDialog
         title: i18n.tr("Merge Pull Request")
@@ -646,12 +648,25 @@ Page {
             title: i18n.tr("Commits")
 
             ListView {
+                id: commitsList
                 anchors.fill: parent
                 model: issue.commits
                 delegate: SubtitledListItem {
                     text: modelData.commit.message
                     subText: i18n.tr("%1 - %2 - %3").arg(modelData.sha.substring(0, 7)).arg(modelData.author.login).arg(friendsUtils.createTimeString(modelData.commit.committer.date))
                 }
+            }
+
+            Label {
+                anchors.centerIn: parent
+                fontSize: "large"
+                opacity: 0.5
+                visible: commitsList.count === 0
+                text: i18n.tr("No commits")
+            }
+
+            Scrollbar {
+                flickableItem: commitsList
             }
         }
     }

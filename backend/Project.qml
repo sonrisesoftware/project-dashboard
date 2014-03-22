@@ -30,7 +30,7 @@ Object {
     function toJSON() { return doc.toJSON() }
     function fromJSON(json) { doc.fromJSON(json) }
 
-    property int selectedTab: doc.get("selectedTab", 0)
+    property int selectedTab: doc.get("selectedTab", 1)
 
     property bool loadedSuccessfully: false
 

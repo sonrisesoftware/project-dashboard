@@ -8,6 +8,8 @@ Object {
     property bool busy: count > 0 || list.length > 0
     property int count: 0
 
+    property int totalCount: 0
+
     signal error(var status, var response, var args)
 
     property var list: []
@@ -17,6 +19,7 @@ Object {
             list = []
         list.push(operation)
         list = list
+        totalCount++
     }
 
     function http(call, path, options, headers, body, args) {
@@ -102,7 +105,12 @@ Object {
         running: list.length > 0
         onTriggered: {
             var op = list[0]
-            doOperation(op)
+            try {
+                doOperation(op)
+            } catch(e) {
+                print(e)
+            }
+
             list.splice(0, 1)
             list = list
         }

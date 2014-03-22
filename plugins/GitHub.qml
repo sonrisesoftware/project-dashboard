@@ -114,7 +114,10 @@ Plugin {
     ]
 
     onSave: {
-        // Save projects
+        print("Saving", project.name)
+
+        // Save issues
+        var start = new Date()
         var list = []
         for (var i = 0; i < issues.count; i++) {
             var issue = issues.get(i).modelData
@@ -122,6 +125,8 @@ Plugin {
         }
 
         doc.set("issues", list)
+        var end = new Date()
+        print("Average time to save an issue is " + (end - start)/list.length + " milliseconds")
     }
 
     onLoaded: {
@@ -152,6 +157,8 @@ Plugin {
         var handler = function(status, response) {
             if (status === 304)
                 return
+
+            plugin.changed = true
 
             //print(response)
             var json = JSON.parse(response)
@@ -186,6 +193,7 @@ Plugin {
             if (status === 304)
                 return
 
+            plugin.changed = true
 
             if (lastRefreshed === "")
                 return

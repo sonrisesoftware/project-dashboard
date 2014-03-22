@@ -10,5 +10,6 @@ Column {
 
     ListItem.Header {
         text: title
+        height: column.visible ? units.gu(4) : 0
     }
 }

@@ -67,6 +67,27 @@ Page {
                     }
                 }
             }
+
+            Repeater {
+                model: backend.availableServices
+
+                delegate: SubtitledListItem {
+                    text: modelData.title
+                    subText: modelData.isEnabled(project) === "" ? project.hasPlugin(modelData.type) ? project.getPlugin(modelData.type).configuration
+                                                                                                     : ""
+                                                                 : modelData.isEnabled(project)
+                    control: Switch {
+                        enabled: modelData.isEnabled(project) === ""
+                        onEnabledChanged: {
+                            if (!enabled)
+                                project.enablePlugin(modelData.type, false)
+                        }
+
+                        checked: project.hasPlugin(modelData.type)
+                        onCheckedChanged: project.enablePlugin(modelData.type, checked)
+                    }
+                }
+            }
         }
 
     }

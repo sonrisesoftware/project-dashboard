@@ -31,7 +31,7 @@ Object {
 
     property int number: info.number
 
-    property int loading
+    property bool loaded
 
     property bool isPullRequest: info.hasOwnProperty("pull_request") || info.hasOwnProperty("head") //TODO: Is this the best way to handle it?
     property bool merged: isPullRequest ? pull && pull.merged  ? pull.merged : false
@@ -65,8 +65,6 @@ Object {
     signal busy(var title, var message, var request)
     signal complete()
 
-    property bool loaded
-
     function newEvent(type, actor) {
         if (actor === undefined)
             actor = github.user
@@ -76,14 +74,18 @@ Object {
                         created_at: new Date().toJSON()
                     })
         events = events
+        plugin.changed = true
     }
 
     function newComment(text) {
         comments.push({body: text, user: github.user, date: new Date().toISOString()})
         comments = comments
+        plugin.changed = true
     }
 
     property var allEvents: {
+        if (!loaded)
+            return []
 
         // Turn the list of commits into events
         var commitEvents = []
@@ -130,14 +132,13 @@ Object {
         return allEvents
     }
 
-    Component.onCompleted: load()
-
-    function load() {
-
+    Component.onCompleted: {
         if (isPullRequest) {
             github.get(info._links.statuses.href, function(status, response) {
                 if (status === 304)
                     return
+
+                plugin.changed = true
 
                  //print(response)
                  if (JSON.parse(response)[0] === undefined) {
@@ -148,10 +149,18 @@ Object {
                      doc.set("statusDescription", JSON.parse(response)[0].description)
                  }
              })
+        }
+    }
 
+    function load() {
+        loaded = true
+
+        if (isPullRequest) {
             github.getPullRequest(plugin.repo, number, function(status, response) {
                 if (status === 304)
                     return
+
+                plugin.changed = true
 
                 doc.set("pull", JSON.parse(response))
                 print("MERGED:", JSON.parse(response).merged, pull.merged)
@@ -162,6 +171,8 @@ Object {
                 if (status === 304)
                     return
 
+                plugin.changed = true
+
                 doc.set("commits", JSON.parse(response))
             })
         }
@@ -169,12 +180,14 @@ Object {
         github.getIssueComments(plugin.repo, issue, function(status, response) {
             if (status === 304)
                 return
+            plugin.changed = true
             doc.set("comments", JSON.parse(response))
         })
 
         github.getIssueEvents(plugin.repo, issue, function(status, response) {
             if (status === 304)
                 return
+            plugin.changed = true
             doc.set("events", JSON.parse(response))
         })
     }
@@ -227,7 +240,8 @@ Object {
         github.editIssue(plugin.repo, issue.number, {"milestone": milestone ? milestone.number : ""})
 
         info.milestone = milestone
-        doc.set("info", info)
+        info = info
+        plugin.changed = true
     }
 
     function setAssignee(assignee) {
@@ -276,6 +290,7 @@ Object {
         info.title = title
         info.body = body
         info = info
+        plugin.changed = true
     }
 
     function comment(text) {

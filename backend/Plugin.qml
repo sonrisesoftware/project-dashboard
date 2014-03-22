@@ -31,8 +31,11 @@ Object {
     property string configuration
 
     property bool canReload: false
+    property bool changed
     function refresh() {}
     function setup() {}
+
+    onChangedChanged: timer.start()
 
     function displayMessage(message) {}
 
@@ -57,4 +60,10 @@ Object {
 //            plugin.reload()
 //        }
 //    }
+
+    Timer {
+        id: timer
+        interval: 10
+        onTriggered: save()
+    }
 }

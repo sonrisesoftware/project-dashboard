@@ -100,6 +100,7 @@ TabbedPage {
                     model: plugin.items
                     delegate: Loader {
                         width: parent.width
+                        height: sourceComponent ? implicitHeight : 0
                         sourceComponent: modelData.pulseItem
                     }
                 }
