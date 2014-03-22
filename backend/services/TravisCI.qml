@@ -29,7 +29,7 @@ Service {
     name: "travis"
     type: "TravisCI"
     title: i18n.tr("Travis CI")
-    disabledMessage: i18n.tr("To enable Travis CI results, connect to a project on GitHub")
+    disabledMessage: i18n.tr("Requires a GitHub project")
     authenticationRequired: false
 
     property string travis: "https://api.travis-ci.org"

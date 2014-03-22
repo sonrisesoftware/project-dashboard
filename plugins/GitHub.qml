@@ -143,6 +143,7 @@ Plugin {
     }
 
     function setup() {
+        github.clearCache()
         PopupUtils.open(Qt.resolvedUrl("github/RepositorySelectionSheet.qml"), mainView, {plugin: plugin})
     }
 

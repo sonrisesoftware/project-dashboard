@@ -82,6 +82,10 @@ Service {
         queue.httpGet(request,["access_token=" + oauth].concat(options), {"Accept":"application/vnd.github.v3+json"}, callback, undefined)
     }
 
+    function clearCache() {
+        Http.cache = {} // FIXME: Not the most optimum solution, by far!
+    }
+
     function post(request, options, body, message) {
         //print("OAuth", oauth)
         if (oauth === "")
