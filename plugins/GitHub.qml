@@ -148,16 +148,23 @@ Plugin {
     }
 
     function refresh() {
-        print("Refreshing")
         if (!repo)
             return
 
         var lastRefreshed = doc.get("lastRefreshed", "")
-        print(lastRefreshed)
+
+        if (lastRefreshed === "")
+            project.loading += 5
 
         var handler = function(status, response) {
-            if (status === 304)
+            if (lastRefreshed === "")
+                project.loading--
+
+            if (status === 304) {
+                if (lastRefreshed === "")
+                    throw "Error: cache wasn't emptied for the new GitHub project!"
                 return
+            }
 
             plugin.changed = true
 
@@ -191,8 +198,14 @@ Plugin {
 
 
         github.getEvents(repo, function (status, response) {
-            if (status === 304)
+            if (lastRefreshed === "")
+                project.loading--
+
+            if (status === 304) {
+                if (lastRefreshed === "")
+                    throw "Error: cache wasn't emptied for the new GitHub project!"
                 return
+            }
 
             plugin.changed = true
 

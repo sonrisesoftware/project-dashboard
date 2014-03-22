@@ -34,6 +34,8 @@ Object {
 
     property bool loadedSuccessfully: false
 
+    property int loading
+
     Document {
         id: doc
 

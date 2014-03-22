@@ -103,39 +103,6 @@ MainView {
         }
     }
 
-    property bool busy: false//queue.busy
-
-    onBusyChanged: {
-        if (busy) {
-            //header.show()
-        }
-    }
-
-    Item {
-        anchors.fill: parent
-        anchors.bottomMargin: header.height - header.__styleInstance.contentHeight
-        parent: header
-
-        ActivityIndicator {
-            anchors {
-                right: parent.right
-                verticalCenter: parent.verticalCenter
-                rightMargin: (parent.height - height)/2
-            }
-
-            height: units.gu(4)
-            width: height
-            running: opacity > 0
-            opacity: busy ? 1 : 0
-
-            Behavior on opacity {
-                UbuntuNumberAnimation {
-                    duration: UbuntuAnimation.SlowDuration
-                }
-            }
-        }
-    }
-
     FriendsUtils {
         id: friendsUtils
     }

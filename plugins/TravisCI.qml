@@ -103,16 +103,37 @@ Plugin {
     }
 
     onLoaded: {
+        var lastRefreshed = doc.get("lastRefreshed", "")
+
+        if (lastRefreshed === "")
+            project.loading += 2
+
         travisCI.getRepo(repo, function(status, response) {
-            if (status === 304)
+            if (lastRefreshed === "")
+                project.loading--
+
+            if (status === 304) {
+                if (lastRefreshed === "")
+                    throw "Error: cache wasn't emptied for the new GitHub project!"
                 return
+            }
+
             doc.set("repo", JSON.parse(response))
         })
 
         travisCI.getBuilds(repo, function(status, response) {
-            if (status === 304)
+            if (lastRefreshed === "")
+                project.loading--
+
+            if (status === 304) {
+                if (lastRefreshed === "")
+                    throw "Error: cache wasn't emptied for the new GitHub project!"
                 return
+            }
+
             doc.set("builds", JSON.parse(response))
         })
+
+        doc.set("lastRefreshed", new Date().toJSON())
     }
 }
