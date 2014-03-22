@@ -77,15 +77,29 @@ MainView {
     PageStack {
         id: pageStack
 
-        ProjectsPage {
-            id: projectsPage
-            visible: false
+        Tabs {
+            id: tabs
+            Tab {
+                title: page.title
+                page: UniversalInboxPage {
+                    id: inboxPage
+                }
+            }
+
+            Tab {
+                title: page.title
+                page: ProjectsPage {
+                    id: projectsPage
+                }
+            }
         }
 
         anchors.bottomMargin: wideAspect ? -mainView.toolbar.triggerSize : 0
 
         Component.onCompleted: {
-            pageStack.push(projectsPage)
+            if (inboxPage.count === 0)
+                tabs.selectedTabIndex = 1
+            pageStack.push(tabs)
         }
     }
 
@@ -135,6 +149,7 @@ MainView {
         path: "project-dashboard.db"
 
         onLoaded: {
+            Http.cache = db.get("httpCache", {})
             settings.fromJSON(db.get("settings", {}))
             backend.fromJSON(db.get("backend", {}))
         }
@@ -143,6 +158,7 @@ MainView {
             print("Saving...")
             db.set("backend", backend.toJSON())
             db.set("settings", settings.toJSON())
+            db.set("httpCache", Http.cache)
         }
     }
 
@@ -232,7 +248,7 @@ MainView {
                         })
     }
 
-//    PerformanceOverlay {
+    PerformanceOverlay {
 
-//    }
+    }
 }

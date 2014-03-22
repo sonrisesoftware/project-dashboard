@@ -42,9 +42,10 @@ Page {
         id: projectsList
         anchors.fill: parent
         model: backend.projects
-        delegate: ListItem.Standard {
+        delegate: ListItem.SingleValue {
             id: projectDelegate
             text: project.name
+            value: project.inbox.count > 0 ? project.inbox.count : ""
             onClicked: pageStack.push(Qt.resolvedUrl("ProjectPage.qml"), {project: project})
             onPressAndHold: PopupUtils.open(projectActionPopover, projectDelegate, {project: project})
 

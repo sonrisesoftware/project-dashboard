@@ -121,7 +121,7 @@ Page {
     function friendlyTime(time) {
         var now = new Date()
         var seconds = (now - time)/1000;
-        print("Difference:", now, time, now - time)
+        //print("Difference:", now, time, now - time)
         var minutes = Math.round(seconds/60);
         if (minutes < 1)
             return i18n.tr("Now")
@@ -135,5 +135,21 @@ Page {
         else if (hours < 24)
             return i18n.tr("%1 hours ago").arg(hours)
         return Qt.formatDate(time)
+    }
+
+    tools: ToolbarItems {
+        opened: wideAspect
+        locked: wideAspect
+
+        onLockedChanged: opened = locked
+
+        ToolbarButton {
+            iconSource: getIcon("edit-clear")
+            text: i18n.tr("Clear")
+            enabled: project.inbox.count > 0
+            onTriggered: {
+                project.clearInbox()
+            }
+        }
     }
 }

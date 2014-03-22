@@ -124,11 +124,20 @@ Object {
 //        }
     }
 
+    property var availableServices: [github, travisCI]
+
     function getPlugin(name) {
         for (var i = 0; i < availablePlugins.count;i++) {
             var plugin = availablePlugins.get(i)
             if (plugin.name === name)
                 return plugin
+        }
+    }
+
+    function clearInbox() {
+        for (var i = 0; i < projects.count; i++) {
+            var project = projects.get(i).modelData
+            project.clearInbox()
         }
     }
 }

@@ -43,7 +43,8 @@ Service {
         if (oauth !== "") {
             get("/user", userLoaded)
             get("/user/repos", function(status, response) {
-                settings.set("githubRepos", JSON.parse(response))
+                if (status !== 304)
+                    settings.set("githubRepos", JSON.parse(response))
             })
         } else {
             settings.set("githubUser", undefined)
@@ -82,6 +83,10 @@ Service {
         if (request && request.indexOf(github) !== 0)
             request = github + request
         queue.http("POST", request, ["access_token=" + oauth].concat(options), {"Accept":"application/vnd.github.v3+json"}, body, message)
+    }
+
+    function getEvents(repo, callback) {
+        get("/repos/" + repo + "/events", callback)
     }
 
     function getIssues(repo, state, since,callback) {

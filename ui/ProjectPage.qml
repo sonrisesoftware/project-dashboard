@@ -105,6 +105,16 @@ TabbedPage {
                 }
             }
         }
+
+        Label {
+            fontSize: "large"
+            text: i18n.tr("Nothing to show")
+
+            anchors.centerIn: parent
+            anchors.verticalCenterOffset: header.height/2
+            visible: pulseListView.contentHeight === 0
+            opacity: 0.5
+        }
     }
 
     Item {

@@ -84,8 +84,6 @@ Object {
     }
 
     property var allEvents: {
-//        if (!loaded)
-//            return []
 
         // Turn the list of commits into events
         var commitEvents = []
@@ -132,51 +130,55 @@ Object {
         return allEvents
     }
 
-//    Component.onCompleted: {
-//        if (isPullRequest) {
-//            loading++
-//            github.get(info._links.statuses.href, function(has_error, status, response) {
-//                 print(response)
-//                 if (JSON.parse(response)[0] === undefined) {
-//                     doc.set("status", "")
-//                     doc.set("statusDescription", "")
-//                 } else {
-//                     doc.set("status", JSON.parse(response)[0].state)
-//                     doc.set("statusDescription", JSON.parse(response)[0].description)
-//                 }
+    Component.onCompleted: {
+        if (isPullRequest) {
+            github.get(info._links.statuses.href, function(status, response) {
+                if (status === 304)
+                    return
 
-//                 loading--
-//             })
-//        }
-//    }
+                 //print(response)
+                 if (JSON.parse(response)[0] === undefined) {
+                     doc.set("status", "")
+                     doc.set("statusDescription", "")
+                 } else {
+                     doc.set("status", JSON.parse(response)[0].state)
+                     doc.set("statusDescription", JSON.parse(response)[0].description)
+                 }
+             })
+        }
+
+        load()
+    }
 
     function load() {
-        print("LOADING>>>>>>>>>")
-        loaded = true
 
         if (isPullRequest) {
-            loading += 2
-            github.getPullRequest(plugin.repo, number, function(has_error, status, response) {
-                loading--
+            github.getPullRequest(plugin.repo, number, function(status, response) {
+                if (status === 304)
+                    return
+
                 doc.set("pull", JSON.parse(response))
                 print("MERGED:", JSON.parse(response).merged, pull.merged)
                 print("MERGEABLE:", JSON.parse(response).mergeable, pull.mergeable)
             })
 
-            github.getPullCommits(plugin.repo, issue, function(has_error, status, response) {
-                loading--
+            github.getPullCommits(plugin.repo, issue, function(status, response) {
+                if (status === 304)
+                    return
+
                 doc.set("commits", JSON.parse(response))
             })
         }
 
-        loading += 2
-        github.getIssueComments(plugin.repo, issue, function(has_error, status, response) {
-            loading--
+        github.getIssueComments(plugin.repo, issue, function(status, response) {
+            if (status === 304)
+                return
             doc.set("comments", JSON.parse(response))
         })
 
-        github.getIssueEvents(plugin.repo, issue, function(has_error, status, response) {
-            loading--
+        github.getIssueEvents(plugin.repo, issue, function(status, response) {
+            if (status === 304)
+                return
             doc.set("events", JSON.parse(response))
         })
     }

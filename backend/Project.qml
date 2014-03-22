@@ -99,6 +99,10 @@ Object {
 
     }
 
+    function clearInbox() {
+        inbox.clear()
+    }
+
     function newMessage(plugin, icon, title, message, date, data) {
         inbox.append({
                          "modelData": {

@@ -147,6 +147,7 @@ Plugin {
             return
 
         var lastRefreshed = doc.get("lastRefreshed", "")
+        print(lastRefreshed)
 
         var handler = function(status, response) {
             if (status === 304)
@@ -158,9 +159,14 @@ Plugin {
             for (var i = 0; i < json.length; i++) {
                 var found = false
                 for (var j = 0; j < issues.count; j++) {
+                    var issue = issues.get(j).modelData
+
                     //print(issues.get(j).modelData.number + " === " + json[i].number)
-                    if (issues.get(j).modelData.number === json[i].number) {
-                        issues.get(j).modelData.info = json[i]
+                    if (issue.number === json[i].number) {
+//                      if (issue.open && json[i].state === "closed") {
+                        //project.newMessage("github", "bug", i18n.tr("<b>%1</b> closed issue %2").arg(issue.user.login).arg(issue.number), issue.title, issue.created_at, issue.info)
+
+                        issue.info = json[i]
                         found = true
                         break
                     }
@@ -170,13 +176,13 @@ Plugin {
                     var issue = issueComponent.createObject(mainView, {info: json[i]})
                     issues.append({"modelData": issue})
 
-                    if (lastRefreshed !== "") {
-                        if (issue.isPullRequest) {
-                            project.newMessage("github", "code-fork", i18n.tr("<b>%1</b> opened pull request %2").arg(issue.user.login).arg(issue.number), issue.title, issue.created_at, issue.info)
-                        } else {
-                            project.newMessage("github", "bug", i18n.tr("<b>%1</b> opened issue %2").arg(issue.user.login).arg(issue.number), issue.title, issue.created_at, issue.info)
-                        }
-                    }
+//                    if (lastRefreshed !== "") {
+//                        if (issue.isPullRequest) {
+//                            project.newMessage("github", "code-fork", i18n.tr("<b>%1</b> opened pull request %2").arg(issue.user.login).arg(issue.number), issue.title, issue.created_at, issue.info)
+//                        } else {
+//                            project.newMessage("github", "bug", i18n.tr("<b>%1</b> opened issue %2").arg(issue.user.login).arg(issue.number), issue.title, issue.created_at, issue.info)
+//                        }
+//                    }
                 }
             }
         }
@@ -185,6 +191,53 @@ Plugin {
         github.getIssues(repo, "closed", lastRefreshed, handler)
         github.getPullRequests(repo, "open", lastRefreshed,  handler)
         github.getPullRequests(repo, "closed", lastRefreshed, handler)
+
+
+        github.getEvents(repo, function (status, response) {
+            if (status === 304)
+                return
+
+
+            if (lastRefreshed === "")
+                return
+
+            var json = JSON.parse(response)
+
+            print("LENGTH:", json.length)
+            for (var i = 0; i < json.length; i++) {
+                var event = json[i]
+                var actor = event.actor.login
+                var type = event.type
+                var date = event.created_at
+                var payload = event.payload
+
+                // TODO: When publishing, add: || actor === github.user.login
+                print(date, lastRefreshed, type)
+                if (new Date(lastRefreshed) >= new Date(date))
+                    break
+
+                // newMessage(plugin, icon, title, message, date, data)
+                print(type)
+
+                if (type === "IssuesEvent") {
+                    var issue = payload.issue
+                    project.newMessage("github", "bug", i18n.tr("<b>%1</b> %2 issue %3")
+                                       .arg(actor)
+                                       .arg(payload.action)
+                                       .arg(issue.number),
+                                       issue.title, date,
+                                       {"type": "issue", "number": issue.number})
+                } else if (type === "IssueCommentEvent") {
+                    var issue = payload.issue
+                    var comment = payload.comment
+                    project.newMessage("github", "comments-o", i18n.tr("<b>%1</b> commented on issue %2")
+                                       .arg(actor)
+                                       .arg(issue.number),
+                                       comment.body, date,
+                                       {"type": "comment", "number": issue.number})
+                }
+            }
+        })
 
         doc.set("lastRefreshed", new Date().toJSON())
     }
@@ -195,6 +248,18 @@ Plugin {
         Issue {
 
         }
+    }
+
+    function displayMessage(message) {
+        for (var i = 0; i < issues.count;i++) {
+            var issue = issues.get(i).modelData
+            if (issue.number == message.data.number) {
+                pageStack.push(Qt.resolvedUrl("github/IssuePage.qml"), {issue: issue, plugin:plugin})
+                return
+            }
+        }
+
+        throw "Unable to display message: " + JSON.stringify(message)
     }
 
     Timer {
