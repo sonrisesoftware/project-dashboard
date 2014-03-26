@@ -1,7 +1,7 @@
 {
     "architecture": "all",
     "description": "Manage everything about your projects, in one convenient app",
-    "framework": "ubuntu-sdk-13.10",
+    "framework": "ubuntu-sdk-14.04-qml-dev1",
     "hooks": {
         "project-dashboard": {
             "apparmor": "project-dashboard.json",
@@ -11,5 +11,5 @@
     "maintainer": "Michael Spencer <sonrisesoftware@gmail.com>",
     "name": "com.ubuntu.developer.mdspencer.project-dashboard",
     "title": "Project Dashboard",
-    "version": "0.1"
+    "version": "0.2"
 }
