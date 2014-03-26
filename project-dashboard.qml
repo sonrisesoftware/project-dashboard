@@ -116,7 +116,6 @@ MainView {
         path: "project-dashboard.db"
 
         onLoaded: {
-            Http.cache = db.get("httpCache", {})
             settings.fromJSON(db.get("settings", {}))
             backend.fromJSON(db.get("backend", {}))
         }
@@ -125,7 +124,6 @@ MainView {
             print("Saving...")
             db.set("backend", backend.toJSON())
             db.set("settings", settings.toJSON())
-            db.set("httpCache", Http.cache)
         }
     }
 
