@@ -36,9 +36,14 @@ Plugin {
     configuration: repo ? repo : "Not connected to a repository"
 
     property string repo: doc.get("repoName", "")
-    property bool hasPushAccess: true
-    property var milestones: []
-    property var availableAssignees: []
+
+    property var milestones: doc.get("milestones", [])
+    property var info: doc.get("repo", {})
+    property var availableAssignees: doc.get("assignees", [])
+    property var branches: doc.get("branches", [])
+    property var commitStats: doc.get("commit_stats", {})
+    property var releases: doc.get("releases", [])
+    property bool hasPushAccess: info.permissions ? info.permissions.push : false
 
     property ListModel issues: ListModel {
 
@@ -153,7 +158,7 @@ Plugin {
         var lastRefreshed = doc.get("lastRefreshed", "")
 
         if (lastRefreshed === "")
-            project.loading += 5
+            project.loading += 11
 
         var handler = function(status, response) {
             if (lastRefreshed === "")
@@ -259,6 +264,50 @@ Plugin {
                                        {"type": "fork"})
                 }
             }
+        })
+
+        github.getLabels(repo, function(status, response) {
+            if (lastRefreshed === "")
+                project.loading--
+            //print("Labels:", response)
+            var json = JSON.parse(response)
+            doc.set("labels", json)
+        })
+
+        github.getAssignees(repo, function(status, response) {
+            if (lastRefreshed === "")
+                project.loading--
+            //print("Labels:", response)
+            var json = JSON.parse(response)
+            doc.set("assignees", json)
+        })
+
+        github.getMilestones(repo, function(status, response) {
+            if (lastRefreshed === "")
+                project.loading--
+            //print("Labels:", response)
+            var json = JSON.parse(response)
+            doc.set("milestones", json)
+        })
+
+        github.getRepository(repo, function(status, response) {
+            if (lastRefreshed === "")
+                project.loading--
+            print("Info:", response)
+            var json = JSON.parse(response)
+            doc.set("repo", json)
+        })
+
+        github.get("/repos/" + repo + "/releases", function(status, response) {
+            if (lastRefreshed === "")
+                project.loading--
+            doc.set("releases", JSON.parse(response))
+        })
+
+        github.get("/repos/" + repo + "/stats/participation", function(status, response) {
+            if (lastRefreshed === "")
+                project.loading--
+            doc.set("commit_stats", JSON.parse(response))
         })
 
         doc.set("lastRefreshed", new Date().toJSON())
