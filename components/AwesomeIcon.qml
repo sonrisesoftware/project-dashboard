@@ -49,6 +49,7 @@ Item {
         "spinner": "",
         "square-o": "",
         "times": "",
+        "times-circle": "",
         "plus": "",
         "bell-o": "",
         "bell": "",
