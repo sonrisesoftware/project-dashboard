@@ -689,7 +689,6 @@ Page {
 
             model: plugin.availableLabels
             delegate: ListItem.Standard {
-                showDivider: index < repeater.count - 1
                 height: units.gu(5)
                 Label {
                     anchors {
