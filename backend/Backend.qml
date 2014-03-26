@@ -115,6 +115,18 @@ Object {
             title: "Resources"
         }
 
+        ListElement {
+            name: "timer"
+            type: "Timer"
+            title: "Time Tracker"
+        }
+
+        ListElement {
+            name: "events"
+            type: "Events"
+            title: "Events"
+        }
+
 //        ListElement {
 //            name: "timer"
 //            type: "Timer"

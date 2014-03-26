@@ -63,7 +63,7 @@ Plugin {
 
             pulseItem: PulseItem {
                 title: i18n.tr("Issues Assigned to Me")
-                visible: repeater.count > 0
+                show: repeater.count > 0
 
                 Repeater {
                     id: repeater
@@ -98,7 +98,7 @@ Plugin {
 
             pulseItem: PulseItem {
                 title: i18n.tr("Open Pull Requests")
-                visible: pullsRepeater.count > 0
+                show: pullsRepeater.count > 0
 
                 Repeater {
                     id: pullsRepeater
@@ -232,6 +232,7 @@ Plugin {
 
                 if (type === "IssuesEvent") {
                     var issue = payload.issue
+                    // TODO: Only display if the actor is other than the authenticated user
                     project.newMessage("github", "bug", i18n.tr("<b>%1</b> %2 issue %3")
                                        .arg(actor)
                                        .arg(payload.action)
@@ -239,6 +240,7 @@ Plugin {
                                        issue.title, date,
                                        {"type": "issue", "number": issue.number})
                 } else if (type === "IssueCommentEvent") {
+                    // TODO: Only display if the actor is other than the authenticated user
                     var issue = payload.issue
                     var comment = payload.comment
                     project.newMessage("github", "comments-o", i18n.tr("<b>%1</b> commented on issue %2")
@@ -246,12 +248,47 @@ Plugin {
                                        .arg(issue.number),
                                        comment.body, date,
                                        {"type": "comment", "number": issue.number})
+                } else if (type === "PushEvent") {
+                    // TODO: Finish push eventss
+                    //groupCommitMessages(payload.ref.substring(11), payload.commits)
+                } else if (type === "ForkEvent") {
+                    var repo = payload.forkee
+                    project.newMessage("github", "code-fork", i18n.tr("<b>%1</b> forked %2")
+                                       .arg(actor)
+                                       .arg(plugin.repo),
+                                       i18n.tr("Forked %1 to %2").arg(plugin.repo).arg(repo.full_name), date,
+                                       {"type": "fork"})
                 }
             }
         })
 
         doc.set("lastRefreshed", new Date().toJSON())
     }
+
+//    function groupCommitMessages(branch, commits) {
+//        var groupedCommits
+//        var index = 0;
+//        var count = 0;
+//        while (index < commits.length) {
+//            var comment = commit[index]
+
+//            if (event && event.event && event.event === "commit") {
+//                index++
+//                var login = event.actor.login
+//                count = 1
+//                while(count < 5 && index < allEvents.length && allEvents[index].event === "commit" && allEvents[index].actor.login === login) {
+//                    var nextEvent = allEvents[index]
+//                    event.commits = event.commits.concat(nextEvent.commits)
+//                    allEvents.splice(index, 1)
+//                    count++
+//                }
+
+//                index--
+//            }
+
+//            index++
+//        }
+//    }
 
     Component {
         id: issueComponent

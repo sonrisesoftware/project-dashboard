@@ -271,17 +271,10 @@ Object {
             labelNames.push(labels[i].name)
         }
 
-        var request = github.editIssue(plugin.repo, issue.number, {"labels": labelNames}, function(response) {
-            complete()
-            if (response === -1) {
-                error(i18n.tr("Connection Error"), i18n.tr("Unable to change the labels. Check your connection and/or firewall settings."))
-            } else {
-                info.labels = labels
-                doc.set("info", info)
-            }
-        })
+        info.labels = labels
+        info = info
 
-        busy(i18n.tr("Changing Labels"), i18n.tr("Changes the labels for the issue"), request)
+        var request = github.editIssue(plugin.repo, issue.number, {"labels": labelNames})
     }
 
     function edit(title, body) {

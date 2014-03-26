@@ -70,6 +70,7 @@ Dialog {
 
             onClicked: {
                 PopupUtils.close(addLinkDialog)
+                plugin.project.newMessage("resources", plugin.items[0].icon, "New note", titleField.text)
                 plugin.documents.push({"title": titleField.text, "type": "link", "text": textField.text})
                 plugin.documents = plugin.documents
             }

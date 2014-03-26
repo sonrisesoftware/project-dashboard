@@ -40,7 +40,7 @@ Plugin {
         value: buildStatus(info.last_build_result)
 
         pulseItem: PulseItem {
-            visible: plugin.info ? true : false
+            show: plugin.info ? true : false
             title: i18n.tr("Latest Results from Travis CI")
             BuildListItem {
                 number: plugin.info ? plugin.info.last_build_number : 0
@@ -102,7 +102,14 @@ Plugin {
         return "<font color=\"" + statusColor(status) + "\">" + (status === -1 ? i18n.tr("Pending") : status === 0 ? i18n.tr("Passed") : status === 1 ? i18n.tr("Failed") : i18n.tr("Error")) + "</font>"
     }
 
-    onLoaded: {
+    onLoaded: refresh()
+
+    function setup() {
+        github.clearCache()
+        refresh()
+    }
+
+    function refresh() {
         var lastRefreshed = doc.get("lastRefreshed", "")
 
         if (lastRefreshed === "")

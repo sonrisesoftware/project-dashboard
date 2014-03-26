@@ -109,12 +109,12 @@ Service {
         post("/repos/" + repo + "/issues/" + number, undefined, JSON.stringify(issue), i18n.tr("Update issue <b>%1</b>").arg(number))
     }
 
-    function newIssue(repo, title, description, callback) {
-        return Http.post(github + "/repos/" + repo + "/issues", ["access_token=" + oauth], callback, undefined, {"Accept":"application/vnd.github.v3+json"}, JSON.stringify({ "title": title, "body": description }))
+    function newIssue(repo, title, description) {
+        return post("/repos/" + repo + "/issues", undefined, JSON.stringify({ "title": title, "body": description }))
     }
 
-    function newPullRequest(repo, title, description, branch, callback) {
-        return Http.post(github + "/repos/" + repo + "/pulls", ["access_token=" + oauth], callback, undefined, {"Accept":"application/vnd.github.v3+json"}, JSON.stringify({ "title": title, "body": description, "head": branch, "base": "master" }))
+    function newPullRequest(repo, title, description, branch) {
+        return post("/repos/" + repo + "/pulls", undefined, JSON.stringify({ "title": title, "body": description, "head": branch, "base": "master" }))
     }
 
     function mergePullRequest(repo, number, message, callback) {
