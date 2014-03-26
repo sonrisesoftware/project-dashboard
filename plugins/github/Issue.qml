@@ -291,11 +291,4 @@ Object {
 
         newComment(text)
     }
-
-    Timer {
-        interval: 2 * 60 * 1000 // 2 minutes
-        running: true
-        repeat: true
-        onTriggered: load()
-    }
 }

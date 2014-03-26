@@ -105,7 +105,6 @@ Plugin {
     onLoaded: refresh()
 
     function setup() {
-        github.clearCache()
         refresh()
     }
 

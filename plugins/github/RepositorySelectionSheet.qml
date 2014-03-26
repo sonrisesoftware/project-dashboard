@@ -30,6 +30,10 @@ DefaultSheet {
 
     property GitHub plugin
 
+    onCloseClicked: {
+        plugin.project.removePlugin("GitHub")
+    }
+
     Component.onCompleted: {
         configureSheet.__leftButton.text = i18n.tr("Cancel")
         configureSheet.__leftButton.color = "gray"

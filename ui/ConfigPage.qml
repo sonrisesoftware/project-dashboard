@@ -63,7 +63,10 @@ Page {
                     enabled: type !== ""
                     control: Switch {
                         checked: project.hasPlugin(type)
-                        onCheckedChanged: project.enablePlugin(type, checked)
+                        onCheckedChanged: {
+                            project.enablePlugin(type, checked)
+                            checked = Qt.binding(function () {return project.hasPlugin(type)})
+                        }
                     }
                 }
             }
@@ -84,7 +87,10 @@ Page {
                         }
 
                         checked: project.hasPlugin(modelData.type)
-                        onCheckedChanged: project.enablePlugin(modelData.type, checked)
+                        onCheckedChanged: {
+                            project.enablePlugin(modelData.type, checked)
+                            checked = Qt.binding(function () {return project.hasPlugin(modelData.type)})
+                        }
                     }
                 }
             }

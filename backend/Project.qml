@@ -176,6 +176,7 @@ Object {
     }
 
     function removePlugin(type) {
+        print("Removing", type)
         for (var i = 0; i < plugins.count; i++) {
             var plugin = plugins.get(i).modelData
             if (plugin.type === type)
