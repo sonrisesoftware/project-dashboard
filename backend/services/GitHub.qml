@@ -60,15 +60,8 @@ Service {
     }
 
     function userLoaded(status, response) {
-        //print("User:", response)
         var json = JSON.parse(response)
-
-//        if (has_error && json.hasOwnProperty("message") && json.message === "Bad credentials") {
-//            settings.set("githubToken", "")
-//            PopupUtils.open(accessRevokedDialog, mainView.pageStack.currentPage)
-//        } else {
-            settings.set("githubUser", json)
-//        }
+        settings.set("githubUser", json)
     }
 
     function get(request, callback, options) {
@@ -113,7 +106,7 @@ Service {
         return post("/repos/" + repo + "/pulls", undefined, JSON.stringify({ "title": title, "body": description, "head": branch, "base": "master" }))
     }
 
-    function mergePullRequest(repo, number, message, callback) {
+    function mergePullRequest(repo, number, message) {
         return Http.put(github + "/repos/" + repo + "/pulls/" + number + "/merge", ["access_token=" + oauth], callback, undefined, {"Accept":"application/vnd.github.v3+json"}, JSON.stringify({ "commit_message": message }))
     }
 

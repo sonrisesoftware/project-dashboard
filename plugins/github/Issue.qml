@@ -133,7 +133,7 @@ Object {
     }
 
     Component.onCompleted: {
-        if (isPullRequest) {
+        if (isPullRequest && info._links) {
             github.get(info._links.statuses.href, function(status, response) {
                 if (status === 304)
                     return
@@ -193,26 +193,11 @@ Object {
     }
 
     function merge(message) {
-        var request = github.mergePullRequest(plugin.repo, number, message, function(has_error, status, response) {
-            complete()
-            try {
-                var json = JSON.parse(response)
-                if (json.merged) {
-                    info.state = "closed"
-                    doc.set("info", info)
-                    newEvent("closed")
-                    newEvent("merged")
-                } else {
-                    error(i18n.tr("Connection Error"), i18n.tr("Unable to merge %1:\n\n%2").arg(type).arg(json.message))
-                }
-            } catch (e) {
-               error(i18n.tr("Connection Error"), i18n.tr("Unable to merge %1. Check your connection and/or firewall settings.").arg(type))
-            }
-        })
-
-        busy(i18n.tr("Merging %1").arg(typeCap),
-             i18n.tr("Merging %2 <b>#%1</b>").arg(number).arg(type),
-             request)
+        info.state = "closed"
+        info = info
+        newEvent("closed")
+        newEvent("merged")
+        var request = github.mergePullRequest(plugin.repo, number, message)
     }
 
     function closeOrReopen() {

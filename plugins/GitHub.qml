@@ -46,6 +46,8 @@ Plugin {
     property var releases: doc.get("releases", [])
     property bool hasPushAccess: info.permissions ? info.permissions.push : false
 
+    property int nextNumber: doc.get("nextNumber", 1)
+
     property ListModel issues: ListModel {
 
     }
@@ -64,7 +66,7 @@ Plugin {
             action: Action {
                 text: i18n.tr("New Issue")
                 description: i18n.tr("Create new issue")
-                onTriggered: PopupUtils.open(Qt.resolvedUrl("github/NewIssuePage.qml"), mainView, {repo: repo, action: refresh})
+                onTriggered: PopupUtils.open(Qt.resolvedUrl("github/NewIssuePage.qml"), mainView, {plugin: githubPlugin})
             }
 
             pulseItem: PulseItem {
@@ -95,7 +97,7 @@ Plugin {
                 text: i18n.tr("Open Pull Request")
                 description: i18n.tr("Open a new pull request")
                 enabled: false
-                onTriggered: PopupUtils.open(Qt.resolvedUrl("github/NewPullRequestPage.qml"), mainView, {repo: repo, action: refresh})
+                onTriggered: PopupUtils.open(Qt.resolvedUrl("github/NewPullRequestPage.qml"), mainView, {plugin: githubPlugin})
             }
 
             page: PullRequestsPage {
@@ -131,6 +133,7 @@ Plugin {
         }
 
         doc.set("issues", list)
+        doc.set("nextNumber", nextNumber)
         var end = new Date()
         print("Average time to save an issue is " + (end - start)/list.length + " milliseconds")
     }
@@ -192,6 +195,7 @@ Plugin {
                 if (!found) {
                     var issue = issueComponent.createObject(mainView, {info: json[i]})
                     issues.append({"modelData": issue})
+                    nextNumber = Math.max(nextNumber, issue.number + 1)
                 }
             }
         }
@@ -345,6 +349,23 @@ Plugin {
         Issue {
 
         }
+    }
+
+    function newIssue(title, description) {
+        var number = nextNumber++
+        var json = {
+            "state": "open",
+            "number": number,
+            "title": title,
+            "body": description,
+            "user": github.user,
+            "labels": [],
+            "created_at": new Date().toJSON()
+        }
+
+        var issue = issueComponent.createObject(mainView, {info: json})
+        issues.append({"modelData": issue})
+        github.newIssue(repo, title, description)
     }
 
     function displayMessage(message) {

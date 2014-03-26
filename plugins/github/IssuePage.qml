@@ -177,7 +177,7 @@ Page {
                         to: "*"
                         UbuntuNumberAnimation {
                             target: optionsColumn
-                            properties: ["height", "opacity"]
+                            properties: "height, opacity"
                         }
                     }
                 ]
@@ -819,19 +819,6 @@ Page {
             onConfirmClicked: {
                 PopupUtils.close(sheet)
                 issue.edit(nameField.text, descriptionField.text)
-            }
-
-            function createIssue() {
-                busyDialog.show()
-                request = github.newIssue(repo, nameField.text, descriptionField.text, function(has_error, status, response) {
-                    busyDialog.hide()
-                    if (has_error) {
-                        error(i18n.tr("Connection Error"), i18n.tr("Unable to create issue. Check your connection and/or firewall settings.\n\nError: %1").arg(status))
-                    } else {
-                        PopupUtils.close(sheet)
-                        dialog.action()
-                    }
-                })
             }
 
             TextField {
