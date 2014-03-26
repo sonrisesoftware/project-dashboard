@@ -99,8 +99,13 @@ Plugin {
         icon: "clock"
         title: i18n.tr("Time Tracker")
 
+        action: Action {
+            text: timer.running ? i18n.tr("Pause Timer") : i18n.tr("Start Timer")
+            onTriggered: startOrStop()
+        }
+
         pulseItem: PulseItem {
-            show: totalTime > 0
+            show: totalTime > 0 || timer.running
             title: i18n.tr("Time Tracked Today")
             ListItem.SingleValue {
                 id: todayItem
@@ -202,6 +207,7 @@ Plugin {
                             anchors.fill: parent
 
                             Item {
+                                id: timerPage
                                 anchors {
                                     left: parent.left
                                     top: parent.top
@@ -241,7 +247,7 @@ Plugin {
                                 }
 
                                 width: parent.width
-                                property bool show: page.selectedTab === i18n.tr("History")
+                                property bool show: !timerPage.show
 
                                 ItemLayout {
                                     anchors.fill: parent
@@ -300,16 +306,7 @@ Plugin {
 
                         Button {
                             text: startTime !== undefined ? i18n.tr("Stop") : i18n.tr("Start")
-                            onTriggered: {
-                                if (startTime) {
-                                    doc.set("savedTime", savedTime + (new Date() - startTime))
-                                    currentTime =  0
-                                    doc.set("startTime", undefined)
-                                } else {
-                                    doc.set("startTime", new Date().toJSON())
-                                    currentTime = 0
-                                }
-                            }
+                            onTriggered: startOrStop()
                         }
 
 //                        Button {
