@@ -1,0 +1,19 @@
+Source: project-dashboard
+Section: utils
+Priority: extra
+Maintainer: Michael Spencer <sonrisesoftware@gmail.com>
+Build-Depends: debhelper (>= 9.0.0)
+Standards-Version: 3.9.5
+Homepage: https://github.com/iBeliever/project-dashboard
+Vcs-Bzr: https://github.com/iBeliever/project-dashboard/commits/master
+
+Package: project-dashboard
+Architecture: all
+Depends: ${misc:Depends},
+	 qtdeclarative5-hud1.0,
+	 qtdeclarative5-qtquick2-plugin,
+	 qtdeclarative5-ubuntu-ui-toolkit-plugin,
+	 qmlscene
+Description: Project Dashboard application
+ Manage everything about your projects in one app.
+
