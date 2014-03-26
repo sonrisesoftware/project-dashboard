@@ -78,7 +78,7 @@ Object {
     }
 
     function newComment(text) {
-        comments.push({body: text, user: github.user, date: new Date().toISOString()})
+        comments.push({body: text, user: github.user, created_at: new Date().toISOString()})
         comments = comments
         plugin.changed = true
     }
@@ -100,7 +100,7 @@ Object {
 
         // Sort by date
         var allEvents = comments.concat(events).concat(commitEvents)
-        allEvents = allEvents.sort(function(a, b) {
+        allEvents.sort(function(a, b) {
             return new Date(a.created_at) - new Date(b.created_at)
         })
 
