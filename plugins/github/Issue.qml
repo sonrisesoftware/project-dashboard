@@ -195,8 +195,8 @@ Object {
     function merge(message) {
         info.state = "closed"
         info = info
-        newEvent("closed")
         newEvent("merged")
+        newEvent("closed")
         var request = github.mergePullRequest(plugin.repo, number, message)
     }
 
