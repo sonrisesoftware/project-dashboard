@@ -1,3 +1,4 @@
 *.qmlproject.user*
 *~
 ubuntu-ui-extras
+*.pyc
