@@ -28,13 +28,25 @@ IssueListItem {
 
     AwesomeIcon {
         anchors.centerIn: icon
+        anchors.verticalCenterOffset: status === "error" ? units.gu(0.04) : 0
+        anchors.horizontalCenterOffset: status === "error" ? units.gu(-0) : 0
 
         width: units.gu(2)
-        size: status === "pending" ? units.gu(3) : units.gu(2.8)
+        size: status === "error" ? units.gu(1.85) : status === "pending" ? units.gu(3) : units.gu(2.8)
 
         color: status === "pending" ? "gray" : "white"
         name: "circle"
-        visible: status != "error" && status != ""
+        visible: status != ""
+    }
+
+    Rectangle {
+        width: units.gu(1)
+        height: units.gu(1)
+        anchors {
+            bottom: icon.bottom
+            bottomMargin: units.gu(0.5)
+            horizontalCenter: icon.horizontalCenter
+        }
     }
 
     AwesomeIcon {
