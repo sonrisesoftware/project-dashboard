@@ -186,7 +186,7 @@ PluginPage {
 
                 ListItem.Standard {
                     text: i18n.tr("Show closed issues")
-                    onClicked: closedCheckbox.trigger()
+                    onClicked: closedCheckbox.triggered(closedCheckbox)
                     CheckBox {
                         id: closedCheckbox
                         anchors {
@@ -197,7 +197,7 @@ PluginPage {
 
                         style: SuruCheckBoxStyle {}
                         checked: settings.get("showClosedTickets", false)
-                        onClicked: checked = settings.sync("showClosedTickets", checked)
+                        onTriggered: checked = settings.sync("showClosedTickets", checked)
                     }
                 }
 
@@ -242,7 +242,6 @@ PluginPage {
                     id: milestoneSelector
                     model: plugin.milestones.concat(i18n.tr("No milestone")).concat(i18n.tr("Any milestone"))
 
-                    visible: plugin.hasPushAccess
                     selectedIndex: model.length - 1
 
                     delegate: OptionSelectorDelegate {

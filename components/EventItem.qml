@@ -91,7 +91,7 @@ Item {
         }
     }
 
-    width: parent.width
+    width: parent ? parent.width : 0
     height: comment.visible ? comment.height : wideAspect ? wideLayout.height: smallLayout.height
 
     CommentArea {
