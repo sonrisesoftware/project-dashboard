@@ -45,7 +45,7 @@ ListItem.SingleValue {
 
             width: parent.width
             elide: Text.ElideRight
-            text: status === -1 ? i18n.tr("<b>Build %1</b> - in progress").arg(number) : i18n.tr("<b>Build %1</b> - %2").arg(number).arg(friendsUtils.createTimeString(built_at))
+            text: status === -1 ? i18n.tr("<b>Build %1</b>").arg(number) : i18n.tr("<b>Build %1</b> - %2").arg(number).arg(friendsUtils.createTimeString(built_at))
         }
 
         Label {

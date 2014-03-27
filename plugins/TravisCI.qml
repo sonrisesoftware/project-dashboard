@@ -95,8 +95,10 @@ Plugin {
             return colors["green"]
         else if (status === 1)
             return colors["red"]
-        else
+        else if (status === -1)
             return ""
+        else
+            return colors["yellow"]
     }
 
     function buildStatus(status) {
