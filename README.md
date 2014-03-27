@@ -17,6 +17,16 @@ I do continue to improve the `ubuntu-ui-extras` repository, so make sure you upd
 
     code update ubuntu-ui-extras
 
+### Installing on Ubuntu 14.04 ###
+
+Project Dashboard is hosted on a PPA for Ubuntu 14.04 through which one can install and receive updates on the desktop.
+
+```
+sudo apt-get add-apt-repository ppa:ubuntu-touch-community-dev/ppa
+sudo apt-get update
+sudo apt-get install project-dashboard
+```
+
 ### Licensing ###
 
 Project Dashboard is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
