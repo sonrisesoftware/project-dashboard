@@ -121,11 +121,11 @@ Object {
             title: "Time Tracker"
         }
 
-        ListElement {
-            name: "events"
-            type: "Events"
-            title: "Events"
-        }
+//        ListElement {
+//            name: "events"
+//            type: "Events"
+//            title: "Events"
+//        }
 
 //        ListElement {
 //            name: "timer"
