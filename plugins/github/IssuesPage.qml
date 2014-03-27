@@ -186,7 +186,15 @@ PluginPage {
 
                 ListItem.Standard {
                     text: i18n.tr("Show closed issues")
-                    control: CheckBox {
+                    onClicked: closedCheckbox.trigger()
+                    CheckBox {
+                        id: closedCheckbox
+                        anchors {
+                            right: parent.right
+                            rightMargin: units.gu(1.5)
+                            verticalCenter: parent.verticalCenter
+                        }
+
                         style: SuruCheckBoxStyle {}
                         checked: settings.get("showClosedTickets", false)
                         onClicked: checked = settings.sync("showClosedTickets", checked)
