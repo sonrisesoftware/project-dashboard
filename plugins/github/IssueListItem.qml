@@ -23,12 +23,12 @@ import Ubuntu.Components.ListItems 0.1 as ListItem
 ListItem.Standard {
     id: listItem
 
-    property alias number: issue.number
+    property int number: issue.number
     property bool showAssignee: true
 
-    property bool isPullRequest: modelData.hasOwnProperty("head")
+    property bool isPullRequest: issue.isPullRequest
 
-    onClicked: pageStack.push(Qt.resolvedUrl("IssuePage.qml"), {number: issue.number, plugin:plugin})
+    onClicked: pageStack.push(Qt.resolvedUrl("IssuePage.qml"), {issue: issue, plugin:plugin})
 
     height: opacity === 0 ? 0 : (__height + units.dp(2))
 
@@ -36,9 +36,7 @@ ListItem.Standard {
         UbuntuNumberAnimation {}
     }
 
-    property Issue issue: Issue {
-        id: issue
-    }
+    property Issue issue
 
     Column {
         id: labels
@@ -67,7 +65,7 @@ ListItem.Standard {
             id: subLabel
             width: parent.width
 
-            height: visible ? implicitHeight: 0
+            //height: visible ? implicitHeight: 0
             //color:  Theme.palette.normal.backgroundText
             opacity: 0.65
             font.weight: Font.Light

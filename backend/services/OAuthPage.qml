@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import Ubuntu.Components 0.1
 import QtWebKit 3.0
+import Ubuntu.Components.Extras.Browser 0.1
 
 Page {
     id: webPage
@@ -12,13 +13,14 @@ Page {
     property string otherGet: "&access_token=" + token
 
 
-    WebView {
+    UbuntuWebView {
         id: webView
         //the webview is bugged, anchors.fill: parent doesn't work
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
         height: parent.height
+
 //        zoomTo:
 
         property string client_id: "f910590f581ce189054e"

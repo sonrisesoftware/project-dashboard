@@ -23,35 +23,46 @@ import "../backend"
 import "../components"
 import "../backend/services"
 import "../ubuntu-ui-extras"
+import "../ubuntu-ui-extras/dateutils.js" as DateUtils
 
 Plugin {
     id: plugin
 
-    property var documents: doc.get("resources", [])
+    property var events: doc.get("events", [])
 
     onSave: {
-        doc.set("resources", documents)
+        doc.set("events", events)
     }
 
     items: PluginItem {
-        title: "Resources"
-        icon: "file"
+        title: "Events"
+        icon: "calendar"
 
         action: Action {
             id: addAction
-            text: i18n.tr("Add Resource")
-            description: i18n.tr("Bookmark a link for referencing later")
+            text: i18n.tr("Add Event")
+            description: i18n.tr("Add an event to your project's calendar")
             onTriggered: PopupUtils.open(Qt.resolvedUrl("resources/AddLinkDialog.qml"), value, {plugin: plugin})
+        }
+
+        pulseItem: PulseItem {
+            title: i18n.tr("Next Event")
+            show: events.length > 0
+
+            ListItem.Subtitled {
+                text: events[0].title
+                subText: Qt.formatDate(events[0].date)
+            }
         }
 
         page: Component {
             PluginPage {
-                title: i18n.tr("Resources")
+                title: i18n.tr("Events")
                 actions: Action {
                     id: addAction
                     iconSource: getIcon("add")
                     text: i18n.tr("Add")
-                    description: i18n.tr("Bookmark a link for referencing later")
+                    description: i18n.tr("Add an event to your project's calendar")
                     onTriggered: PopupUtils.open(Qt.resolvedUrl("resources/AddLinkDialog.qml"), value, {plugin: plugin})
                 }
 
@@ -189,50 +200,4 @@ Plugin {
             }
         }
     }
-
-//    ListItem.Header {
-//        text: i18n.tr("Recently Saved")
-//        visible: documents.length > 0
-//    }
-
-//    ListItem.Standard {
-//        text: i18n.tr("No saved resources")
-//        visible: documents.length === 0
-//        enabled: false
-//    }
-
-//    Repeater {
-//        model: Math.min(documents.length, 4)
-//        delegate: ListItem.Subtitled {
-//            id: item
-//            property var modelData: documents[documents.length - index - 1]
-//            text: modelData.title
-//            subText: modelData.text
-
-//            onClicked: pageStack.push(Qt.resolvedUrl("resources/WebPage.qml"), {resource: modelData})
-//            onPressAndHold: PopupUtils.open(actionsPopover, item, {index: documents.length - index - 1})
-//        }
-//    }
-
-
-
-//    viewAllMessage: i18n.tr("View all resources")
-//    summary: i18n.tr("<b>%1</b> resources").arg(documents.length)
-
-//    property Component addPopover: Component {
-//        id: addPopover
-
-//        ActionSelectionPopover {
-//            actions: ActionList {
-//                Action {
-//                    text: i18n.tr("Link")
-//                    onTriggered: PopupUtils.open(addLinkDialog)
-//                }
-
-//                Action {
-//                    text: i18n.tr("Content from other apps")
-//                }
-//            }
-//        }
-//    }
 }

@@ -30,6 +30,8 @@ Item {
     property string disabledMessage
     property bool authenticationRequired: true
 
+    function isEnabled(project) {}
+
     function connect(project) {}
     function status(value) {}
     function authenticate() {}

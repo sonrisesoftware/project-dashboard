@@ -27,75 +27,98 @@ Service {
     id: root
 
     name: "github"
-    type: ["GitHubIssues", "GitHubPullRequests"]//, "GitHub"]
+    type: "GitHub"
     title: i18n.tr("GitHub")
     authenticationStatus: oauth === "" ? "" : i18n.tr("Logged in as %1").arg(user.login)
-    disabledMessage: i18n.tr("To connect to a GitHub project, please authenticate to GitHub from Settings")
+    disabledMessage: i18n.tr("Authenticate to GitHub in Settings")
 
     enabled: oauth !== ""
 
     property string oauth:settings.get("githubToken", "")
     property string github: "https://api.github.com"
     property var user: settings.get("githubUser", "")
+    property var repos: settings.get("githubRepos", [])
+
+    function isEnabled(project) {
+        if (enabled) {
+            return ""
+        } else {
+            return disabledMessage
+        }
+    }
 
     onOauthChanged: {
         if (oauth !== "") {
             get("/user", userLoaded)
+            get("/user/repos", function(status, response) {
+                if (status !== 304)
+                    settings.set("githubRepos", JSON.parse(response))
+            })
         } else {
             settings.set("githubUser", undefined)
         }
     }
 
-    function userLoaded(has_error, status, response) {
-        //print("User:", response)
+    function userLoaded(status, response) {
         var json = JSON.parse(response)
-
-        if (has_error && json.hasOwnProperty("message") && json.message === "Bad credentials") {
-            settings.set("githubToken", "")
-            PopupUtils.open(accessRevokedDialog, mainView.pageStack.currentPage)
-        } else {
-            settings.set("githubUser", json)
-        }
+        settings.set("githubUser", json)
     }
 
     function get(request, callback, options) {
+        //print("OAuth", oauth)
         if (oauth === "")
             return undefined
         if (options === undefined)
             options = []
         if (request && request.indexOf(github) !== 0)
             request = github + request
-        return Http.get(request, ["access_token=" + oauth].concat(options), callback, undefined, {"Accept":"application/vnd.github.v3+json"})
+        queue.httpGet(request,["access_token=" + oauth].concat(options), {"Accept":"application/vnd.github.v3+json"}, callback, undefined)
     }
 
-    function post(request, callback, options, body) {
+    function post(request, options, body, message) {
+        //print("OAuth", oauth)
         if (oauth === "")
             return undefined
         if (options === undefined)
             options = []
         if (request && request.indexOf(github) !== 0)
             request = github + request
-        return Http.post(request, ["access_token=" + oauth].concat(options), callback, undefined, {"Accept":"application/vnd.github.v3+json"}, body)
+        queue.http("POST", request, ["access_token=" + oauth].concat(options), {"Accept":"application/vnd.github.v3+json"}, body, message)
     }
 
-    function getIssues(repo, state, since, callback) {
+    function put(request, options, body, message) {
+        //print("OAuth", oauth)
+        if (oauth === "")
+            return undefined
+        if (options === undefined)
+            options = []
+        if (request && request.indexOf(github) !== 0)
+            request = github + request
+        queue.http("PUT", request, ["access_token=" + oauth].concat(options), {"Accept":"application/vnd.github.v3+json"}, body, message)
+    }
+
+    function getEvents(repo, callback) {
+        get("/repos/" + repo + "/events", callback)
+    }
+
+    function getIssues(repo, state, since,callback) {
         return get("/repos/" + repo + "/issues", callback, ["state=" + state, "since=" + since])
     }
 
-    function editIssue(repo, number, issue, callback) {
-        return Http.patch(github + "/repos/" + repo + "/issues/" + number, ["access_token=" + oauth], callback, undefined, {"Accept":"application/vnd.github.v3+json"}, JSON.stringify(issue))
+    function editIssue(repo, number, issue) {
+        post("/repos/" + repo + "/issues/" + number, undefined, JSON.stringify(issue), i18n.tr("Update issue <b>%1</b>").arg(number))
     }
 
-    function newIssue(repo, title, description, callback) {
-        return Http.post(github + "/repos/" + repo + "/issues", ["access_token=" + oauth], callback, undefined, {"Accept":"application/vnd.github.v3+json"}, JSON.stringify({ "title": title, "body": description }))
+    function newIssue(repo, title, description) {
+        return post("/repos/" + repo + "/issues", undefined, JSON.stringify({ "title": title, "body": description }), i18n.tr("Create issue <b>%1</b>").arg(title))
     }
 
-    function newPullRequest(repo, title, description, branch, callback) {
-        return Http.post(github + "/repos/" + repo + "/pulls", ["access_token=" + oauth], callback, undefined, {"Accept":"application/vnd.github.v3+json"}, JSON.stringify({ "title": title, "body": description, "head": branch, "base": "master" }))
+    function newPullRequest(repo, title, description, branch) {
+        return post("/repos/" + repo + "/pulls", undefined, JSON.stringify({ "title": title, "body": description, "head": branch, "base": "master" }), i18n.tr("Create pull request <b>%1</b>").arg(title))
     }
 
-    function mergePullRequest(repo, number, message, callback) {
-        return Http.put(github + "/repos/" + repo + "/pulls/" + number + "/merge", ["access_token=" + oauth], callback, undefined, {"Accept":"application/vnd.github.v3+json"}, JSON.stringify({ "commit_message": message }))
+    function mergePullRequest(repo, number, message) {
+        put("/repos/" + repo + "/pulls/" + number + "/merge", undefined, JSON.stringify({ "commit_message": message }), i18n.tr("Merge pull request <b>%1</b>").arg(number))
     }
 
     function getPullRequests(repo, state, since, callback) {
@@ -138,13 +161,8 @@ Service {
         return get('/repos/' + repo + '/issues/' + issue.number + '/events', callback)
     }
 
-    function newIssueComment(repo, issue, comment, callback) {
-        return post("/repos/" + repo + "/issues/" + issue.number + "/comments", callback, undefined, JSON.stringify({body: comment}))
-    }
-
-    function connect(project) {
-        //print("Connecting...")
-        PopupUtils.open(githubDialog, mainView.pageStack.currentPage, {project: project})
+    function newIssueComment(repo, issue, comment) {
+        post("/repos/" + repo + "/issues/" + issue.number + "/comments", undefined, JSON.stringify({body: comment}), i18n.tr("Comment on issue <b>%1</b>").arg(issue.number))
     }
 
     function authenticate() {
@@ -157,21 +175,6 @@ Service {
 
     function status(value) {
         return i18n.tr("Connected to %1").arg(value)
-    }
-
-    Component {
-        id: githubDialog
-
-        InputDialog {
-            property var project
-
-            title: i18n.tr("Connect to GitHub")
-            text: i18n.tr("Enter the name of repository on GitHub you would like to add to your project")
-            placeholderText: i18n.tr("owner/repo")
-            onAccepted: {
-                project.enablePlugin("github", value)
-            }
-        }
     }
 
     Component {

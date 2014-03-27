@@ -60,7 +60,7 @@ UbuntuShape {
 
         Label {
             text: i18n.tr("Owner")
-            visible: plugin.info.owner.login === author
+            visible: plugin.info ? plugin.info.owner.login === author : false
             font.italic: true
             anchors {
                 verticalCenter: parent.verticalCenter
