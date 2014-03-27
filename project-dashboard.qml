@@ -212,8 +212,4 @@ MainView {
                             action:action
                         })
     }
-
-    PerformanceOverlay {
-
-    }
 }
