@@ -236,12 +236,14 @@ Plugin {
                 if (new Date(lastRefreshed) >= new Date(date))
                     break
 
+                if (actor === github.user.login)
+                    continue
+
                 // newMessage(plugin, icon, title, message, date, data)
                 print(type)
 
                 if (type === "IssuesEvent") {
                     var issue = payload.issue
-                    // TODO: Only display if the actor is other than the authenticated user
                     project.newMessage("github", "bug", i18n.tr("<b>%1</b> %2 issue %3")
                                        .arg(actor)
                                        .arg(payload.action)
