@@ -28,7 +28,7 @@ TabbedPage {
     
     title: project.name
 
-    tabs: [i18n.tr("Pulse"), i18n.tr("Overview")]
+    tabs: wideAspect ? [i18n.tr("Pulse")] : [i18n.tr("Pulse"), i18n.tr("Overview")]
 
     property Project project
 
@@ -71,6 +71,7 @@ TabbedPage {
     ]
 
     Item {
+        visible: !wideAspect
         anchors {
             left: parent.left
             top: parent.top
@@ -83,6 +84,12 @@ TabbedPage {
         }
 
         width: parent.width
+
+        opacity: show ? 1 : 0
+
+        Behavior on opacity {
+            UbuntuNumberAnimation {}
+        }
 
         property bool show: selectedTab === i18n.tr("Pulse")
 
@@ -119,6 +126,7 @@ TabbedPage {
     }
 
     Item {
+        visible: !wideAspect
         anchors {
             right: parent.right
             top: parent.top
@@ -131,6 +139,12 @@ TabbedPage {
         }
 
         width: parent.width
+
+        opacity: show ? 1 : 0
+
+        Behavior on opacity {
+            UbuntuNumberAnimation {}
+        }
 
         property bool show: selectedTab === i18n.tr("Overview")
 
@@ -182,7 +196,7 @@ TabbedPage {
 
     property Flickable oldFlickable
 
-    flickable: selectedTab === i18n.tr("Pulse") ? pulseListView : listView
+    flickable: wideAspect ? mainFlickable : selectedTab === i18n.tr("Pulse") ? pulseListView : listView
 
     onFlickableChanged: {
         if (oldFlickable && wideAspect) {
@@ -323,70 +337,76 @@ TabbedPage {
 //        }
 //    }
 
-//    Flickable {
-//        id: mainFlickable
-//        anchors {
+    Flickable {
+        id: mainFlickable
+        anchors {
+            fill: parent
 //            left: sidebar.right
 //            right: parent.right
 //            top: parent.top
 //            bottom: parent.bottom
-//        }
-//        clip: wideAspect
-//        visible: selectedPlugin == null && sidebar.expanded
-//        contentHeight: contents.height
-//        contentWidth: width
+        }
+        clip: wideAspect
+        visible: wideAspect
+        contentHeight: contents.height
+        contentWidth: width
 
-//        Item {
-//            id: contents
-//            width: parent.width
-//            height: column.contentHeight + units.gu(2)
+        Item {
+            id: contents
+            width: parent.width
+            height: column.contentHeight + units.gu(2)
 
-//            ColumnFlow {
-//                id: column
-//                width: parent.width - units.gu(2)
-//                height: contentHeight
-//                anchors.centerIn: parent
-//                model: project.enabledPlugins
-//                columns: extraWideAspect ? 3 : wideAspect ? 2 : 1
-//                //spacing: units.gu(2)
-//                delegate: Item {
-//                    width: parent.width
-//                    height: loader.height + units.gu(2)
+            ColumnFlow {
+                id: column
+                width: parent.width - units.gu(2)
+                height: contentHeight
+                anchors.centerIn: parent
+                model: project.plugins
+                columns: extraWideAspect ? 3 : wideAspect ? 2 : 1
+                //spacing: units.gu(2)
+                delegate: Repeater {
+                    model: modelData.items
 
-//                    property alias item: loader.item
-//                    visible: loader.status == Loader.Ready
-//                    opacity: visible ? 1 : 0
+                    delegate: Item {
+                        id: tile
+                        width: parent.width
+                        height: pluginTile.height + units.gu(2)
+                        visible: pluginItem.pulseItem
 
-//                    Behavior on opacity {
-//                        UbuntuNumberAnimation {
-//                            duration: UbuntuAnimation.SlowDuration
-//                        }
-//                    }
+                        onHeightChanged: column.reEvalColumns()
 
-//                    Loader {
-//                        id: loader
-//                        anchors.centerIn: parent
-//                        width: parent.width - units.gu(2)
-//                        source: Qt.resolvedUrl("../plugins/" + modelData + ".qml")
-//                        active: true
-//                        onLoaded: {
-//                            column.reEvalColumns()
-//                        }
-//                        asynchronous: true
+                        property PluginItem pluginItem: modelData
 
+                        PluginTile {
+                            id: pluginTile
+                            iconSource: tile.pluginItem.icon
+                            title: tile.pluginItem.title
+                            viewAllMessage: loader.item.viewAll
+                            action: tile.pluginItem.action
+                            anchors.centerIn: parent
+                            width: parent.width - units.gu(2)
 
-//                        onHeightChanged: column.reEvalColumns()
-//                    }
-//                }
+                            Loader {
+                                id: loader
+                                width: parent.width
+                                sourceComponent: tile.pluginItem.pulseItem
+                                onLoaded: {
+                                    column.reEvalColumns()
+                                }
+                                onHeightChanged: column.reEvalColumns()
+                            }
+                        }
+                    }
+                }
 
-//                Timer {
-//                    interval: 2
-//                    running: true
-//                    onTriggered: column.reEvalColumns()
-//                }
-//            }
-//        }
-//    }
+                Timer {
+                    interval: 2
+                    running: true
+                    onTriggered: column.reEvalColumns()
+                }
+            }
+        }
+    }
 
 //    Sidebar {
 //        id: sidebar

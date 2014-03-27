@@ -42,6 +42,7 @@ Plugin {
         pulseItem: PulseItem {
             show: plugin.info ? true : false
             title: i18n.tr("Latest Results from Travis CI")
+            viewAll: i18n.tr("View all builds")
             BuildListItem {
                 number: plugin.info ? plugin.info.last_build_number : 0
                 status: plugin.info ? plugin.info.last_build_result : 0

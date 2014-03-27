@@ -54,6 +54,7 @@ Plugin {
 
     items: [
         PluginItem {
+            id: pluginItem
             icon: "bug"
             title: i18n.tr("Issues")
             value: List.filteredCount(issues, function (issue) {
@@ -70,7 +71,8 @@ Plugin {
             }
 
             pulseItem: PulseItem {
-                title: i18n.tr("Issues Assigned to Me")
+                title: i18n.tr("Issues Assigned to You")
+                viewAll: i18n.tr("View all <b>%1</b> open issues").arg(pluginItem.value)
                 show: repeater.count > 0
 
                 Repeater {
@@ -87,6 +89,7 @@ Plugin {
         },
 
         PluginItem {
+            id: pullsItem
             icon: "code-fork"
             title: i18n.tr("Pull Requests")
             value: List.filteredCount(issues, function (issue) {
@@ -94,7 +97,7 @@ Plugin {
             })
 
             action: Action {
-                text: i18n.tr("Open Pull Request")
+                text: wideAspect && width < units.gu(90) ? i18n.tr("Open Pull") : i18n.tr("Open Pull Request")
                 description: i18n.tr("Open a new pull request")
                 onTriggered: PopupUtils.open(Qt.resolvedUrl("github/NewPullRequestPage.qml"), mainView, {plugin: githubPlugin})
             }
@@ -105,6 +108,7 @@ Plugin {
 
             pulseItem: PulseItem {
                 title: i18n.tr("Open Pull Requests")
+                viewAll: i18n.tr("View all <b>%1</b> open pull requests").arg(pullsItem.value)
                 show: pullsRepeater.count > 0
 
                 Repeater {

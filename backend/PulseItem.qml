@@ -8,6 +8,7 @@ Column {
     width: parent.width
 
     property string title
+    property string viewAll
     property bool show: title !== ""
 
     height: opacity === 0 ? 0 : implicitHeight
