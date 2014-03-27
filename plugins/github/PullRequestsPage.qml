@@ -26,12 +26,9 @@ import ".."
 
 PluginPage {
     id: page
-
     title: i18n.tr("Pull Requests")
 
     property var plugin
-
-    property string sort: doc.get("sort", "number")
 
     property var allIssues: List.filter(plugin.issues, function(issue) {
         return issue.isPullRequest
@@ -49,15 +46,8 @@ PluginPage {
             id: filterAction
             text: i18n.tr("Filter")
             iconSource: getIcon("filter")
-            onTriggered: PopupUtils.open(filterPopover, value)
+            onTriggered: filterPopover.show()
             visible: !wideAspect
-        },
-
-        Action {
-            id: viewAction
-            text: i18n.tr("View")
-            iconSource: getIcon("navigation-menu")
-            onTriggered: PopupUtils.open(viewMenu, value)
         }
     ]
 
@@ -83,8 +73,8 @@ PluginPage {
         }
         model: allIssues
         delegate: PullRequestListItem {
-            number: modelData
-            show: selectedFilter(modelData)
+            issue: modelData
+            show: selectedFilter(issue)
         }
         clip: true
     }
@@ -99,12 +89,16 @@ PluginPage {
 
     property var selectedFilter: allFilter
 
+    function filter(issue) {
+        return (issue.open || settings.get("showClosedTickets", false))
+    }
+
     property var allFilter: function(issue) {
-        return issue.open || settings.get("showClosedTickets", false)
+        return filter(issue) ? true : false
     }
 
     property var createdFilter: function(issue) {
-        return issue.user && issue.user.login === github.user.login && (issue.open || settings.get("showClosedTickets", false))
+        return issue.user && issue.user.login === github.user.login && filter(issue) ? true : false
     }
 
     Scrollbar {
@@ -113,33 +107,12 @@ PluginPage {
 
     Sidebar {
         id: sidebar
-        width: units.gu(25)
+        width: units.gu(30)
         expanded: wideAspect
-        Column {
+        Item {
+            id: sidebarContents
             width: parent.width
-
-            ListItem.Header {
-                text: i18n.tr("Filter")
-            }
-
-            ListItem.SingleValue {
-                text: i18n.tr("All Requests")
-                selected: allFilter === selectedFilter
-                onClicked: selectedFilter = allFilter
-                value: List.filteredCount(allIssues, allFilter)
-            }
-
-            ListItem.SingleValue {
-                text: i18n.tr("Yours")
-                selected: createdFilter === selectedFilter
-                onClicked: selectedFilter = createdFilter
-                value: List.filteredCount(allIssues, createdFilter)
-            }
-
-//            ListItem.SingleValue {
-//                text: i18n.tr("Mentioning you")
-//                value: "1"
-//            }
+            height: childrenRect.height
         }
     }
 
@@ -151,25 +124,62 @@ PluginPage {
             Column {
                 width: parent.width
 
-                ListItem.Standard {
-                    text: i18n.tr("Show closed pull requests")
-                    control: CheckBox {
-                        checked: settings.get("showClosedTickets", false)
-                        onClicked: checked = settings.sync("showClosedTickets", checked)
-                    }
-                }
+
+//                ListItem.ValueSelector {
+//                    text: i18n.tr("Sort By")
+//                    values: [i18n.tr("Number"), i18n.tr("Assignee"), i18n.tr("Milestone")]
+//                    selectedIndex: {
+//                        if (sort === "number") return 0
+//                        if (sort === "assignee") return 1
+//                        if (sort === "milestone") return 2
+//                    }
+
+//                    onSelectedIndexChanged: {
+//                        if (selectedIndex === 0) doc.set("sort", "number")
+//                        if (selectedIndex === 1) doc.set("sort", "assignee")
+//                        if (selectedIndex === 2) doc.set("sort", "milestone")
+//                    }
+//                }
             }
         }
     }
 
-    Component {
+    DefaultSheet {
         id: filterPopover
 
-        Popover {
-            contentHeight: column.height
+        title: i18n.tr("Filter")
+
+        Component.onCompleted: {
+            filterPopover.__leftButton.text = i18n.tr("Close")
+            filterPopover.__leftButton.color = filterPopover.__rightButton.__styleInstance.defaultColor
+            filterPopover.__foreground.style = Theme.createStyleComponent(Qt.resolvedUrl("../../ubuntu-ui-extras/SuruSheetStyle.qml"), filterPopover)
+        }
+
+        contentsHeight: mainView.height
+        Item {
+            anchors.fill: parent
+            anchors.margins: -units.gu(1)
+
             Column {
-                id: column
+                id: filterColumn
                 width: parent.width
+
+                ListItem.Standard {
+                    text: i18n.tr("Show closed issues")
+                    onClicked: closedCheckbox.triggered(closedCheckbox)
+                    CheckBox {
+                        id: closedCheckbox
+                        anchors {
+                            right: parent.right
+                            rightMargin: units.gu(1.5)
+                            verticalCenter: parent.verticalCenter
+                        }
+
+                        style: SuruCheckBoxStyle {}
+                        checked: settings.get("showClosedTickets", false)
+                        onTriggered: checked = settings.sync("showClosedTickets", checked)
+                    }
+                }
 
                 ListItem.Header {
                     text: i18n.tr("Filter")
@@ -196,4 +206,24 @@ PluginPage {
             }
         }
     }
+
+    states: [
+        State {
+            when: sidebar.expanded
+
+            ParentChange {
+                target: filterColumn
+                parent: sidebarContents
+                width: sidebarContents.width
+                x: 0
+                y: 0
+            }
+
+            StateChangeScript {
+                script: {
+                    filterPopover.hide()
+                }
+            }
+        }
+    ]
 }

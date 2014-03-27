@@ -48,14 +48,7 @@ PluginPage {
             iconSource: getIcon("filter")
             onTriggered: filterPopover.show()
             visible: !wideAspect
-        }/*,
-
-        Action {
-            id: viewAction
-            text: i18n.tr("View")
-            iconSource: getIcon("navigation-menu")
-            onTriggered: PopupUtils.open(viewMenu, value)
-        }*/
+        }
     ]
 
     flickable: sidebar.expanded ? null : listView
