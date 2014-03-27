@@ -14,7 +14,7 @@ autopilot:
 	chmod +x tests/autopilot/run
 	tests/autopilot/run
 
-check:
+unit_test_check:
 	qmltestrunner -input tests/unit
 
 python_check:

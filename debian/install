@@ -1,6 +1,6 @@
 project-dashboard.desktop usr/share/applications/
 project-dashboard.qml usr/share/project-dashboard/
-project-dashboard-shadowed.png usr/share/icons/hicolor/512x512/apps
+project-dashboard.png usr/share/icons/hicolor/512x512/apps
 Markdown.Converter.js usr/share/project-dashboard/
 backend usr/share/project-dashboard/
 components usr/share/project-dashboard/

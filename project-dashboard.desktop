@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=Project Dashboard
 Exec=qmlscene $@ /usr/share/project-dashboard/project-dashboard.qml
-Icon=project-dashboard-shadowed.png
+Icon=project-dashboard.png
 Terminal=false
 Type=Application
 Keywords=Project,Git,Launchpad,Management;
