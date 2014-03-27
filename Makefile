@@ -14,8 +14,8 @@ autopilot:
 	chmod +x tests/autopilot/run
 	tests/autopilot/run
 
-#check:
-	#qmltestrunner -input tests/unit
+check:
+	qmltestrunner -input tests/unit
 
 python_check:
 	pep8 tests/autopilot/project_dashboard/
@@ -24,8 +24,8 @@ python_check:
 run:
 	/usr/bin/qmlscene $@ project-dashboard.qml
 
-#clean:
-	#rm ~/.local/share/com.ubuntu.developer.mdspencer.project-dashboard/ -R
+erase_db:
+	rm ~/.local/share/com.ubuntu.developer.mdspencer.project-dashboard/ -R
 
 backup: 
 	cp ~/.local/share/com.ubuntu.developer.mdspencer.project-dashboard/*.db .
