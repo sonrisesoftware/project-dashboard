@@ -386,6 +386,11 @@ TabbedPage {
                             anchors.centerIn: parent
                             width: parent.width - units.gu(2)
 
+                            onTriggered: {
+                                if (pluginItem.page)
+                                    pageStack.push(pluginItem.page)
+                            }
+
                             Loader {
                                 id: loader
                                 width: parent.width

@@ -107,6 +107,7 @@ Plugin {
         pulseItem: PulseItem {
             show: totalTime > 0 || timer.running
             title: i18n.tr("Time Tracked Today")
+            viewAll: i18n.tr("View all days")
             ListItem.SingleValue {
                 id: todayItem
                 text: i18n.tr("Today")
