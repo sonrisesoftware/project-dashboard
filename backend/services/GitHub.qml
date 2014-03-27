@@ -86,6 +86,17 @@ Service {
         queue.http("POST", request, ["access_token=" + oauth].concat(options), {"Accept":"application/vnd.github.v3+json"}, body, message)
     }
 
+    function put(request, options, body, message) {
+        //print("OAuth", oauth)
+        if (oauth === "")
+            return undefined
+        if (options === undefined)
+            options = []
+        if (request && request.indexOf(github) !== 0)
+            request = github + request
+        queue.http("PUT", request, ["access_token=" + oauth].concat(options), {"Accept":"application/vnd.github.v3+json"}, body, message)
+    }
+
     function getEvents(repo, callback) {
         get("/repos/" + repo + "/events", callback)
     }
@@ -99,15 +110,15 @@ Service {
     }
 
     function newIssue(repo, title, description) {
-        return post("/repos/" + repo + "/issues", undefined, JSON.stringify({ "title": title, "body": description }))
+        return post("/repos/" + repo + "/issues", undefined, JSON.stringify({ "title": title, "body": description }), i18n.tr("Create issue <b>%1</b>").arg(title))
     }
 
     function newPullRequest(repo, title, description, branch) {
-        return post("/repos/" + repo + "/pulls", undefined, JSON.stringify({ "title": title, "body": description, "head": branch, "base": "master" }))
+        return post("/repos/" + repo + "/pulls", undefined, JSON.stringify({ "title": title, "body": description, "head": branch, "base": "master" }), i18n.tr("Create pull request <b>%1</b>").arg(title))
     }
 
     function mergePullRequest(repo, number, message) {
-        return Http.put(github + "/repos/" + repo + "/pulls/" + number + "/merge", ["access_token=" + oauth], callback, undefined, {"Accept":"application/vnd.github.v3+json"}, JSON.stringify({ "commit_message": message }))
+        put("/repos/" + repo + "/pulls/" + number + "/merge", undefined, JSON.stringify({ "commit_message": message }), i18n.tr("Merge pull request <b>%1</b>").arg(number))
     }
 
     function getPullRequests(repo, state, since, callback) {
@@ -154,11 +165,6 @@ Service {
         post("/repos/" + repo + "/issues/" + issue.number + "/comments", undefined, JSON.stringify({body: comment}), i18n.tr("Comment on issue <b>%1</b>").arg(issue.number))
     }
 
-    function connect(project) {
-        //print("Connecting...")
-        PopupUtils.open(githubDialog, mainView.pageStack.currentPage, {project: project})
-    }
-
     function authenticate() {
         pageStack.push(Qt.resolvedUrl("OAuthPage.qml"))
     }
@@ -169,21 +175,6 @@ Service {
 
     function status(value) {
         return i18n.tr("Connected to %1").arg(value)
-    }
-
-    Component {
-        id: githubDialog
-
-        InputDialog {
-            property var project
-
-            title: i18n.tr("Connect to GitHub")
-            text: i18n.tr("Enter the name of repository on GitHub you would like to add to your project")
-            placeholderText: i18n.tr("owner/repo")
-            onAccepted: {
-                project.enablePlugin("github", value)
-            }
-        }
     }
 
     Component {

@@ -242,12 +242,11 @@ Object {
 
         if (login !== "") {
             info.assignee = assignee
-            doc.set("info", info)
             newEvent("assigned", assignee)
         } else {
             info.assignee = undefined
-            doc.set("info", info)
         }
+        info = info
     }
 
     function updateLabels(labels) {

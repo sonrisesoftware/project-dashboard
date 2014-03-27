@@ -231,7 +231,7 @@ Plugin {
                 var payload = event.payload
 
                 // TODO: When publishing, add: || actor === github.user.login
-                print(date, lastRefreshed, type)
+                print(date, lastRefreshed, type, actor)
                 if (new Date(lastRefreshed) >= new Date(date))
                     break
 
@@ -299,7 +299,7 @@ Plugin {
         github.getRepository(repo, function(status, response) {
             if (lastRefreshed === "")
                 project.loading--
-            print("Info:", response)
+            //print("Info:", response)
             var json = JSON.parse(response)
             doc.set("repo", json)
         })
