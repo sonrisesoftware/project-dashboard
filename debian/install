@@ -1,0 +1,10 @@
+project-dashboard.desktop usr/share/applications/
+project-dashboard.qml usr/share/project-dashboard/
+project-dashboard.png usr/share/icons/hicolor/256x256/apps
+Markdown.Converter.js usr/share/project-dashboard/
+backend usr/share/project-dashboard/
+components usr/share/project-dashboard/
+icons usr/share/project-dashboard/
+plugins usr/share/project-dashboard/
+ubuntu-ui-extras usr/share/project-dashboard/
+ui usr/share/project-dashboard/

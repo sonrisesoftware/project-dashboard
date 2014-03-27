@@ -14,7 +14,7 @@ autopilot:
 	chmod +x tests/autopilot/run
 	tests/autopilot/run
 
-check:
+unit_test_check:
 	qmltestrunner -input tests/unit
 
 python_check:
@@ -24,7 +24,7 @@ python_check:
 run:
 	/usr/bin/qmlscene $@ project-dashboard.qml
 
-clean:
+erase_db:
 	rm ~/.local/share/com.ubuntu.developer.mdspencer.project-dashboard/ -R
 
 backup: 
