@@ -96,7 +96,6 @@ Plugin {
             action: Action {
                 text: i18n.tr("Open Pull Request")
                 description: i18n.tr("Open a new pull request")
-                enabled: false
                 onTriggered: PopupUtils.open(Qt.resolvedUrl("github/NewPullRequestPage.qml"), mainView, {plugin: githubPlugin})
             }
 
@@ -162,7 +161,7 @@ Plugin {
         var lastRefreshed = doc.get("lastRefreshed", "")
 
         if (lastRefreshed === "")
-            project.loading += 11
+            project.loading += 12
 
         var handler = function(status, response) {
             if (lastRefreshed === "")
@@ -317,6 +316,12 @@ Plugin {
             doc.set("commit_stats", JSON.parse(response))
         })
 
+        github.get("/repos/" + repo + "/branches", function(status, response) {
+            if (lastRefreshed === "")
+                project.loading--
+            doc.set("branches", JSON.parse(response))
+        })
+
         doc.set("lastRefreshed", new Date().toJSON())
     }
 
@@ -351,6 +356,24 @@ Plugin {
         Issue {
 
         }
+    }
+
+    function newPullRequest(title, description, branch) {
+        var number = nextNumber++
+        var json = {
+            "state": "open",
+            "number": number,
+            "title": title,
+            "body": description,
+            "pull_request": {},
+            "user": github.user,
+            "labels": [],
+            "created_at": new Date().toJSON()
+        }
+
+        var issue = issueComponent.createObject(mainView, {info: json})
+        issues.append({"modelData": issue})
+        github.newPullRequest(repo, title, description, branch)
     }
 
     function newIssue(title, description) {
