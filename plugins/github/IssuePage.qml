@@ -410,8 +410,8 @@ Page {
                     }
 
                     Button {
-                        text:  issue.state === "open" ? i18n.tr("Comment and Close") : i18n.tr("Comment and Reopen")
-                        color: issue.state === "open" ? colors["red"] : colors["green"]
+                        text:  issue.open ? i18n.tr("Comment and Close") : i18n.tr("Comment and Reopen")
+                        color: issue.open ? colors["red"] : colors["green"]
 
                         visible: wideAspect
                         opacity: commentBox.show ? 1 : 0
