@@ -27,41 +27,66 @@ import "../ubuntu-ui-extras/dateutils.js" as DateUtils
 import "../ubuntu-ui-extras"
 
 Plugin {
-    id: root
+    id: plugin
 
-    title: "Timer"
-    iconSource: "clock"
-    //unread: true
+    name: "timer"
 
-    property alias dates: doc.children
-    property int totalTime: savedTime + currentTime
-    property int currentTime: 0//new Date() - startTime
-    property int savedTime: today.get("savedTime", 0)
-    property int otherTime: List.iter(doc.children, function(docId) {
-        if (docId === today.docId)
-            return 0
-        return doc.childrenData[docId]["time"]
-    })
-    property int allTime: otherTime + totalTime
-    property var startTime: doc.get("startTime", undefined) === undefined ? undefined : new Date(doc.get("startTime", undefined))
+    onSave: {
+        dates[today].time = totalTime
+        doc.set("dates", dates)
+    }
 
-    Component.onDestruction: today.set("time", totalTime)
-
-    action: Action {
-        text: startTime !== undefined ? i18n.tr("Stop") : i18n.tr("Start")
-        onTriggered: {
-            if (startTime) {
-                today.set("savedTime", savedTime + (new Date() - startTime))
-                currentTime =  0
-                doc.set("startTime", undefined)
-            } else {
-                doc.set("startTime", new Date().toJSON())
-                currentTime = 0
+    function setup() {
+        dates = doc.get("dates", {})
+        if (!dates.hasOwnProperty("today")) {
+            dates[today] = {
+                "date": today,
+                "time": 0
             }
         }
     }
 
+    onLoaded: {
+        dates = doc.get("dates", {})
+        if (!dates.hasOwnProperty("today")) {
+            dates[today] = {
+                "date": today,
+                "time": 0
+            }
+        }
+    }
+
+    property string today: DateUtils.today.toJSON()
+
+    property var dates: doc.get("dates", {})
+    property int totalTime: savedTime + currentTime
+    property int currentTime: 0
+    property int savedTime: doc.get("savedTime", 0)
+    property int otherTime: {
+        var time = 0
+        for (var key in dates) {
+            if (key !== today)
+                time += dates[key].time
+        }
+        return time
+    }
+
+    property int allTime: otherTime + totalTime
+    property var startTime: doc.get("startTime", undefined) === undefined ? undefined : new Date(doc.get("startTime", undefined))
+
+    function startOrStop() {
+        if (startTime) {
+            doc.set("savedTime", savedTime + (new Date() - startTime))
+            currentTime =  0
+            doc.set("startTime", undefined)
+        } else {
+            doc.set("startTime", new Date().toJSON())
+            currentTime = 0
+        }
+    }
+
     Timer {
+        id: timer
         interval: 1000
         repeat: true
         running: startTime !== undefined
@@ -70,36 +95,32 @@ Plugin {
         }
     }
 
-    Document {
-        id: today
-        docId: {
-            var today = DateUtils.today
-            return today.toJSON()
+    items: PluginItem {
+        icon: "clock"
+        title: i18n.tr("Time Tracker")
+
+        action: Action {
+            text: timer.running ? i18n.tr("Pause Timer") : i18n.tr("Start Timer")
+            onTriggered: startOrStop()
         }
 
-        parent: doc
-    }
+        pulseItem: PulseItem {
+            show: totalTime > 0 || timer.running
+            title: i18n.tr("Time Tracked Today")
+            viewAll: i18n.tr("View all days")
+            ListItem.SingleValue {
+                id: todayItem
+                text: i18n.tr("Today")
+                value: DateUtils.friendlyDuration(totalTime)
+                onClicked: PopupUtils.open(editDialog, todayItem, {docId: today})
+            }
+        }
 
-    document: Document {
-        id: doc
-        docId: "timer"
-        parent: project.document
-    }
-
-    ListItem.SingleValue {
-        id: todayItem
-        text: i18n.tr("Today")
-        value: DateUtils.friendlyDuration(totalTime)
-        onClicked: PopupUtils.open(editDialog, todayItem, {docId: today.docId})
-    }
-
-    viewAllMessage:  "View all days"
-    summary: i18n.tr("Total Time")
-    summaryValue: DateUtils.friendlyDuration(allTime)
-
-    page: Component {
-        PluginPage {
+        page: PluginPage {
+            id: page
             title: "Timer"
+
+            tabs: wideAspect ? [i18n.tr("Timer")] : [i18n.tr("Timer"), i18n.tr("History")]
 
             Layouts {
                 id: layouts
@@ -186,92 +207,72 @@ Plugin {
                             id: regLayout
                             anchors.fill: parent
 
-                            property bool timerSelected: true
+                            Item {
+                                id: timerPage
+                                anchors {
+                                    left: parent.left
+                                    top: parent.top
+                                    bottom: parent.bottom
+                                    leftMargin: show ? 0 : -width
 
-                            Rectangle {
-                                anchors.bottom: parent.bottom
-                                anchors.bottomMargin: -units.gu(1.2)
-                                height: header.height - header.__styleInstance.contentHeight + units.gu(1)
-                                parent: header
+                                    Behavior on leftMargin {
+                                        UbuntuNumberAnimation {}
+                                    }
+                                }
+
                                 width: parent.width
-                                color: "#3e3e3e" //FIXME: This color is hard-coded based on the current app background color
+                                property bool show: page.selectedTab === i18n.tr("Timer")
 
-                                Image {
-                                    id: separatorBottom
-                                    anchors {
-                                        bottom: parent.bottom
-                                        left: parent.left
-                                        right: parent.right
-                                    }
-                                    source: getIcon("PageHeaderBaseDividerBottom.png")
-                                }
-
-                                Row {
-                                    anchors.centerIn: parent
-                                    anchors.verticalCenterOffset: units.gu(-0.1)
-                                    spacing: units.gu(1)
-
-                                    Label {
-                                        text: "Timer"
-                                        color: regLayout.timerSelected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
-                                        MouseArea {
-                                            anchors.fill: parent
-                                            onClicked: regLayout.timerSelected = true
-                                        }
-                                    }
-
-                                    Label {
-                                        text: "|"
-                                    }
-
-                                    Label {
-                                        text: "History"
-                                        color: !regLayout.timerSelected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
-                                        MouseArea {
-                                            anchors.fill: parent
-                                            onClicked: regLayout.timerSelected = false
-                                        }
+                                Item {
+                                    anchors.fill: parent
+                                    //anchors.topMargin: units.gu(1) - header.height
+                                    ItemLayout {
+                                        anchors.centerIn: parent
+                                        item: "timer"
+                                        width: timerView.width
+                                        height: timerView.height
                                     }
                                 }
-                            }
-
-                            ItemLayout {
-                                anchors.fill: parent
-                                anchors.topMargin: units.gu(1)
-                                item: "list"
-                                visible: !regLayout.timerSelected
                             }
 
                             Item {
-                                anchors.fill: parent
-                                anchors.topMargin: units.gu(1) - header.height
-                                ItemLayout {
-                                    anchors.centerIn: parent
-                                    item: "timer"
-                                    width: timerView.width
-                                    height: timerView.height
-                                }
-                                visible: regLayout.timerSelected
-                            }
-
-                            Rectangle {
-                                anchors.fill: column
-                                color: Qt.rgba(0,0,0,0.2)
-                                visible: !regLayout.timerSelected
-                            }
-
-                            ItemLayout {
-                                id: column
-                                item: "footer"
-                                visible: !regLayout.timerSelected
-
                                 anchors {
-                                    left: parent.left
                                     right: parent.right
+                                    top: parent.top
                                     bottom: parent.bottom
+                                    rightMargin: show ? 0 : -width
+
+                                    Behavior on rightMargin {
+                                        UbuntuNumberAnimation {}
+                                    }
                                 }
 
-                                height: footer.height
+                                width: parent.width
+                                property bool show: !timerPage.show
+
+                                ItemLayout {
+                                    anchors.fill: parent
+                                    anchors.topMargin: units.gu(1)
+                                    item: "list"
+                                }
+
+                                Rectangle {
+                                    anchors.fill: column
+                                    color: Qt.rgba(0,0,0,0.2)
+                                }
+
+                                ItemLayout {
+                                    id: column
+                                    item: "footer"
+
+                                    anchors {
+                                        left: parent.left
+                                        right: parent.right
+                                        bottom: parent.bottom
+                                    }
+
+                                    height: footer.height
+                                }
                             }
                         }
                     }
@@ -279,19 +280,13 @@ Plugin {
 
                 ListView {
                     Layouts.item: "list"
-                    model: dates
+                    model: List.objectKeys(dates)
                     delegate: ListItem.SingleValue {
                         id: item
-                        text: DateUtils.formattedDate(new Date(child.docId))
-                        value: modelData === today.docId ? DateUtils.friendlyDuration(totalTime)
-                                                         : DateUtils.friendlyDuration(child.get("time", 0))
-                        onClicked: PopupUtils.open(editDialog, item, {docId: modelData})
-
-                        Document {
-                            id: child
-                            docId: modelData
-                            parent: doc
-                        }
+                        text: DateUtils.formattedDate(new Date(modelData))
+                        value: modelData === today ? DateUtils.friendlyDuration(totalTime)
+                                                         : DateUtils.friendlyDuration(dates[modelData].time)
+                        onClicked: PopupUtils.open(editDialog, item, {date: modelData})
                     }
                 }
 
@@ -312,16 +307,7 @@ Plugin {
 
                         Button {
                             text: startTime !== undefined ? i18n.tr("Stop") : i18n.tr("Start")
-                            onTriggered: {
-                                if (startTime) {
-                                    today.set("savedTime", savedTime + (new Date() - startTime))
-                                    currentTime =  0
-                                    doc.set("startTime", undefined)
-                                } else {
-                                    doc.set("startTime", new Date().toJSON())
-                                    currentTime = 0
-                                }
-                            }
+                            onTriggered: startOrStop()
                         }
 
 //                        Button {
@@ -347,57 +333,53 @@ Plugin {
                 }
             }
         }
-    }
 
-    Component {
-        id: editDialog
+        Component {
+            id: editDialog
 
-        InputDialog {
-            property alias docId: child.docId
+            InputDialog {
+                property string date
 
-            title: i18n.tr("Edit Time")
-            text: i18n.tr("Edit the time logged for <b>%1</b>").arg(DateUtils.formattedDate(new Date(child.docId)))
-            value: modelData === today.docId ? DateUtils.friendlyDuration(totalTime)
-                                             : DateUtils.friendlyDuration(child.get("time", 0))
+                title: i18n.tr("Edit Time")
+                text: i18n.tr("Edit the time logged for <b>%1</b>").arg(DateUtils.formattedDate(new Date(dates[date].date)))
+                value: date === today ? DateUtils.friendlyDuration(totalTime)
+                                                 : DateUtils.friendlyDuration(dates[date].time)
 
-            property bool running
+                property bool running
 
-            Component.onCompleted: {
-                if (docId == today.docId ) {
-                    value = DateUtils.friendlyDuration(totalTime)
-                    if (startTime) {
-                        today.set("savedTime", savedTime + (new Date() - startTime))
-                        currentTime =  0
-                        doc.set("startTime", undefined)
+                Component.onCompleted: {
+                    if (date == today ) {
+                        value = DateUtils.friendlyDuration(totalTime)
+                        if (startTime) {
+                            doc.set("savedTime", savedTime + (new Date() - startTime))
+                            currentTime =  0
+                            doc.set("startTime", undefined)
 
-                        running = true
+                            running = true
+                        }
                     }
                 }
-            }
 
-            onAccepted: {
-                if (docId == today.docId) {
-                    today.set("savedTime", DateUtils.parseDuration(value))
+                onAccepted: {
+                    if (date == today) {
+                        doc.set("savedTime", DateUtils.parseDuration(value))
 
+                        if (running) {
+                            doc.set("startTime", new Date().toJSON())
+                            currentTime = 0
+                        }
+                    } else {
+                        dates[date].time = DateUtils.parseDuration(value)
+                        dates = dates
+                    }
+                }
+
+                onRejected: {
                     if (running) {
                         doc.set("startTime", new Date().toJSON())
                         currentTime = 0
                     }
-                } else {
-                    child.set("time", DateUtils.parseDuration(value))
                 }
-            }
-
-            onRejected: {
-                if (running) {
-                    doc.set("startTime", new Date().toJSON())
-                    currentTime = 0
-                }
-            }
-
-            Document {
-                id: child
-                parent: doc
             }
         }
     }

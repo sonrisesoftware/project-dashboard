@@ -6,26 +6,48 @@ import "../../backend/utils.js" as Utils
 Object {
     id: issue
 
+    function toJSON() { return doc.toJSON() }
+    function fromJSON(json) { doc.fromJSON(json) }
+
+    Document {
+        id: doc
+
+        onSave: {
+            doc.set("info", info)
+            doc.set("pull", pull)
+            doc.set("events", events)
+            doc.set("comments", comments)
+            doc.set("commits", commits)
+            doc.set("status", status)
+            doc.set("statusDescription", statusDescription)
+        }
+    }
+
     property var info: doc.get("info", {})
-    property var pull: doc.get("pull", {})
+    property var pull: doc.get("pull", undefined)
     property var events: doc.get("events", [])
     property var comments: doc.get("comments", [])
     property var commits: doc.get("commits", [])
 
-    property int number
-    Document {
-        id: doc
-        docId: String(number)
-        parent: plugin.issues
-    }
+    property int number: info.number
 
-    property int loading
+    property bool loaded
 
-    property bool isPullRequest: info.hasOwnProperty("head") //TODO: Is this the best way to handle it?
-    property bool merged: isPullRequest ? pull.merged : false
-    property bool mergeable: isPullRequest ? pull.mergeable : false
+    property bool isPullRequest: info.hasOwnProperty("pull_request") || info.hasOwnProperty("head") //TODO: Is this the best way to handle it?
+    property bool merged: isPullRequest ? pull && pull.merged  ? pull.merged : false
+                                        : false
+    property bool mergeable: isPullRequest ? pull && pull.mergeable ? pull.mergeable : false
+                                           : false
     property bool open: info.state === "open"
     property var assignee: info.assignee
+    property bool assignedToMe: {
+        var result = issue.assignee && issue.assignee.login && issue.assignee.login === github.user.login
+        if (result === undefined)
+            return false
+        else
+            return result
+    }
+
     property var milestone: info.milestone
     property string title: info.title
     property var labels: info.labels
@@ -43,8 +65,6 @@ Object {
     signal busy(var title, var message, var request)
     signal complete()
 
-    property bool loaded
-
     function newEvent(type, actor) {
         if (actor === undefined)
             actor = github.user
@@ -53,12 +73,14 @@ Object {
                         actor: actor,
                         created_at: new Date().toJSON()
                     })
-        doc.set("events", events)
+        events = events
+        plugin.changed = true
     }
 
     function newComment(text) {
-        comments.push({body: text, user: github.user, date: new Date().toISOString()})
-        doc.set("comments", comments)
+        comments.push({body: text, user: github.user, created_at: new Date().toISOString()})
+        comments = comments
+        plugin.changed = true
     }
 
     property var allEvents: {
@@ -111,10 +133,14 @@ Object {
     }
 
     Component.onCompleted: {
-        if (isPullRequest) {
-            loading++
-            github.get(info._links.statuses.href, function(has_error, status, response) {
-                 print(response)
+        if (isPullRequest && info._links) {
+            github.get(info._links.statuses.href, function(status, response) {
+                if (status === 304)
+                    return
+
+                plugin.changed = true
+
+                 //print(response)
                  if (JSON.parse(response)[0] === undefined) {
                      doc.set("status", "")
                      doc.set("statusDescription", "")
@@ -122,97 +148,70 @@ Object {
                      doc.set("status", JSON.parse(response)[0].state)
                      doc.set("statusDescription", JSON.parse(response)[0].description)
                  }
-
-                 loading--
              })
         }
     }
 
     function load() {
-        print("LOADING>>>>>>>>>")
         loaded = true
 
         if (isPullRequest) {
-            loading += 2
-            github.getPullRequest(plugin.repo, number, function(has_error, status, response) {
-                loading--
+            github.getPullRequest(plugin.repo, number, function(status, response) {
+                if (status === 304)
+                    return
+
+                plugin.changed = true
+
                 doc.set("pull", JSON.parse(response))
                 print("MERGED:", JSON.parse(response).merged, pull.merged)
                 print("MERGEABLE:", JSON.parse(response).mergeable, pull.mergeable)
             })
 
-            github.getPullCommits(plugin.repo, issue, function(has_error, status, response) {
-                loading--
+            github.getPullCommits(plugin.repo, issue, function(status, response) {
+                if (status === 304)
+                    return
+
+                plugin.changed = true
+
                 doc.set("commits", JSON.parse(response))
             })
         }
 
-        loading += 2
-        github.getIssueComments(plugin.repo, issue, function(has_error, status, response) {
-            loading--
+        github.getIssueComments(plugin.repo, issue, function(status, response) {
+            if (status === 304)
+                return
+            plugin.changed = true
             doc.set("comments", JSON.parse(response))
         })
 
-        github.getIssueEvents(plugin.repo, issue, function(has_error, status, response) {
-            loading--
+        github.getIssueEvents(plugin.repo, issue, function(status, response) {
+            if (status === 304)
+                return
+            plugin.changed = true
             doc.set("events", JSON.parse(response))
         })
     }
 
     function merge(message) {
-        var request = github.mergePullRequest(plugin.repo, number, message, function(has_error, status, response) {
-            complete()
-            try {
-                var json = JSON.parse(response)
-                if (json.merged) {
-                    info.state = "closed"
-                    doc.set("info", info)
-                    newEvent("closed")
-                    newEvent("merged")
-                } else {
-                    error(i18n.tr("Connection Error"), i18n.tr("Unable to merge %1:\n\n%2").arg(type).arg(json.message))
-                }
-            } catch (e) {
-               error(i18n.tr("Connection Error"), i18n.tr("Unable to merge %1. Check your connection and/or firewall settings.").arg(type))
-            }
-        })
-
-        busy(i18n.tr("Merging %1").arg(typeCap),
-             i18n.tr("Merging %2 <b>#%1</b>").arg(number).arg(type),
-             request)
+        info.state = "closed"
+        info = info
+        newEvent("merged")
+        newEvent("closed")
+        var request = github.mergePullRequest(plugin.repo, number, message)
     }
 
     function closeOrReopen() {
         if (open) {
-            var request = github.editIssue(plugin.repo, number, {"state": "closed"}, function(response) {
-                complete()
-                if (response === -1) {
-                    error(i18n.tr("Connection Error"), i18n.tr("Unable to close %1. Check your connection and/or firewall settings.").arg(type))
-                } else {
-                    info.state = "closed"
-                    doc.set("info", info)
-                    newEvent("closed")
-                }
-            })
-
-            busy(i18n.tr("Closing %1").arg(typeCap),
-                 i18n.tr("Closing %2 <b>#%1</b>").arg(number).arg(type),
-                 request)
+            github.editIssue(plugin.repo, number, {"state": "closed"})
+            info.state = "closed"
+            info = info
+            newEvent("closed")
         } else {
-            var request = github.editIssue(plugin.repo, number, {"state": "open"}, function(response) {
-                complete()
-                if (response === -1) {
-                    error(i18n.tr("Connection Error"), i18n.tr("Unable to reopen %1. Check your connection and/or firewall settings.").arg(type))
-                } else {
-                    info.state = "open"
-                    doc.set("info", info)
-                    newEvent("reopened")
-                }
-            })
+            github.editIssue(plugin.repo, number, {"state": "open"})
 
-            busy(i18n.tr("Reopening %1").arg(typeCap),
-                 i18n.tr("Reopening %2 <b>#%1</b>").arg(number).arg(type),
-                 request)
+            info.state = "open"
+            info = info
+            newEvent("reopened")
         }
     }
 
@@ -223,20 +222,11 @@ Object {
         if (!(issue.milestone && issue.milestone.hasOwnProperty("number")) && !milestone)
             return
 
-        var request = github.editIssue(plugin.repo, issue.number, {"milestone": milestone ? milestone.number : ""}, function(response) {
-            complete()
-            if (response === -1) {
-                error(i18n.tr("Connection Error"), i18n.tr("Unable to change milestone. Check your connection and/or firewall settings."))
-            } else {
-                info.milestone = milestone
-                doc.set("info", info)
-            }
-        })
+        github.editIssue(plugin.repo, issue.number, {"milestone": milestone ? milestone.number : ""})
 
-        if (milestone === undefined)
-            busy(i18n.tr("Changing Milestone"), i18n.tr("Removing milestone from the %1").arg(type), request)
-        else
-            busy(i18n.tr("Changing Milestone"), i18n.tr("Setting milestone to <b>%1</b>").arg(milestone.title), request)
+        info.milestone = milestone
+        info = info
+        plugin.changed = true
     }
 
     function setAssignee(assignee) {
@@ -248,27 +238,15 @@ Object {
         if (!(issue.assignee && issue.assignee.hasOwnProperty("login")) && login === "")
             return
 
-        var request = github.editIssue(plugin.repo, issue.number, {"assignee": login}, function(response) {
-            complete()
-            if (response === -1) {
-                error(i18n.tr("Connection Error"), i18n.tr("Unable to change assignee. Check your connection and/or firewall settings."))
-            } else {
-                if (login !== "") {
-                    info.assignee = assignee
-                    doc.set("info", info)
-                    newEvent("assigned", assignee)
-                } else {
-                    info.assignee = undefined
-                    doc.set("info", info)
-                }
-            }
-        })
+        github.editIssue(plugin.repo, issue.number, {"assignee": login})
 
-        if (login) {
-            busy(i18n.tr("Changing Assignee"), i18n.tr("Setting assignee to <b>%1</b>").arg(login), request)
+        if (login !== "") {
+            info.assignee = assignee
+            newEvent("assigned", assignee)
         } else {
-            busy(i18n.tr("Changing Assignee"), i18n.tr("Removing assignee from %1").arg(type), request)
+            info.assignee = undefined
         }
+        info = info
     }
 
     function updateLabels(labels) {
@@ -277,45 +255,24 @@ Object {
             labelNames.push(labels[i].name)
         }
 
-        var request = github.editIssue(plugin.repo, issue.number, {"labels": labelNames}, function(response) {
-            complete()
-            if (response === -1) {
-                error(i18n.tr("Connection Error"), i18n.tr("Unable to change the labels. Check your connection and/or firewall settings."))
-            } else {
-                info.labels = labels
-                doc.set("info", info)
-            }
-        })
+        info.labels = labels
+        info = info
 
-        busy(i18n.tr("Changing Labels"), i18n.tr("Changes the labels for the issue"), request)
+        var request = github.editIssue(plugin.repo, issue.number, {"labels": labelNames})
     }
 
     function edit(title, body) {
+        github.editIssue(plugin.repo, issue.number, {"title": title, "body": body})
 
-        var request = github.editIssue(plugin.repo, issue.number, {"title": title, "body": body}, function(response) {
-            complete()
-            if (response === -1) {
-                error(i18n.tr("Connection Error"), i18n.tr("Unable to update issue. Check your connection and/or firewall settings."))
-            } else {
-                info.title = title
-                info.body = body
-                doc.set("info", info)
-            }
-        })
-
-        busy(i18n.tr("Updating Issue"), i18n.tr("Updating the title and body of the issue"), request)
+        info.title = title
+        info.body = body
+        info = info
+        plugin.changed = true
     }
 
     function comment(text) {
-        var request = github.newIssueComment(plugin.repo, issue, text, function(response) {
-            complete()
-            if (response === -1) {
-                error(i18n.tr("Connection Error"), i18n.tr("Unable to create comment. Check your connection and/or firewall settings."))
-            } else {
-                newComment(text)
-            }
-        })
+        github.newIssueComment(plugin.repo, issue, text)
 
-        busy(i18n.tr("Creating Comment"), i18n.tr("Creating a new comment for issue <b>%1</b>").arg(issue.number), request)
+        newComment(text)
     }
 }

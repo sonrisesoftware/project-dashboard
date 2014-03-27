@@ -22,171 +22,48 @@ import Ubuntu.Components.ListItems 0.1 as ListItem
 import "../components"
 import "../ubuntu-ui-extras"
 
-UbuntuShape {
+Object {
     id: plugin
 
-    color: Qt.rgba(0,0,0,0.2)
+    property string name
+    property string type
+    property Project project
+    property string configuration
 
-    radius: "medium"
-
-    property alias title: titleLabel.text
-    property string shortTitle: title
-    property alias iconSource: iconImage.name
-    property bool unread: unreadItems.length > 0
-    property int loading: 0
-    property string viewAllMessage
-    property string summary: viewAllMessage
-    property string summaryValue
-    property string value: summaryValue
-    property bool expanded: document.get("expanded" + title, true)
     property bool canReload: false
-    function reload() {}
+    property bool changed
+    function refresh() {}
+    function setup() {}
+
+    onChangedChanged: timer.start()
 
     function displayMessage(message) {}
 
-    property Component page
+    function toJSON() { return doc.toJSON() }
+    function fromJSON(json) { doc.fromJSON(json) }
 
-    signal triggered
+    signal save()
+    signal loaded()
 
-    onTriggered: {
-        if (page) {
-            displayPlugin(plugin)
-        }
+    property Document doc: Document {
+
+        onSave: plugin.save()
+        onLoaded: plugin.loaded()
     }
 
-    Connections {
-        target: project
-        onReload: {
-            //print("Reloading" + plugin.title)
-            plugin.reload()
-        }
-    }
+    property list<PluginItem> items
 
-    onClicked: document.set("expanded" + title, !expanded)
+//    Connections {
+//        target: project
+//        onReload: {
+//            print("Reloading" + plugin.name)
+//            plugin.reload()
+//        }
+//    }
 
-    //opacity: unread ? 1 : 0.5
-
-    height: titleLabel.height + units.gu(3) + contents.height
-
-    default property alias contents: column.data
-
-    signal clicked()
-
-    //property Project project
-    property Action action
-    property Document document
-
-    Item {
-        id: titleItem
-        clip: true
-        height: titleLabel.height + units.gu(3)
-        anchors {
-            top: parent.top
-            left: parent.left
-            right: parent.right
-        }
-
-        UbuntuShape {
-            radius: "medium"
-            color: Qt.rgba(0,0,0,0.2)
-            height: plugin.height
-
-            anchors {
-                top: parent.top
-                left: parent.left
-                right: parent.right
-            }
-
-            MouseArea {
-                anchors.fill: parent
-                onClicked: plugin.clicked()
-            }
-
-            AwesomeIcon {
-                id: iconImage
-                anchors {
-                    left: parent.left
-                    verticalCenter: titleLabel.verticalCenter
-                    verticalCenterOffset: units.gu(0.1)
-                    leftMargin: units.gu(2)
-                }
-
-                size: units.gu(3)
-                color: titleLabel.color
-            }
-
-            Label {
-                id: titleLabel
-
-                fontSize: "large"
-
-                anchors {
-                    left: iconImage.right
-                    right: parent.right
-                    top: parent.top
-                    margins: units.gu(2)
-                    topMargin: units.gu(1.5)
-                }
-                //color: unread ? "#77ddff" : Theme.palette.normal.baseText
-            }
-
-            ActivityIndicator {
-                visible: loading > 0
-                running: loading > 0
-
-                anchors {
-                    right: parent.right
-                    margins: units.gu(1.5)
-                    verticalCenter: titleLabel.verticalCenter
-                }
-            }
-
-            Button {
-                id: actionButton
-                visible: plugin.action && loading == 0
-                height: units.gu(4)
-                anchors {
-                    right: parent.right
-                    margins: units.gu(1)
-                    verticalCenter: titleLabel.verticalCenter
-                }
-
-                text: plugin.action.text
-                onClicked: plugin.action.triggered(actionButton)
-            }
-        }
-    }
-
-    Column {
-        id: contents
-
-        anchors {
-            bottom: parent.bottom
-            left: parent.left
-            right: parent.right
-        }
-
-        ListItem.ThinDivider {}
-
-        Column {
-            id: column
-            width: parent.width
-            height: expanded ? childrenRect.height : 0
-            clip: true
-
-            Behavior on height {
-                UbuntuNumberAnimation {
-                    duration: UbuntuAnimation.SlowDuration
-                }
-            }
-        }
-
-        ListItem.SingleValue {
-            text: expanded ? viewAllMessage : summary
-            value: expanded ? "" : summaryValue
-            progression: true
-            showDivider: false
-            onTriggered: plugin.triggered()
-        }
+    Timer {
+        id: timer
+        interval: 10
+        onTriggered: save()
     }
 }

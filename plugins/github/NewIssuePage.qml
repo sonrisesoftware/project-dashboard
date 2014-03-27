@@ -25,6 +25,7 @@ ComposerSheet {
     id: sheet
 
     title: i18n.tr("New Issue")
+    contentsHeight: wideAspect ? units.gu(40) : mainView.height
 
     Component.onCompleted: {
         sheet.__leftButton.text = i18n.tr("Cancel")
@@ -34,33 +35,10 @@ ComposerSheet {
         sheet.__foreground.style = Theme.createStyleComponent(Qt.resolvedUrl("../../ubuntu-ui-extras/SuruSheetStyle.qml"), sheet)
     }
 
-    // FIXME: A hack to ensure that the sheet remains until after the issue is created,
-    // since the sheet going away prematurely was causing the app to crash when HttpLib
-    // called the callback function
-    __rightButton: Button {
-        objectName: "confirmButton"
-        onClicked: {
-            confirmClicked()
-        }
-    }
+    property string repo: plugin.repo
+    property var plugin
 
-    property string repo
-    property var action
-
-    onConfirmClicked: createIssue()
-
-    function createIssue() {
-        busyDialog.show()
-        request = github.newIssue(repo, nameField.text, descriptionField.text, function(has_error, status, response) {
-            busyDialog.hide()
-            if (has_error) {
-                error(i18n.tr("Connection Error"), i18n.tr("Unable to create issue. Check your connection and/or firewall settings.\n\nError: %1").arg(status))
-            } else {
-                PopupUtils.close(sheet)
-                sheet.action()
-            }
-        })
-    }
+    onConfirmClicked: plugin.newIssue(nameField.text, descriptionField.text)
 
     TextField {
         id: nameField
@@ -69,7 +47,6 @@ ComposerSheet {
             left: parent.left
             top: parent.top
             right: parent.right
-            //margins: units.gu(1)
         }
         color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
 
@@ -87,64 +64,6 @@ ComposerSheet {
             top: nameField.bottom
             bottom: parent.bottom
             topMargin: units.gu(1)
-        }
-    }
-
-//    tools: ToolbarItems {
-//        locked: true
-//        opened: true
-
-//        back: ToolbarButton {
-//            text: i18n.tr("Cancel")
-//            iconSource: getIcon("back")
-
-//            onTriggered: {
-//                pageStack.pop()
-//            }
-//        }
-
-//        ToolbarButton {
-//            text: i18n.tr("Create")
-//            iconSource: getIcon("add")
-
-//            onTriggered: {
-//                busyDialog.show()
-//                request = github.newIssue(repo, nameField.text, descriptionField.text, function(has_error, status, response) {
-//                    busyDialog.hide()
-//                    if (has_error) {
-//                        error(i18n.tr("Connection Error"), i18n.tr("Unable to create issue. Check your connection and/or firewall settings.\n\nError: %1").arg(status))
-//                    } else {
-//                        pageStack.pop()
-//                        dialog.action()
-//                    }
-//                })
-//            }
-//        }
-//    }
-
-    property var request
-
-    property alias busyDialog: busyDialog
-
-    Dialog {
-        id: busyDialog
-        title: i18n.tr("Creating Issue")
-
-        text: i18n.tr("Creating issue titled <b>'%1'</b>").arg(nameField.text)
-
-        ActivityIndicator {
-            running: busyDialog.visible
-            implicitHeight: units.gu(5)
-            implicitWidth: implicitHeight
-            anchors.horizontalCenter: parent.horizontalCenter
-        }
-
-        Button {
-            text: i18n.tr("Cancel")
-            onTriggered: {
-                request.abort()
-                busyDialog.hide()
-            }
         }
     }
 }

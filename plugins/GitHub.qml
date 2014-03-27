@@ -23,103 +23,396 @@ import "../backend"
 import "../components"
 import "../backend/services"
 import "../ubuntu-ui-extras"
+import "../ubuntu-ui-extras/listutils.js" as List
 import "github"
 
 Plugin {
     id: plugin
 
-    title: "GitHub"
-    iconSource: "github"
-    canReload: true
+    property alias githubPlugin: plugin
+
+    name: "github"
+    canReload: false
+    configuration: repo ? repo : "Not connected to a repository"
+
+    property string repo: doc.get("repoName", "")
 
     property var milestones: doc.get("milestones", [])
     property var info: doc.get("repo", {})
     property var availableAssignees: doc.get("assignees", [])
+    property var availableLabels: doc.get("labels", [])
     property var branches: doc.get("branches", [])
     property var commitStats: doc.get("commit_stats", {})
     property var releases: doc.get("releases", [])
+    property bool hasPushAccess: info.permissions ? info.permissions.push : false
 
-    document: Document {
-        id: doc
-        docId: "github"
-        parent: project.document
+    property int nextNumber: doc.get("nextNumber", 1)
+
+    property ListModel issues: ListModel {
+
     }
 
-    ListItem.Standard {
-        text: i18n.tr("<b>%1</b> commit during the past week",
-                      "<b>%1</b> commits during the past week",
-                      commitStats["all"][commitStats["all"].length - 1]).arg(commitStats["all"][commitStats["all"].length - 1])
+    items: [
+        PluginItem {
+            id: pluginItem
+            icon: "bug"
+            title: i18n.tr("Issues")
+            value: List.filteredCount(issues, function (issue) {
+                return !issue.isPullRequest && issue.open
+            })
+            page: IssuesPage {
+                plugin: githubPlugin
+            }
+
+            action: Action {
+                text: i18n.tr("New Issue")
+                description: i18n.tr("Create new issue")
+                onTriggered: PopupUtils.open(Qt.resolvedUrl("github/NewIssuePage.qml"), mainView, {plugin: githubPlugin})
+            }
+
+            pulseItem: PulseItem {
+                title: i18n.tr("Issues Assigned to You")
+                viewAll: i18n.tr("View all <b>%1</b> open issues").arg(pluginItem.value)
+                show: repeater.count > 0
+
+                Repeater {
+                    id: repeater
+                    model: List.filter(issues, function(issue) {
+                        return !issue.isPullRequest && issue.assignedToMe && issue.open
+                    }).sort(function(a, b) { return b.number - a.number })
+                    delegate: IssueListItem {
+                        showAssignee: false
+                        issue: modelData
+                    }
+                }
+            }
+        },
+
+        PluginItem {
+            id: pullsItem
+            icon: "code-fork"
+            title: i18n.tr("Pull Requests")
+            value: List.filteredCount(issues, function (issue) {
+                return issue.isPullRequest && issue.open
+            })
+
+            action: Action {
+                text: wideAspect && width < units.gu(90) ? i18n.tr("Open Pull") : i18n.tr("Open Pull Request")
+                description: i18n.tr("Open a new pull request")
+                onTriggered: PopupUtils.open(Qt.resolvedUrl("github/NewPullRequestPage.qml"), mainView, {plugin: githubPlugin})
+            }
+
+            page: PullRequestsPage {
+                plugin: githubPlugin
+            }
+
+            pulseItem: PulseItem {
+                title: i18n.tr("Open Pull Requests")
+                viewAll: i18n.tr("View all <b>%1</b> open pull requests").arg(pullsItem.value)
+                show: pullsRepeater.count > 0
+
+                Repeater {
+                    id: pullsRepeater
+                    model: List.filter(issues, function(issue) {
+                        return issue.isPullRequest && issue.open
+                    }).sort(function(a, b) { return b.number - a.number })
+                    delegate: PullRequestListItem {
+                        issue: modelData
+                    }
+                }
+            }
+        }
+    ]
+
+    onSave: {
+        print("Saving", project.name)
+
+        // Save issues
+        var start = new Date()
+        var list = []
+        for (var i = 0; i < issues.count; i++) {
+            var issue = issues.get(i).modelData
+            list.push(issue.toJSON())
+        }
+
+        doc.set("issues", list)
+        doc.set("nextNumber", nextNumber)
+        var end = new Date()
+        print("Average time to save an issue is " + (end - start)/list.length + " milliseconds")
     }
 
-    ListItem.Standard {
-        text: i18n.tr("<b>%1</b> contributor",
-                      "<b>%1</b> contributors",
-                      availableAssignees.length).arg(availableAssignees.length)
+    onLoaded: {
+        print("Loading!")
+
+        var list = doc.get("issues", [])
+        for (var i = 0; i < list.length; i++) {
+            var issue = issueComponent.createObject(mainView, {info: list[i].info})
+            issue.fromJSON(list[i])
+            issues.append({"modelData": issue})
+        }
+
+        refresh()
     }
 
-    ListItem.Standard {
-        text: milestones.length > 0 ? i18n.tr("<b>%1</b> open milestone",
-                                              "<b>%1</b> open milestones",
-                                              milestones.length).arg(milestones.length)
-                                  : i18n.tr("No open milestones")
+    function setup() {
+        PopupUtils.open(Qt.resolvedUrl("github/RepositorySelectionSheet.qml"), mainView, {plugin: plugin})
     }
 
-    ListItem.Standard {
-        text: releases.length > 0 ? i18n.tr("<b>%1</b> release",
-                                            "<b>%1</b> releases",
-                                            releases.length).arg(releases.length)
-                                  : i18n.tr("No releases yet")
-    }
+    function refresh() {
+        if (!repo)
+            return
 
-    viewAllMessage: i18n.tr("Manage project")
+        var lastRefreshed = doc.get("lastRefreshed", "")
 
-    property string repo:  project.serviceValue("github")
-    property bool hasPushAccess: info.hasOwnProperty("permissions") ? info.permissions.push : false
+        if (lastRefreshed === "")
+            project.loading += 12
 
-    onRepoChanged: reload()
+        var handler = function(status, response) {
+            if (lastRefreshed === "")
+                project.loading--
 
-    function reload() {
-        loading += 5
-        github.getMilestones(repo, function(has_error, status, response) {
-            loading--
-            //print("Milestones:", response)
+            if (status === 304) {
+                if (lastRefreshed === "")
+                    throw "Error: cache wasn't emptied for the new GitHub project!"
+                return
+            }
+
+            plugin.changed = true
+
+            //print(response)
+            var json = JSON.parse(response)
+            //print("LENGTH:", json.length)
+            for (var i = 0; i < json.length; i++) {
+                var found = false
+                for (var j = 0; j < issues.count; j++) {
+                    var issue = issues.get(j).modelData
+
+                    //print(issues.get(j).modelData.number + " === " + json[i].number)
+                    if (issue.number === json[i].number) {
+                        issue.info = json[i]
+                        found = true
+                        break
+                    }
+                }
+
+                if (!found) {
+                    var issue = issueComponent.createObject(mainView, {info: json[i]})
+                    issues.append({"modelData": issue})
+                    nextNumber = Math.max(nextNumber, issue.number + 1)
+                }
+            }
+        }
+
+        github.getIssues(repo, "open", lastRefreshed,  handler)
+        github.getIssues(repo, "closed", lastRefreshed, handler)
+        github.getPullRequests(repo, "open", lastRefreshed,  handler)
+        github.getPullRequests(repo, "closed", lastRefreshed, handler)
+
+
+        github.getEvents(repo, function (status, response) {
+            if (lastRefreshed === "")
+                project.loading--
+
+            if (status === 304) {
+                if (lastRefreshed === "")
+                    throw "Error: cache wasn't emptied for the new GitHub project!"
+                return
+            }
+
+            plugin.changed = true
+
+            if (lastRefreshed === "")
+                return
+
             var json = JSON.parse(response)
 
-            doc.set("milestones", json)
+            print("LENGTH:", json.length)
+            for (var i = 0; i < json.length; i++) {
+                var event = json[i]
+                var actor = event.actor.login
+                var type = event.type
+                var date = event.created_at
+                var payload = event.payload
+
+                // TODO: When publishing, add: || actor === github.user.login
+                print(date, lastRefreshed, type, actor)
+                if (new Date(lastRefreshed) >= new Date(date))
+                    break
+
+                if (actor === github.user.login)
+                    continue
+
+                // newMessage(plugin, icon, title, message, date, data)
+                print(type)
+
+                if (type === "IssuesEvent") {
+                    var issue = payload.issue
+                    project.newMessage("github", "bug", i18n.tr("<b>%1</b> %2 issue %3")
+                                       .arg(actor)
+                                       .arg(payload.action)
+                                       .arg(issue.number),
+                                       issue.title, date,
+                                       {"type": "issue", "number": issue.number})
+                } else if (type === "IssueCommentEvent") {
+                    // TODO: Only display if the actor is other than the authenticated user
+                    var issue = payload.issue
+                    var comment = payload.comment
+                    project.newMessage("github", "comments-o", i18n.tr("<b>%1</b> commented on issue %2")
+                                       .arg(actor)
+                                       .arg(issue.number),
+                                       comment.body, date,
+                                       {"type": "comment", "number": issue.number})
+                } else if (type === "PushEvent") {
+                    // TODO: Finish push eventss
+                    //groupCommitMessages(payload.ref.substring(11), payload.commits)
+                } else if (type === "ForkEvent") {
+                    var repo = payload.forkee
+                    project.newMessage("github", "code-fork", i18n.tr("<b>%1</b> forked %2")
+                                       .arg(actor)
+                                       .arg(plugin.repo),
+                                       i18n.tr("Forked %1 to %2").arg(plugin.repo).arg(repo.full_name), date,
+                                       {"type": "fork"})
+                }
+            }
         })
 
-        github.getRepository(repo, function(has_error, status, response) {
-            loading--
-            //print("Repository:", response)
-            var json = JSON.parse(response)
-
-            doc.set("repo", json)
-        })
-
-        github.getAssignees(repo, function(has_error, status, response) {
-            loading--
-            //print("Repository:", response)
-            var json = JSON.parse(response)
-
-            doc.set("assignees", json)
-        })
-
-        github.getLabels(repo, function(has_error, status, response) {
-            loading--
+        github.getLabels(repo, function(status, response) {
+            if (lastRefreshed === "")
+                project.loading--
             //print("Labels:", response)
             var json = JSON.parse(response)
-
             doc.set("labels", json)
         })
 
-        github.get("/repos/" + repo + "/releases", function(has_error, status, response) {
-            loading--
+        github.getAssignees(repo, function(status, response) {
+            if (lastRefreshed === "")
+                project.loading--
+            //print("Labels:", response)
+            var json = JSON.parse(response)
+            doc.set("assignees", json)
+        })
+
+        github.getMilestones(repo, function(status, response) {
+            if (lastRefreshed === "")
+                project.loading--
+            //print("Labels:", response)
+            var json = JSON.parse(response)
+            doc.set("milestones", json)
+        })
+
+        github.getRepository(repo, function(status, response) {
+            if (lastRefreshed === "")
+                project.loading--
+            //print("Info:", response)
+            var json = JSON.parse(response)
+            doc.set("repo", json)
+        })
+
+        github.get("/repos/" + repo + "/releases", function(status, response) {
+            if (lastRefreshed === "")
+                project.loading--
             doc.set("releases", JSON.parse(response))
         })
 
-        github.get("/repos/" + repo + "/stats/participation", function(has_error, status, response) {
-            loading--
+        github.get("/repos/" + repo + "/stats/participation", function(status, response) {
+            if (lastRefreshed === "")
+                project.loading--
             doc.set("commit_stats", JSON.parse(response))
         })
+
+        github.get("/repos/" + repo + "/branches", function(status, response) {
+            if (lastRefreshed === "")
+                project.loading--
+            doc.set("branches", JSON.parse(response))
+        })
+
+        doc.set("lastRefreshed", new Date().toJSON())
+    }
+
+//    function groupCommitMessages(branch, commits) {
+//        var groupedCommits
+//        var index = 0;
+//        var count = 0;
+//        while (index < commits.length) {
+//            var comment = commit[index]
+
+//            if (event && event.event && event.event === "commit") {
+//                index++
+//                var login = event.actor.login
+//                count = 1
+//                while(count < 5 && index < allEvents.length && allEvents[index].event === "commit" && allEvents[index].actor.login === login) {
+//                    var nextEvent = allEvents[index]
+//                    event.commits = event.commits.concat(nextEvent.commits)
+//                    allEvents.splice(index, 1)
+//                    count++
+//                }
+
+//                index--
+//            }
+
+//            index++
+//        }
+//    }
+
+    Component {
+        id: issueComponent
+
+        Issue {
+
+        }
+    }
+
+    function newPullRequest(title, description, branch) {
+        var number = nextNumber++
+        var json = {
+            "state": "open",
+            "number": number,
+            "title": title,
+            "body": description,
+            "pull_request": {},
+            "user": github.user,
+            "labels": [],
+            "created_at": new Date().toJSON()
+        }
+
+        var issue = issueComponent.createObject(mainView, {info: json})
+        issues.append({"modelData": issue})
+        github.newPullRequest(repo, title, description, branch)
+    }
+
+    function newIssue(title, description) {
+        var number = nextNumber++
+        var json = {
+            "state": "open",
+            "number": number,
+            "title": title,
+            "body": description,
+            "user": github.user,
+            "labels": [],
+            "created_at": new Date().toJSON()
+        }
+
+        var issue = issueComponent.createObject(mainView, {info: json})
+        issues.append({"modelData": issue})
+        github.newIssue(repo, title, description)
+    }
+
+    function displayMessage(message) {
+        for (var i = 0; i < issues.count;i++) {
+            var issue = issues.get(i).modelData
+            if (issue.number == message.data.number) {
+                pageStack.push(Qt.resolvedUrl("github/IssuePage.qml"), {issue: issue, plugin:plugin})
+                return
+            }
+        }
+
+        throw "Unable to display message: " + JSON.stringify(message)
+    }
+
+    Timer {
+        interval: 2 * 60 * 1000 // 2 minutes
+        running: true
+        repeat: true
+        onTriggered: refresh()
     }
 }

@@ -28,83 +28,41 @@ import "travis"
 Plugin {
     id: plugin
 
-    title: "Continuous Integration"
-    shortTitle: "Testing"
-    iconSource: "check-circle"
+    name: "travis"
     canReload: true
 
-    property var info: doc.get("repo", [])
+    property var info: doc.get("repo", undefined)
     property var builds: doc.get("builds", [])
 
-    document: Document {
-        id: doc
-        docId: "travis"
-        parent: project.document
-    }
+    items: PluginItem {
+        title: "Continuous Integration"
+        icon: "check-circle"
+        value: buildStatus(info.last_build_result)
 
-    BuildListItem {
-        number: plugin.info.last_build_number
-        status: plugin.info.last_build_result
-        built_at: plugin.info.last_build_finished_at
-        info: {
-            for (var i = 0; i < builds.length; i++) {
-                if (builds[i].id === plugin.info.last_build_id) {
-                    return builds[i]
+        pulseItem: PulseItem {
+            show: plugin.info ? true : false
+            title: i18n.tr("Latest Results from Travis CI")
+            viewAll: i18n.tr("View all builds")
+            BuildListItem {
+                number: plugin.info ? plugin.info.last_build_number : 0
+                status: plugin.info ? plugin.info.last_build_result : 0
+                built_at: plugin.info ? plugin.info.last_build_finished_at : ""
+                info: {
+                    for (var i = 0; i < builds.length; i++) {
+                        if (builds[i].id === plugin.info.last_build_id) {
+                            return builds[i]
+                        }
+                    }
+
+                    return {}
                 }
-            }
 
-            return {}
+                repo: repo
+                message: plugin.info ? info.message ? info.message : "" : ""
+            }
         }
 
-        repo: repo
-        message: info.message ? info.message : ""
-    }
-
-    summary: i18n.tr("Build %1").arg(info.last_build_number)
-    summaryValue: buildStatus(info.last_build_result)
-
-    viewAllMessage: "View build history"
-
-    property string repo:  project.serviceValue("travis")
-
-    onRepoChanged: reload()
-
-    function statusColor(status) {
-        if (status === 0)
-            return colors["green"]
-        else if (status === 1)
-            return colors["red"]
-        else
-            return ""
-    }
-
-    function buildStatus(status) {
-        return "<font color=\"" + statusColor(status) + "\">" + (status === -1 ? i18n.tr("Pending") : status === 0 ? i18n.tr("Passed") : status === 1 ? i18n.tr("Failed") : i18n.tr("Error")) + "</font>"
-    }
-
-    function reload() {
-        loading += 2
-        travisCI.getRepo(repo, function(has_error, status, response) {
-            loading--
-            if (has_error)
-                error(i18n.tr("Connection Error"), i18n.tr("Unable to download results from Travis CI. Check your connection and/or firewall settings.\n\nError: %1").arg(status))
-            //print("Travis CI Results:", response)
-            doc.set("repo", JSON.parse(response))
-        })
-
-        travisCI.getBuilds(repo, function(has_error, status, response) {
-            loading--
-            if (has_error)
-                error(i18n.tr("Connection Error"), i18n.tr("Unable to download results from Travis CI. Check your connection and/or firewall settings.\n\nError: %1").arg(status))
-            //print("Travis CI Results:", response)
-            doc.set("builds", JSON.parse(response))
-        })
-    }
-
-    page: Component {
-        id: buildsPage
-
-        PluginPage {
+        page: PluginPage {
             title: i18n.tr("Build History")
 
             flickable: listView
@@ -128,5 +86,63 @@ Plugin {
                 flickableItem: listView
             }
         }
+    }
+
+    property string repo:  project.getPlugin("GitHub").repo
+
+    function statusColor(status) {
+        if (status === 0)
+            return colors["green"]
+        else if (status === 1)
+            return colors["red"]
+        else if (status === -1)
+            return ""
+        else
+            return colors["yellow"]
+    }
+
+    function buildStatus(status) {
+        return "<font color=\"" + statusColor(status) + "\">" + (status === -1 ? i18n.tr("Pending") : status === 0 ? i18n.tr("Passed") : status === 1 ? i18n.tr("Failed") : i18n.tr("Error")) + "</font>"
+    }
+
+    onLoaded: refresh()
+
+    function setup() {
+        refresh()
+    }
+
+    function refresh() {
+        var lastRefreshed = doc.get("lastRefreshed", "")
+
+        if (lastRefreshed === "")
+            project.loading += 2
+
+        travisCI.getRepo(repo, function(status, response) {
+            if (lastRefreshed === "")
+                project.loading--
+
+            if (status === 304) {
+                if (lastRefreshed === "")
+                    throw "Error: cache wasn't emptied for the new GitHub project!"
+                return
+            }
+
+            doc.set("repo", JSON.parse(response))
+        })
+
+        travisCI.getBuilds(repo, function(status, response) {
+            if (lastRefreshed === "")
+                project.loading--
+
+            if (status === 304) {
+                if (lastRefreshed === "")
+                    throw "Error: cache wasn't emptied for the new GitHub project!"
+                return
+            }
+
+            doc.set("builds", JSON.parse(response))
+        })
+
+        doc.set("lastRefreshed", new Date().toJSON())
     }
 }

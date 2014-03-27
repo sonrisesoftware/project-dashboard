@@ -34,29 +34,12 @@ Page {
     property string typeCap: issue.isPullRequest ? "Pull request" : "Issue"
     property string typeTitle: issue.isPullRequest ? "Pull Request" : "Issue"
 
-    property alias number: issue.number
     property Plugin plugin
     property var request
 
-    Issue {
-        id: issue
+    property Issue issue
 
-        Component.onCompleted: load()
-
-        onBusy: {
-            busyDialog.title = title
-            busyDialog.text = message
-            page.request = request
-
-            busyDialog.show()
-        }
-
-        onComplete: {
-            busyDialog.hide()
-        }
-
-        onError: mainView.error(title, message)
-    }
+    Component.onCompleted: issue.load()
 
     InputDialog {
         id: mergeDialog
@@ -194,7 +177,7 @@ Page {
                         to: "*"
                         UbuntuNumberAnimation {
                             target: optionsColumn
-                            properties: ["height", "opacity"]
+                            properties: "height, opacity"
                         }
                     }
                 ]
@@ -427,8 +410,8 @@ Page {
                     }
 
                     Button {
-                        text:  issue.state === "open" ? i18n.tr("Comment and Close") : i18n.tr("Comment and Reopen")
-                        color: issue.state === "open" ? colors["red"] : colors["green"]
+                        text:  issue.open ? i18n.tr("Comment and Close") : i18n.tr("Comment and Reopen")
+                        color: issue.open ? colors["red"] : colors["green"]
 
                         visible: wideAspect
                         opacity: commentBox.show ? 1 : 0
@@ -665,12 +648,25 @@ Page {
             title: i18n.tr("Commits")
 
             ListView {
+                id: commitsList
                 anchors.fill: parent
                 model: issue.commits
                 delegate: SubtitledListItem {
                     text: modelData.commit.message
                     subText: i18n.tr("%1 - %2 - %3").arg(modelData.sha.substring(0, 7)).arg(modelData.author.login).arg(friendsUtils.createTimeString(modelData.commit.committer.date))
                 }
+            }
+
+            Label {
+                anchors.centerIn: parent
+                fontSize: "large"
+                opacity: 0.5
+                visible: commitsList.count === 0
+                text: i18n.tr("No commits")
+            }
+
+            Scrollbar {
+                flickableItem: commitsList
             }
         }
     }
@@ -693,7 +689,6 @@ Page {
 
             model: plugin.availableLabels
             delegate: ListItem.Standard {
-                showDivider: index < repeater.count - 1
                 height: units.gu(5)
                 Label {
                     anchors {
@@ -824,19 +819,6 @@ Page {
             onConfirmClicked: {
                 PopupUtils.close(sheet)
                 issue.edit(nameField.text, descriptionField.text)
-            }
-
-            function createIssue() {
-                busyDialog.show()
-                request = github.newIssue(repo, nameField.text, descriptionField.text, function(has_error, status, response) {
-                    busyDialog.hide()
-                    if (has_error) {
-                        error(i18n.tr("Connection Error"), i18n.tr("Unable to create issue. Check your connection and/or firewall settings.\n\nError: %1").arg(status))
-                    } else {
-                        PopupUtils.close(sheet)
-                        dialog.action()
-                    }
-                })
             }
 
             TextField {

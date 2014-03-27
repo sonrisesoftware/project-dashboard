@@ -25,7 +25,9 @@ import "../../backend/services"
 ComposerSheet {
     id: sheet
 
-    title: i18n.tr("New Pull Request")
+    title: width > units.gu(50) ? i18n.tr("New Pull Request") :i18n.tr("New Pull")
+
+    contentsHeight: wideAspect ? units.gu(40) : mainView.height
 
     Component.onCompleted: {
         sheet.__leftButton.text = i18n.tr("Cancel")
@@ -35,21 +37,10 @@ ComposerSheet {
         sheet.__foreground.style = Theme.createStyleComponent(Qt.resolvedUrl("../../ubuntu-ui-extras/SuruSheetStyle.qml"), sheet)
     }
 
-    // FIXME: A hack to ensure that the sheet remains until after the issue is created,
-    // since the sheet going away prematurely was causing the app to crash when HttpLib
-    // called the callback function
-    __rightButton: Button {
-        objectName: "confirmButton"
-        onClicked: {
-            confirmClicked()
-        }
-    }
+    property string repo: plugin.repo
+    property var plugin
 
-    onConfirmClicked: createPullRequest()
-
-    property string repo
-    property var action
-    property var branches
+    onConfirmClicked: plugin.newPullRequest(nameField.text, descriptionField.text, branchPicker.model[branchPicker.selectedIndex].name)
 
     Flickable {
         id: flickable
@@ -90,7 +81,7 @@ ComposerSheet {
                 width: parent.width
 
                 model: {
-                    var list = branches
+                    var list = plugin.branches
                     print(JSON.stringify(list))
                     for (var i = 0; i < list.length; i++) {
                         if (list[i].name === "master")
@@ -122,45 +113,6 @@ ComposerSheet {
                 height: flickable.height - nameField.height * 2 - branchLabel.height - units.gu(6)
                 width: parent.width
                 color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
-            }
-        }
-    }
-
-    function createPullRequest() {
-        busyDialog.show()
-        request = github.newPullRequest(repo, nameField.text, descriptionField.text, branchPicker.model[branchPicker.selectedIndex].name, function(has_error, status, response) {
-            busyDialogAlias.hide()
-            if (has_error) {
-                error(i18n.tr("Connection Error"), i18n.tr("Unable to create pull request. Check your connection and/or firewall settings.\n\nError: %1").arg(status))
-            } else {
-                PopupUtils.close(sheet)
-                sheet.action()
-            }
-        })
-    }
-
-    property var request
-
-    property alias busyDialogAlias: busyDialog
-
-    Dialog {
-        id: busyDialog
-        title: i18n.tr("Creating Pull Request")
-
-        text: i18n.tr("Creating pull request into <b>'%1'</b>").arg(branchPicker.model[branchPicker.selectedIndex].name)
-
-        ActivityIndicator {
-            running: busyDialog.visible
-            implicitHeight: units.gu(5)
-            implicitWidth: implicitHeight
-            anchors.horizontalCenter: parent.horizontalCenter
-        }
-
-        Button {
-            text: i18n.tr("Cancel")
-            onTriggered: {
-                request.abort()
-                busyDialog.hide()
             }
         }
     }

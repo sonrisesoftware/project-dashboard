@@ -20,7 +20,7 @@ import Ubuntu.Components 0.1
 import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
 
-ListItem.Empty {
+ListItem.Standard {
     id: listItem
 
     property alias text: titleLabel.text
@@ -50,6 +50,7 @@ ListItem.Empty {
 
             width: parent.width
             elide: Text.ElideRight
+            maximumLineCount: 1
         }
 
         Label {
