@@ -20,6 +20,7 @@ Navigate into the ubuntu-ui-extras folder and remove the **.git**, **.gitignore*
 ### Step 2: Update the changelog ###
 
 While in the root folder, type
+
     dch
 
 This will open the changelog in the terminal. Fill it with the changes in this new version. Also ensure that the release is set to trusty or other ubuntu version and finally set the version number to a unique number. If the PPA has version 0.2, then the update can be any other version like 0.2ubuntu1, 0.2.1, etc etc.
@@ -30,7 +31,7 @@ While in the root folder, building the debian package is a one line command,
 
     debuild -us -uc
 
-This will build and create the debian package outside the root folder. Install the debian package using the dpkg command and check if it installed in your system properly.
+This will build and create the debian package outside the root folder. Install the debian package using the **dpkg** command and check if it installed in your system properly.
 
 ### Step 4: Upload source to the PPA ###
 
