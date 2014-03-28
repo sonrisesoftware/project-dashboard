@@ -57,6 +57,16 @@ Page {
                 }
             }
         }
+
+        ListItem.Header {
+            text: i18n.tr("Help and About")
+        }
+
+        ListItem.Standard {
+            text: i18n.tr("About Project Dashboard")
+            progression: true
+            onClicked: pageStack.push(aboutPage)
+        }
     }
 
     tools: ToolbarItems {

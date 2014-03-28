@@ -103,6 +103,32 @@ MainView {
         }
     }
 
+    Component {
+        id: aboutPage
+        AboutPage {
+
+            linkColor: colors["blue"]
+
+            appName: i18n.tr("Project Dashboard")
+            icon: Qt.resolvedUrl("project-dashboard-shadowed.png")
+            iconFrame: false
+            version: "0.2.1"
+            credits: {
+                var credits = {}
+                credits[i18n.tr("Icon")] = "Sam Hewitt"
+                credits[i18n.tr("Debian Packaging")] = "Nekhelesh Ramananthan"
+                return credits
+            }
+
+            website: "http://www.sonrisesoftware.com/apps/project-dashboard"
+            reportABug: "https://github.com/iBeliever/project-dashboard/issues"
+
+            copyright: i18n.tr("Copyright (c) 2014 Michael Spencer")
+            author: "Sonrise Software"
+            contactEmail: "sonrisesoftware@gmail.com"
+        }
+    }
+
     FriendsUtils {
         id: friendsUtils
     }
@@ -182,7 +208,7 @@ MainView {
             return ""
         } if (markdownCache.hasOwnProperty(text)) {
             /// Custom color for links
-            var response = markdownCache[text].replace(/<a(.*?)>(.*?)</g, "<a $1><font color=\"" + colors["blue"] + "\">$2</font><")
+            var response = colorLinks(markdownCache[text])
             return response
         } else {
             print("Calling Markdown API")
@@ -196,6 +222,10 @@ MainView {
               }))
             return "Loading..."
         }
+    }
+
+    function colorLinks(text) {
+        return text.replace(/<a(.*?)>(.*?)</g, "<a $1><font color=\"" + colors["blue"] + "\">$2</font><")
     }
 
     function newObject(type, args) {

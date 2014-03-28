@@ -22,11 +22,15 @@ Project {
         filter: "*.html"
     }
     Files {
-        filter: "Makefile;README.md;*json"
+        filter: "Makefile;*.md;*json"
     }
     Files {
         directory: "html"
         filter: "*"
+    }
+    Files {
+        directory: "debian"
+        filter: "changelog;install"
     }
     Files {
         directory: "img/"
