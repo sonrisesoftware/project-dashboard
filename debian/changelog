@@ -1,3 +1,12 @@
+project-dashboard (0.2.1) trusty; urgency=low
+
+  * Worked on the tablet/desktop tiles UI
+    - Fixed the tile view to correctly align tiles
+    - Improved the display of tiles on the project page
+  * Added an about page
+
+ -- Michael Spencer <sonrisesoftware@gmail.com>  Fri, 28 Mar 2014 09:21:55 -0500
+
 project-dashboard (0.2) trusty; urgency=medium
 
   * Initial Desktop release.
