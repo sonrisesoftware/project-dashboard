@@ -121,7 +121,7 @@ Plugin {
                 ListItem.Standard {
                     text: i18n.tr("No open pull requests")
                     enabled: false
-                    visible: repeater.count == 0
+                    visible: pullsRepeater.count == 0
                     height: visible ? implicitHeight : 0
                 }
 

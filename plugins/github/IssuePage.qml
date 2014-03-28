@@ -110,51 +110,60 @@ Page {
         Column {
             id: column
             width: parent.width
+            spacing: units.gu(1)
             anchors {
                 top: parent.top
                 topMargin: sidebar.expanded ? units.gu(2) : units.gu(1)
-                margins: units.gu(2)
                 left: parent.left
                 right: parent.right
             }
-            spacing: units.gu(1)
-            Label {
-                width: parent.width
-                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                text: issue.title
-                fontSize: "large"
-            }
 
-            Row {
-                spacing: units.gu(1)
-                UbuntuShape {
-                    height: stateLabel.height + units.gu(1)
-                    width: stateLabel.width + units.gu(2)
-                    color: issue.merged ? colors["blue"] : issue.open ? colors["green"] : colors["red"]
-                    anchors.verticalCenter: parent.verticalCenter
-
-                    Label {
-                        id: stateLabel
-                        anchors.centerIn: parent
-                        text: issue.merged ? i18n.tr("Merged") : issue.open ? i18n.tr("Open") : i18n.tr("Closed")
-                    }
+            Column {
+                anchors {
+                    margins: units.gu(2)
+                    left: parent.left
+                    right: parent.right
                 }
+                spacing: units.gu(1)
 
                 Label {
-                    text: issue.isPullRequest ? issue.merged ? i18n.tr("<b>%1</b> merged %2 commits").arg(issue.user.login).arg(issue.commits.length)
-                                                 : i18n.tr("<b>%1</b> wants to merge %2 commits").arg(issue.user.login).arg(issue.commits.length)
-                                        : i18n.tr("<b>%1</b> opened this issue %2").arg(issue.user.login).arg(friendsUtils.createTimeString(issue.created_at))
-                    anchors.verticalCenter: parent.verticalCenter
+                    width: parent.width
+                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                    text: issue.title
+                    fontSize: "large"
+                }
+
+                Row {
+                    width: parent.width
+                    spacing: units.gu(1)
+                    UbuntuShape {
+                        id: stateShape
+                        height: stateLabel.height + units.gu(1)
+                        width: stateLabel.width + units.gu(2)
+                        color: issue.merged ? colors["blue"] : issue.open ? colors["green"] : colors["red"]
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        Label {
+                            id: stateLabel
+                            anchors.centerIn: parent
+                            text: issue.merged ? i18n.tr("Merged") : issue.open ? i18n.tr("Open") : i18n.tr("Closed")
+                        }
+                    }
+
+                    Label {
+                        text: issue.isPullRequest ? issue.merged ? i18n.tr("<b>%1</b> merged %2 commits").arg(issue.user.login).arg(issue.commits.length)
+                                                     : i18n.tr("<b>%1</b> wants to merge %2 commits").arg(issue.user.login).arg(issue.commits.length)
+                                            : i18n.tr("<b>%1</b> opened this issue %2").arg(issue.user.login).arg(friendsUtils.createTimeString(issue.created_at))
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: parent.width - stateShape.width - parent.spacing
+                        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                    }
                 }
             }
 
             Column {
                 id: optionsColumn
-                anchors {
-                    left: parent.left
-                    right: parent.right
-                    margins: units.gu(-2)
-                }
+                width: parent.width
 
                 property bool hide: sidebar.expanded || issue.isPullRequest
 
@@ -166,6 +175,15 @@ Page {
                             target: optionsColumn
                             height: 0
                             opacity: 0
+                        }
+                    },
+                    State {
+                        when: !optionsColumn.hide
+                        PropertyChanges {
+                            restoreEntryValues: true
+                            target: optionsColumn
+                            height: optionsColumn.implicitHeight
+                            opacity: 1
                         }
                     }
 
@@ -279,40 +297,58 @@ Page {
                 }
             }
 
-            TextArea {
-                id: textArea
-                width: parent.width
-                text: JSON.stringify(plugin.info)//issue.renderBody()
-                height: Math.max(__internal.linesHeight(4), edit.height + textArea.__internal.frameSpacing * 2)
-                placeholderText: i18n.tr("No description set.")
-                readOnly: true
-                textFormat: Text.RichText
-                color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
+//            TextArea {
+//                id: textArea
+//                width: parent.width
+//                text: issue.renderBody()
+//                height: Math.max(__internal.linesHeight(4), edit.height + textArea.__internal.frameSpacing * 2)
+//                placeholderText: i18n.tr("No description set.")
+//                readOnly: true
+//                textFormat: Text.RichText
+//                color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
 
-                // FIXME: Hack necessary to get the correct line height
-                TextEdit {
-                    id: edit
-                    visible: false
-                    width: parent.width
-                    textFormat: Text.RichText
+//                // FIXME: Hack necessary to get the correct line height
+//                TextEdit {
+//                    id: edit
+//                    visible: false
+//                    width: parent.width
+//                    textFormat: Text.RichText
+//                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+//                    text: textArea.text
+//                    font: textArea.font
+//                }
+//            }
+
+            UbuntuShape {
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                    margins: units.gu(2)
+                }
+                height: body.height + units.gu(2)
+                color: Theme.palette.normal.field
+
+                Label {
+                    id: body
+                    text: issue.body
+                    width: parent.width - units.gu(2)
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                    text: textArea.text
-                    font: textArea.font
+                    anchors.centerIn: parent
                 }
             }
 
             Column {
                 id: eventColumn
                 anchors {
+                    margins: wideAspect ? units.gu(2) : 0
                     left: parent.left
                     right: parent.right
-                    margins: wideAspect ? 0 : units.gu(-2)
                 }
 
                 spacing: wideAspect ? parent.spacing : 0
 
                 ListItem.ThinDivider {
-                    visible: !wideAspect
+                    //visible: !wideAspect
                 }
 
                 ListItem.Standard {
@@ -346,116 +382,125 @@ Page {
                 }
             }
 
-            TextArea {
-                id: commentBox
-                width: parent.width
-                color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
-
-                property bool show
-
-                height: show ? implicitHeight : 0
-
-                onHeightChanged: {
-                    mainFlickable.contentY = mainFlickable.contentHeight - mainFlickable.height
+            Column {
+                anchors {
+                    margins: units.gu(2)
+                    left: parent.left
+                    right: parent.right
                 }
+                spacing: units.gu(1)
 
-                Behavior on height {
-                    UbuntuNumberAnimation {}
-                }
-            }
+                TextArea {
+                    id: commentBox
+                    width: parent.width
+                    color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
 
-            Item {
-                width: parent.width
-                height: childrenRect.height
+                    property bool show
 
-                ActivityIndicator {
-                    id: eventLoadingIndicator
-                    anchors {
-                        left: parent.left
-                        verticalCenter: parent.verticalCenter
+                    height: show ? implicitHeight : 0
+
+                    onHeightChanged: {
+                        mainFlickable.contentY = mainFlickable.contentHeight - mainFlickable.height
                     }
-                    visible: issue.loading > 0
-                    running: visible
-                }
 
-                Label {
-                    text: "Loading events..."
-                    anchors {
-                        left: eventLoadingIndicator.right
-                        leftMargin: units.gu(1)
-                        verticalCenter: parent.verticalCenter
+                    Behavior on height {
+                        UbuntuNumberAnimation {}
                     }
-                    visible: eventLoadingIndicator.visible
                 }
 
-                Row {
-                    spacing: units.gu(1)
-                    anchors.right: parent.right
-                    anchors.verticalCenter: parent.verticalCenter
+                Item {
+                    width: parent.width
+                    height: childrenRect.height
 
-                    Button {
-                        text: i18n.tr("Cancel")
-                        color: "gray"
+                    ActivityIndicator {
+                        id: eventLoadingIndicator
+                        anchors {
+                            left: parent.left
+                            verticalCenter: parent.verticalCenter
+                        }
+                        visible: issue.loading > 0
+                        running: visible
+                    }
 
-                        opacity: commentBox.show ? 1 : 0
+                    Label {
+                        text: "Loading events..."
+                        anchors {
+                            left: eventLoadingIndicator.right
+                            leftMargin: units.gu(1)
+                            verticalCenter: parent.verticalCenter
+                        }
+                        visible: eventLoadingIndicator.visible
+                    }
 
-                        onClicked: {
-                            commentBox.text = ""
-                            commentBox.show = false
+                    Row {
+                        spacing: units.gu(1)
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        Button {
+                            text: i18n.tr("Cancel")
+                            color: "gray"
+
+                            opacity: commentBox.show ? 1 : 0
+
+                            onClicked: {
+                                commentBox.text = ""
+                                commentBox.show = false
+                            }
+
+                            Behavior on opacity {
+                                UbuntuNumberAnimation {}
+                            }
                         }
 
-                        Behavior on opacity {
-                            UbuntuNumberAnimation {}
+                        Button {
+                            text:  issue.open ? i18n.tr("Comment and Close") : i18n.tr("Comment and Reopen")
+                            color: issue.open ? colors["red"] : colors["green"]
+
+                            visible: wideAspect
+                            opacity: commentBox.show ? 1 : 0
+                            enabled: commentBox.text !== ""
+
+                            onClicked: {
+                                busyDialog.title = i18n.tr("Creating Comment")
+                                busyDialog.text = i18n.tr("Creating a new comment for issue <b>%1</b>").arg(issue.number)
+                                busyDialog.show()
+
+                                var text = commentBox.text
+
+                                request = github.newIssueComment(plugin.repo, issue, commentBox.text, function(response) {
+                                    busyDialog.hide()
+                                    if (response === -1) {
+                                        error(i18n.tr("Connection Error"), i18n.tr("Unable to create comment. Check your connection and/or firewall settings."))
+                                    } else {
+                                        issue.newComment(text)
+
+                                        commentBox.text = ""
+                                        commentBox.show = false
+
+                                        issue.closeOrReopen()
+                                    }
+                                })
+                            }
+
+                            Behavior on opacity {
+                                UbuntuNumberAnimation {}
+                            }
                         }
-                    }
 
-                    Button {
-                        text:  issue.open ? i18n.tr("Comment and Close") : i18n.tr("Comment and Reopen")
-                        color: issue.open ? colors["red"] : colors["green"]
-
-                        visible: wideAspect
-                        opacity: commentBox.show ? 1 : 0
-                        enabled: commentBox.text !== ""
-
-                        onClicked: {
-                            busyDialog.title = i18n.tr("Creating Comment")
-                            busyDialog.text = i18n.tr("Creating a new comment for issue <b>%1</b>").arg(issue.number)
-                            busyDialog.show()
-
-                            var text = commentBox.text
-
-                            request = github.newIssueComment(plugin.repo, issue, commentBox.text, function(response) {
-                                busyDialog.hide()
-                                if (response === -1) {
-                                    error(i18n.tr("Connection Error"), i18n.tr("Unable to create comment. Check your connection and/or firewall settings."))
-                                } else {
-                                    issue.newComment(text)
+                        Button {
+                            text: i18n.tr("Comment")
+                            enabled: commentBox.text !== "" || !commentBox.show
+                            onClicked: {
+                                if (commentBox.show) {
+                                    issue.comment(commentBox.text)
 
                                     commentBox.text = ""
                                     commentBox.show = false
-
-                                    issue.closeOrReopen()
+                                } else {
+                                    commentBox.show = true
+                                    commentBox.forceActiveFocus()
                                 }
-                            })
-                        }
-
-                        Behavior on opacity {
-                            UbuntuNumberAnimation {}
-                        }
-                    }
-
-                    Button {
-                        text: i18n.tr("Comment")
-                        enabled: commentBox.text !== "" || !commentBox.show
-                        onClicked: {
-                            if (commentBox.show) {
-                                issue.comment(commentBox.text)
-
-                                commentBox.text = ""
-                                commentBox.show = false
-                            } else {
-                                commentBox.show = true
-                                commentBox.forceActiveFocus()
                             }
                         }
                     }
