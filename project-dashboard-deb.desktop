@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=Project Dashboard
-Exec=qmlscene $@ project-dashboard.qml
+Exec=qmlscene $@ /usr/share/project-dashboard/project-dashboard.qml
 Icon=project-dashboard.png
 Terminal=false
 Type=Application

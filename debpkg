@@ -1,0 +1,17 @@
+VERSION=$1
+RELEASE_DIR=../releases/project-dashboard/v$VERSION-deb
+mkdir -p ../releases/project-dashboard
+
+cp . $RELEASE_DIR -r
+cd $RELEASE_DIR
+replace '@APP_VERSION@' $VERSION manifest.json
+sudo rm .git* -r
+rm ubuntu-ui-extras -r
+cp ../../../ubuntu-ui-extras . -r
+sudo rm ubuntu-ui-extras/.git* -r
+cd ..
+mv project-dashboard-deb.desktop project-dashboard.desktop
+mv project-dashboard-shadowed.png project-dashboard.png
+
+debuild -us -uc
+debuild -S -sa
