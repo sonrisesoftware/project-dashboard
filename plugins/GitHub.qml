@@ -75,6 +75,13 @@ Plugin {
                 viewAll: i18n.tr("View all <b>%1</b> open issues").arg(pluginItem.value)
                 show: repeater.count > 0
 
+                ListItem.Standard {
+                    text: i18n.tr("No issues assigned to you")
+                    enabled: false
+                    visible: repeater.count == 0
+                    height: visible ? implicitHeight : 0
+                }
+
                 Repeater {
                     id: repeater
                     model: List.filter(issues, function(issue) {
@@ -110,6 +117,13 @@ Plugin {
                 title: i18n.tr("Open Pull Requests")
                 viewAll: i18n.tr("View all <b>%1</b> open pull requests").arg(pullsItem.value)
                 show: pullsRepeater.count > 0
+
+                ListItem.Standard {
+                    text: i18n.tr("No open pull requests")
+                    enabled: false
+                    visible: repeater.count == 0
+                    height: visible ? implicitHeight : 0
+                }
 
                 Repeater {
                     id: pullsRepeater

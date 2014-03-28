@@ -59,13 +59,24 @@ UbuntuShape {
         }
 
         Label {
-            text: i18n.tr("Owner")
-            visible: plugin.info ? plugin.info.owner.login === author : false
+            text: owner ? i18n.tr("Owner")
+                        : contributor ? i18n.tr("Contributor") : ""
+            visible: owner || contributor
             font.italic: true
             anchors {
                 verticalCenter: parent.verticalCenter
                 right: parent.right
                 rightMargin: units.gu(1)
+            }
+
+            property bool owner: plugin.info ? plugin.info.owner.login === author : false
+            property bool contributor: {
+                for (var i = 0; i < plugin.availableAssignees.length; i++) {
+                    if (plugin.availableAssignees[i].login === author)
+                        return true
+                }
+
+                return false
             }
         }
     }

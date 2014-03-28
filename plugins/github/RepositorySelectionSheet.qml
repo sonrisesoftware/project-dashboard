@@ -24,7 +24,7 @@ import ".."
 DefaultSheet {
     id: configureSheet
 
-    title: "Select Repository"
+    title: width > units.gu(50) ? i18n.tr("Select Repository") :i18n.tr("Repository")
 
     contentsHeight: wideAspect ? (units.gu(6) + units.dp(2)) * 9 : mainView.height
 
@@ -47,40 +47,47 @@ DefaultSheet {
         model: github.repos
         clip: true
 
-        header: ListItem.Empty {
-            TextField {
-                id: textField
-                placeholderText: i18n.tr("Repository name")
-                anchors {
-                    left: parent.left
-                    leftMargin: units.gu(2)
-                    right: okButton.left
-                    rightMargin: units.gu(1)
-                    verticalCenter: parent.verticalCenter
-                }
-                onAccepted: okButton.trigger()
+        header: Column {
+            width: parent.width
+            ListItem.Empty {
+                TextField {
+                    id: textField
+                    placeholderText: i18n.tr("Repository name")
+                    anchors {
+                        left: parent.left
+                        leftMargin: units.gu(2)
+                        right: okButton.left
+                        rightMargin: units.gu(1)
+                        verticalCenter: parent.verticalCenter
+                    }
+                    onAccepted: okButton.trigger()
 
-                validator: RegExpValidator {
-                    regExp: /.+/
+                    validator: RegExpValidator {
+                        regExp: /.+/
+                    }
+                }
+
+                Button {
+                    id: okButton
+                    text: i18n.tr("Use")
+                    anchors {
+                        right: parent.right
+                        rightMargin: units.gu(2)
+                        verticalCenter: parent.verticalCenter
+                    }
+
+                    enabled: textField.acceptableInput
+
+                    onTriggered: {
+                        plugin.doc.set("repoName", textField.text)
+                        plugin.refresh()
+                        PopupUtils.close(configureSheet)
+                    }
                 }
             }
 
-            Button {
-                id: okButton
-                text: i18n.tr("Use")
-                anchors {
-                    right: parent.right
-                    rightMargin: units.gu(2)
-                    verticalCenter: parent.verticalCenter
-                }
-
-                enabled: textField.acceptableInput
-
-                onTriggered: {
-                    plugin.doc.set("repoName", textField.text)
-                    plugin.refresh()
-                    PopupUtils.close(configureSheet)
-                }
+            ListItem.Header {
+                text: i18n.tr("Your Repositories")
             }
         }
 

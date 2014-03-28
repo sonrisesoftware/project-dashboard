@@ -47,11 +47,21 @@ Plugin {
 
         pulseItem: PulseItem {
             title: i18n.tr("Next Event")
+            viewAll: i18n.tr("View all events")
             show: events.length > 0
 
+            ListItem.Standard {
+                text: i18n.tr("No upcoming events")
+                enabled: false
+                visible: events.length === 0
+                height: visible ? implicitHeight : 0
+            }
+
             ListItem.Subtitled {
-                text: events[0].title
-                subText: Qt.formatDate(events[0].date)
+                text: visible ? events[0].title : ""
+                subText: visible ? Qt.formatDate(events[0].date) : ""
+                visible: events.length > 0
+                height: visible ? implicitHeight : 0
             }
         }
 

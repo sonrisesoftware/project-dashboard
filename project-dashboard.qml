@@ -139,8 +139,12 @@ MainView {
         id: queue
 
         onError: {
-            print("Error", status, response, args)
-            mainView.error(i18n.tr("Connection Error"), i18n.tr("Unable to complete action:\n\n%1").arg(args))
+            print("Error", call, status, response, args)
+            if (status === 0) {
+                mainView.error(i18n.tr("Connection Error"), i18n.tr("Timeout error. Please check your internet and firewall settings:\n\n%1").arg(call))
+            } else {
+                mainView.error(i18n.tr("Connection Error"), i18n.tr("Unable to complete action:\n\n%1").arg(args))
+            }
         }
     }
 

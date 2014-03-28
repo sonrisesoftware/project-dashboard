@@ -10,7 +10,7 @@ Object {
 
     property int totalCount: 0
 
-    signal error(var status, var response, var args)
+    signal error(var call, var status, var response, var args)
 
     property var list: []
 
@@ -81,7 +81,7 @@ Object {
         Http.request(data.path, "GET", data.options, function(has_error, status, response) {
             count--
             if (has_error) {
-                error(status, response, data.args)
+                error(data.path, status, response, data.args)
             } else {
                 if (data.callback)
                     data.callback(status, response, data.args)
@@ -94,7 +94,7 @@ Object {
         Http.request(data.path, data.call, data.options, function(has_error, status, response) {
             count--
             if (has_error) {
-                error(status, response, data.args)
+                error(data.path, status, response, data.args)
             }
         }, undefined, data.headers, data.body)
     }

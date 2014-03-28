@@ -373,6 +373,8 @@ TabbedPage {
                         height: pluginTile.height + units.gu(2)
                         visible: pluginItem.pulseItem
 
+                        onVisibleChanged: column.reEvalColumns()
+
                         onHeightChanged: column.reEvalColumns()
 
                         property PluginItem pluginItem: modelData
@@ -405,9 +407,12 @@ TabbedPage {
                 }
 
                 Timer {
-                    interval: 2
+                    interval: 100
                     running: true
-                    onTriggered: column.reEvalColumns()
+                    onTriggered: {
+                        print("Triggered!")
+                        column.updateWidths()
+                    }
                 }
             }
         }

@@ -10,6 +10,7 @@ Column {
     property string title
     property string viewAll
     property bool show: title !== ""
+    property bool showAnyway: wideAspect && title !== ""
 
     height: opacity === 0 ? 0 : implicitHeight
 
@@ -17,7 +18,7 @@ Column {
         UbuntuNumberAnimation {}
     }
 
-    opacity: show ? 1 : 0
+    opacity: show || showAnyway ? 1 : 0
 
     Behavior on opacity {
         UbuntuNumberAnimation {}
@@ -25,5 +26,7 @@ Column {
 
     ListItem.Header {
         text: title
+        visible: column.show
+        height: visible ? units.gu(4) : 0
     }
 }

@@ -282,7 +282,7 @@ Page {
             TextArea {
                 id: textArea
                 width: parent.width
-                text: issue.renderBody()
+                text: JSON.stringify(plugin.info)//issue.renderBody()
                 height: Math.max(__internal.linesHeight(4), edit.height + textArea.__internal.frameSpacing * 2)
                 placeholderText: i18n.tr("No description set.")
                 readOnly: true
