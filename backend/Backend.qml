@@ -22,7 +22,7 @@ import Ubuntu.Components.ListItems 0.1 as ListItem
 import "../ubuntu-ui-extras"
 import "services"
 
-Object {
+Item {
     id: root
 
     function toJSON() { return doc.toJSON() }
@@ -50,7 +50,7 @@ Object {
         onLoaded: {
             var list = doc.get("projects", [])
             for (var i = 0; i < list.length; i++) {
-                var project = projectComponent.createObject(mainView, {index: nextIndex++})
+                var project = projectComponent.createObject(root, {index: nextIndex++})
                 project.fromJSON(list[i])
                 projects.append({"modelData": project})
             }
@@ -62,7 +62,7 @@ Object {
     }
 
     function newProject(name) {
-        var project = projectComponent.createObject(mainView, {index: nextIndex++})
+        var project = projectComponent.createObject(root, {index: nextIndex++})
         project.name = name
         projects.append({"modelData": project})
         project.fromJSON({})
@@ -121,17 +121,11 @@ Object {
             title: "Time Tracker"
         }
 
-//        ListElement {
-//            name: "events"
-//            type: "Events"
-//            title: "Events"
-//        }
-
-//        ListElement {
-//            name: "timer"
-//            type: "Timer"
-//            title: "Timer"
-//        }
+        ListElement {
+            name: "events"
+            type: "Events"
+            title: "Events"
+        }
     }
 
     property var availableServices: [github, travisCI]

@@ -22,7 +22,7 @@ import Ubuntu.Components.ListItems 0.1 as ListItem
 import "../components"
 import "../ubuntu-ui-extras"
 
-Object {
+Item {
     id: plugin
 
     property string name

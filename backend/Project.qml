@@ -21,7 +21,7 @@ import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
 import "../ubuntu-ui-extras"
 
-Object {
+Item {
     id: project
 
     property string name: doc.get("name", "")
@@ -91,6 +91,14 @@ Object {
 
             loadedSuccessfully = true
         }
+    }
+
+    function newObject(type, args) {
+        if (!args)
+            args = {}
+        print(type)
+        var component = Qt.createComponent(type);
+        return component.createObject(project, args);
     }
 
     function remove() {
