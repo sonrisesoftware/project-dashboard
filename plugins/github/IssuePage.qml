@@ -348,7 +348,7 @@ Page {
                 spacing: wideAspect ? parent.spacing : 0
 
                 ListItem.ThinDivider {
-                    //visible: !wideAspect
+                    visible: !wideAspect
                 }
 
                 ListItem.Standard {
@@ -462,25 +462,11 @@ Page {
                             enabled: commentBox.text !== ""
 
                             onClicked: {
-                                busyDialog.title = i18n.tr("Creating Comment")
-                                busyDialog.text = i18n.tr("Creating a new comment for issue <b>%1</b>").arg(issue.number)
-                                busyDialog.show()
+                                issue.comment(commentBox.text)
+                                issue.closeOrReopen()
 
-                                var text = commentBox.text
-
-                                request = github.newIssueComment(plugin.repo, issue, commentBox.text, function(response) {
-                                    busyDialog.hide()
-                                    if (response === -1) {
-                                        error(i18n.tr("Connection Error"), i18n.tr("Unable to create comment. Check your connection and/or firewall settings."))
-                                    } else {
-                                        issue.newComment(text)
-
-                                        commentBox.text = ""
-                                        commentBox.show = false
-
-                                        issue.closeOrReopen()
-                                    }
-                                })
+                                commentBox.text = ""
+                                commentBox.show = false
                             }
 
                             Behavior on opacity {
