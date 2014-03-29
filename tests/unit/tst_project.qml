@@ -84,8 +84,10 @@ Item {
             var expected = "Sample Project";
             var new_value = "Renamed Project"
 
+            var orig_length = backend.projects.count
+
             var project = backend.newProject(expected)
-            compare(backend.projects.count,1, "Project was not created correctly")
+            compare(backend.projects.count,orig_length+1, "Project was not created correctly")
             compare(project.name,expected, "Project name is incorrect")
 
             var json = project.toJSON()
@@ -124,6 +126,25 @@ Item {
             var docId1 = backend.newProject("Dummy project")
             compare(backend.projects.count,orig_length + 1, "Project was not created correctly")
             compare(backend.toJSON().projects.length, orig_length + 1, "Project doesn't show when saved")
+        }
+
+        function test_plugins() {
+            var orig_length = backend.projects.count
+
+            var project = backend.newProject("Project name")
+
+            var plugins = ["Notes", "Resources", "Timer", "Events"]
+
+            plugins.forEach(function(plugin) {
+                compare(project.plugins.count, 0, "There should be no plugins initially")
+
+                project.enablePlugin(plugin, true)
+                compare(project.plugins.count, 1, "The plugin isn't showing")
+                compare(backend.toJSON().projects[orig_length].plugins.length, 1, "Plugin doesn't show when saved")
+
+                project.enablePlugin(plugin, false)
+                compare(project.plugins.count, 0, "There should be no plugins now")
+            })
         }
     }
 }
