@@ -1,17 +1,17 @@
 /*
  * Project Dashboard - Manage everything about your projects in one app
  * Copyright (C) 2014 Michael Spencer
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -28,155 +28,205 @@ import "../ubuntu-ui-extras"
 Plugin {
     id: plugin
 
-    title: "Tasks"
-    iconSource: "list"
-    //unread: true
+    name: "tasks"
 
-    property alias tasks: doc.children
-    property var openTasks: List.filter(tasks, function(docId) {
-        return !doc.childrenData[docId].hasOwnProperty("done") || !doc.childrenData[docId]["done"]
-    })
-    unread: tasks.length > 0
+    property var tasks: doc.get("tasks", [])
 
-    document: Document {
-        id: doc
-        docId: "tasks"
-        parent: project.document
+    onSave: {
+        doc.set("tasks", tasks)
     }
 
-    property int nextDocId: doc.get("nextDocId", 0)
-
-    function addTask(title) {
-        var docId = String(nextDocId)
-        doc.set("nextDocId", nextDocId + 1)
-        doc.newDoc(docId, {"title": title, "dueDate": ""})
-        //print(JSON.stringify(doc.save()))
-        return docId
+    function newTask(title, contents) {
+        tasks.push({"title": title, "contents": contents, "date": new Date().toJSON()})
+        tasks = tasks
     }
 
-    action: Action {
-        text: i18n.tr("Add")
-        onTriggered: PopupUtils.open(addPopover, value)
-    }
+    items: PluginItem {
+        title: i18n.tr("Tasks")
+        icon: "check-square-o"
+        value: tasks.length > 0 ? tasks.length : ""
 
-    ListItem.Header {
-        text: "Upcoming Tasks"
-        visible: upcomingTasks.height > 0
-    }
+        action: Action {
+            text: i18n.tr("Add Task")
+            description: i18n.tr("Add a new task to your to do list")
+            iconSource: getIcon("add")
+            onTriggered: PopupUtils.open(newTaskPage)
+        }
 
-    Column {
-        id: upcomingTasks
-        width: parent.width
+        pulseItem: PulseItem {
 
-        Repeater {
-            id: repeater
-            model: tasks
-            delegate: ToDoListItem {
-                docId: modelData
-                show: !task.get("done", false) && task.get("dueDate", "") !== "" && isDueThisWeek(new Date(task.get("dueDate", "")))
-                tasks: doc
+            visible: tasks.length > 0
+            title: i18n.tr("Upcoming Tasks")
+            viewAll: i18n.tr("View all <b>%1</b> tasks").arg(tasks.length)
 
-                Document {
-                    id: task
-                    docId: modelData
-                    parent: doc
+            ListItem.Standard {
+                text: i18n.tr("No tasks")
+                enabled: false
+                visible: tasks.length === 0
+                height: visible ? implicitHeight : 0
+            }
+
+            Repeater {
+                model: Math.min(tasks.length, project.maxRecent)
+                delegate: SubtitledListItem {
+                    property var modelData: tasks[tasks.length - index - 1]
+                    id: item
+                    text: modelData.title + " <font color=\"" + colors["green"] + "\">" + Qt.formatDate(new Date(modelData.date)) + "</font>"
+                    subText: modelData.contents
+
+                    onClicked: pageStack.push(notePage, {index: index})
+
+                    onItemRemoved: {
+                        tasks.splice(index, 1)
+                        tasks = tasks
+                    }
                 }
             }
         }
-    }
 
-    ListItem.Header {
-        text: "Recent Tasks"
-        visible: upcomingTasks.height === 0 && openTasks.length === 0
-    }
-
-    Repeater {
-        model: Math.min(4, openTasks.length)
-        delegate: ToDoListItem {
-            docId: openTasks[openTasks.length - index - 1]
-            show: true
-            tasks: doc
-        }
-    }
-
-    ListItem.Standard {
-        enabled: false
-        visible: openTasks.length === 0
-        text: "No tasks"
-    }
-
-    viewAllMessage:  "View all tasks"
-    summary: openTasks.length > 0 ? i18n.tr("<b>%1</b> tasks").arg(openTasks.length) : i18n.tr("No tasks")
-
-    Component {
-        id: addPopover
-
-        Popover {
-            id: popover
-            contentHeight: textField.height + units.gu(2)
-
-            Component.onCompleted: textField.forceActiveFocus()
-
-            Item {
-                height: textField.height + units.gu(2)
-                width: parent.width
-                Button {
-                    id: button
-                    text: i18n.tr("Done")
-                    onTriggered: {
-                        PopupUtils.close(popover)
-                        addTask(textField.text)
-                    }
-
-                    anchors {
-                        verticalCenter: parent.verticalCenter
-                        right: parent.right
-                        margins: units.gu(1)
-                    }
-                }
-
-                TextField {
-                    id: textField
-                    anchors {
-                        verticalCenter: parent.verticalCenter
-                        left: parent.left
-                        right: button.left
-                        margins: units.gu(1)
-                    }
-                    onAccepted: button.trigger()
-                }
-            }
-        }
-    }
-
-    page: Component {
-        id: todoPage
-
-        PluginPage {
+        page: PluginPage {
             title: i18n.tr("Tasks")
 
+            actions: Action {
+                text: i18n.tr("Add")
+                iconSource: getIcon("add")
+                onTriggered: PopupUtils.open(newTaskPage)
+            }
+
             ListView {
-                id: repeater
+                id: listView
                 anchors.fill: parent
                 model: tasks
-                delegate: ToDoListItem {
-                    docId: modelData
-                    tasks: doc
+                delegate: SubtitledListItem {
+                    id: item
+                    text: modelData.title + " <font color=\"" + colors["green"] + "\">" + Qt.formatDate(new Date(modelData.date)) + "</font>"
+                    subText: modelData.contents
 
-                    Document {
-                        id: task
-                        docId: modelData
-                        parent: doc
+                    onClicked: pageStack.push(notePage, {index: index})
+
+                    removable: true
+                    backgroundIndicator: ListItemBackground {
+                        state: item.swipingState
+                        iconSource: getIcon("delete-white")
+                        text: i18n.tr("Delete")
                     }
+
+                    onItemRemoved: {
+                        tasks.splice(index, 1)
+                        tasks = tasks
+                    }
+                }
+            }
+
+            Scrollbar {
+                flickableItem: listView
+            }
+
+            Label {
+                anchors.centerIn: parent
+                visible: tasks.length === 0
+                text: "No tasks"
+                opacity: 0.5
+                fontSize: "large"
+            }
+        }
+    }
+
+    Component {
+        id: newTaskPage
+
+        ComposerSheet {
+            id: sheet
+
+            title: i18n.tr("New Task")
+            contentsHeight: wideAspect ? units.gu(40) : mainView.height
+
+            onConfirmClicked: newTask(nameField.text, descriptionField.text)
+
+            Component.onCompleted: {
+                sheet.__leftButton.text = i18n.tr("Cancel")
+                sheet.__leftButton.color = "gray"
+                sheet.__rightButton.text = i18n.tr("Create")
+                sheet.__rightButton.color = sheet.__rightButton.__styleInstance.defaultColor
+                sheet.__foreground.style = Theme.createStyleComponent(Qt.resolvedUrl("../ubuntu-ui-extras/SuruSheetStyle.qml"), sheet)
+            }
+
+            TextField {
+                id: nameField
+                placeholderText: i18n.tr("Title")
+                anchors {
+                    left: parent.left
+                    top: parent.top
+                    right: parent.right
+                }
+
+                Keys.onTabPressed: descriptionField.forceActiveFocus()
+            }
+
+            TextArea {
+                id: descriptionField
+                placeholderText: i18n.tr("Contents")
+
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                    top: nameField.bottom
+                    bottom: parent.bottom
+                    topMargin: units.gu(2)
                 }
             }
         }
     }
 
-    function isDueThisWeek(dueDate) {
-        var date = new Date()
-        date.setDate(date.getDate() + 7)
+    Component {
+        id: notePage
 
-        return DateUtils.dateIsBeforeOrSame(dueDate, date)
+        Page {
+            id: page
+            title: note.title
+
+            property int index: 0
+            property var note: tasks[index]
+
+            Component.onDestruction: {
+                tasks[index].contents = descriptionField.text
+                tasks = tasks
+            }
+
+            TextArea {
+                id: descriptionField
+                placeholderText: i18n.tr("Contents")
+                color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
+
+                text: note.contents
+
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                    top: parent.top
+                    bottom: parent.bottom
+                    margins: units.gu(2)
+                }
+            }
+
+            tools: ToolbarItems {
+                opened: wideAspect
+                locked: wideAspect
+
+                onLockedChanged: opened = locked
+
+                ToolbarButton {
+                    text: i18n.tr("Delete")
+                    iconSource: getIcon("delete")
+
+                    onTriggered: {
+                        pageStack.pop()
+                        tasks.splice(page.index, 1)
+                        tasks = tasks
+                    }
+                }
+            }
+        }
     }
 }
+
