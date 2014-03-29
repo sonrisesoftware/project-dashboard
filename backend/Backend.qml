@@ -91,13 +91,15 @@ Item {
 
     property ListModel availablePlugins: ListModel {
 
-//        ListElement {
-//            name: "tasks"
-//            type: "ToDo"
-//            title: "Tasks"
-//        }
+        ListElement {
+            icon: "check-square-o"
+            name: "tasks"
+            type: "ToDo"
+            title: "Tasks"
+        }
 
         ListElement {
+            icon: "pencil-square-o"
             name: "notes"
             type: "Notes"
             title: "Notes"
@@ -110,18 +112,21 @@ Item {
 //        }
 
         ListElement {
+            icon: "file"
             name: "resources"
             type: "Resources"
             title: "Resources"
         }
 
         ListElement {
+            icon: "clock"
             name: "timer"
             type: "Timer"
             title: "Time Tracker"
         }
 
         ListElement {
+            icon: "calendar"
             name: "events"
             type: "Events"
             title: "Events"

@@ -28,6 +28,7 @@ Service {
 
     name: "travis"
     type: "TravisCI"
+    icon: "check-circle"
     title: i18n.tr("Travis CI")
     disabledMessage: i18n.tr("Requires a GitHub project")
     authenticationRequired: false

@@ -57,10 +57,11 @@ Page {
             Repeater {
                 model: backend.availablePlugins
 
-                delegate: SubtitledListItem {
-                    text: title
-                    subText: project.hasPlugin(type) ? project.getPlugin(type).configuration : ""
-                    enabled: type !== ""
+                delegate: ListItem.Standard {
+                    id: listItem
+
+                    enabled: type != ""
+
                     control: Switch {
                         checked: project.hasPlugin(type)
                         onCheckedChanged: {
@@ -68,17 +69,85 @@ Page {
                             checked = Qt.binding(function () {return project.hasPlugin(type)})
                         }
                     }
+
+                    property bool overlay: false
+
+                    height: opacity === 0 ? 0 : (__height + units.dp(2))
+
+                    Behavior on height {
+                        UbuntuNumberAnimation {}
+                    }
+
+                    AwesomeIcon {
+                        id: iconItem
+                        name: model.icon
+                        size: units.gu(3.5)
+                        anchors {
+                            verticalCenter: parent.verticalCenter
+                            left: parent.left
+                            leftMargin: units.gu(1.5)
+                        }
+                    }
+
+                    Column {
+                        id: labels
+
+                        spacing: units.gu(0.1)
+
+                        anchors {
+                            verticalCenter: parent.verticalCenter
+                            left: iconItem.right
+                            leftMargin: units.gu(1.5)
+                            rightMargin: units.gu(2)
+                            right: parent.right
+                        }
+
+                        Label {
+                            id: titleLabel
+
+                            width: parent.width
+                            elide: Text.ElideRight
+                            maximumLineCount: 1
+                            text: title
+                            color: overlay ? "#888888" : Theme.palette.selected.backgroundText
+                        }
+
+                        Label {
+                            id: subLabel
+                            width: parent.width
+
+                            height: visible ? implicitHeight: 0
+                            //color:  Theme.palette.normal.backgroundText
+                            maximumLineCount: 1
+                            opacity: overlay ? 0.7 : 0.65
+                            font.weight: Font.Light
+                            fontSize: "small"
+                            visible: text !== ""
+                            elide: Text.ElideRight
+                            text: project.hasPlugin(type) ? project.getPlugin(type).configuration : ""
+                            color: overlay ? "#888888" : Theme.palette.selected.backgroundText
+                        }
+                    }
+
+                    opacity: show ? 1 : 0
+
+                    Behavior on opacity {
+                        UbuntuNumberAnimation {}
+                    }
+
+                    property bool show: true
                 }
             }
 
             Repeater {
                 model: backend.availableServices
 
-                delegate: SubtitledListItem {
-                    text: modelData.title
-                    subText: modelData.isEnabled(project) === "" ? project.hasPlugin(modelData.type) ? project.getPlugin(modelData.type).configuration
-                                                                                                     : ""
-                                                                 : modelData.isEnabled(project)
+                delegate: ListItem.Standard {
+                    id: listItem
+
+                    property alias text: titleLabel.text
+                    property alias subText: subLabel.text
+
                     control: Switch {
                         enabled: modelData.isEnabled(project) === ""
                         onEnabledChanged: {
@@ -92,6 +161,74 @@ Page {
                             checked = Qt.binding(function () {return project.hasPlugin(modelData.type)})
                         }
                     }
+
+                    property bool overlay: false
+
+                    height: opacity === 0 ? 0 : (__height + units.dp(2))
+
+                    Behavior on height {
+                        UbuntuNumberAnimation {}
+                    }
+
+                    AwesomeIcon {
+                        id: icon2
+                        name: modelData.icon
+                        size: units.gu(3.5)
+                        anchors {
+                            verticalCenter: parent.verticalCenter
+                            left: parent.left
+                            leftMargin: units.gu(1.5)
+                        }
+                    }
+
+                    Column {
+
+                        spacing: units.gu(0.1)
+
+                        anchors {
+                            verticalCenter: parent.verticalCenter
+                            left: icon2.right
+                            leftMargin: units.gu(1.5)
+                            rightMargin: units.gu(2)
+                            right: parent.right
+                        }
+
+                        Label {
+                            id: titleLabel
+
+                            width: parent.width
+                            elide: Text.ElideRight
+                            maximumLineCount: 1
+                            text: modelData.title
+                            color: overlay ? "#888888" : Theme.palette.selected.backgroundText
+                        }
+
+                        Label {
+                            id: subLabel
+                            width: parent.width
+
+                            height: visible ? implicitHeight: 0
+                            //color:  Theme.palette.normal.backgroundText
+                            maximumLineCount: 1
+                            opacity: overlay ? 0.7 : 0.65
+                            font.weight: Font.Light
+                            fontSize: "small"
+                            visible: text !== ""
+                            elide: Text.ElideRight
+                            text: modelData.isEnabled(project) === "" ? project.hasPlugin(modelData.type) ? project.getPlugin(modelData.type).configuration
+                                                                                                          : ""
+                                                                      : modelData.isEnabled(project)
+                            color: overlay ? "#888888" : Theme.palette.selected.backgroundText
+                        }
+                    }
+
+                    opacity: show ? 1 : 0
+
+                    Behavior on opacity {
+                        UbuntuNumberAnimation {}
+                    }
+
+                    property bool show: true
                 }
             }
         }

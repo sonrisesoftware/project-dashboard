@@ -24,6 +24,7 @@ Item {
     id: root
 
     property string name
+    property string icon
     property var type: []
     property string title
     property string authenticationStatus

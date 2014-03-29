@@ -27,6 +27,7 @@ Service {
     id: root
 
     name: "github"
+    icon: "github"
     type: "GitHub"
     title: i18n.tr("GitHub")
     authenticationStatus: oauth === "" ? "" : i18n.tr("Logged in as %1").arg(user.login)
