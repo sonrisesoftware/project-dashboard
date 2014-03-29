@@ -571,10 +571,10 @@ TabbedPage {
                 }
             }
 
-            Label {
-                anchors.centerIn: parent
-                text: project.loading
-            }
+//            Label {
+//                anchors.centerIn: parent
+//                text: project.loading
+//            }
         }
     }
 
