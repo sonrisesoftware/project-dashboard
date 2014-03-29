@@ -29,10 +29,22 @@ import "../ubuntu-ui-extras/dateutils.js" as DateUtils
 Plugin {
     id: plugin
 
-    property var events: doc.get("events", [])
+    property var events: []
 
     onSave: {
         doc.set("events", events)
+    }
+
+    onLoaded: {
+        events = doc.get("events", [])
+        events.sort(function(a,b) {
+            return new Date(a.date) - new Date(b.date)
+        })
+        while (DateUtils.dateIsBefore(new Date(events[0].date), new Date())) {
+            events.splice(0, 1)
+        }
+
+        events = events
     }
 
     function addEvent(title, date) {
@@ -71,9 +83,9 @@ Plugin {
                 height: visible ? implicitHeight : 0
             }
 
-            ListItem.Subtitled {
+            SubtitledListItem {
                 text: visible ? events[0].title : ""
-                subText: visible ? DateUtils.formattedDate(new Date(events[0].date)) : ""
+                subText: visible ? new Date(events[0].date).toDateString() : ""
                 visible: events.length > 0
                 height: visible ? implicitHeight : 0
 
@@ -82,8 +94,10 @@ Plugin {
                 Label {
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.right: parent.right
+                    anchors.rightMargin: units.gu(2)
 
-                    text: i18n.tr("%1 days").arg(Math.floor((new Date(events[0].date) - new Date())/(1000*60*60*24)))
+                    text: DateUtils.isToday(new Date(events[0].date)) ? i18n.tr("Today")
+                                                                      : i18n.tr("%1 days").arg(Math.floor((new Date(events[0].date) - new Date())/(1000*60*60*24)))
                 }
             }
         }
@@ -103,16 +117,18 @@ Plugin {
                 anchors.fill: parent
 
                 model: events
-                delegate: ListItem.Subtitled {
+                delegate: SubtitledListItem {
                     id: item
                     text: modelData.title
-                    subText: DateUtils.formattedDate(new Date(modelData.date))
+                    subText: new Date(modelData.date).toDateString()
 
                     Label {
                         anchors.verticalCenter: parent.verticalCenter
                         anchors.right: parent.right
+                        anchors.rightMargin: units.gu(2)
 
-                        text: i18n.tr("%1 days").arg(Math.floor((new Date(modelData.date) - new Date())/(1000*60*60*24)))
+                        text: DateUtils.isToday(new Date(modelData.date)) ? i18n.tr("Today")
+                                                                          : i18n.tr("%1 days").arg(Math.floor((new Date(modelData.date) - new Date())/(1000*60*60*24)))
                     }
 
                     removable: true

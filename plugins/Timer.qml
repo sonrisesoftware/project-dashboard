@@ -286,7 +286,7 @@ Plugin {
                         text: DateUtils.formattedDate(new Date(modelData))
                         value: modelData === today ? DateUtils.friendlyDuration(totalTime)
                                                          : DateUtils.friendlyDuration(dates[modelData].time)
-                        onClicked: PopupUtils.open(editDialog, item, {date: modelData})
+                        onClicked: PopupUtils.open(editDialog, plugin, {date: modelData})
                     }
                 }
 
@@ -333,52 +333,52 @@ Plugin {
                 }
             }
         }
+    }
 
-        Component {
-            id: editDialog
+    Component {
+        id: editDialog
 
-            InputDialog {
-                property string date
+        InputDialog {
+            property string date
 
-                title: i18n.tr("Edit Time")
-                text: i18n.tr("Edit the time logged for <b>%1</b>").arg(DateUtils.formattedDate(new Date(dates[date].date)))
-                value: date === today ? DateUtils.friendlyDuration(totalTime)
-                                                 : DateUtils.friendlyDuration(dates[date].time)
+            title: i18n.tr("Edit Time")
+            text: i18n.tr("Edit the time logged for <b>%1</b>").arg(DateUtils.formattedDate(new Date(dates[date].date)))
+            value: date === today ? DateUtils.friendlyDuration(totalTime)
+                                             : DateUtils.friendlyDuration(dates[date].time)
 
-                property bool running
+            property bool running
 
-                Component.onCompleted: {
-                    if (date == today ) {
-                        value = DateUtils.friendlyDuration(totalTime)
-                        if (startTime) {
-                            doc.set("savedTime", savedTime + (new Date() - startTime))
-                            currentTime =  0
-                            doc.set("startTime", undefined)
+            Component.onCompleted: {
+                if (date == today ) {
+                    value = DateUtils.friendlyDuration(totalTime)
+                    if (startTime) {
+                        doc.set("savedTime", savedTime + (new Date() - startTime))
+                        currentTime =  0
+                        doc.set("startTime", undefined)
 
-                            running = true
-                        }
+                        running = true
                     }
                 }
+            }
 
-                onAccepted: {
-                    if (date == today) {
-                        doc.set("savedTime", DateUtils.parseDuration(value))
+            onAccepted: {
+                if (date == today) {
+                    doc.set("savedTime", DateUtils.parseDuration(value))
 
-                        if (running) {
-                            doc.set("startTime", new Date().toJSON())
-                            currentTime = 0
-                        }
-                    } else {
-                        dates[date].time = DateUtils.parseDuration(value)
-                        dates = dates
-                    }
-                }
-
-                onRejected: {
                     if (running) {
                         doc.set("startTime", new Date().toJSON())
                         currentTime = 0
                     }
+                } else {
+                    dates[date].time = DateUtils.parseDuration(value)
+                    dates = dates
+                }
+            }
+
+            onRejected: {
+                if (running) {
+                    doc.set("startTime", new Date().toJSON())
+                    currentTime = 0
                 }
             }
         }

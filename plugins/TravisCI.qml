@@ -35,6 +35,7 @@ Plugin {
     property var builds: doc.get("builds", [])
 
     items: PluginItem {
+        id: pluginItem
         title: "Continuous Integration"
         icon: "check-circle"
         value: buildStatus(info.last_build_result)
@@ -44,6 +45,7 @@ Plugin {
             title: i18n.tr("Latest Results from Travis CI")
             viewAll: i18n.tr("View all builds")
             BuildListItem {
+                onTriggered: pageStack.push(pluginItem.page)
                 number: plugin.info ? plugin.info.last_build_number : 0
                 status: plugin.info ? plugin.info.last_build_result : 0
                 built_at: plugin.info ? plugin.info.last_build_finished_at : ""
