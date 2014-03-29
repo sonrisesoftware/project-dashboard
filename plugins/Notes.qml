@@ -28,119 +28,126 @@ import "../ubuntu-ui-extras"
 Plugin {
     id: plugin
 
-    title: i18n.tr("Notes")
-    iconSource: "pencil-square-o"
+    name: "notes"
 
-    viewAllMessage: i18n.tr("View all notes")
+    property var notes: doc.get("notes", [])
 
-    property alias notes: doc.children
-
-    property int nextDocId: doc.get("nextDocId", 0)
+    onSave: {
+        doc.set("notes", notes)
+    }
 
     function newNote(title, contents) {
-        var docId = String(nextDocId)
-        doc.set("nextDocId", nextDocId + 1)
-        doc.newDoc(docId, {"title": title, "contents": contents, "date": new Date().toJSON()})
-        //project.newMessage("notes", "pencil-square-o", "You created a new note", title, new Date().toJSON(), docId)
-        //print(JSON.stringify(doc.save()))
-        return docId
+        notes.push({"title": title, "contents": contents, "date": new Date().toJSON()})
+        notes = notes
     }
 
-    function displayMessage(message) {
-        pageStack.push(notePage, {docId: message.data})
-    }
-
-    action: Action {
-        id: newNoteAction
-        iconSource: getIcon("add")
-        text: i18n.tr("Add")
-        onTriggered: pageStack.push(newNotePage)
-    }
-
-    document: Document {
-        id: doc
-        docId: "notes"
-        parent: project.document
-    }
-
-    ListItem.Header {
-        text: "Recent Notes"
-        visible: notes.length > 0
-    }
-
-    Repeater {
-        model: Math.min(notes.length, 4)
-        delegate: SubtitledListItem {
-            id: item
-            text: note.get("title") + " <font color=\"" + colors["green"] + "\">" + Qt.formatDate(new Date(note.get("date"))) + "</font>"
-            subText: note.get("contents")
-
-
-
-            onClicked: pageStack.push(notePage, {docId: note.docId})
-            //onPressAndHold: PopupUtils.open(actionsPopover, item, {index: documents.length - index - 1})
-            removable: true
-            confirmRemoval: true
-            onItemRemoved: note.remove()
-
-            Document {
-                id: note
-                docId: notes[notes.length - index - 1]
-                parent: doc
-            }
-        }
-    }
-
-    ListItem.Standard {
-        enabled: false
-        visible: notes.length === 0
-        text: "No notes"
-    }
-
-    page: PluginPage {
+    items: PluginItem {
         title: i18n.tr("Notes")
+        icon: "pencil-square-o"
 
-        ListView {
-            id: listView
-            anchors.fill: parent
-            model: notes
-            delegate: SubtitledListItem {
-                text: noteDoc.get("title") + " <font color=\"" + colors["green"] + "\">" + Qt.formatDate(new Date(noteDoc.get("date"))) + "</font>"
-                subText: noteDoc.get("contents")
+        action: Action {
+            text: i18n.tr("Add Note")
+            description: i18n.tr("Add a new note to your project")
+            iconSource: getIcon("add")
+            onTriggered: PopupUtils.open(newNotePage)
+        }
 
-                onClicked: pageStack.push(notePage, {docId: noteDoc.docId})
-                removable: true
-                confirmRemoval: true
-                onItemRemoved: noteDoc.remove()
+        pulseItem: PulseItem {
+            visible: notes.length > 0
+            title: i18n.tr("Recent Notes")
+            viewAll: i18n.tr("View all <b>%1</b> notes").arg(notes.length)
 
-                Document {
-                    id: noteDoc
-                    docId: modelData
-                    parent: doc
+            ListItem.Standard {
+                text: i18n.tr("No notes")
+                enabled: false
+                visible: notes.length === 0
+                height: visible ? implicitHeight : 0
+            }
+
+            Repeater {
+                model: Math.min(notes.length, 4)
+                delegate: SubtitledListItem {
+                    property var modelData: notes[notes.length - index - 1]
+                    id: item
+                    text: modelData.title + " <font color=\"" + colors["green"] + "\">" + Qt.formatDate(new Date(modelData.date)) + "</font>"
+                    subText: modelData.contents
+
+                    onClicked: pageStack.push(notePage, {index: index})
+
+                    onItemRemoved: {
+                        notes.splice(index, 1)
+                        notes = notes
+                    }
                 }
             }
         }
 
-        Scrollbar {
-            flickableItem: listView
-        }
+        page: PluginPage {
+            title: i18n.tr("Notes")
 
-        Label {
-            anchors.centerIn: parent
-            visible: notes.length === 0
-            text: "No notes"
-            opacity: 0.5
-            fontSize: "large"
-        }
+            actions: Action {
+                text: i18n.tr("Add")
+                iconSource: getIcon("add")
+                onTriggered: PopupUtils.open(newNotePage)
+            }
 
-        actions: newNoteAction
+            ListView {
+                id: listView
+                anchors.fill: parent
+                model: notes
+                delegate: SubtitledListItem {
+                    id: item
+                    text: modelData.title + " <font color=\"" + colors["green"] + "\">" + Qt.formatDate(new Date(modelData.date)) + "</font>"
+                    subText: modelData.contents
+
+                    onClicked: pageStack.push(notePage, {index: index})
+
+                    removable: true
+                    backgroundIndicator: ListItemBackground {
+                        state: item.swipingState
+                        iconSource: getIcon("delete-white")
+                        text: i18n.tr("Delete")
+                    }
+
+                    onItemRemoved: {
+                        notes.splice(index, 1)
+                        notes = notes
+                    }
+                }
+            }
+
+            Scrollbar {
+                flickableItem: listView
+            }
+
+            Label {
+                anchors.centerIn: parent
+                visible: notes.length === 0
+                text: "No notes"
+                opacity: 0.5
+                fontSize: "large"
+            }
+        }
     }
 
     Component {
         id: newNotePage
 
-        Page {
+        ComposerSheet {
+            id: sheet
+
             title: i18n.tr("New Note")
+            contentsHeight: wideAspect ? units.gu(40) : mainView.height
+
+            onConfirmClicked: newNote(nameField.text, descriptionField.text)
+
+            Component.onCompleted: {
+                sheet.__leftButton.text = i18n.tr("Cancel")
+                sheet.__leftButton.color = "gray"
+                sheet.__rightButton.text = i18n.tr("Create")
+                sheet.__rightButton.color = sheet.__rightButton.__styleInstance.defaultColor
+                sheet.__foreground.style = Theme.createStyleComponent(Qt.resolvedUrl("../ubuntu-ui-extras/SuruSheetStyle.qml"), sheet)
+            }
 
             TextField {
                 id: nameField
@@ -149,7 +156,6 @@ Plugin {
                     left: parent.left
                     top: parent.top
                     right: parent.right
-                    margins: units.gu(2)
                 }
 
                 Keys.onTabPressed: descriptionField.forceActiveFocus()
@@ -164,31 +170,7 @@ Plugin {
                     right: parent.right
                     top: nameField.bottom
                     bottom: parent.bottom
-                    margins: units.gu(2)
-                }
-            }
-
-            tools: ToolbarItems {
-                locked: true
-                opened: true
-
-                back: ToolbarButton {
-                    text: i18n.tr("Cancel")
-                    iconSource: getIcon("back")
-
-                    onTriggered: {
-                        pageStack.pop()
-                    }
-                }
-
-                ToolbarButton {
-                    text: i18n.tr("Save")
-                    iconSource: getIcon("add")
-
-                    onTriggered: {
-                        pageStack.pop()
-                        newNote(nameField.text, descriptionField.text)
-                    }
+                    topMargin: units.gu(2)
                 }
             }
         }
@@ -198,13 +180,15 @@ Plugin {
         id: notePage
 
         Page {
-            title: note.get("title")
+            id: page
+            title: note.title
 
-            property alias docId: note.docId
+            property int index: 0
+            property var note: notes[index]
 
-            Document {
-                id: note
-                parent: doc
+            Component.onDestruction: {
+                notes[index].contents = descriptionField.text
+                notes = notes
             }
 
             TextArea {
@@ -212,7 +196,7 @@ Plugin {
                 placeholderText: i18n.tr("Contents")
                 color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
 
-                text: note.get("contents")
+                text: note.contents
 
                 anchors {
                     left: parent.left
@@ -222,8 +206,6 @@ Plugin {
                     margins: units.gu(2)
                 }
             }
-
-            Component.onDestruction: note.set("contents", descriptionField.text)
 
             tools: ToolbarItems {
                 opened: wideAspect
@@ -237,7 +219,8 @@ Plugin {
 
                     onTriggered: {
                         pageStack.pop()
-                        note.remove()
+                        notes.splice(page.index, 1)
+                        notes = notes
                     }
                 }
             }

@@ -97,11 +97,11 @@ Item {
 //            title: "Tasks"
 //        }
 
-//        ListElement {
-//            name: "notes"
-//            type: "Notes"
-//            title: "Notes"
-//        }
+        ListElement {
+            name: "notes"
+            type: "Notes"
+            title: "Notes"
+        }
 
 //        ListElement {
 //            name: "drawings"
