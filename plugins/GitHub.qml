@@ -52,14 +52,20 @@ Plugin {
 
     }
 
+    property var openPulls: List.filter(issues, function(issue) {
+        return issue.isPullRequest && issue.open
+    }).sort(function(a, b) { return b.number - a.number })
+
+    property var openIssues: List.filter(issues, function (issue) {
+        return !issue.isPullRequest && issue.open
+    })
+
     items: [
         PluginItem {
             id: pluginItem
             icon: "bug"
             title: i18n.tr("Issues")
-            value: List.filteredCount(issues, function (issue) {
-                return !issue.isPullRequest && issue.open
-            })
+            value: openIssues.length > 0 ? openIssues.length : ""
             page: IssuesPage {
                 plugin: githubPlugin
             }
@@ -99,9 +105,7 @@ Plugin {
             id: pullsItem
             icon: "code-fork"
             title: i18n.tr("Pull Requests")
-            value: List.filteredCount(issues, function (issue) {
-                return issue.isPullRequest && issue.open
-            })
+            value: openPulls.length > 0 ? openPulls.length : ""
 
             action: Action {
                 text: wideAspect && width < units.gu(90) ? i18n.tr("Open Pull") : i18n.tr("Open Pull Request")
@@ -114,7 +118,7 @@ Plugin {
             }
 
             pulseItem: PulseItem {
-                title: i18n.tr("Open Pull Requests")
+                title: i18n.tr("Recently Opened Pull Requests")
                 viewAll: i18n.tr("View all <b>%1</b> open pull requests").arg(pullsItem.value)
                 show: pullsRepeater.count > 0
 
@@ -127,11 +131,10 @@ Plugin {
 
                 Repeater {
                     id: pullsRepeater
-                    model: List.filter(issues, function(issue) {
-                        return issue.isPullRequest && issue.open
-                    }).sort(function(a, b) { return b.number - a.number })
+
+                    model: Math.min(openPulls.length, project.maxRecent)
                     delegate: PullRequestListItem {
-                        issue: modelData
+                        issue: openPulls[index]
                     }
                 }
             }

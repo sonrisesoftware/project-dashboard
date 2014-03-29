@@ -36,6 +36,8 @@ Item {
 
     property int loading
 
+    property int maxRecent: wideAspect ? 4 : 3
+
     Document {
         id: doc
 

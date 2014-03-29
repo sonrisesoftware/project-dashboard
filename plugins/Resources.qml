@@ -36,6 +36,7 @@ Plugin {
     items: PluginItem {
         title: "Resources"
         icon: "file"
+        value: documents.length > 0 ? documents.length : ""
 
         action: Action {
             id: addAction
@@ -44,7 +45,34 @@ Plugin {
             onTriggered: PopupUtils.open(Qt.resolvedUrl("resources/AddLinkDialog.qml"), value, {plugin: plugin})
         }
 
+        pulseItem: PulseItem {
+            visible: documents.length > 0
+            title: i18n.tr("Recently Saved Resources")
+            viewAll: i18n.tr("View all <b>%1</b> resources").arg(documents.length)
+
+            ListItem.Standard {
+                text: i18n.tr("No saved resources")
+                enabled: false
+                visible: documents.length === 0
+                height: visible ? implicitHeight : 0
+            }
+
+            Repeater {
+                model: Math.min(documents.length, project.maxRecent)
+                delegate: SubtitledListItem {
+                    id: item
+                    property var modelData: documents[documents.length - index - 1]
+                    text: modelData.title
+                    subText: modelData.text
+
+                    onClicked: pageStack.push(Qt.resolvedUrl("resources/WebPage.qml"), {plugin: plugin, resource: modelData})
+                    onPressAndHold: PopupUtils.open(actionsPopover, item, {index: documents.length - index - 1})
+                }
+            }
+        }
+
         page: Component {
+
             PluginPage {
                 title: i18n.tr("Resources")
                 actions: Action {
@@ -61,13 +89,13 @@ Plugin {
                     anchors.fill: parent
 
                     model: documents.length
-                    delegate: ListItem.Subtitled {
+                    delegate: SubtitledListItem {
                         id: item
                         property var modelData: documents[documents.length - index - 1]
                         text: modelData.title
                         subText: modelData.text
 
-                        onClicked: pageStack.push(Qt.resolvedUrl("resources/WebPage.qml"), {resource: modelData})
+                        onClicked: pageStack.push(Qt.resolvedUrl("resources/WebPage.qml"), {plugin: plugin, resource: modelData})
                         onPressAndHold: PopupUtils.open(actionsPopover, item, {index: documents.length - index - 1})
                     }
                 }

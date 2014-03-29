@@ -27,6 +27,7 @@ Page {
     title: resource.title
 
     property var resource
+    property var plugin
 
     property string token: ""
     property string firstGet: "?access_token=" + token
@@ -42,9 +43,7 @@ Page {
             text: i18n.tr("Bookmark")
             iconSource: getIcon("favorite-unselected")
             enabled: index > 1
-            onTriggered: {
-                PopupUtils.open(plugin.addLinkDialog, webPage, {url: webView.url})
-            }
+            onTriggered: PopupUtils.open(Qt.resolvedUrl("AddLinkDialog.qml"), webPage, {plugin: plugin, url: webView.url})
         },
 
         Action {

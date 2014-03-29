@@ -67,7 +67,7 @@ Plugin {
             }
 
             Repeater {
-                model: Math.min(notes.length, 4)
+                model: Math.min(notes.length, project.maxRecent)
                 delegate: SubtitledListItem {
                     property var modelData: notes[notes.length - index - 1]
                     id: item
