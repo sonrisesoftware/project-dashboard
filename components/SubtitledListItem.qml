@@ -26,6 +26,8 @@ ListItem.Standard {
     property alias text: titleLabel.text
     property alias subText: subLabel.text
 
+    property bool overlay: false
+
     height: opacity === 0 ? 0 : (__height + units.dp(2))
 
     Behavior on height {
@@ -51,6 +53,7 @@ ListItem.Standard {
             width: parent.width
             elide: Text.ElideRight
             maximumLineCount: 1
+            color: overlay ? "#888888" : Theme.palette.selected.backgroundText
         }
 
         Label {
@@ -60,11 +63,12 @@ ListItem.Standard {
             height: visible ? implicitHeight: 0
             //color:  Theme.palette.normal.backgroundText
             maximumLineCount: 1
-            opacity: 0.65
+            opacity: overlay ? 0.7 : 0.65
             font.weight: Font.Light
             fontSize: "small"
             visible: text !== ""
             elide: Text.ElideRight
+            color: overlay ? "#888888" : Theme.palette.selected.backgroundText
         }
     }
 

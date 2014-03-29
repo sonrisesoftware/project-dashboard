@@ -214,19 +214,27 @@ Plugin {
 
                 if (!found) {
                     var issue = issueComponent.createObject(mainView, {info: json[i]})
+                    issue.refresh(id)
                     issues.append({"modelData": issue})
                     nextNumber = Math.max(nextNumber, issue.number + 1)
                 }
             }
         }
 
-        github.getIssues(repo, "open", lastRefreshed,  handler)
-        github.getIssues(repo, "closed", lastRefreshed, handler)
-        github.getPullRequests(repo, "open", lastRefreshed,  handler)
-        github.getPullRequests(repo, "closed", lastRefreshed, handler)
+        var id = project.syncQueue.newGroup(i18n.tr("Updating GitHub project"))
+
+        for (var i = 0; i < issues.count; i++) {
+            var issue = issues.get(i).modelData
+            issue.refresh(id)
+        }
+
+        github.getIssues(project, id, repo, "open", lastRefreshed,  handler)
+        github.getIssues(project, id, repo, "closed", lastRefreshed, handler)
+        github.getPullRequests(project, id, repo, "open", lastRefreshed,  handler)
+        github.getPullRequests(project, id, repo, "closed", lastRefreshed, handler)
 
 
-        github.getEvents(repo, function (status, response) {
+        github.getEvents(project, id, repo, function (status, response) {
             if (lastRefreshed === "")
                 project.loading--
 
@@ -293,7 +301,7 @@ Plugin {
             }
         })
 
-        github.getLabels(repo, function(status, response) {
+        github.getLabels(project, id, repo, function(status, response) {
             if (lastRefreshed === "")
                 project.loading--
             //print("Labels:", response)
@@ -301,7 +309,7 @@ Plugin {
             doc.set("labels", json)
         })
 
-        github.getAssignees(repo, function(status, response) {
+        github.getAssignees(project, id, repo, function(status, response) {
             if (lastRefreshed === "")
                 project.loading--
             //print("Labels:", response)
@@ -309,7 +317,7 @@ Plugin {
             doc.set("assignees", json)
         })
 
-        github.getMilestones(repo, function(status, response) {
+        github.getMilestones(project, id, repo, function(status, response) {
             if (lastRefreshed === "")
                 project.loading--
             //print("Labels:", response)
@@ -317,7 +325,7 @@ Plugin {
             doc.set("milestones", json)
         })
 
-        github.getRepository(repo, function(status, response) {
+        github.getRepository(project, id, repo, function(status, response) {
             if (lastRefreshed === "")
                 project.loading--
             //print("Info:", response)
@@ -325,19 +333,19 @@ Plugin {
             doc.set("repo", json)
         })
 
-        github.get("/repos/" + repo + "/releases", function(status, response) {
+        github.get(project, id, "/repos/" + repo + "/releases", function(status, response) {
             if (lastRefreshed === "")
                 project.loading--
             doc.set("releases", JSON.parse(response))
         })
 
-        github.get("/repos/" + repo + "/stats/participation", function(status, response) {
+        github.get(project, id, "/repos/" + repo + "/stats/participation", function(status, response) {
             if (lastRefreshed === "")
                 project.loading--
             doc.set("commit_stats", JSON.parse(response))
         })
 
-        github.get("/repos/" + repo + "/branches", function(status, response) {
+        github.get(project, id, "/repos/" + repo + "/branches", function(status, response) {
             if (lastRefreshed === "")
                 project.loading--
             doc.set("branches", JSON.parse(response))
@@ -394,7 +402,7 @@ Plugin {
 
         var issue = issueComponent.createObject(mainView, {info: json})
         issues.append({"modelData": issue})
-        github.newPullRequest(repo, title, description, branch)
+        github.newPullRequest(project, repo, number, title, description, branch)
     }
 
     function newIssue(title, description) {
@@ -411,7 +419,7 @@ Plugin {
 
         var issue = issueComponent.createObject(mainView, {info: json})
         issues.append({"modelData": issue})
-        github.newIssue(repo, title, description)
+        github.newIssue(project, repo, number, title, description)
     }
 
     function displayMessage(message) {

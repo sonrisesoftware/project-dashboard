@@ -132,9 +132,9 @@ Object {
         return allEvents
     }
 
-    Component.onCompleted: {
+    function refresh(id) {
         if (isPullRequest && info._links) {
-            github.get(info._links.statuses.href, function(status, response) {
+            github.get(project, id, info._links.statuses.href, function(status, response) {
                 if (status === 304)
                     return
 
@@ -155,8 +155,10 @@ Object {
     function load() {
         loaded = true
 
+        var id = project.syncQueue.newGroup(i18n.tr("Updating issue <b>%1</b>").arg(number))
+
         if (isPullRequest) {
-            github.getPullRequest(plugin.repo, number, function(status, response) {
+            github.getPullRequest(project, id, plugin.repo, number, function(status, response) {
                 if (status === 304)
                     return
 
@@ -167,7 +169,7 @@ Object {
                 print("MERGEABLE:", JSON.parse(response).mergeable, pull.mergeable)
             })
 
-            github.getPullCommits(plugin.repo, issue, function(status, response) {
+            github.getPullCommits(project, id, plugin.repo, issue, function(status, response) {
                 if (status === 304)
                     return
 
@@ -177,14 +179,14 @@ Object {
             })
         }
 
-        github.getIssueComments(plugin.repo, issue, function(status, response) {
+        github.getIssueComments(project, id, plugin.repo, issue, function(status, response) {
             if (status === 304)
                 return
             plugin.changed = true
             doc.set("comments", JSON.parse(response))
         })
 
-        github.getIssueEvents(plugin.repo, issue, function(status, response) {
+        github.getIssueEvents(project, id, plugin.repo, issue, function(status, response) {
             if (status === 304)
                 return
             plugin.changed = true
@@ -197,17 +199,17 @@ Object {
         info = info
         newEvent("merged")
         newEvent("closed")
-        var request = github.mergePullRequest(plugin.repo, number, message)
+        var request = github.mergePullRequest(project, plugin.repo, number, message)
     }
 
     function closeOrReopen() {
         if (open) {
-            github.editIssue(plugin.repo, number, {"state": "closed"})
+            github.editIssue(project, plugin.repo, number, {"state": "closed"}, i18n.tr("Closing issue <b>%1</b>").arg(number))
             info.state = "closed"
             info = info
             newEvent("closed")
         } else {
-            github.editIssue(plugin.repo, number, {"state": "open"})
+            github.editIssue(project, plugin.repo, number, {"state": "open"}, i18n.tr("Reopening issue <b>%1</b>").arg(number))
 
             info.state = "open"
             info = info
@@ -222,7 +224,7 @@ Object {
         if (!(issue.milestone && issue.milestone.hasOwnProperty("number")) && !milestone)
             return
 
-        github.editIssue(plugin.repo, issue.number, {"milestone": milestone ? milestone.number : ""})
+        github.editIssue(project, plugin.repo, issue.number, {"milestone": milestone ? milestone.number : ""}, i18n.tr("Changing milestone for issue <b>%1</b>").arg(number))
 
         info.milestone = milestone
         info = info
@@ -238,7 +240,7 @@ Object {
         if (!(issue.assignee && issue.assignee.hasOwnProperty("login")) && login === "")
             return
 
-        github.editIssue(plugin.repo, issue.number, {"assignee": login})
+        github.editIssue(project, plugin.repo, issue.number, {"assignee": login}, i18n.tr("Changing assignee for issue <b>%1</b>").arg(number))
 
         if (login !== "") {
             info.assignee = assignee
@@ -258,11 +260,11 @@ Object {
         info.labels = labels
         info = info
 
-        var request = github.editIssue(plugin.repo, issue.number, {"labels": labelNames})
+        var request = github.editIssue(project, plugin.repo, issue.number, {"labels": labelNames}, i18n.tr("Changing labels for issue <b>%1</b>").arg(number))
     }
 
     function edit(title, body) {
-        github.editIssue(plugin.repo, issue.number, {"title": title, "body": body})
+        github.editIssue(plugin.repo, issue.number, {"title": title, "body": body}, i18n.tr("Changing title and description for issue <b>%1</b>").arg(number))
 
         info.title = title
         info.body = body
@@ -271,7 +273,7 @@ Object {
     }
 
     function comment(text) {
-        github.newIssueComment(plugin.repo, issue, text)
+        github.newIssueComment(project, plugin.repo, issue, text)
 
         newComment(text)
     }

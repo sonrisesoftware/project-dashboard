@@ -38,6 +38,10 @@ Item {
 
     property int maxRecent: wideAspect ? 4 : 3
 
+    property SyncQueue syncQueue: SyncQueue {
+        onError: syncError = true
+    }
+
     Document {
         id: doc
 

@@ -49,22 +49,26 @@ Service {
 
     onOauthChanged: {
         if (oauth !== "") {
-            get("/user", userLoaded)
-            get("/user/repos", function(status, response) {
+            //get(path, options, callback, args, headers) {
+            Http.get(github + "/user", ["access_token=" + oauth], userLoaded,
+                     undefined, {"Accept":"application/vnd.github.v3+json"})
+
+            Http.get(github + "/user/repos", ["access_token=" + oauth], function(has_error, status, response) {
+                print("REPOS", response)
                 if (status !== 304)
                     settings.set("githubRepos", JSON.parse(response))
-            })
+            }, undefined, {"Accept":"application/vnd.github.v3+json"})
         } else {
             settings.set("githubUser", undefined)
         }
     }
 
-    function userLoaded(status, response) {
+    function userLoaded(has_error, status, response) {
         var json = JSON.parse(response)
         settings.set("githubUser", json)
     }
 
-    function get(request, callback, options) {
+    function get(project, id, request, callback, options) {
         //print("OAuth", oauth)
         if (oauth === "")
             return undefined
@@ -72,10 +76,10 @@ Service {
             options = []
         if (request && request.indexOf(github) !== 0)
             request = github + request
-        queue.httpGet(request,["access_token=" + oauth].concat(options), {"Accept":"application/vnd.github.v3+json"}, callback, undefined)
+        project.syncQueue.httpGet(id, request,["access_token=" + oauth].concat(options), {"Accept":"application/vnd.github.v3+json"}, callback, undefined)
     }
 
-    function post(request, options, body, message) {
+    function post(project, id, request, options, body, message) {
         //print("OAuth", oauth)
         if (oauth === "")
             return undefined
@@ -83,10 +87,10 @@ Service {
             options = []
         if (request && request.indexOf(github) !== 0)
             request = github + request
-        queue.http("POST", request, ["access_token=" + oauth].concat(options), {"Accept":"application/vnd.github.v3+json"}, body, message)
+        project.syncQueue.http(id, "POST", request, ["access_token=" + oauth].concat(options), {"Accept":"application/vnd.github.v3+json"}, body, message)
     }
 
-    function put(request, options, body, message) {
+    function put(project, id, request, options, body, message) {
         //print("OAuth", oauth)
         if (oauth === "")
             return undefined
@@ -94,75 +98,80 @@ Service {
             options = []
         if (request && request.indexOf(github) !== 0)
             request = github + request
-        queue.http("PUT", request, ["access_token=" + oauth].concat(options), {"Accept":"application/vnd.github.v3+json"}, body, message)
+        project.syncQueue.http(id, "PUT", request, ["access_token=" + oauth].concat(options), {"Accept":"application/vnd.github.v3+json"}, body, message)
     }
 
-    function getEvents(repo, callback) {
-        get("/repos/" + repo + "/events", callback)
+    function getEvents(project, id, repo, callback) {
+        get(project, id, "/repos/" + repo + "/events", callback)
     }
 
-    function getIssues(repo, state, since,callback) {
-        return get("/repos/" + repo + "/issues", callback, ["state=" + state, "since=" + since])
+    function getIssues(project, id, repo, state, since,callback) {
+        return get(project, id, "/repos/" + repo + "/issues", callback, ["state=" + state, "since=" + since])
     }
 
-    function editIssue(repo, number, issue) {
-        post("/repos/" + repo + "/issues/" + number, undefined, JSON.stringify(issue), i18n.tr("Update issue <b>%1</b>").arg(number))
+    function editIssue(project, repo, number, issue, message) {
+        var id = project.syncQueue.newGroup(message)
+        post(project, id, "/repos/" + repo + "/issues/" + number, undefined, JSON.stringify(issue), i18n.tr("Update issue <b>%1</b>").arg(number))
     }
 
-    function newIssue(repo, title, description) {
-        return post("/repos/" + repo + "/issues", undefined, JSON.stringify({ "title": title, "body": description }), i18n.tr("Create issue <b>%1</b>").arg(title))
+    function newIssue(project, repo, number, title, description, message) {
+        var id = project.syncQueue.newGroup(i18n.tr("Creating pull request <b>%1</b>").arg(number))
+        return post(project, id, "/repos/" + repo + "/issues", undefined, JSON.stringify({ "title": title, "body": description }), i18n.tr("Create issue <b>%1</b>").arg(title))
     }
 
-    function newPullRequest(repo, title, description, branch) {
-        return post("/repos/" + repo + "/pulls", undefined, JSON.stringify({ "title": title, "body": description, "head": branch, "base": "master" }), i18n.tr("Create pull request <b>%1</b>").arg(title))
+    function newPullRequest(project, repo, number, title, description, branch) {
+        var id = project.syncQueue.newGroup(i18n.tr("Creating pull request <b>%1</b>").arg(number))
+        return post(project, id, "/repos/" + repo + "/pulls", undefined, JSON.stringify({ "title": title, "body": description, "head": branch, "base": "master" }), i18n.tr("Create pull request <b>%1</b>").arg(title))
     }
 
-    function mergePullRequest(repo, number, message) {
-        put("/repos/" + repo + "/pulls/" + number + "/merge", undefined, JSON.stringify({ "commit_message": message }), i18n.tr("Merge pull request <b>%1</b>").arg(number))
+    function mergePullRequest(project, repo, number, message) {
+        var id = project.syncQueue.newGroup(i18n.tr("Merging pull request <b>%1</b>").arg(number))
+        put(project, id, "/repos/" + repo + "/pulls/" + number + "/merge", undefined, JSON.stringify({ "commit_message": message }), i18n.tr("Merge pull request <b>%1</b>").arg(number))
     }
 
-    function getPullRequests(repo, state, since, callback) {
-        return get("/repos/" + repo + "/pulls", callback, ["state=" + state, "since=" + since])
+    function getPullRequests(project, id, repo, state, since, callback) {
+        return get(project, id, "/repos/" + repo + "/pulls", callback, ["state=" + state, "since=" + since])
     }
 
     function getPullRequest(repo, number, callback) {
-        return get("/repos/" + repo + "/pulls/" + number, callback)
+        return get(project, id, "/repos/" + repo + "/pulls/" + number, callback)
     }
 
-    function getAssignees(repo, callback) {
-        return get("/repos/" + repo + "/assignees", callback)
+    function getAssignees(project, id, repo, callback) {
+        return get(project, id, "/repos/" + repo + "/assignees", callback)
     }
 
-    function getMilestones(repo, callback) {
-        return get("/repos/" + repo + "/milestones", callback)
+    function getMilestones(project, id, repo, callback) {
+        return get(project, id, "/repos/" + repo + "/milestones", callback)
     }
 
-    function getLabels(repo, callback) {
-        return get("/repos/" + repo + "/labels", callback)
+    function getLabels(project, id, repo, callback) {
+        return get(project, id, "/repos/" + repo + "/labels", callback)
     }
 
-    function getBranches(repo, callback) {
-        return get("/repos/" + repo + "/branches", callback)
+    function getBranches(project, id, repo, callback) {
+        return get(project, id, "/repos/" + repo + "/branches", callback)
     }
 
-    function getRepository(repo, callback) {
-        return get("/repos/" + repo, callback)
+    function getRepository(project, id, repo, callback) {
+        return get(project, id, "/repos/" + repo, callback)
     }
 
-    function getIssueComments(repo, issue, callback) {
-        return get('/repos/' + repo + '/issues/' + issue.number + '/comments', callback)
+    function getIssueComments(project, id, repo, issue, callback) {
+        return get(project, id, '/repos/' + repo + '/issues/' + issue.number + '/comments', callback)
     }
 
-    function getPullCommits(repo, pull, callback) {
-        return get('/repos/' + repo + '/pulls/' + pull.number + '/commits', callback)
+    function getPullCommits(project, id, repo, pull, callback) {
+        return get(project, id, '/repos/' + repo + '/pulls/' + pull.number + '/commits', callback)
     }
 
-    function getIssueEvents(repo, issue, callback) {
-        return get('/repos/' + repo + '/issues/' + issue.number + '/events', callback)
+    function getIssueEvents(project, id, repo, issue, callback) {
+        return get(project, id, '/repos/' + repo + '/issues/' + issue.number + '/events', callback)
     }
 
-    function newIssueComment(repo, issue, comment) {
-        post("/repos/" + repo + "/issues/" + issue.number + "/comments", undefined, JSON.stringify({body: comment}), i18n.tr("Comment on issue <b>%1</b>").arg(issue.number))
+    function newIssueComment(project, repo, issue, comment) {
+        var id = project.syncQueue.newGroup(i18n.tr("Commenting on issue <b>%1</b>").arg(issue))
+        post(project, id, "/repos/" + repo + "/issues/" + issue.number + "/comments", undefined, JSON.stringify({body: comment}), i18n.tr("Comment on issue <b>%1</b>").arg(issue.number))
     }
 
     function authenticate() {

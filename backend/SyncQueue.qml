@@ -13,18 +13,37 @@ Object {
     signal error(var call, var status, var response, var args)
 
     property var list: []
+    property var groups: { return {} }
+    property int nextGroup: 0
 
-    function append(operation) {
+    function append(id, operation) {
         if (list === undefined)
             list = []
         list.push(operation)
         list = list
         totalCount++
+        groups[id].count++
+        groups[id].total++
     }
 
-    function http(call, path, options, headers, body, args) {
+    function newGroup(title) {
+        var id = nextGroup++
+        print(title)
+        groups[id] = {
+            "title": title,
+            "count": 0,
+            "total": 0,
+            "errors": []
+        }
+        groups = groups
+
+        return id
+    }
+
+    function http(id, call, path, options, headers, body, args) {
         var operation = {
             "type": "http",
+            "group": id,
             "data": {
                 "path": path,
                 "call": call,
@@ -35,12 +54,13 @@ Object {
             }
         }
 
-        append(operation)
+        append(id, operation)
     }
 
-    function httpGet(path, options, headers, callback, args) {
+    function httpGet(id, path, options, headers, callback, args) {
         var operation = {
             "type": "httpGet",
+            "group": id,
             "data": {
                 "path": path,
                 "options": options,
@@ -50,51 +70,76 @@ Object {
             }
         }
 
-        append(operation)
+        append(id, operation)
     }
 
-    function action(action, args) {
+    function action(id, action, args) {
         var operation = {
             "type": "action",
+            "group": id,
             "data": {
                 "action": action,
                 "args": args
             }
         }
 
-        append(operation)
+        append(id, operation)
     }
 
     function doOperation(op) {
         //print("Doing operation:", op.type)
         if (op.type === "http") {
-            doHttp(op.data)
+            doHttp(op.group, op.data)
         } else if (op.type === "httpGet") {
-            doHttpGet(op.data)
+            doHttpGet(op.group, op.data)
         } else {
             throw "Operation not supported: " + op.type
         }
     }
 
-    function doHttpGet(data) {
+    function doHttpGet(id, data) {
         count++
         Http.request(data.path, "GET", data.options, function(has_error, status, response) {
+            print("Finished", id)
+            groups[id].count--
+            groups = groups
             count--
             if (has_error) {
+                groups[id].errors.push({
+                                           "path": data.path,
+                                           "status": status
+                                       })
                 error(data.path, status, response, data.args)
             } else {
                 if (data.callback)
                     data.callback(status, response, data.args)
             }
+
+            if (groups[id].count === 0 && groups[id].errors.length === 0) {
+                print("Deleting", id)
+                delete groups[id]
+                groups = groups
+            }
         }, undefined, data.headers, undefined)
     }
 
-    function doHttp(data) {
+    function doHttp(id, data) {
         count++
         Http.request(data.path, data.call, data.options, function(has_error, status, response) {
+            groups[id].count--
+            groups = groups
             count--
             if (has_error) {
+                groups[id].errors.push({
+                                           "path": data.path,
+                                           "status": status
+                                       })
                 error(data.path, status, response, data.args)
+            }
+
+            if (groups[id].count === 0 && groups[id].errors.length === 0) {
+                delete groups[id]
+                groups = groups
             }
         }, undefined, data.headers, data.body)
     }

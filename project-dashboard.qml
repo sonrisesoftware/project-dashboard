@@ -19,11 +19,13 @@ import QtQuick 2.0
 import Ubuntu.Components 0.1
 import Ubuntu.PerformanceMetrics 0.1
 import Ubuntu.Components.Popups 0.1
+import Ubuntu.Components.ListItems 0.1 as ListItem
 import "components"
 import "ui"
 import "backend"
 import "backend/services"
 import "ubuntu-ui-extras"
+import "ubuntu-ui-extras/listutils.js" as List
 import "ubuntu-ui-extras/httplib.js" as Http
 import Friends 0.2
 import "Markdown.Converter.js" as Markdown
@@ -129,6 +131,136 @@ MainView {
         }
     }
 
+    property bool syncError: false
+    property bool busy: List.iter(backend.projects, function(project) {
+        var count = 0;
+        for (var id in project.syncQueue.groups) {
+            count += project.syncQueue.groups[id].count
+        }
+        return count
+    }) > 0
+
+    Item {
+        anchors.fill: parent
+        anchors.bottomMargin: header.height - header.__styleInstance.contentHeight
+        parent: header
+
+        AwesomeIcon {
+            name: "exclamation-triangle"
+            color: colors["yellow"]
+            anchors.centerIn: syncIndicator
+            size: units.gu(2.6)
+            opacity: syncError ? 1 : 0
+
+            Behavior on opacity {
+                UbuntuNumberAnimation {
+                    duration: UbuntuAnimation.SlowDuration
+                }
+            }
+        }
+
+        ActivityIndicator {
+            id: syncIndicator
+            anchors {
+                right: parent.right
+                verticalCenter: parent.verticalCenter
+                rightMargin: (parent.height - height)/2
+            }
+
+            height: units.gu(4)
+            width: height
+            running: opacity > 0
+            opacity: busy ? 1 : 0
+
+            Behavior on opacity {
+                UbuntuNumberAnimation {
+                    duration: UbuntuAnimation.SlowDuration
+                }
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: PopupUtils.open(syncPopover, syncIndicator)
+            }
+        }
+    }
+
+    Component {
+        id: syncPopover
+
+        Popover {
+            contentHeight: column.height
+            Column {
+                id: column
+                width: parent.width
+
+                Repeater {
+                    model: backend.projects
+                    delegate: Column {
+                        id: syncColumn
+                        width: parent.width
+
+                        property Project project: modelData
+
+                        visible: List.objectKeys(modelData.syncQueue.groups).length > 0
+
+                        ListItem.Header {
+                            Label {
+                                text: modelData.name
+                                anchors {
+                                    verticalCenter: parent.verticalCenter
+                                    left: parent.left
+                                    leftMargin: units.gu(1)
+                                }
+                                color: "#888888"//Theme.palette.normal.overlayText
+                            }
+                            height: List.objectKeys(modelData.syncQueue.groups).length > 0 ? units.gu(3.5) : 0
+                        }
+
+                        Repeater {
+                            model: List.objectKeys(modelData.syncQueue.groups)
+                            delegate: SubtitledListItem {
+                                id: item
+                                overlay: true
+                                property var group: syncColumn.project.syncQueue.groups[modelData]
+                                text: group.title
+                                subText: group.errors.length > 0 ? i18n.tr("Error: %1").arg(group.errors[0].status)
+                                                                 : ""
+
+                                control: ProgressBar {
+                                    minimumValue: 0
+                                    maximumValue: group.total
+                                    value: item.group.total - item.group.count
+                                    visible: item.group.count > 0
+                                    width: units.gu(10)
+                                    height: units.gu(2.5)
+                                }
+
+                                AwesomeIcon {
+                                    name: "exclamation-triangle"
+                                    color: colors["yellow"]
+                                    anchors {
+                                        right: parent.right
+                                        verticalCenter: parent.verticalCenter
+                                        rightMargin: (parent.height - height)/2
+                                    }
+                                    size: units.gu(2.6)
+                                    opacity: item.group.errors.length > 0 ? 1 : 0
+
+                                    Behavior on opacity {
+                                        UbuntuNumberAnimation {
+                                            duration: UbuntuAnimation.SlowDuration
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     FriendsUtils {
         id: friendsUtils
     }
@@ -161,22 +293,22 @@ MainView {
         }
     }
 
-    SyncQueue {
-        id: queue
+//    SyncQueue {
+//        id: queue
 
-        onError: {
-            print("Error", call, status, response, args)
-            if (status === 0) {
-                mainView.error(i18n.tr("Connection Error"), i18n.tr("Timeout error. Please check your internet and firewall settings:\n\n%1").arg(call))
-            } else {
-                if (args) {
-                    mainView.error(i18n.tr("Connection Error"), i18n.tr("Unable to complete action:\n\n%1").arg(args))
-                } else {
-                    mainView.error(i18n.tr("Connection Error"), i18n.tr("Unable to complete operation. HTTP Error: %1\n\n%2").arg(status).arg(call))
-                }
-            }
-        }
-    }
+//        onError: {
+//            print("Error", call, status, response, args)
+//            if (status === 0) {
+//                mainView.error(i18n.tr("Connection Error"), i18n.tr("Timeout error. Please check your internet and firewall settings:\n\n%1").arg(call))
+//            } else {
+//                if (args) {
+//                    mainView.error(i18n.tr("Connection Error"), i18n.tr("Unable to complete action:\n\n%1").arg(args))
+//                } else {
+//                    mainView.error(i18n.tr("Connection Error"), i18n.tr("Unable to complete operation. HTTP Error: %1\n\n%2").arg(status).arg(call))
+//                }
+//            }
+//        }
+//    }
 
     GitHub {
         id: github

@@ -119,7 +119,9 @@ Plugin {
         if (lastRefreshed === "")
             project.loading += 2
 
-        travisCI.getRepo(repo, function(status, response) {
+        var id = project.syncQueue.newGroup(i18n.tr("Updating Travis CI"))
+
+        travisCI.getRepo(project, id, repo, function(status, response) {
             if (lastRefreshed === "")
                 project.loading--
 
@@ -132,7 +134,7 @@ Plugin {
             doc.set("repo", JSON.parse(response))
         })
 
-        travisCI.getBuilds(repo, function(status, response) {
+        travisCI.getBuilds(project, id, repo, function(status, response) {
             if (lastRefreshed === "")
                 project.loading--
 

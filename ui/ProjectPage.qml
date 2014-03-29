@@ -548,35 +548,35 @@ TabbedPage {
 //        visible: project.enabledPlugins.length === 0
 //    }
 
-    Item {
-        anchors.fill: parent
-        anchors.bottomMargin: header.height - header.__styleInstance.contentHeight
-        parent: header
+//    Item {
+//        anchors.fill: parent
+//        anchors.bottomMargin: header.height - header.__styleInstance.contentHeight
+//        parent: header
 
-        ActivityIndicator {
-            anchors {
-                right: parent.right
-                verticalCenter: parent.verticalCenter
-                rightMargin: (parent.height - height)/2
-            }
-
-            height: units.gu(4)
-            width: height
-            running: opacity > 0
-            opacity: project.loading ? 1 : 0
-
-            Behavior on opacity {
-                UbuntuNumberAnimation {
-                    duration: UbuntuAnimation.SlowDuration
-                }
-            }
-
-//            Label {
-//                anchors.centerIn: parent
-//                text: project.loading
+//        ActivityIndicator {
+//            anchors {
+//                right: parent.right
+//                verticalCenter: parent.verticalCenter
+//                rightMargin: (parent.height - height)/2
 //            }
-        }
-    }
+
+//            height: units.gu(4)
+//            width: height
+//            running: opacity > 0
+//            opacity: project.loading ? 1 : 0
+
+//            Behavior on opacity {
+//                UbuntuNumberAnimation {
+//                    duration: UbuntuAnimation.SlowDuration
+//                }
+//            }
+
+////            Label {
+////                anchors.centerIn: parent
+////                text: project.loading
+////            }
+//        }
+//    }
 
     Component {
         id: actionMenu

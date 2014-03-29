@@ -42,26 +42,26 @@ Service {
         }
     }
 
-    function get(request, callback, options) {
+    function get(project, id, request, callback, options) {
         if (options === undefined)
             options = []
         // httpGet(path, options, headers, callback, args) {
-        return queue.httpGet(travis + request,options, {}, callback)
+        return project.syncQueue.httpGet(id, travis + request,options, {}, callback)
     }
 
-    function getRepo(repo, callback) {
-        return get("/repos/" + repo, callback)
+    function getRepo(project, id, repo, callback) {
+        return get(project, id, "/repos/" + repo, callback)
     }
 
-    function getBuilds(repo, callback) {
-        return get("/repos/" + repo + "/builds", callback)
+    function getBuilds(project, id, repo, callback) {
+        return get(project, id, "/repos/" + repo + "/builds", callback)
     }
 
-    function getBuild(repo, build, callback) {
-        return get("/repos/" + repo + "/builds/" + build, callback)
+    function getBuild(project, id, repo, build, callback) {
+        return get(project, id, "/repos/" + repo + "/builds/" + build, callback)
     }
 
-    function getLog(job, callback) {
-        return get("/jobs/" + job + "/log", callback)
+    function getLog(project, id, job, callback) {
+        return get(project, id, "/jobs/" + job + "/log", callback)
     }
 }

@@ -98,6 +98,7 @@ Plugin {
     items: PluginItem {
         icon: "clock"
         title: i18n.tr("Time Tracker")
+        value: DateUtils.friendlyDuration(allTime)
 
         action: Action {
             text: timer.running ? i18n.tr("Pause Timer") : i18n.tr("Start Timer")
