@@ -52,6 +52,7 @@ MainView {
 
     backgroundColor: Qt.rgba(0.3,0.3,0.3,1)
 
+    // The size of the Nexus 4
     width: units.gu(42)
     height: units.gu(67)
 
@@ -176,6 +177,7 @@ MainView {
 
             MouseArea {
                 anchors.fill: parent
+                enabled: busy || syncError
                 onClicked: PopupUtils.open(syncPopover, syncIndicator)
             }
         }
@@ -185,7 +187,14 @@ MainView {
         id: syncPopover
 
         Popover {
+            id: popover
             contentHeight: column.height
+
+            onContentHeightChanged: {
+                if (contentHeight == 0)
+                    PopupUtils.close(popover)
+            }
+
             Column {
                 id: column
                 width: parent.width
