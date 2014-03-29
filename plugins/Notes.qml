@@ -44,6 +44,7 @@ Plugin {
     items: PluginItem {
         title: i18n.tr("Notes")
         icon: "pencil-square-o"
+        value: notes.length > 0 ? notes.length : ""
 
         action: Action {
             text: i18n.tr("Add Note")
@@ -53,6 +54,7 @@ Plugin {
         }
 
         pulseItem: PulseItem {
+
             visible: notes.length > 0
             title: i18n.tr("Recent Notes")
             viewAll: i18n.tr("View all <b>%1</b> notes").arg(notes.length)

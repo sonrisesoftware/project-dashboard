@@ -63,6 +63,7 @@ Plugin {
         id: eventsItem
         title: "Events"
         icon: "calendar"
+        value: events.length > 0 ? events.length : ""
 
         action: Action {
             id: addAction
