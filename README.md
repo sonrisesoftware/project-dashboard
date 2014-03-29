@@ -27,6 +27,10 @@ sudo apt-get update
 sudo apt-get install project-dashboard
 ```
 
+### Bugs in the Ubuntu SDK that affect Project Dashboard ###
+
+[LP #1208833](https://bugs.launchpad.net/ubuntu-ui-toolkit/+bug/1208833) - The pointer on the popover that opens for the sync item isn't correctly positioned when the app's width is too small.
+
 ### Licensing ###
 
 Project Dashboard is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
