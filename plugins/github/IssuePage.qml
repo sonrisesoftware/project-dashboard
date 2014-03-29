@@ -297,7 +297,7 @@ Page {
                 }
             }
 
-//            TextArea {
+            //TextArea {
 //                id: textArea
 //                width: parent.width
 //                text: issue.renderBody()
@@ -330,10 +330,13 @@ Page {
 
                 Label {
                     id: body
-                    text: issue.body
+                    text: empty ? "No description" : issue.renderBody()
+                    property bool empty: issue.body === ""
+                    color: empty ? Theme.palette.normal.backgroundText : Theme.palette.selected.backgroundText
                     width: parent.width - units.gu(2)
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                     anchors.centerIn: parent
+                    textFormat: Text.RichText
                 }
             }
 

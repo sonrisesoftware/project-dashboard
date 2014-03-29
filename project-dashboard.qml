@@ -133,11 +133,7 @@ MainView {
 
     property bool syncError: false
     property bool busy: List.iter(backend.projects, function(project) {
-        var count = 0;
-        for (var id in project.syncQueue.groups) {
-            count += project.syncQueue.groups[id].count
-        }
-        return count
+        return project.syncQueue.count
     }) > 0
 
     Item {
@@ -150,7 +146,7 @@ MainView {
             color: colors["yellow"]
             anchors.centerIn: syncIndicator
             size: units.gu(2.6)
-            opacity: syncError ? 1 : 0
+            opacity: !busy && syncError ? 1 : 0
 
             Behavior on opacity {
                 UbuntuNumberAnimation {
