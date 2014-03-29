@@ -5,6 +5,7 @@ mkdir -p ../releases/project-dashboard
 cp . $RELEASE_DIR -r
 cd $RELEASE_DIR
 replace '@APP_VERSION@' $VERSION manifest.json
+replace '@APP_VERSION@' $VERSION project-dashboard.qml
 sudo rm .git* -r
 rm ubuntu-ui-extras -r
 cp ../../../ubuntu-ui-extras . -r

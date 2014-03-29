@@ -112,7 +112,7 @@ MainView {
             appName: i18n.tr("Project Dashboard")
             icon: Qt.resolvedUrl("project-dashboard-shadowed.png")
             iconFrame: false
-            version: "0.2.1"
+            version: "@APP_VERSION@"
             credits: {
                 var credits = {}
                 credits[i18n.tr("Icon")] = "Sam Hewitt"
@@ -169,7 +169,11 @@ MainView {
             if (status === 0) {
                 mainView.error(i18n.tr("Connection Error"), i18n.tr("Timeout error. Please check your internet and firewall settings:\n\n%1").arg(call))
             } else {
-                mainView.error(i18n.tr("Connection Error"), i18n.tr("Unable to complete action:\n\n%1").arg(args))
+                if (args) {
+                    mainView.error(i18n.tr("Connection Error"), i18n.tr("Unable to complete action:\n\n%1").arg(args))
+                } else {
+                    mainView.error(i18n.tr("Connection Error"), i18n.tr("Unable to complete operation. HTTP Error: %1\n\n%2").arg(status).arg(call))
+                }
             }
         }
     }

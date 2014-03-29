@@ -1,3 +1,11 @@
+project-dashboard (0.2.2) trusty; urgency=low
+
+  * Fixed keyboard showing up when opening an issue
+  * Fixed the issue summary not wrapping
+  * Better error messages
+
+ -- Michael Spencer <sonrisesoftware@gmail.com>  Fri, 28 Mar 2014 13:52:10 -0500
+
 project-dashboard (0.2.1) trusty; urgency=low
 
   * Worked on the tablet/desktop tiles UI
