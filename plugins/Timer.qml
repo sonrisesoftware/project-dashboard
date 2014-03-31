@@ -38,7 +38,7 @@ Plugin {
 
     function setup() {
         dates = doc.get("dates", {})
-        if (!dates.hasOwnProperty("today")) {
+        if (!dates.hasOwnProperty(today)) {
             dates[today] = {
                 "date": today,
                 "time": 0
@@ -48,11 +48,13 @@ Plugin {
 
     onLoaded: {
         dates = doc.get("dates", {})
-        if (!dates.hasOwnProperty("today")) {
+        if (!dates.hasOwnProperty(today)) {
             dates[today] = {
                 "date": today,
                 "time": 0
             }
+            doc.set("savedTime", 0)
+            doc.set("startTime", undefined)
         }
     }
 
@@ -106,14 +108,25 @@ Plugin {
         }
 
         pulseItem: PulseItem {
+            id: pulseItem
             show: totalTime > 0 || timer.running
             title: i18n.tr("Time Tracked Today")
             viewAll: i18n.tr("View all days")
+
+            ListItem.Standard {
+                text: i18n.tr("No time tracked today")
+                visible: !pulseItem.show
+                enabled: false
+                height: visible ? implicitHeight : 0
+            }
+
             ListItem.SingleValue {
                 id: todayItem
                 text: i18n.tr("Today")
                 value: DateUtils.friendlyDuration(totalTime)
-                onClicked: PopupUtils.open(editDialog, todayItem, {docId: today})
+                onClicked: PopupUtils.open(editDialog, todayItem, {date: today})
+                visible: pulseItem.show
+                height: visible ? implicitHeight : 0
             }
         }
 
@@ -123,177 +136,31 @@ Plugin {
 
             tabs: wideAspect ? [i18n.tr("Timer")] : [i18n.tr("Timer"), i18n.tr("History")]
 
-            Layouts {
-                id: layouts
-                anchors.fill: parent
+            Item {
+                id: timerPage
+                anchors {
+                    left: parent.left
+                    top: parent.top
+                    bottom: parent.bottom
+                    leftMargin: show ? 0 : -width
 
-                layouts: [
-                    ConditionalLayout {
-                        name: "wideAspect"
-                        when: wideAspect
-
-                        Item {
-                            anchors.fill: parent
-
-                            Item {
-                                anchors {
-                                    left: parent.left
-                                    right: parent.horizontalCenter
-                                    top: parent.top
-                                    bottom: parent.bottom
-                                    margins: units.gu(2)
-                                    rightMargin: units.gu(1)
-                                }
-
-                                ItemLayout {
-                                    item: "timer"
-                                    width: timerView.width
-                                    height: timerView.height
-
-                                    anchors.centerIn: parent
-                                }
-                            }
-
-                            UbuntuShape {
-                                id: shape
-                                color: Qt.rgba(0,0,0,0.2)
-                                anchors {
-                                    right: parent.right
-                                    left: parent.horizontalCenter
-                                    top: parent.top
-                                    bottom: parent.bottom
-                                    margins: units.gu(2)
-                                    leftMargin: units.gu(1)
-                                }
-                                clip: true
-
-                                ItemLayout {
-                                    item: "list"
-
-                                    anchors.fill: parent
-                                }
-
-                                Item {
-                                    anchors.bottom: parent.bottom
-                                    height: footer.height
-                                    width: parent.width
-                                    clip: true
-                                    UbuntuShape {
-                                        anchors.bottom: parent.bottom
-                                        height: shape.height
-                                        width: parent.width
-                                        color: Qt.rgba(0,0,0,0.2)
-                                        ItemLayout {
-                                            item: "footer"
-
-                                            anchors {
-                                                left: parent.left
-                                                right: parent.right
-                                                bottom: parent.bottom
-                                            }
-
-                                            height: footer.height
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    },
-
-                    ConditionalLayout {
-                        name: "regularAspect"
-                        when: !wideAspect
-
-                        Item {
-                            id: regLayout
-                            anchors.fill: parent
-
-                            Item {
-                                id: timerPage
-                                anchors {
-                                    left: parent.left
-                                    top: parent.top
-                                    bottom: parent.bottom
-                                    leftMargin: show ? 0 : -width
-
-                                    Behavior on leftMargin {
-                                        UbuntuNumberAnimation {}
-                                    }
-                                }
-
-                                width: parent.width
-                                property bool show: page.selectedTab === i18n.tr("Timer")
-
-                                Item {
-                                    anchors.fill: parent
-                                    //anchors.topMargin: units.gu(1) - header.height
-                                    ItemLayout {
-                                        anchors.centerIn: parent
-                                        item: "timer"
-                                        width: timerView.width
-                                        height: timerView.height
-                                    }
-                                }
-                            }
-
-                            Item {
-                                anchors {
-                                    right: parent.right
-                                    top: parent.top
-                                    bottom: parent.bottom
-                                    rightMargin: show ? 0 : -width
-
-                                    Behavior on rightMargin {
-                                        UbuntuNumberAnimation {}
-                                    }
-                                }
-
-                                width: parent.width
-                                property bool show: !timerPage.show
-
-                                ItemLayout {
-                                    anchors.fill: parent
-                                    anchors.topMargin: units.gu(1)
-                                    item: "list"
-                                }
-
-                                Rectangle {
-                                    anchors.fill: column
-                                    color: Qt.rgba(0,0,0,0.2)
-                                }
-
-                                ItemLayout {
-                                    id: column
-                                    item: "footer"
-
-                                    anchors {
-                                        left: parent.left
-                                        right: parent.right
-                                        bottom: parent.bottom
-                                    }
-
-                                    height: footer.height
-                                }
-                            }
-                        }
+                    Behavior on leftMargin {
+                        UbuntuNumberAnimation {}
                     }
-                ]
+                }
 
-                ListView {
-                    Layouts.item: "list"
-                    model: List.objectKeys(dates)
-                    delegate: ListItem.SingleValue {
-                        id: item
-                        text: DateUtils.formattedDate(new Date(modelData))
-                        value: modelData === today ? DateUtils.friendlyDuration(totalTime)
-                                                         : DateUtils.friendlyDuration(dates[modelData].time)
-                        onClicked: PopupUtils.open(editDialog, plugin, {date: modelData})
-                    }
+                width: parent.width
+                property bool show: page.selectedTab === i18n.tr("Timer")
+
+                opacity: show ? 1 : 0
+
+                Behavior on opacity {
+                    UbuntuNumberAnimation {}
                 }
 
                 Column {
                     id: timerView
-                    Layouts.item: "timer"
+                    anchors.centerIn: parent
                     spacing: units.gu(1)
 
                     Label {
@@ -311,28 +178,246 @@ Plugin {
                             onTriggered: startOrStop()
                         }
 
-//                        Button {
-//                            text: i18n.tr("Edit")
-//                            onTriggered: PopupUtils.open(editDialog, todayItem, {docId: today.docId})
-//                        }
-                    }
-                }
-
-                Column {
-                    id: footer
-                    Layouts.item: "footer"
-
-                    width: units.gu(20)
-
-                    ListItem.ThinDivider {}
-                    ListItem.SingleValue {
-                        text: i18n.tr("Total Time")
-                        value: DateUtils.friendlyDuration(allTime)
-                        showDivider: false
-                        height: units.gu(4.5)
+                        Button {
+                            text: i18n.tr("Edit")
+                            onClicked: PopupUtils.open(editDialog, todayItem, {date: today})
+                        }
                     }
                 }
             }
+
+            Item {
+                id: historyPage
+                anchors {
+                    right: parent.right
+                    top: parent.top
+                    bottom: parent.bottom
+                    rightMargin: show ? 0 : -width
+
+                    Behavior on rightMargin {
+                        UbuntuNumberAnimation {}
+                    }
+                }
+
+                width: parent.width
+                property bool show: !timerPage.show
+
+                opacity: show ? 1 : 0
+
+                Behavior on opacity {
+                    UbuntuNumberAnimation {}
+                }
+
+//                ItemLayout {
+//                    anchors.fill: parent
+//                    anchors.topMargin: units.gu(1)
+//                    item: "list"
+//                }
+
+                Item {
+                    id: list
+                    anchors.fill: parent
+                    anchors.margins: wideAspect ? units.gu(2) : 0
+
+                    Behavior on anchors.margins {
+                        UbuntuNumberAnimation {}
+                    }
+
+                    UbuntuShape {
+                        anchors.fill: parent
+                        color: Qt.rgba(0,0,0,0.2)
+                        opacity: wideAspect ? 1 : 0
+
+                        Behavior on opacity {
+                            UbuntuNumberAnimation {}
+                        }
+                    }
+
+                    ListView {
+                        anchors.fill: parent
+                        model: List.objectKeys(dates)
+                        delegate: ListItem.SingleValue {
+                            id: item
+                            text: DateUtils.formattedDate(new Date(modelData))
+                            value: modelData === today ? DateUtils.friendlyDuration(totalTime)
+                                                             : DateUtils.friendlyDuration(dates[modelData].time)
+                            onClicked: PopupUtils.open(editDialog, plugin, {date: modelData})
+                        }
+                    }
+
+                    Item {
+                        anchors.bottom: parent.bottom
+                        height: footer.height
+                        width: parent.width
+                        visible: wideAspect
+                        clip: true
+                        UbuntuShape {
+                            anchors.bottom: parent.bottom
+                            height: list.height
+                            width: parent.width
+                            color: Qt.rgba(0,0,0,0.2)
+                        }
+                    }
+
+                    Rectangle {
+                        anchors.fill: footer
+                        color: Qt.rgba(0,0,0,0.2)
+                        visible: !wideAspect
+                    }
+
+                    Column {
+                        id: footer
+
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                            bottom: parent.bottom
+                        }
+
+                        ListItem.ThinDivider {}
+                        ListItem.SingleValue {
+                            text: i18n.tr("Total Time")
+                            value: DateUtils.friendlyDuration(allTime)
+                            showDivider: false
+                            height: units.gu(4.5)
+                        }
+                    }
+                }
+            }
+
+            states: [
+                State {
+                    name: "wide"
+                    when: wideAspect
+                    PropertyChanges {
+                        restoreEntryValues: true
+                        target: timerPage
+                        width: parent.width/2
+                        show: true
+                    }
+
+                    PropertyChanges {
+                        restoreEntryValues: true
+                        target: historyPage
+                        width: parent.width/2
+                        show: true
+                    }
+                }
+
+            ]
+
+            transitions: [
+                Transition {
+                    from: "*"
+                    to: "wide"
+
+                    UbuntuNumberAnimation {
+                        target: timerPage
+                        property: "width"
+                    }
+
+                    UbuntuNumberAnimation {
+                        target: historyPage
+                        property: "width"
+                    }
+                },
+
+                Transition {
+                    from: "wide"
+                    to: "*"
+
+                    NumberAnimation { target: timerPage; property: "anchors.leftMargin"; duration: 0;  }
+                    NumberAnimation { target: historyPage; property: "anchors.rightMargin"; duration: 0;  }
+                }
+
+            ]
+
+//            Layouts {
+//                id: layouts
+//                anchors.fill: parent
+
+//                layouts: [
+//                    ConditionalLayout {
+//                        name: "wideAspect"
+//                        when: wideAspect
+
+//                        Item {
+//                            anchors.fill: parent
+
+//                            Item {
+//                                anchors {
+//                                    left: parent.left
+//                                    right: parent.horizontalCenter
+//                                    top: parent.top
+//                                    bottom: parent.bottom
+//                                    margins: units.gu(2)
+//                                    rightMargin: units.gu(1)
+//                                }
+
+//                                ItemLayout {
+//                                    item: "timer"
+//                                    width: timerView.width
+//                                    height: timerView.height
+
+//                                    anchors.centerIn: parent
+//                                }
+//                            }
+
+//                            UbuntuShape {
+//                                id: shape
+//                                color: Qt.rgba(0,0,0,0.2)
+//                                anchors {
+//                                    right: parent.right
+//                                    left: parent.horizontalCenter
+//                                    top: parent.top
+//                                    bottom: parent.bottom
+//                                    margins: units.gu(2)
+//                                    leftMargin: units.gu(1)
+//                                }
+//                                clip: true
+
+//                                ItemLayout {
+//                                    item: "list"
+
+//                                    anchors.fill: parent
+//                                }
+
+//                                Item {
+//                                    anchors.bottom: parent.bottom
+//                                    height: footer.height
+//                                    width: parent.width
+//                                    clip: true
+//                                    UbuntuShape {
+//                                        anchors.bottom: parent.bottom
+//                                        height: shape.height
+//                                        width: parent.width
+//                                        color: Qt.rgba(0,0,0,0.2)
+//                                        ItemLayout {
+//                                            item: "footer"
+
+//                                            anchors {
+//                                                left: parent.left
+//                                                right: parent.right
+//                                                bottom: parent.bottom
+//                                            }
+
+//                                            height: footer.height
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    },
+
+//                    ConditionalLayout {
+//                        name: "regularAspect"
+//                        when: !wideAspect
+
+
+//                    }
+//                ]
+
+//            }
         }
     }
 
