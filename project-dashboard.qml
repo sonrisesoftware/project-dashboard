@@ -219,7 +219,7 @@ MainView {
                                 }
                                 color: "#888888"//Theme.palette.normal.overlayText
                             }
-                            height: List.objectKeys(modelData.syncQueue.groups).length > 0 ? units.gu(3.5) : 0
+                            height: List.objectKeys(modelData.syncQueue.groups).length > 0 ? units.gu(4) : 0
                         }
 
                         Repeater {
