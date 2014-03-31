@@ -39,6 +39,7 @@ Plugin {
     function newNote(title, contents) {
         notes.push({"title": title, "contents": contents, "date": new Date().toJSON()})
         notes = notes
+        notification.show(i18n.tr("Note created"))
     }
 
     items: PluginItem {

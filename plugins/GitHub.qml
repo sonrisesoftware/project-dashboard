@@ -403,6 +403,7 @@ Plugin {
         var issue = issueComponent.createObject(mainView, {info: json})
         issues.append({"modelData": issue})
         github.newPullRequest(project, repo, number, title, description, branch)
+        notification.show(i18n.tr("Pull request created"))
     }
 
     function newIssue(title, description) {
@@ -420,6 +421,7 @@ Plugin {
         var issue = issueComponent.createObject(mainView, {info: json})
         issues.append({"modelData": issue})
         github.newIssue(project, repo, number, title, description)
+        notification.show(i18n.tr("Issue created"))
     }
 
     function displayMessage(message) {

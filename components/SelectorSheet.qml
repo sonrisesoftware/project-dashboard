@@ -36,6 +36,7 @@ ComposerSheet {
 
     ListView {
         id: listView
+        clip: true
         anchors {
             margins: units.gu(-1)
             fill: parent

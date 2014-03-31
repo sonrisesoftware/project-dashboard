@@ -121,6 +121,7 @@ Page {
             onAccepted: {
                 var project = backend.newProject(value)
                 pageStack.push(Qt.resolvedUrl("ProjectPage.qml"), {project: project})
+                notification.show(i18n.tr("Project created"))
             }
         }
     }

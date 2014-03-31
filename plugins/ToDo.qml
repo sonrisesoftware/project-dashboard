@@ -39,6 +39,7 @@ Plugin {
     function newTask(title, contents) {
         tasks.push({"title": title, "contents": contents, "date": new Date().toJSON()})
         tasks = tasks
+        notification.show(i18n.tr("Task added"))
     }
 
     items: PluginItem {

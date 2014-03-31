@@ -77,6 +77,7 @@ Dialog {
 
                 plugin.documents.push({"title": titleField.text, "type": "link", "text": link})
                 plugin.documents = plugin.documents
+                notification.show(i18n.tr("Resource saved"))
             }
         }
 

@@ -81,6 +81,7 @@ Object {
         comments.push({body: text, user: github.user, created_at: new Date().toISOString()})
         comments = comments
         plugin.changed = true
+        notification.show(i18n.tr("Comment posted"))
     }
 
     property var allEvents: {
@@ -200,20 +201,23 @@ Object {
         newEvent("merged")
         newEvent("closed")
         var request = github.mergePullRequest(project, plugin.repo, number, message)
+        notification.show(i18n.tr("Pull request merged"))
     }
 
     function closeOrReopen() {
         if (open) {
-            github.editIssue(project, plugin.repo, number, {"state": "closed"}, i18n.tr("Closing issue <b>%1</b>").arg(number))
+            github.editIssue(project, plugin.repo, number, {"state": "closed"}, i18n.tr("Closing %2 <b>%1</b>").arg(number).type(type))
             info.state = "closed"
             info = info
             newEvent("closed")
+            notification.show(i18n.tr("%1 closed").arg(typeCape))
         } else {
             github.editIssue(project, plugin.repo, number, {"state": "open"}, i18n.tr("Reopening issue <b>%1</b>").arg(number))
 
             info.state = "open"
             info = info
             newEvent("reopened")
+            notification.show(i18n.tr("%1 reopened").arg(typeCape))
         }
     }
 
@@ -229,6 +233,7 @@ Object {
         info.milestone = milestone
         info = info
         plugin.changed = true
+        notification.show(i18n.tr("Milestone changed"))
     }
 
     function setAssignee(assignee) {
@@ -249,6 +254,7 @@ Object {
             info.assignee = undefined
         }
         info = info
+        notification.show(i18n.tr("Assignee changed"))
     }
 
     function updateLabels(labels) {
@@ -261,6 +267,7 @@ Object {
         info = info
 
         var request = github.editIssue(project, plugin.repo, issue.number, {"labels": labelNames}, i18n.tr("Changing labels for issue <b>%1</b>").arg(number))
+        notification.show(i18n.tr("Labels updated"))
     }
 
     function edit(title, body) {
@@ -270,6 +277,7 @@ Object {
         info.body = body
         info = info
         plugin.changed = true
+        notification.show(i18n.tr("%1 updated").arg(typeCap))
     }
 
     function comment(text) {

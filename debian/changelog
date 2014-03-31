@@ -1,3 +1,17 @@
+project-dashboard (0.3) trusty; urgency=medium
+
+  * Work on the Timer plugin
+    - New UI transitions
+    - Bug fixes
+  * Better sync framework and UI
+  * Various other bug fixes and improvements
+  * New plugins
+    - Notes
+    - Events
+  * A first-run walkthrough!
+
+ -- Michael Spencer <sonrisesoftware@gmail.com>  Mon, 31 Mar 2014 15:02:29 -0500
+
 project-dashboard (0.2.2) trusty; urgency=low
 
   * Fixed keyboard showing up when opening an issue

@@ -141,6 +141,10 @@ MainView {
         return project.syncQueue.count
     }) > 0
 
+    Notification {
+        id: notification
+    }
+
     Item {
         anchors.fill: parent
         anchors.bottomMargin: header.height - header.__styleInstance.contentHeight
