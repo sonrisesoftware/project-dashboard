@@ -10,7 +10,7 @@ rm ubuntu-ui-extras -r
 cp ../../../ubuntu-ui-extras . -r
 sudo rm ubuntu-ui-extras/.git* -r
 mv project-dashboard-deb.desktop project-dashboard.desktop
-mv project-dashboard-shadowed.png project-dashboard.png
+cp project-dashboard-shadowed.png project-dashboard.png
 
 debuild -us -uc
 debuild -S -sa

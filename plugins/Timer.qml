@@ -175,12 +175,13 @@ Plugin {
 
                         Button {
                             text: startTime !== undefined ? i18n.tr("Stop") : i18n.tr("Start")
+                            color: startTime === undefined ? colors["green"] : colors["red"]
                             onTriggered: startOrStop()
                         }
 
                         Button {
                             text: i18n.tr("Edit")
-                            onClicked: PopupUtils.open(editDialog, todayItem, {date: today})
+                            onClicked: PopupUtils.open(editDialog, timerView, {date: today})
                         }
                     }
                 }
