@@ -46,6 +46,7 @@ Item {
         "ellipse-h": "",
         "ellipse-v": "",
         "save": "",
+        "smile-o": "",
         "spinner": "",
         "square-o": "",
         "times": "",

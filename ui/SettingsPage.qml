@@ -67,6 +67,12 @@ Page {
             progression: true
             onClicked: pageStack.push(aboutPage)
         }
+
+        ListItem.Standard {
+            text: i18n.tr("View Tutorial")
+            progression: true
+            onClicked: pageStack.push(Qt.resolvedUrl("InitialWalkthrough.qml"), {exitable: true})
+        }
     }
 
     tools: ToolbarItems {
