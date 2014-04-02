@@ -136,14 +136,7 @@ UbuntuShape {
         Column {
             id: column
             width: parent.width
-            height: expanded ? childrenRect.height : 0
             clip: true
-
-            Behavior on height {
-                UbuntuNumberAnimation {
-                    duration: UbuntuAnimation.SlowDuration
-                }
-            }
         }
 
         ListItem.SingleValue {
@@ -154,4 +147,29 @@ UbuntuShape {
             onTriggered: tile.triggered()
         }
     }
+
+    states: State {
+        when: !expanded
+
+        PropertyChanges {
+            target: column
+            restoreEntryValues: true
+
+            height: 0
+        }
+    }
+
+    transitions: [
+        Transition {
+            from: "*"
+            to: "*"
+
+            UbuntuNumberAnimation {
+                target: column
+                property: "height"
+
+                duration: UbuntuAnimation.SlowDuration
+            }
+        }
+    ]
 }

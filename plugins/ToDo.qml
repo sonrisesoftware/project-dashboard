@@ -36,8 +36,8 @@ Plugin {
         doc.set("tasks", tasks)
     }
 
-    function newTask(title, contents) {
-        tasks.push({"title": title, "contents": contents, "date": new Date().toJSON()})
+    function newTask(text, date) {
+        tasks.push({"text": text, "done": false, "date": date ? date.toJSON(): undefined})
         tasks = tasks
         notification.show(i18n.tr("Task added"))
     }
@@ -69,11 +69,12 @@ Plugin {
 
             Repeater {
                 model: Math.min(tasks.length, project.maxRecent)
-                delegate: SubtitledListItem {
+                delegate: ToDoListItem {
                     property var modelData: tasks[tasks.length - index - 1]
                     id: item
-                    text: modelData.title + " <font color=\"" + colors["green"] + "\">" + Qt.formatDate(new Date(modelData.date)) + "</font>"
-                    subText: modelData.contents
+                    done: modelData.done
+                    text: modelData.text
+                    subText: modelData.date ? i18n.tr("Due %1").arg(DateUtils.formattedDate(modelData.date)) : ""
 
                     onClicked: pageStack.push(notePage, {index: index})
 

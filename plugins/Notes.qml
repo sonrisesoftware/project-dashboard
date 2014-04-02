@@ -37,7 +37,7 @@ Plugin {
     }
 
     function newNote(title, contents) {
-        notes.push({"title": title, "contents": contents, "date": new Date().toJSON()})
+        notes = [{"title": title, "contents": contents, "date": new Date().toJSON()}].concat(notes)
         notes = notes
         notification.show(i18n.tr("Note created"))
     }
@@ -70,7 +70,7 @@ Plugin {
             Repeater {
                 model: Math.min(notes.length, project.maxRecent)
                 delegate: SubtitledListItem {
-                    property var modelData: notes[notes.length - index - 1]
+                    property var modelData: notes[index]
                     id: item
                     text: modelData.title + " <font color=\"" + colors["green"] + "\">" + Qt.formatDate(new Date(modelData.date)) + "</font>"
                     subText: modelData.contents

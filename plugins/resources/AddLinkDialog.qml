@@ -20,6 +20,7 @@ import Ubuntu.Components 0.1
 import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
 import ".."
+import "../../ubuntu-ui-extras"
 
 Dialog {
     id: addLinkDialog
@@ -38,7 +39,7 @@ Dialog {
 
         onAccepted: textField.forceActiveFocus()
         Keys.onTabPressed: textField.forceActiveFocus()
-        color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
+        style: DialogTextFieldStyle {}
     }
 
     TextField {
@@ -47,7 +48,7 @@ Dialog {
         placeholderText: i18n.tr("http://www.example.com")
 
         onAccepted: okButton.clicked()
-        color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
+        style: DialogTextFieldStyle {}
         validator: RegExpValidator {
             regExp: /.+/
         }

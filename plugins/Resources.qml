@@ -158,7 +158,7 @@ Plugin {
 
                             onAccepted: textField.forceActiveFocus()
                             Keys.onTabPressed: descriptionField.forceActiveFocus()
-                            color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
+                            style: DialogTextFieldStyle {}
                         }
 
                         TextField {
@@ -166,12 +166,13 @@ Plugin {
 
                             placeholderText: i18n.tr("Link")
                             text: documents[index].text
-                            color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
 
                             onAccepted: okButton.clicked()
                             validator: RegExpValidator {
                                 regExp: /.+/
                             }
+
+                            style: DialogTextFieldStyle {}
                         }
 
                         Item {

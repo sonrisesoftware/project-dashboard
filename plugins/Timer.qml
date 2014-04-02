@@ -236,7 +236,11 @@ Plugin {
 
                     ListView {
                         anchors.fill: parent
-                        model: List.objectKeys(dates)
+                        anchors.bottomMargin: footer.height
+                        model: List.objectKeys(dates).sort(function(a,b) {
+                            return new Date(b) - new Date(a)
+                        })
+                        clip: true
                         delegate: ListItem.SingleValue {
                             id: item
                             text: DateUtils.formattedDate(new Date(modelData))

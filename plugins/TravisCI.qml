@@ -79,7 +79,7 @@ Plugin {
                     info: modelData
                     status: typeof(modelData.result) == "number" ? modelData.result : -1
                     built_at:  modelData.finished_at != null ? modelData.finished_at : ""
-                    repo: repo
+                    repo: plugin.repo
                 }
                 clip: true
             }

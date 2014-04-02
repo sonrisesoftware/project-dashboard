@@ -98,7 +98,7 @@ Plugin {
                     anchors.rightMargin: units.gu(2)
 
                     text: DateUtils.isToday(new Date(events[0].date)) ? i18n.tr("Today")
-                                                                      : i18n.tr("%1 days").arg(Math.floor((new Date(events[0].date) - new Date())/(1000*60*60*24)))
+                                                                      : i18n.tr("%1 days").arg(DateUtils.daysUntilDate(new Date(events[0].date)))
                 }
             }
         }
@@ -129,7 +129,7 @@ Plugin {
                         anchors.rightMargin: units.gu(2)
 
                         text: DateUtils.isToday(new Date(modelData.date)) ? i18n.tr("Today")
-                                                                          : i18n.tr("%1 days").arg(Math.floor((new Date(modelData.date) - new Date())/(1000*60*60*24)))
+                                                                          : i18n.tr("%1 days").arg(DateUtils.daysUntilDate(new Date(modelData.date)))
                     }
 
                     removable: true
@@ -195,7 +195,7 @@ Plugin {
                     property int index
 
                     title: i18n.tr("Edit Event")
-                    text: i18n.tr("Edit the title or ate:")
+                    text: i18n.tr("Edit the title or date:")
 
                     TextField {
                         id: titleField
@@ -205,13 +205,14 @@ Plugin {
 
                         onAccepted: textField.forceActiveFocus()
                         Keys.onTabPressed: descriptionField.forceActiveFocus()
-                        color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
+                        style: DialogTextFieldStyle {}
                     }
 
-                    DatePicker {
+                    Picker.DatePicker {
                         id: datePicker
                         width: parent.width
-                        initialDate: new Date(events[index].date)
+                        date: new Date(events[index].date)
+                        style: SuruDatePickerStyle {}
                     }
 
                     Item {
@@ -279,13 +280,14 @@ Plugin {
 
                 onAccepted: textField.forceActiveFocus()
                 Keys.onTabPressed: textField.forceActiveFocus()
-                color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
+                style: DialogTextFieldStyle {}
             }
 
-            DatePicker {
+            Picker.DatePicker {
                 id: datePicker
                 width: parent.width
-                initialDate: new Date()
+                date: new Date()
+                style: SuruDatePickerStyle {}
             }
 
             Item {

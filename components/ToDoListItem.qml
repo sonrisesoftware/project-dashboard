@@ -26,14 +26,9 @@ ListItem.Empty {
 
     id: root
 
-    property string docId
-    property Document tasks
-
-    Document {
-        id: doc
-        docId: root.docId
-        parent: tasks
-    }
+    property alias done: doneCheckBox.checked
+    property alias text: titleLabel.text
+    property alias subText: subLabel.text
 
     height: opacity === 0 ? 0 : implicitHeight
 
@@ -60,9 +55,6 @@ ListItem.Empty {
             leftMargin: (parent.height - doneCheckBox.height)/2
         }
 
-        checked: doc.get("done", false)
-        onClicked: checked = doc.sync("done", checked)
-
         style: SuruCheckBoxStyle {}
     }
 
@@ -84,7 +76,6 @@ ListItem.Empty {
 
             width: parent.width
             elide: Text.ElideRight
-            text: formatText(doc.get("title", ""))
 
             //font.bold: task.priority !== "low"
             color: selected ? UbuntuColors.orange : /*task.priority === "low" ? */Theme.palette.selected.backgroundText/* : priorityColor(task.priority)*/
@@ -99,7 +90,6 @@ ListItem.Empty {
             color:  Theme.palette.normal.backgroundText
             fontSize: "small"
             //font.italic: true
-            text: doc.get("dueDate", "") === "" ? "" : "Due " + DateUtils.formattedDate(new Date(doc.get("dueDate", "")))
             visible: text !== ""
             elide: Text.ElideRight
         }
