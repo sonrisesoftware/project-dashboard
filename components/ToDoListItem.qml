@@ -29,6 +29,8 @@ ListItem.Empty {
     property alias done: doneCheckBox.checked
     property alias text: titleLabel.text
     property alias subText: subLabel.text
+    property color subTextColor: defaultSubTextColor
+    property color defaultSubTextColor: Theme.palette.normal.backgroundText
 
     height: opacity === 0 ? 0 : implicitHeight
 
@@ -87,55 +89,11 @@ ListItem.Empty {
             width: parent.width
 
             height: visible ? implicitHeight: 0
-            color:  Theme.palette.normal.backgroundText
             fontSize: "small"
             //font.italic: true
             visible: text !== ""
             elide: Text.ElideRight
-        }
-    }
-
-    onClicked: PopupUtils.open(editPopover, root)
-
-    Component {
-        id: editPopover
-
-        Popover {
-            id: popover
-            contentHeight: textField.height + units.gu(2)
-
-            Component.onCompleted: textField.forceActiveFocus()
-
-            Item {
-                height: textField.height + units.gu(2)
-                width: parent.width
-                Button {
-                    id: button
-                    text: i18n.tr("Done")
-                    onTriggered: {
-                        PopupUtils.close(popover)
-                        doc.set("title", textField.text)
-                    }
-
-                    anchors {
-                        verticalCenter: parent.verticalCenter
-                        right: parent.right
-                        margins: units.gu(1)
-                    }
-                }
-
-                TextField {
-                    id: textField
-                    text: doc.get("title", "")
-                    anchors {
-                        verticalCenter: parent.verticalCenter
-                        left: parent.left
-                        right: button.left
-                        margins: units.gu(1)
-                    }
-                    onAccepted: button.trigger()
-                }
-            }
+            color: subTextColor
         }
     }
 

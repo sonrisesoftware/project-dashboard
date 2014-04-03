@@ -31,7 +31,17 @@ Plugin {
 
     name: "tasks"
 
-    property var tasks: doc.get("tasks", [])
+    property var tasks: doc.get("tasks", []).sort(sortFunction)
+
+    function sortFunction(a,b) {
+        if (a.date === undefined && b.date === undefined)
+            return a.text > b.text ? 1 : a.text < b.text ? -1 : 0
+        else if (a.date === undefined)
+            return 1
+        else if (b.date === undefined)
+            return -1
+        else
+            return new Date(a.date) - new Date(b.date)}
 
     onSave: {
         doc.set("tasks", tasks)
@@ -40,8 +50,11 @@ Plugin {
     function newTask(text, date) {
         tasks.push({"text": text, "done": false, "date": date ? date.toJSON(): undefined})
         tasks = tasks
+        tasks = tasks.sort(sortFunction)
         notification.show(i18n.tr("Task added"))
     }
+
+    property var upcomingTasks: tasks
 
     items: PluginItem {
         title: i18n.tr("Tasks")
@@ -62,7 +75,7 @@ Plugin {
             viewAll: i18n.tr("View all <b>%1</b> tasks").arg(tasks.length)
 
             ListItem.Standard {
-                text: i18n.tr("No tasks")
+                text: i18n.tr("No upcoming tasks")
                 enabled: false
                 visible: tasks.length === 0
                 height: visible ? implicitHeight : 0
@@ -71,16 +84,19 @@ Plugin {
             Repeater {
                 model: Math.min(tasks.length, project.maxRecent)
                 delegate: ToDoListItem {
-                    property var modelData: tasks[tasks.length - index - 1]
+                    property var modelData: tasks[index]
                     id: item
                     done: modelData.done
                     text: modelData.text
-                    subText: modelData.date ? i18n.tr("Due %1").arg(DateUtils.formattedDate(new Date(modelData.date))) : ""
+                    property var dueDate: modelData.date !== undefined ? new Date(modelData.date) : undefined
+                    subText: modelData.date ? i18n.tr("Due %1").arg(DateUtils.formattedDate(dueDate)) : ""
+                    subTextColor: dueDate !== undefined ? DateUtils.isToday(dueDate) ? colors["green"]
+                                                                              : DateUtils.dateIsBefore(dueDate, new Date()) ? colors["red"]
+                                                                                                                            : DateUtils.dateIsThisWeek(dueDate) ? colors["yellow"]
+                                                                                                                                                                : defaultSubTextColor
+                                                 : defaultSubTextColor
 
-                    onItemRemoved: {
-                        tasks.splice(index, 1)
-                        tasks = tasks
-                    }
+                    onClicked: PopupUtils.open(editDialog, mainView, {index: index})
                 }
             }
         }
@@ -101,12 +117,21 @@ Plugin {
                 delegate: ToDoListItem {
                     done: modelData.done
                     text: modelData.text
-                    subText: modelData.date ? i18n.tr("Due %1").arg(DateUtils.formattedDate(new Date(modelData.date))) : ""
+                    property var dueDate: modelData.date !== undefined ? new Date(modelData.date) : undefined
+                    subText: modelData.date ? i18n.tr("Due %1").arg(DateUtils.formattedDate(dueDate)) : ""
+                    subTextColor: dueDate !== undefined ? DateUtils.isToday(dueDate) ? colors["green"]
+                                                                              : DateUtils.dateIsBefore(dueDate, new Date()) ? colors["red"]
+                                                                                                                            : DateUtils.dateIsThisWeek(dueDate) ? colors["yellow"]
+                                                                                                                                                                : defaultSubTextColor
+                                                 : defaultSubTextColor
 
                     onItemRemoved: {
                         tasks.splice(index, 1)
                         tasks = tasks
                     }
+                    onClicked: PopupUtils.open(editDialog, listView, {index: index})
+
+                    show: !modelData.done || doc.get("showCompleted", false)
                 }
             }
 
@@ -120,57 +145,6 @@ Plugin {
                 text: "No tasks"
                 opacity: 0.5
                 fontSize: "large"
-            }
-        }
-    }
-
-    Component {
-        id: notePage
-
-        Page {
-            id: page
-            title: note.title
-
-            property int index: 0
-            property var note: tasks[index]
-
-            Component.onDestruction: {
-                tasks[index].contents = descriptionField.text
-                tasks = tasks
-            }
-
-            TextArea {
-                id: descriptionField
-                placeholderText: i18n.tr("Contents")
-                color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
-
-                text: note.contents
-
-                anchors {
-                    left: parent.left
-                    right: parent.right
-                    top: parent.top
-                    bottom: parent.bottom
-                    margins: units.gu(2)
-                }
-            }
-
-            tools: ToolbarItems {
-                opened: wideAspect
-                locked: wideAspect
-
-                onLockedChanged: opened = locked
-
-                ToolbarButton {
-                    text: i18n.tr("Delete")
-                    iconSource: getIcon("delete")
-
-                    onTriggered: {
-                        pageStack.pop()
-                        tasks.splice(page.index, 1)
-                        tasks = tasks
-                    }
-                }
             }
         }
     }
@@ -192,8 +166,6 @@ Plugin {
 
                 placeholderText: i18n.tr("Title")
 
-                onAccepted: textField.forceActiveFocus()
-                Keys.onTabPressed: textField.forceActiveFocus()
                 style: DialogTextFieldStyle {}
             }
 
@@ -271,6 +243,116 @@ Plugin {
                     onClicked: {
                         PopupUtils.close(dialog)
                         newTask(titleField.text, dueDateSwitch.checked ? datePicker.date : undefined)
+                    }
+                }
+            }
+        }
+    }
+
+    Component {
+        id: editDialog
+        Dialog {
+            id: dialog
+
+            property int index
+
+            title: i18n.tr("Edit Task")
+            text: i18n.tr("Change the title or due date of your task:")
+
+            property Resources plugin
+
+            Component.onCompleted: titleField.parent.parent.height = Qt.binding(function() { return titleField.parent.height + dialog.__foreground.margins })
+
+            TextField {
+                id: titleField
+
+                placeholderText: i18n.tr("Title")
+
+                style: DialogTextFieldStyle {}
+                text: tasks[index].text
+            }
+
+            Item {
+                width: parent.width
+                height: childrenRect.height
+
+                Label {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: i18n.tr("Has due date:")
+                }
+
+                Switch {
+                    id: dueDateSwitch
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.right: parent.right
+                    checked: tasks[index].date !== undefined
+                }
+            }
+
+            Item {
+                width: parent.width
+                height: dueDateSwitch.checked ? datePicker.height : 0
+                opacity: dueDateSwitch.checked ? 1 : 0
+                clip: true
+
+                Behavior on height {
+                    UbuntuNumberAnimation {}
+                }
+
+                Behavior on opacity {
+                    UbuntuNumberAnimation {}
+                }
+
+                Picker.DatePicker {
+                    id: datePicker
+                    width: parent.width
+                    style: SuruDatePickerStyle {}
+                    anchors.bottom: parent.bottom
+                    date: tasks[index].date ? new Date(tasks[index].date) : new Date()
+                }
+            }
+
+            Item {
+                width: parent.width
+                height: childrenRect.height
+
+                Button {
+                    objectName: "cancelButton"
+                    text: i18n.tr("Cancel")
+                    anchors {
+                        left: parent.left
+                        right: parent.horizontalCenter
+                        rightMargin: units.gu(1)
+                    }
+
+                    color: "gray"
+
+                    onClicked: {
+                        PopupUtils.close(dialog)
+                    }
+                }
+
+                Button {
+                    id: okButton
+                    objectName: "okButton"
+
+                    text: i18n.tr("Ok")
+                    enabled: titleField.text !== ""
+                    anchors {
+                        left: parent.horizontalCenter
+                        right: parent.right
+                        leftMargin: units.gu(1)
+                    }
+
+                    onClicked: {
+                        PopupUtils.close(dialog)
+                        tasks[index] = {
+                            "text": titleField.text,
+                            "done": tasks[index].done,
+                            "date": dueDateSwitch.checked ? datePicker.date.toJSON() : undefined
+                        }
+
+                        tasks = tasks.sort(sortFunction)
                     }
                 }
             }
