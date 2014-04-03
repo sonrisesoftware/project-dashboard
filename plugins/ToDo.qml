@@ -18,6 +18,7 @@
 import QtQuick 2.0
 import Ubuntu.Components 0.1
 import Ubuntu.Components.Popups 0.1
+import Ubuntu.Components.Pickers 0.1 as Picker
 import Ubuntu.Components.ListItems 0.1 as ListItem
 import "../backend"
 import "../components"
@@ -51,7 +52,7 @@ Plugin {
             text: i18n.tr("Add Task")
             description: i18n.tr("Add a new task to your to do list")
             iconSource: getIcon("add")
-            onTriggered: PopupUtils.open(newTaskPage)
+            onTriggered: PopupUtils.open(addLinkDialog)
         }
 
         pulseItem: PulseItem {
@@ -74,9 +75,7 @@ Plugin {
                     id: item
                     done: modelData.done
                     text: modelData.text
-                    subText: modelData.date ? i18n.tr("Due %1").arg(DateUtils.formattedDate(modelData.date)) : ""
-
-                    onClicked: pageStack.push(notePage, {index: index})
+                    subText: modelData.date ? i18n.tr("Due %1").arg(DateUtils.formattedDate(new Date(modelData.date))) : ""
 
                     onItemRemoved: {
                         tasks.splice(index, 1)
@@ -92,26 +91,17 @@ Plugin {
             actions: Action {
                 text: i18n.tr("Add")
                 iconSource: getIcon("add")
-                onTriggered: PopupUtils.open(newTaskPage)
+                onTriggered: PopupUtils.open(addLinkDialog)
             }
 
             ListView {
                 id: listView
                 anchors.fill: parent
                 model: tasks
-                delegate: SubtitledListItem {
-                    id: item
-                    text: modelData.title + " <font color=\"" + colors["green"] + "\">" + Qt.formatDate(new Date(modelData.date)) + "</font>"
-                    subText: modelData.contents
-
-                    onClicked: pageStack.push(notePage, {index: index})
-
-                    removable: true
-                    backgroundIndicator: ListItemBackground {
-                        state: item.swipingState
-                        iconSource: getIcon("delete-white")
-                        text: i18n.tr("Delete")
-                    }
+                delegate: ToDoListItem {
+                    done: modelData.done
+                    text: modelData.text
+                    subText: modelData.date ? i18n.tr("Due %1").arg(DateUtils.formattedDate(new Date(modelData.date))) : ""
 
                     onItemRemoved: {
                         tasks.splice(index, 1)
@@ -130,52 +120,6 @@ Plugin {
                 text: "No tasks"
                 opacity: 0.5
                 fontSize: "large"
-            }
-        }
-    }
-
-    Component {
-        id: newTaskPage
-
-        ComposerSheet {
-            id: sheet
-
-            title: i18n.tr("New Task")
-            contentsHeight: wideAspect ? units.gu(40) : mainView.height
-
-            onConfirmClicked: newTask(nameField.text, descriptionField.text)
-
-            Component.onCompleted: {
-                sheet.__leftButton.text = i18n.tr("Cancel")
-                sheet.__leftButton.color = "gray"
-                sheet.__rightButton.text = i18n.tr("Create")
-                sheet.__rightButton.color = sheet.__rightButton.__styleInstance.defaultColor
-                sheet.__foreground.style = Theme.createStyleComponent(Qt.resolvedUrl("../ubuntu-ui-extras/SuruSheetStyle.qml"), sheet)
-            }
-
-            TextField {
-                id: nameField
-                placeholderText: i18n.tr("Title")
-                anchors {
-                    left: parent.left
-                    top: parent.top
-                    right: parent.right
-                }
-
-                Keys.onTabPressed: descriptionField.forceActiveFocus()
-            }
-
-            TextArea {
-                id: descriptionField
-                placeholderText: i18n.tr("Contents")
-
-                anchors {
-                    left: parent.left
-                    right: parent.right
-                    top: nameField.bottom
-                    bottom: parent.bottom
-                    topMargin: units.gu(2)
-                }
             }
         }
     }
@@ -225,6 +169,108 @@ Plugin {
                         pageStack.pop()
                         tasks.splice(page.index, 1)
                         tasks = tasks
+                    }
+                }
+            }
+        }
+    }
+
+    Component {
+        id: addLinkDialog
+        Dialog {
+            id: dialog
+
+            title: i18n.tr("Add Task")
+            text: i18n.tr("Enter the title and opionally the due date of your task:")
+
+            property Resources plugin
+
+            Component.onCompleted: titleField.parent.parent.height = Qt.binding(function() { return titleField.parent.height + dialog.__foreground.margins })
+
+            TextField {
+                id: titleField
+
+                placeholderText: i18n.tr("Title")
+
+                onAccepted: textField.forceActiveFocus()
+                Keys.onTabPressed: textField.forceActiveFocus()
+                style: DialogTextFieldStyle {}
+            }
+
+            Item {
+                width: parent.width
+                height: childrenRect.height
+
+                Label {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: i18n.tr("Has due date:")
+                }
+
+                Switch {
+                    id: dueDateSwitch
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.right: parent.right
+                }
+            }
+
+            Item {
+                width: parent.width
+                height: dueDateSwitch.checked ? datePicker.height : 0
+                opacity: dueDateSwitch.checked ? 1 : 0
+                clip: true
+
+                Behavior on height {
+                    UbuntuNumberAnimation {}
+                }
+
+                Behavior on opacity {
+                    UbuntuNumberAnimation {}
+                }
+
+                Picker.DatePicker {
+                    id: datePicker
+                    width: parent.width
+                    date: new Date()
+                    style: SuruDatePickerStyle {}
+                    anchors.bottom: parent.bottom
+                }
+            }
+
+            Item {
+                width: parent.width
+                height: childrenRect.height
+
+                Button {
+                    objectName: "cancelButton"
+                    text: i18n.tr("Cancel")
+                    anchors {
+                        left: parent.left
+                        right: parent.horizontalCenter
+                        rightMargin: units.gu(1)
+                    }
+
+                    color: "gray"
+
+                    onClicked: {
+                        PopupUtils.close(dialog)
+                    }
+                }
+
+                Button {
+                    id: okButton
+                    objectName: "okButton"
+
+                    text: i18n.tr("Ok")
+                    enabled: titleField.text !== ""
+                    anchors {
+                        left: parent.horizontalCenter
+                        right: parent.right
+                        leftMargin: units.gu(1)
+                    }
+
+                    onClicked: {
+                        PopupUtils.close(dialog)
+                        newTask(titleField.text, dueDateSwitch.checked ? datePicker.date : undefined)
                     }
                 }
             }
