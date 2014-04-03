@@ -19,6 +19,7 @@ import QtQuick 2.0
 import Ubuntu.Layouts 0.1
 import Ubuntu.Components 0.1
 import Ubuntu.Components.Popups 0.1
+import Ubuntu.Components.Pickers 0.1 as Picker
 import Ubuntu.Components.ListItems 0.1 as ListItem
 import "../backend"
 import "../components"
@@ -429,19 +430,27 @@ Plugin {
     Component {
         id: editDialog
 
-        InputDialog {
+        Dialog {
+            id: root
+
             property string date
 
             title: i18n.tr("Edit Time")
             text: i18n.tr("Edit the time logged for <b>%1</b>").arg(DateUtils.formattedDate(new Date(dates[date].date)))
-            value: date === today ? DateUtils.friendlyDuration(totalTime)
-                                             : DateUtils.friendlyDuration(dates[date].time)
+
+            Picker.DatePicker {
+                id: datePicker
+                width: parent.width
+                date: root.date === today ? DateUtils.toUTC(new Date(totalTime)) : DateUtils.toUTC(new Date(dates[root.date].time))
+                mode: "Hours|Minutes|Seconds"
+                style: SuruDatePickerStyle {}
+            }
 
             property bool running
 
             Component.onCompleted: {
                 if (date == today ) {
-                    value = DateUtils.friendlyDuration(totalTime)
+                    //datePicker.date = new Date(totalTime).getUTCDate()
                     if (startTime) {
                         doc.set("savedTime", savedTime + (new Date() - startTime))
                         currentTime =  0
@@ -452,24 +461,56 @@ Plugin {
                 }
             }
 
-            onAccepted: {
-                if (date == today) {
-                    doc.set("savedTime", DateUtils.parseDuration(value))
+            Item {
+                width: parent.width
+                height: childrenRect.height
 
-                    if (running) {
-                        doc.set("startTime", new Date().toJSON())
-                        currentTime = 0
+                Button {
+                    objectName: "cancelButton"
+                    text: i18n.tr("Cancel")
+                    anchors {
+                        left: parent.left
+                        right: parent.horizontalCenter
+                        rightMargin: units.gu(1)
                     }
-                } else {
-                    dates[date].time = DateUtils.parseDuration(value)
-                    dates = dates
-                }
-            }
 
-            onRejected: {
-                if (running) {
-                    doc.set("startTime", new Date().toJSON())
-                    currentTime = 0
+                    color: "gray"
+
+                    onClicked: {
+                        PopupUtils.close(root)
+                        if (running) {
+                            doc.set("startTime", new Date().toJSON())
+                            currentTime = 0
+                        }
+                    }
+                }
+
+                Button {
+                    id: okButton
+                    objectName: "okButton"
+                    anchors {
+                        left: parent.horizontalCenter
+                        right: parent.right
+                        leftMargin: units.gu(1)
+                    }
+
+                    text: i18n.tr("Ok")
+
+                    onClicked: {
+                        PopupUtils.close(root)
+                        print(datePicker.date)
+                        if (date == today) {
+                            doc.set("savedTime", DateUtils.timeFromDate(datePicker.date))
+
+                            if (running) {
+                                doc.set("startTime", new Date().toJSON())
+                                currentTime = 0
+                            }
+                        } else {
+                            dates[date].time = DateUtils.timeFromDate(datePicker.date)
+                            dates = dates
+                        }
+                    }
                 }
             }
         }
