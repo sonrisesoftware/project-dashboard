@@ -114,14 +114,26 @@ TabbedPage {
             }
         }
 
-        Label {
-            fontSize: "large"
-            text: i18n.tr("Nothing to show")
-
+        Column {
             anchors.centerIn: parent
             anchors.verticalCenterOffset: header.height/2
+
             visible: pulseListView.contentHeight === 0
             opacity: 0.5
+            spacing: units.gu(1)
+
+            AwesomeIcon {
+                anchors.horizontalCenter: parent.horizontalCenter
+                name: "dashboard"
+                size: units.gu(7)
+            }
+
+            Label {
+                fontSize: "large"
+                text: i18n.tr("Nothing to show")
+
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
         }
     }
 
@@ -206,7 +218,7 @@ TabbedPage {
 
         oldFlickable = flickable
 
-        if (flickable != null) {
+        if (flickable != null && header != null) {
             flickable.topMargin = header.height
             flickable.contentY = -header.height
         }

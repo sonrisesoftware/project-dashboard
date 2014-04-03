@@ -97,8 +97,8 @@ Plugin {
                     anchors.right: parent.right
                     anchors.rightMargin: units.gu(2)
 
-                    text: DateUtils.isToday(new Date(events[0].date)) ? i18n.tr("Today")
-                                                                      : i18n.tr("%1 days").arg(DateUtils.daysUntilDate(new Date(events[0].date)))
+                    text: events.length === 0 ? "" : DateUtils.isToday(new Date(events[0].date)) ? i18n.tr("Today")
+                                                                                                 : i18n.tr("%1 days").arg(DateUtils.daysUntilDate(new Date(events[0].date)))
                 }
             }
         }
@@ -218,13 +218,30 @@ Plugin {
                     Item {
                         width: parent.width
                         height: childrenRect.height
+
                         Button {
-                            id: okButton
-                            objectName: "okButton"
+                            objectName: "cancelButton"
+                            text: i18n.tr("Cancel")
                             anchors {
                                 left: parent.left
                                 right: parent.horizontalCenter
                                 rightMargin: units.gu(1)
+                            }
+
+                            color: "gray"
+
+                            onClicked: {
+                                PopupUtils.close(root)
+                            }
+                        }
+
+                        Button {
+                            id: okButton
+                            objectName: "okButton"
+                            anchors {
+                                left: parent.horizontalCenter
+                                right: parent.right
+                                leftMargin: units.gu(1)
                             }
 
                             text: i18n.tr("Ok")
@@ -237,22 +254,6 @@ Plugin {
                                     "date": datePicker.date
                                 }
                                 events = events
-                            }
-                        }
-
-                        Button {
-                            objectName: "cancelButton"
-                            text: i18n.tr("Cancel")
-                            anchors {
-                                left: parent.horizontalCenter
-                                right: parent.right
-                                leftMargin: units.gu(1)
-                            }
-
-                            color: "gray"
-
-                            onClicked: {
-                                PopupUtils.close(root)
                             }
                         }
                     }
@@ -293,37 +294,38 @@ Plugin {
             Item {
                 width: parent.width
                 height: childrenRect.height
+
                 Button {
-                    id: okButton
-                    objectName: "okButton"
+                    objectName: "cancelButton"
+                    text: i18n.tr("Cancel")
                     anchors {
                         left: parent.left
                         right: parent.horizontalCenter
                         rightMargin: units.gu(1)
                     }
 
-                    text: i18n.tr("Ok")
-                    enabled: titleField.text !== ""
+                    color: "gray"
 
                     onClicked: {
-                        PopupUtils.close(dialog)
-                        addEvent(titleField.text, datePicker.date)
+                        PopupUtils.close(root)
                     }
                 }
 
                 Button {
-                    objectName: "cancelButton"
-                    text: i18n.tr("Cancel")
+                    id: okButton
+                    objectName: "okButton"
                     anchors {
                         left: parent.horizontalCenter
                         right: parent.right
                         leftMargin: units.gu(1)
                     }
 
-                    color: "gray"
+                    text: i18n.tr("Ok")
+                    enabled: titleField.text !== ""
 
                     onClicked: {
-                        PopupUtils.close(dialog)
+                        PopupUtils.close(root)
+                        addEvent(titleField.text, datePicker.date)
                     }
                 }
             }

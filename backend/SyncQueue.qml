@@ -28,7 +28,7 @@ Object {
 
     function newGroup(title) {
         var id = nextGroup++
-        print(title)
+        //print(title)
         groups[id] = {
             "title": title,
             "count": 0,
@@ -100,7 +100,7 @@ Object {
     function doHttpGet(id, data) {
         count++
         Http.request(data.path, "GET", data.options, function(has_error, status, response) {
-            print("Finished", id)
+            //print("Finished", id)
             groups[id].count--
             groups = groups
             count--
@@ -116,7 +116,7 @@ Object {
             }
 
             if (groups[id].count === 0 && groups[id].errors.length === 0) {
-                print("Deleting", id)
+                //print("Deleting", id)
                 delete groups[id]
                 groups = groups
             }

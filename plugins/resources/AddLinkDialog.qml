@@ -57,13 +57,32 @@ Dialog {
     Item {
         width: parent.width
         height: childrenRect.height
+
         Button {
-            id: okButton
-            objectName: "okButton"
+            objectName: "cancelButton"
+            text: i18n.tr("Cancel")
+
             anchors {
                 left: parent.left
                 right: parent.horizontalCenter
                 rightMargin: units.gu(1)
+            }
+
+            color: "gray"
+
+            onClicked: {
+                PopupUtils.close(addLinkDialog)
+            }
+        }
+
+        Button {
+            id: okButton
+            objectName: "okButton"
+
+            anchors {
+                left: parent.horizontalCenter
+                right: parent.right
+                leftMargin: units.gu(1)
             }
 
             text: i18n.tr("Ok")
@@ -79,22 +98,6 @@ Dialog {
                 plugin.documents.push({"title": titleField.text, "type": "link", "text": link})
                 plugin.documents = plugin.documents
                 notification.show(i18n.tr("Resource saved"))
-            }
-        }
-
-        Button {
-            objectName: "cancelButton"
-            text: i18n.tr("Cancel")
-            anchors {
-                left: parent.horizontalCenter
-                right: parent.right
-                leftMargin: units.gu(1)
-            }
-
-            color: "gray"
-
-            onClicked: {
-                PopupUtils.close(addLinkDialog)
             }
         }
     }
