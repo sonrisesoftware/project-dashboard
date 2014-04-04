@@ -44,7 +44,7 @@ ListItem.Empty {
         UbuntuNumberAnimation {}
     }
 
-    property bool show: !doc.get("done", false)
+    property bool show
 
     clip: true
 

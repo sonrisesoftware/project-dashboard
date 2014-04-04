@@ -55,8 +55,7 @@ Plugin {
         }
 
         pulseItem: PulseItem {
-
-            visible: notes.length > 0
+            show: notes.length > 0
             title: i18n.tr("Recent Notes")
             viewAll: i18n.tr("View all <b>%1</b> notes").arg(notes.length)
 

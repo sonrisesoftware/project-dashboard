@@ -49,8 +49,8 @@ Plugin {
 
     function newTask(text, date) {
         tasks.push({"text": text, "done": false, "date": date ? date.toJSON(): undefined})
-        tasks = tasks
         tasks = tasks.sort(sortFunction)
+        tasks = tasks
         notification.show(i18n.tr("Task added"))
     }
 
@@ -70,7 +70,7 @@ Plugin {
 
         pulseItem: PulseItem {
 
-            visible: tasks.length > 0
+            show: tasks.length > 0
             title: i18n.tr("Upcoming Tasks")
             viewAll: i18n.tr("View all <b>%1</b> tasks").arg(tasks.length)
 
@@ -97,6 +97,14 @@ Plugin {
                                                  : defaultSubTextColor
 
                     onClicked: PopupUtils.open(editDialog, mainView, {index: index})
+                    show: !modelData.done || doc.get("showCompleted", false)
+
+                    onDoneChanged: {
+                        if (done !== tasks[index].done) {
+                            tasks[index].done = done
+                            modelData = Qt.binding(function() { return tasks[index] })
+                        }
+                    }
                 }
             }
         }
@@ -104,11 +112,20 @@ Plugin {
         page: PluginPage {
             title: i18n.tr("Tasks")
 
-            actions: Action {
-                text: i18n.tr("Add")
-                iconSource: getIcon("add")
-                onTriggered: PopupUtils.open(addLinkDialog)
-            }
+            actions: [
+                Action {
+                    text: i18n.tr("Add")
+                    iconSource: getIcon("add")
+                    onTriggered: PopupUtils.open(addLinkDialog)
+                },
+
+                Action {
+                    text: i18n.tr("View")
+                    iconSource: getIcon("navigation-menu")
+                    onTriggered: PopupUtils.open(viewPopover, value)
+                }
+
+            ]
 
             ListView {
                 id: listView
@@ -125,13 +142,16 @@ Plugin {
                                                                                                                                                                 : defaultSubTextColor
                                                  : defaultSubTextColor
 
-                    onItemRemoved: {
-                        tasks.splice(index, 1)
-                        tasks = tasks
-                    }
                     onClicked: PopupUtils.open(editDialog, listView, {index: index})
 
                     show: !modelData.done || doc.get("showCompleted", false)
+
+                    onDoneChanged: {
+                        if (done !== tasks[index].done) {
+                            tasks[index].done = done
+                            modelData = Qt.binding(function() { return tasks[index] })
+                        }
+                    }
                 }
             }
 
@@ -141,10 +161,35 @@ Plugin {
 
             Label {
                 anchors.centerIn: parent
-                visible: tasks.length === 0
+                visible: listView.contentHeight === 0
                 text: "No tasks"
                 opacity: 0.5
                 fontSize: "large"
+            }
+        }
+    }
+
+    Component {
+        id:viewPopover
+
+        Popover {
+            id: popover
+
+            contentHeight: column.height
+
+            Column {
+                id: column
+                width: parent.width
+
+                ListItem.Standard {
+                    text: i18n.tr("Show completed tasks")
+                    control: CheckBox {
+                        checked: doc.get("showCompleted", false)
+                        onClicked: {
+                            doc.set("showCompleted", checked)
+                        }
+                    }
+                }
             }
         }
     }

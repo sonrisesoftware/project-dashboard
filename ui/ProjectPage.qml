@@ -118,7 +118,7 @@ TabbedPage {
             anchors.centerIn: parent
             anchors.verticalCenterOffset: header.height/2
 
-            visible: pulseListView.contentHeight === 0
+            visible: pulseListView.contentHeight === 0 && project.plugins.count > 0
             opacity: 0.5
             spacing: units.gu(1)
 
@@ -183,26 +183,26 @@ TabbedPage {
                 }
             }
         }
+    }
 
-        Column {
-            anchors.centerIn: parent
-            width: parent.width - units.gu(3)
-            visible: project.plugins.count === 0
-            //opacity: 0.7
+    Column {
+        anchors.centerIn: parent
+        width: parent.width - units.gu(3)
+        visible: project.plugins.count === 0
+        //opacity: 0.7
 
-            Label {
-                anchors.horizontalCenter: parent.horizontalCenter
-                fontSize: "large"
-                font.bold: true
-                text: i18n.tr("No plugins")
-            }
+        Label {
+            anchors.horizontalCenter: parent.horizontalCenter
+            fontSize: "large"
+            font.bold: true
+            text: i18n.tr("No plugins")
+        }
 
-            Label {
-                horizontalAlignment: Text.AlignHCenter
-                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                width: parent.width
-                text: i18n.tr("Add some plugins by tapping \"Edit\" in the toolbar.")
-            }
+        Label {
+            horizontalAlignment: Text.AlignHCenter
+            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+            width: parent.width
+            text: i18n.tr("Add some plugins by tapping \"Edit\" in the toolbar.")
         }
     }
 
