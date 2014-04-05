@@ -71,7 +71,7 @@ Plugin {
                 delegate: SubtitledListItem {
                     property var modelData: notes[index]
                     id: item
-                    text: modelData.title + " <font color=\"" + colors["green"] + "\">" + Qt.formatDate(new Date(modelData.date)) + "</font>"
+                    text: escapeHTML(modelData.title) + " <font color=\"" + colors["green"] + "\">" + Qt.formatDate(new Date(modelData.date)) + "</font>"
                     subText: modelData.contents
 
                     onClicked: pageStack.push(notePage, {index: index})
@@ -105,7 +105,7 @@ Plugin {
                 model: notes
                 delegate: SubtitledListItem {
                     id: item
-                    text: modelData.title + " <font color=\"" + colors["green"] + "\">" + Qt.formatDate(new Date(modelData.date)) + "</font>"
+                    text: escapeHTML(modelData.title) + " <font color=\"" + colors["green"] + "\">" + Qt.formatDate(new Date(modelData.date)) + "</font>"
                     subText: modelData.contents
 
                     onClicked: pageStack.push(notePage, {index: index})
@@ -233,5 +233,9 @@ Plugin {
                 }
             }
         }
+    }
+
+    function escapeHTML(html) {
+        return html.replace(/&/g, "&amp;").replace(/>/g, "&gt;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
     }
 }
