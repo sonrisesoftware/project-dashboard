@@ -53,8 +53,11 @@ MainView {
     backgroundColor: Qt.rgba(0.3,0.3,0.3,1)
 
     // The size of the Nexus 4
-    width: units.gu(42)
-    height: units.gu(67)
+    //width: units.gu(42)
+    //height: units.gu(67)
+
+    width: units.gu(100)
+    height: units.gu(75)
 
     property var colors: {
         "green": "#5cb85c",//"#59B159",//"#859a01",
