@@ -206,18 +206,18 @@ Object {
 
     function closeOrReopen() {
         if (open) {
-            github.editIssue(project, plugin.repo, number, {"state": "closed"}, i18n.tr("Closing %2 <b>%1</b>").arg(number).type(type))
+            github.editIssue(project, plugin.repo, number, {"state": "closed"}, i18n.tr("Closing %2 <b>%1</b>").arg(number).arg(type))
             info.state = "closed"
             info = info
             newEvent("closed")
-            notification.show(i18n.tr("%1 closed").arg(typeCape))
+            notification.show(i18n.tr("%1 closed").arg(typeCap))
         } else {
             github.editIssue(project, plugin.repo, number, {"state": "open"}, i18n.tr("Reopening issue <b>%1</b>").arg(number))
 
             info.state = "open"
             info = info
             newEvent("reopened")
-            notification.show(i18n.tr("%1 reopened").arg(typeCape))
+            notification.show(i18n.tr("%1 reopened").arg(typeCap))
         }
     }
 

@@ -76,6 +76,12 @@ Plugin {
 
                     onClicked: pageStack.push(notePage, {index: index})
 
+                    removable: true
+                    backgroundIndicator: ListItemBackground {
+                        state: item.swipingState
+                        iconSource: getIcon("delete-white")
+                        text: i18n.tr("Delete")
+                    }
                     onItemRemoved: {
                         notes.splice(index, 1)
                         notes = notes

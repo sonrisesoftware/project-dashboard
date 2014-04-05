@@ -137,7 +137,7 @@ Plugin {
 
             tabs: wideAspect ? [i18n.tr("Timer")] : [i18n.tr("Timer"), i18n.tr("History")]
 
-            Item {
+            Rectangle {
                 id: timerPage
                 anchors {
                     left: parent.left
@@ -152,8 +152,10 @@ Plugin {
 
                 width: parent.width
                 property bool show: page.selectedTab === i18n.tr("Timer")
+                z: show ? 2 : 1
 
                 opacity: show ? 1 : 0
+                color: mainView.backgroundColor
 
                 Behavior on opacity {
                     UbuntuNumberAnimation {}
@@ -188,7 +190,7 @@ Plugin {
                 }
             }
 
-            Item {
+            Rectangle {
                 id: historyPage
                 anchors {
                     right: parent.right
@@ -203,6 +205,8 @@ Plugin {
 
                 width: parent.width
                 property bool show: !timerPage.show
+                z: show ? 2 : 1
+                color: mainView.backgroundColor
 
                 opacity: show ? 1 : 0
 
@@ -315,7 +319,7 @@ Plugin {
             transitions: [
                 Transition {
                     from: "*"
-                    to: "wide"
+                    to: "*"
 
                     UbuntuNumberAnimation {
                         target: timerPage
