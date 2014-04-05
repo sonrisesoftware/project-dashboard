@@ -46,7 +46,7 @@ Plugin {
         }
 
         pulseItem: PulseItem {
-            visible: documents.length > 0
+            show: false//documents.length > 0
             title: i18n.tr("Recently Saved Resources")
             viewAll: i18n.tr("View all <b>%1</b> resources").arg(documents.length)
 

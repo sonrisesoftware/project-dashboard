@@ -54,7 +54,7 @@ ListItem.Empty {
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
-            leftMargin: (parent.height - doneCheckBox.height)/2
+            leftMargin: (root.implicitHeight - doneCheckBox.height)/2
         }
 
         style: SuruCheckBoxStyle {}
