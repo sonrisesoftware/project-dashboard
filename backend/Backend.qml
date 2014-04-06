@@ -91,12 +91,12 @@ Item {
 
     property ListModel availablePlugins: ListModel {
 
-//        ListElement {
-//            icon: "check-square-o"
-//            name: "tasks"
-//            type: "ToDo"
-//            title: "Tasks"
-//        }
+        ListElement {
+            icon: "check-square-o"
+            name: "tasks"
+            type: "ToDo"
+            title: "Tasks"
+        }
 
         ListElement {
             icon: "pencil-square-o"

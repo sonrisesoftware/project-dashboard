@@ -32,7 +32,7 @@ ListItem.Empty {
     property color subTextColor: defaultSubTextColor
     property color defaultSubTextColor: Theme.palette.normal.backgroundText
 
-    height: opacity === 0 ? 0 : implicitHeight
+    height: opacity === 0 ? 0 : units.gu(6)
 
     Behavior on height {
         UbuntuNumberAnimation {}
@@ -82,6 +82,7 @@ ListItem.Empty {
             //font.bold: task.priority !== "low"
             color: selected ? UbuntuColors.orange : /*task.priority === "low" ? */Theme.palette.selected.backgroundText/* : priorityColor(task.priority)*/
             fontSize: "medium"
+            font.bold: text.indexOf("!") !== -1
         }
 
         Label {

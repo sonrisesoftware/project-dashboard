@@ -33,33 +33,58 @@ Plugin {
 
     property var tasks: doc.get("tasks", []).sort(sortFunction)
 
+    // Return -1 to sort A before B, 1 to sort B before A
     function sortFunction(a,b) {
-        if (a.date === undefined && b.date === undefined)
-            return a.text > b.text ? 1 : a.text < b.text ? -1 : 0
-        else if (a.date === undefined)
+        if (a.date === undefined && b.date === undefined) {
+            if ((a.text.indexOf("!") !== -1 && b.text.indexOf("!") !== -1) ||
+                    (a.text.indexOf("!") == -1 && b.text.indexOf("!") == -1)) {
+                return a.text > b.text ? 1 : a.text < b.text ? -1 : 0
+            } else if (a.text.indexOf("!") !== -1 && b.text.indexOf("!") == -1) {
+                return -1
+            } else {
+                return 1
+            }
+        } else if (a.date === undefined) {
             return 1
-        else if (b.date === undefined)
+        } else if (b.date === undefined) {
             return -1
-        else
-            return new Date(a.date) - new Date(b.date)}
+        } else {
+            return new Date(a.date) - new Date(b.date)
+        }
+    }
 
     onSave: {
         doc.set("tasks", tasks)
     }
 
     function newTask(text, date) {
-        tasks.push({"text": text, "done": false, "date": date ? date.toJSON(): undefined})
+        var task = {"text": text, "done": false, "date": date ? date.toJSON(): undefined}
+        tasks.push(task)
         tasks = tasks.sort(sortFunction)
         tasks = tasks
         notification.show(i18n.tr("Task added"))
     }
 
-    property var upcomingTasks: tasks
+    property var openTasks: {
+        var list = []
+        print("Searching...")
+        for (var i = 0; i < tasks.length; i++) {
+            var task = tasks[i]
+            print(task.text, task.done)
+            if (!task.done) {
+                print("Open task:", task.text)
+                task.index = i
+                list.push(task)
+            }
+        }
+
+        return list
+    }
 
     items: PluginItem {
         title: i18n.tr("Tasks")
         icon: "check-square-o"
-        value: tasks.length > 0 ? tasks.length : ""
+        value: openTasks.length > 0 ? openTasks.length : ""
 
         action: Action {
             text: i18n.tr("Add Task")
@@ -70,21 +95,22 @@ Plugin {
 
         pulseItem: PulseItem {
 
-            show: tasks.length > 0
+            show: openTasks.length > 0
             title: i18n.tr("Upcoming Tasks")
-            viewAll: i18n.tr("View all <b>%1</b> tasks").arg(tasks.length)
+            viewAll: i18n.tr("View all <b>%1</b> tasks").arg(openTasks.length)
 
             ListItem.Standard {
                 text: i18n.tr("No upcoming tasks")
                 enabled: false
-                visible: tasks.length === 0
+                visible: openTasks.length === 0
                 height: visible ? implicitHeight : 0
             }
 
             Repeater {
-                model: Math.min(tasks.length, project.maxRecent)
+                id: repeater
+                model: Math.min(openTasks.length, project.maxRecent)
                 delegate: ToDoListItem {
-                    property var modelData: tasks[index]
+                    property var modelData: openTasks[index]
                     id: item
                     done: modelData.done
                     text: modelData.text
@@ -96,13 +122,14 @@ Plugin {
                                                                                                                                                                 : defaultSubTextColor
                                                  : defaultSubTextColor
 
-                    onClicked: PopupUtils.open(editDialog, mainView, {index: index})
-                    show: !modelData.done || doc.get("showCompleted", false)
+                    onClicked: PopupUtils.open(editDialog, mainView, {index: modelData.index})
+                    show: !done
 
-                    onDoneChanged: {
-                        if (done !== tasks[index].done) {
-                            tasks[index].done = done
-                            modelData = Qt.binding(function() { return tasks[index] })
+                    onHeightChanged: {
+                        if (height === 0 && done && !openTasks[index].done) {
+                            tasks[modelData.index].done = true
+                            tasks = tasks
+                            done = Qt.binding(function() { return modelData.done })
                         }
                     }
                 }
@@ -144,12 +171,21 @@ Plugin {
 
                     onClicked: PopupUtils.open(editDialog, listView, {index: index})
 
-                    show: !modelData.done || doc.get("showCompleted", false)
+                    show: !done || doc.get("showCompleted", false)
 
                     onDoneChanged: {
-                        if (done !== tasks[index].done) {
-                            tasks[index].done = done
-                            modelData = Qt.binding(function() { return tasks[index] })
+                        if (height === units.gu(6) && !done && tasks[index].done) {
+                            tasks[index].done = false
+                            tasks = tasks
+                            done = Qt.binding(function() { return modelData.done })
+                        }
+                    }
+
+                    onHeightChanged: {
+                        if (height === 0 && done && !tasks[index].done) {
+                            tasks[index].done = true
+                            tasks = tasks
+                            done = Qt.binding(function() { return modelData.done })
                         }
                     }
                 }
