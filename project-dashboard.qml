@@ -85,12 +85,7 @@ MainView {
 
         Tabs {
             id: tabs
-            Tab {
-                title: page.title
-                page: UniversalInboxPage {
-                    id: inboxPage
-                }
-            }
+
 
             Tab {
                 title: page.title
@@ -98,12 +93,19 @@ MainView {
                     id: projectsPage
                 }
             }
+
+            Tab {
+                title: page.title
+                page: UniversalInboxPage {
+                    id: inboxPage
+                }
+            }
         }
 
         anchors.bottomMargin: wideAspect && mainView.toolbar.opened && mainView.toolbar.locked ? -mainView.toolbar.triggerSize : 0
 
         Component.onCompleted: {
-            if (inboxPage.count === 0)
+            if (inboxPage.count > 0)
                 tabs.selectedTabIndex = 1
             pageStack.push(tabs)
 

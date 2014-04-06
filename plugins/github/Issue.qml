@@ -23,6 +23,11 @@ Object {
         }
     }
 
+    property string type: typeRegular
+    property string typeRegular: issue.isPullRequest ? "pull request" : "issue"
+    property string typeCap: issue.isPullRequest ? "Pull request" : "Issue"
+    property string typeTitle: issue.isPullRequest ? "Pull Request" : "Issue"
+
     property var info: doc.get("info", {})
     property var pull: doc.get("pull", undefined)
     property var events: doc.get("events", [])

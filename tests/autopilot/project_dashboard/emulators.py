@@ -28,15 +28,55 @@ from ubuntuuitoolkit import emulators as toolkit_emulators
 class MainView(toolkit_emulators.MainView):
 
     def get_projects_page(self):
-        page = self.wait_select_single(ProjectsPage)
+        page = self.get_tabs().select_single(ProjectsPage)
         page.main_view = self
         return page
 
+    def get_walkthrough(self):
+        page = self.select_single(InitialWalkthrough)
+        page.main_view = self
+        return page
+    
+    def get_input_dialog(self):
+        return self.wait_select_single(InputDialog)
 
 class ProjectsPage(toolkit_emulators.UbuntuUIToolkitEmulatorBase):
     def get_new_project_dialog(self):
         pass
+    
+    def get_projects_count(self):
+        return len(self.select_many(toolkit_emulators.SingleValue))
 
+class InitialWalkthrough(toolkit_emulators.UbuntuUIToolkitEmulatorBase):
+        pass
 
 class SettingsPage(toolkit_emulators.UbuntuUIToolkitEmulatorBase):
     pass
+
+class ConfirmDialog(toolkit_emulators.UbuntuUIToolkitEmulatorBase):
+    """ConfirmDialog Autopilot emulator."""
+
+    def __init__(self, *args):
+        super(ConfirmDialog, self).__init__(*args)
+        self.pointing_device = toolkit_emulators.get_pointing_device()
+
+    def ok(self):
+        okButton = self.select_single('Button', objectName='okButton')
+        self.pointing_device.click_object(okButton)
+
+    def cancel(self):
+        cancel_button = self.select_single('Button', objectName='cancelButton')
+        self.pointing_device.click_object(cancel_button)
+
+class InputDialog(ConfirmDialog):
+    """ConfirmDialogWithInput Autopilot emulator."""
+
+    def __init__(self, *args):
+        super(InputDialog, self).__init__(*args)
+        self.textfield = self.select_single(toolkit_emulators.TextField)
+
+    def enter_text(self, text, clear=True):
+        self.textfield.write(text, clear)
+
+    def clear_text(self):
+        self.textfield.clear()

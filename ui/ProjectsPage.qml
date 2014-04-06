@@ -28,6 +28,9 @@ Page {
     title: i18n.tr("Projects")
     objectName: "projectsPage"
 
+    // Needs custom property to show up in autopilot tests
+    property bool test: true
+
     actions: [
         Action {
             id: newProjectAction
@@ -86,6 +89,7 @@ Page {
         onLockedChanged: opened = locked
 
         ToolbarButton {
+            objectName: "createProject"
             action: newProjectAction
             width: units.gu(8)
         }

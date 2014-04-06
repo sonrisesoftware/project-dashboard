@@ -29,6 +29,9 @@ Walkthough {
         settings.set("existingInstallation", true)
     }
 
+    // Needs custom property to show up in autopilot tests
+    property bool test: true
+
     model: [
          Component {
             Item {

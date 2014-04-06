@@ -34,14 +34,17 @@ Plugin {
     property var info: doc.get("repo", undefined)
     property var builds: doc.get("builds", [])
 
+    property bool buildsExist: builds.length > 0
+
     items: PluginItem {
         id: pluginItem
         title: "Continuous Integration"
+        shortTitle: "Testing"
         icon: "check-circle"
-        value: buildStatus(info.last_build_result)
+        value: buildsExist ? buildStatus(info.last_build_result) : ""
 
         pulseItem: PulseItem {
-            show: plugin.info ? true : false
+            show: buildsExist
             title: i18n.tr("Latest Results from Travis CI")
             viewAll: i18n.tr("View all builds")
             BuildListItem {
@@ -61,6 +64,15 @@ Plugin {
 
                 repo: repo
                 message: plugin.info ? info.message ? info.message : "" : ""
+                visible: buildsExist
+                height: visible ? implicitHeight : 0
+            }
+
+            ListItem.Standard {
+                text: i18n.tr("No builds exist")
+                enabled: false
+                visible: !buildsExist
+                height: visible ? implicitHeight : 0
             }
         }
 
@@ -86,6 +98,14 @@ Plugin {
 
             Scrollbar {
                 flickableItem: listView
+            }
+
+            Label {
+                anchors.centerIn: parent
+                visible: listView.contentHeight === 0
+                text: "No builds"
+                opacity: 0.5
+                fontSize: "large"
             }
         }
     }

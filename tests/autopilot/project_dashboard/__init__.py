@@ -2,73 +2,127 @@
 
 """Ubuntu Touch App autopilot tests."""
 
-import os
-#import subprocess
+# -*- Mode: Python; coding: utf-8; indent-tabs-mode: nil; tab-width: 4 -*-
+#
+# Copyright (C) 2013 Canonical Ltd
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 3 as
+# published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Authored by: Renato Araujo Oliveira Filho <renato@canonical.com>
 
-from autopilot import input, platform
-from autopilot.matchers import Eventually
-from testtools.matchers import Equals
+
+"""clock-app autopilot tests."""
+
+import os.path
+import os
+import shutil
+import logging
+
+from autopilot import input
+from autopilot.platform import model
 from ubuntuuitoolkit import (
     base,
     emulators as toolkit_emulators
 )
+
 from project_dashboard import emulators
 
-
-def _get_module_include_path():
-    return os.path.join(get_path_to_source_root(), 'modules')
-
-
-def get_path_to_source_root():
-    return os.path.abspath(
-        os.path.join(
-            os.path.dirname(__file__), '..', '..', '..', '..'))
+logger = logging.getLogger(__name__)
 
 
 class ClickAppTestCase(base.UbuntuUIToolkitAppTestCase):
-    """Common test case that provides several useful methods for the tests."""
 
-    package_id = ''  # TODO
-    app_name = 'project-dashboard'
+    """A common test case class that provides several useful methods for
+    calendar-app tests.
+
+    """
+    local_location = "../../project-dashboard.qml"
+    installed_location = "/usr/share/project-dashboard/project-dashboard.qml"
+    sqlite_dir = os.path.expanduser(
+        "~/.local/share/com.ubuntu.developer.mdspencer.project-dashboard")
+    backup_dir = sqlite_dir + ".backup"
 
     def setUp(self):
         super(ClickAppTestCase, self).setUp()
         self.pointing_device = input.Pointer(self.input_device_class.create())
-        self.launch_application()
 
-        self.assertThat(self.main_view.visible, Eventually(Equals(True)))
+        #backup and wipe db's before testing
+        self.temp_move_sqlite_db()
+        self.addCleanup(self.restore_sqlite_db)
 
-    def launch_application(self):
-        if platform.model() == 'Desktop':
-            self._launch_application_from_desktop()
+        #turn off the OSK so it doesn't block screen elements
+        if model() != 'Desktop':
+            os.system("stop maliit-server")
+            # adding cleanup step seems to restart
+            # service immediately; disabling for now
+            # self.addCleanup(os.system("start maliit-server"))
+
+        if os.path.exists(self.local_location):
+            self.launch_test_local()
+        elif os.path.exists(self.installed_location):
+            self.launch_test_installed()
         else:
-            self._launch_application_from_phablet()
+            self.launch_test_click()
 
-    def _launch_application_from_desktop(self):
-        app_qml_source_location = self._get_app_qml_source_path()
-        if os.path.exists(app_qml_source_location):
-            self.app = self.launch_test_application(
-                base.get_qmlscene_launch_command(),
-                '-I' + _get_module_include_path(),
-                app_qml_source_location,
-                app_type='qt',
-                emulator_base=toolkit_emulators.UbuntuUIToolkitEmulatorBase)
+    def launch_test_local(self):
+        self.app = self.launch_test_application(
+            base.get_qmlscene_launch_command(),
+            self.local_location,
+            app_type='qt',
+            emulator_base=toolkit_emulators.UbuntuUIToolkitEmulatorBase)
+
+    def launch_test_installed(self):
+        self.app = self.launch_test_application(
+            base.get_qmlscene_launch_command(),
+            self.installed_location,
+            "--desktop_file_hint=/usr/share/applications/"
+            "project-dashboard.desktop",
+            app_type='qt',
+            emulator_base=toolkit_emulators.UbuntuUIToolkitEmulatorBase)
+
+    def launch_test_click(self):
+        self.app = self.launch_click_package(
+            "com.ubuntu.clock",
+            emulator_base=toolkit_emulators.UbuntuUIToolkitEmulatorBase)
+
+    def temp_move_sqlite_db(self):
+        try:
+            shutil.rmtree(self.backup_dir)
+        except:
+            pass
         else:
-            raise NotImplementedError(
-                "On desktop we can't install click packages yet, so we can "
-                "only run from source.")
+            logger.warning("Prexisting backup database found and removed")
 
-    def _get_app_qml_source_path(self):
-        qml_file_name = '{0}.qml'.format(self.app_name)
-        return os.path.join(self._get_path_to_app_source(), qml_file_name)
+        try:
+            shutil.move(self.sqlite_dir, self.backup_dir)
+        except:
+            logger.warning("No current database found")
+        else:
+            logger.debug("Backed up database")
 
-    def _get_path_to_app_source(self):
-        return os.path.join(get_path_to_source_root(), self.app_name)
-
-    def _launch_application_from_phablet(self):
-        # On phablet, we only run the tests against the installed click
-        # package.
-        self.app = self.launch_click_package(self.pacakge_id, self.app_name)
+    def restore_sqlite_db(self):
+        if os.path.exists(self.backup_dir):
+            if os.path.exists(self.sqlite_dir):
+                try:
+                    shutil.rmtree(self.sqlite_dir)
+                except:
+                    logger.error("Failed to remove test database and restore" /
+                                 "database")
+                    return
+            try:
+                shutil.move(self.backup_dir, self.sqlite_dir)
+            except:
+                logger.error("Failed to restore database")
 
     @property
     def main_view(self):

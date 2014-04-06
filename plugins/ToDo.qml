@@ -116,7 +116,7 @@ Plugin {
                     text: modelData.text
                     property var dueDate: modelData.date !== undefined ? new Date(modelData.date) : undefined
                     subText: modelData.date ? i18n.tr("Due %1").arg(DateUtils.formattedDate(dueDate)) : ""
-                    subTextColor: dueDate !== undefined ? DateUtils.isToday(dueDate) ? colors["green"]
+                    subTextColor: dueDate !== undefined  ? DateUtils.isToday(dueDate) ? colors["green"]
                                                                               : DateUtils.dateIsBefore(dueDate, new Date()) ? colors["red"]
                                                                                                                             : DateUtils.dateIsThisWeek(dueDate) ? colors["yellow"]
                                                                                                                                                                 : defaultSubTextColor
@@ -163,7 +163,7 @@ Plugin {
                     text: modelData.text
                     property var dueDate: modelData.date !== undefined ? new Date(modelData.date) : undefined
                     subText: modelData.date ? i18n.tr("Due %1").arg(DateUtils.formattedDate(dueDate)) : ""
-                    subTextColor: dueDate !== undefined ? DateUtils.isToday(dueDate) ? colors["green"]
+                    subTextColor: dueDate !== undefined && !done ? DateUtils.isToday(dueDate) ? colors["green"]
                                                                               : DateUtils.dateIsBefore(dueDate, new Date()) ? colors["red"]
                                                                                                                             : DateUtils.dateIsThisWeek(dueDate) ? colors["yellow"]
                                                                                                                                                                 : defaultSubTextColor
