@@ -100,6 +100,10 @@ UbuntuShape {
             text: comment.text
             textFormat: Text.RichText
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+
+            onLinkActivated: {
+                Qt.openUrlExternally(link)
+            }
         }
     }
 }

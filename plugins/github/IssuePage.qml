@@ -337,6 +337,10 @@ Page {
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                     anchors.centerIn: parent
                     textFormat: Text.RichText
+
+                    onLinkActivated: {
+                        Qt.openUrlExternally(link)
+                    }
                 }
             }
 
