@@ -1,3 +1,10 @@
+project-dashboard (0.4.1) trusty; urgency=high
+
+  * Bug fixes in the Events and GitHub plugins
+  * Some initial Autopilot tests 
+
+ -- Michael Spencer <sonrisesoftware@gmail.com>  Mon, 07 Apr 2014 09:57:17 -0500
+
 project-dashboard (0.4) trusty; urgency=medium
 
   * Added Tasks plugin
