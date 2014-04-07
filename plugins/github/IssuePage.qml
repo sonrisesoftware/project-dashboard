@@ -556,11 +556,11 @@ Page {
                 model: plugin.availableAssignees.concat(i18n.tr("No one assigned"))
                 visible: plugin.hasPushAccess
                 selectedIndex: {
-                    print("ASSIGNEE:", JSON.stringify(issue.assignee))
+                    //print("ASSIGNEE:", JSON.stringify(issue.assignee))
                     if (issue.assignee && issue.assignee.hasOwnProperty("login")) {
                         for (var i = 0; i < model.length; i++) {
                             if (model[i].login === issue.assignee.login) {
-                                print("Assignee Index:", i)
+                                //print("Assignee Index:", i)
                                 return i
                             }
                         }

@@ -245,7 +245,17 @@ MainView {
                                 subText: group.errors.length > 0 ? i18n.tr("Error: %1").arg(group.errors[0].status)
                                                                  : ""
 
-                                control: ProgressBar {
+                                onClicked: {
+                                    print("Clicked")
+                                    error(i18n.tr("%1 Failed").arg(group.title), i18n.tr("Call: %1\n\n%2").arg(group.errors[0].call).arg(group.errors[0].response))
+                                }
+
+                                ProgressBar {
+                                    anchors {
+                                        right: parent.right
+                                        verticalCenter: parent.verticalCenter
+                                        rightMargin: units.gu(2)
+                                    }
                                     minimumValue: 0
                                     maximumValue: group.total
                                     value: item.group.total - item.group.count

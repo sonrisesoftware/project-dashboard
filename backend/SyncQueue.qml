@@ -106,8 +106,9 @@ Object {
             count--
             if (has_error) {
                 groups[id].errors.push({
-                                           "path": data.path,
-                                           "status": status
+                                           "call": data.path,
+                                           "status": status,
+                                           "response": response
                                        })
                 error(data.path, status, response, data.args)
             } else {
@@ -131,8 +132,9 @@ Object {
             count--
             if (has_error) {
                 groups[id].errors.push({
-                                           "path": data.path,
-                                           "status": status
+                                           "call": data.path,
+                                           "status": status,
+                                           "response": response
                                        })
                 error(data.path, status, response, data.args)
             }

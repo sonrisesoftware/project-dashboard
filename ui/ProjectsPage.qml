@@ -62,7 +62,7 @@ Page {
                 text: "Delete"
             }
 
-            // TODO: Nasty hack to improve the appearnce of the confirm removal dialog
+            // TODO: Nasty hack to improve the appearance of the confirm removal dialog
             Component.onCompleted: {
                 var image = findChild(projectDelegate, "confirmRemovalDialog").children[0].children[0]
                 image.source = ""
