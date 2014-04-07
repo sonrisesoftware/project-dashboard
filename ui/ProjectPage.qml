@@ -103,6 +103,8 @@ TabbedPage {
             delegate: Column {
                 property Plugin plugin: modelData
                 width: parent.width
+                visible: modelData.enabled
+                height: visible ? implicitHeight : 0
                 Repeater {
                     model: plugin.items
                     delegate: Loader {
@@ -179,6 +181,8 @@ TabbedPage {
                             if (modelData.page)
                                 pageStack.push(modelData.page)
                         }
+                        visible: modelData.enabled
+                        height: visible ? implicitHeight : 0
                     }
                 }
             }
@@ -224,139 +228,14 @@ TabbedPage {
         }
     }
 
-//    Project {
-//        id: project
-//        //docId: modelData
-//    }
-
-//    property Plugin selectedPlugin
-//    property bool wide: sidebar.expanded
-
-//    onWideChanged: {
-//        if (!wide && selectedPlugin) {
-//            pageStack.push(pushedPage, {plugin: selectedPlugin})
-//            selectedPlugin = null
-//        }
-//    }
-
-//    function displayPlugin(plugin) {
-//        if (sidebar.expanded) {
-//            selectedPlugin = plugin
-//        } else {
-//            pageStack.push(pushedPage, {plugin: plugin})
-//        }
-//    }
-
-//    function displayMessage(message) {
-//        var pluginName = message.plugin
-//        var plugin = null
-//        for (var i = 0; i < column.children.length; i++) {
-//            var item = column.children[i]
-//            print(item.item.document.docId)
-//            if (item.item && item.item.document.docId === pluginName) {
-//                plugin = item.item
-//                break
-//            }
-//        }
-
-//        if (!plugin)
-//            throw "Unable to find plugin named: " + pluginName
-
-//        plugin.displayMessage(message)
-//    }
-
-//    Component {
-//        id: pushedPage
-
-//        Page {
-//            id: pushedPagePage
-//            title: pluginItem.item.title
-
-//            property Plugin plugin
-//            property bool wide: sidebar.expanded
-//            flickable: pluginItem.item.flickable
-
-//            onWideChanged: {
-//                if (wide) {
-//                    pageStack.pop()
-//                    selectedPlugin = plugin
-//                }
-//            }
-
-//            Loader {
-//                id: pluginItem
-//                anchors.fill: parent
-//                visible: plugin
-//                sourceComponent: plugin ? plugin.page : null
-//                property Plugin plugin: pushedPagePage.plugin
-
-//                property Header header: pushedPagePage.header
-//            }
-
-//            tools: ToolbarItems {
-//                opened: wideAspect
-//                locked: wideAspect
-
-//                onLockedChanged: opened = locked
-
-//                Repeater {
-//                    model: pluginItem.item.actions
-//                    delegate: ToolbarButton {
-//                        id: toolbarButton
-//                        action: modelData
-//                        visible: action.visible
-//                        function trigger(value) { action.triggered(toolbarButton) }
-//                    }
-//                }
-
-//                ToolbarButton {
-//                    action: refreshAction
-//                    visible: plugin.canReload
-//                }
-//            }
-//        }
-//    }
-
-//    Loader {
-//        id: pluginPage
-//        anchors {
-//            left: sidebar.right
-//            right: parent.right
-//            top: parent.top
-//            bottom: parent.bottom
-//        }
-//        visible: selectedPlugin
-//        sourceComponent: selectedPlugin ? selectedPlugin.page : null
-//        property Plugin plugin: selectedPlugin
-//    }
-
-//    ListView {
-//        id: listView
-//        anchors.fill: parent
-//        visible: !sidebar.expanded
-//        model: column.children
-//        delegate: ListItem.SingleValue {
-//            property var plugin: visible ? modelData.item : null
-//            visible: modelData.hasOwnProperty("item") && modelData.item != null
-//            enabled: plugin.page
-//            height: visible? implicitHeight : 0
-
-//            text: visible ? plugin.title : ""
-//            value: visible ? plugin.value : ""
-
-//            progression: true
-//            onClicked: displayPlugin(plugin)
-//        }
-//    }
-
     Flickable {
         id: mainFlickable
         anchors {
-            fill: parent
-//            left: sidebar.right
-//            right: parent.right
-//            top: parent.top
-//            bottom: parent.bottom
+//            fill: parent
+            left: sidebar.right
+            right: parent.right
+            top: parent.top
+            bottom: parent.bottom
         }
         clip: wideAspect
         visible: wideAspect
@@ -382,8 +261,9 @@ TabbedPage {
                     delegate: Item {
                         id: tile
                         width: parent.width
-                        height: pluginTile.height + units.gu(2)
-                        visible: pluginItem.pulseItem
+
+                        visible: modelData.enabled && pluginItem.pulseItem
+                        height: visible ? pluginTile.height + units.gu(2) : 0
 
                         onVisibleChanged: column.reEvalColumns()
 
@@ -430,18 +310,48 @@ TabbedPage {
         }
     }
 
-//    Sidebar {
-//        id: sidebar
-//        expanded: wideAspect
-//        width: units.gu(6)
-//        color: Qt.rgba(0.2,0.2,0.2,0.8)
+    Sidebar {
+        id: sidebar
+        expanded: false
+        width: showTitles ? units.gu(8) : units.gu(6)
+        color: Qt.rgba(0,0,0,0.4)
 
-//        Column {
-//            width: parent.width
+        property int itemHeight: showTitles ? units.gu(7) : units.gu(6)
+        property bool showTitles: false
+
+        Column {
+            width: parent.width
+
+            ListItem.Standard {
+                id: item
+                height: sidebar.itemHeight
+                //onClicked: selectedPlugin = null
+                //selected: selectedPlugin === null
+
+                Column {
+                    anchors.centerIn: parent
+                    spacing: units.gu(0.5)
+
+                    AwesomeIcon {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        name: "dashboard"
+                        size: units.gu(3.5)
+                        color: item.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
+                    }
+
+                    Label {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: i18n.tr("Overview")
+                        fontSize: "small"
+                        color: item.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
+                        visible: sidebar.showTitles
+                    }
+                }
+            }
 
 //            ListItem.Standard {
-//                id: item
-//                height: width
+//                id: inboxItem
+//                height: units.gu(7)//width
 //                onClicked: selectedPlugin = null
 //                selected: selectedPlugin === null
 
@@ -451,144 +361,80 @@ TabbedPage {
 
 //                    AwesomeIcon {
 //                        anchors.horizontalCenter: parent.horizontalCenter
-//                        name: "dashboard"
-//                        size: units.gu(3.5)
-//                        color: item.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
-//                    }
+//                        name: "inbox"
+//                        size: units.gu(3)
+//                        color: inboxItem.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
 
-////                    Label {
-////                        anchors.horizontalCenter: parent.horizontalCenter
-////                        text: i18n.tr("Overview")
-////                        fontSize: "small"
-////                        color: item.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
-////                    }
-//                }
-//            }
+//                        Rectangle {
+//                            color: colors["red"]
+//                            width: label.text.length == 1 ? height: label.width + units.gu(1.2)
+//                            height: units.gu(2.5)
+//                            radius: height/2
+//                            border.color: Qt.darker(colors["red"])
+//                            antialiasing: true
 
-////            ListItem.Standard {
-////                id: inboxItem
-////                height: units.gu(7)//width
-////                onClicked: selectedPlugin = null
-////                selected: selectedPlugin === null
+//                            Label {
+//                                id: label
+//                                anchors.centerIn: parent
+//                                text: "23"
+//                            }
 
-////                Column {
-////                    anchors.centerIn: parent
-////                    spacing: units.gu(0.5)
-
-////                    AwesomeIcon {
-////                        anchors.horizontalCenter: parent.horizontalCenter
-////                        name: "inbox"
-////                        size: units.gu(3)
-////                        color: inboxItem.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
-
-////                        Rectangle {
-////                            color: colors["red"]
-////                            width: label.text.length == 1 ? height: label.width + units.gu(1.2)
-////                            height: units.gu(2.5)
-////                            radius: height/2
-////                            border.color: Qt.darker(colors["red"])
-////                            antialiasing: true
-
-////                            Label {
-////                                id: label
-////                                anchors.centerIn: parent
-////                                text: "23"
-////                            }
-
-////                            anchors {
-////                                horizontalCenter: parent.right
-////                                verticalCenter: parent.top
-////                                verticalCenterOffset: units.gu(1)
-////                                horizontalCenterOffset: units.gu(0.5)
-////                            }
-////                        }
-////                    }
-
-////                    Label {
-////                        anchors.horizontalCenter: parent.horizontalCenter
-////                        text: i18n.tr("Inbox")
-////                        fontSize: "small"
-////                        color: inboxItem.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
-////                    }
-////                }
-////            }
-
-//            Repeater {
-//                model: column.children
-//                delegate: ListItem.Standard {
-//                    id: pluginSidebarItem
-//                    height: visible ? width : 0
-//                    visible: modelData.hasOwnProperty("item") && modelData.item != null
-//                    enabled: modelData.item.page
-//                    opacity: enabled ? 1 : 0.5
-//                    onClicked: selectedPlugin = modelData.item
-//                    selected: selectedPlugin === modelData.item
-
-//                    Column {
-//                        anchors.centerIn: parent
-//                        spacing: units.gu(0.5)
-
-//                        AwesomeIcon {
-//                            anchors.horizontalCenter: parent.horizontalCenter
-//                            name: modelData.item.iconSource
-//                            size: units.gu(3.5)
-
-//                            color: pluginSidebarItem.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
+//                            anchors {
+//                                horizontalCenter: parent.right
+//                                verticalCenter: parent.top
+//                                verticalCenterOffset: units.gu(1)
+//                                horizontalCenterOffset: units.gu(0.5)
+//                            }
 //                        }
+//                    }
 
-////                        Label {
-////                            anchors.horizontalCenter: parent.horizontalCenter
-////                            text: modelData.item.shortTitle
-////                            color: pluginSidebarItem.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
-////                            fontSize: "small"
-////                        }
+//                    Label {
+//                        anchors.horizontalCenter: parent.horizontalCenter
+//                        text: i18n.tr("Inbox")
+//                        fontSize: "small"
+//                        color: inboxItem.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
 //                    }
 //                }
 //            }
-//        }
-//    }
 
-//    Scrollbar {
-//        flickableItem: mainFlickable
-//    }
+            Repeater {
+                model: project.plugins
+                delegate: Repeater {
+                    model: modelData.items
+                    delegate: ListItem.Standard {
+                        id: pluginSidebarItem
+                        height: sidebar.itemHeight
+                        opacity: enabled ? 1 : 0.5
 
-//    Label {
-//        anchors.centerIn: parent
-//        fontSize: "large"
-//        opacity: 0.5
-//        text: "No plugins enabled"
-//        visible: project.enabledPlugins.length === 0
-//    }
+                        Column {
+                            anchors.centerIn: parent
+                            spacing: units.gu(0.5)
 
-//    Item {
-//        anchors.fill: parent
-//        anchors.bottomMargin: header.height - header.__styleInstance.contentHeight
-//        parent: header
+                            AwesomeIcon {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                name: modelData.icon
+                                size: units.gu(3.5)
 
-//        ActivityIndicator {
-//            anchors {
-//                right: parent.right
-//                verticalCenter: parent.verticalCenter
-//                rightMargin: (parent.height - height)/2
-//            }
+                                color: pluginSidebarItem.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
+                            }
 
-//            height: units.gu(4)
-//            width: height
-//            running: opacity > 0
-//            opacity: project.loading ? 1 : 0
+                            Label {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                text: modelData.shortTitle
+                                color: pluginSidebarItem.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
+                                fontSize: "small"
+                                visible: sidebar.showTitles
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
-//            Behavior on opacity {
-//                UbuntuNumberAnimation {
-//                    duration: UbuntuAnimation.SlowDuration
-//                }
-//            }
-
-////            Label {
-////                anchors.centerIn: parent
-////                text: project.loading
-////            }
-//        }
-//    }
+    Scrollbar {
+        flickableItem: mainFlickable
+    }
 
     Component {
         id: actionMenu

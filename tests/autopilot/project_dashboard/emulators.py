@@ -36,25 +36,29 @@ class MainView(toolkit_emulators.MainView):
         page = self.select_single(InitialWalkthrough)
         page.main_view = self
         return page
-    
+
     def get_input_dialog(self):
         return self.wait_select_single(InputDialog)
+
 
 class ProjectsPage(toolkit_emulators.UbuntuUIToolkitEmulatorBase):
     def get_new_project_dialog(self):
         pass
-    
+
     def get_projects_count(self):
         return len(self.select_many(toolkit_emulators.SingleValue))
-    
+
     def get_action_popover(self):
         return self.select_single(toolkit_emulators.ActionSelectionPopover)
+
 
 class InitialWalkthrough(toolkit_emulators.UbuntuUIToolkitEmulatorBase):
         pass
 
+
 class SettingsPage(toolkit_emulators.UbuntuUIToolkitEmulatorBase):
     pass
+
 
 class ConfirmDialog(toolkit_emulators.UbuntuUIToolkitEmulatorBase):
     """ConfirmDialog Autopilot emulator."""
@@ -70,6 +74,7 @@ class ConfirmDialog(toolkit_emulators.UbuntuUIToolkitEmulatorBase):
     def cancel(self):
         cancel_button = self.select_single('Button', objectName='cancelButton')
         self.pointing_device.click_object(cancel_button)
+
 
 class InputDialog(ConfirmDialog):
     """ConfirmDialogWithInput Autopilot emulator."""

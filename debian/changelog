@@ -1,4 +1,4 @@
-project-dashboard (0.4.2) medium; urgency=medium
+project-dashboard (0.4.2) trusty; urgency=medium
 
   * More bug fixes
   * Swipe to delete projects

@@ -101,6 +101,7 @@ Plugin {
     items: PluginItem {
         icon: "clock"
         title: i18n.tr("Time Tracker")
+        shortTitle: i18n.tr("Timer")
         value: DateUtils.friendlyDuration(allTime)
 
         action: Action {

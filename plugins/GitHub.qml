@@ -45,6 +45,7 @@ Plugin {
     property var commitStats: doc.get("commit_stats", {})
     property var releases: doc.get("releases", [])
     property bool hasPushAccess: info.permissions ? info.permissions.push : false
+    property bool isFork: info.fork
 
     property int nextNumber: doc.get("nextNumber", 1)
 
@@ -66,6 +67,7 @@ Plugin {
             icon: "bug"
             title: i18n.tr("Issues")
             value: openIssues.length > 0 ? openIssues.length : ""
+            enabled: !isFork
             page: IssuesPage {
                 plugin: githubPlugin
             }
@@ -228,8 +230,6 @@ Plugin {
             issue.refresh(id)
         }
 
-        github.getIssues(project, id, repo, "open", lastRefreshed,  handler)
-        github.getIssues(project, id, repo, "closed", lastRefreshed, handler)
         github.getPullRequests(project, id, repo, "open", lastRefreshed,  handler)
         github.getPullRequests(project, id, repo, "closed", lastRefreshed, handler)
 
@@ -276,7 +276,7 @@ Plugin {
                                        .arg(actor)
                                        .arg(payload.action)
                                        .arg(issue.number),
-                                       issue.title, date,
+                                       issue.title, new Date(date),
                                        {"type": "issue", "number": issue.number})
                 } else if (type === "IssueCommentEvent") {
                     // TODO: Only display if the actor is other than the authenticated user
@@ -285,7 +285,7 @@ Plugin {
                     project.newMessage("github", "comments-o", i18n.tr("<b>%1</b> commented on issue %2")
                                        .arg(actor)
                                        .arg(issue.number),
-                                       comment.body, date,
+                                       comment.body, new Date(date),
                                        {"type": "comment", "number": issue.number})
                 } else if (type === "PushEvent") {
                     // TODO: Finish push eventss
@@ -295,34 +295,10 @@ Plugin {
                     project.newMessage("github", "code-fork", i18n.tr("<b>%1</b> forked %2")
                                        .arg(actor)
                                        .arg(plugin.repo),
-                                       i18n.tr("Forked %1 to %2").arg(plugin.repo).arg(repo.full_name), date,
+                                       i18n.tr("Forked %1 to %2").arg(plugin.repo).arg(repo.full_name), new Date(date),
                                        {"type": "fork"})
                 }
             }
-        })
-
-        github.getLabels(project, id, repo, function(status, response) {
-            if (lastRefreshed === "")
-                project.loading--
-            //print("Labels:", response)
-            var json = JSON.parse(response)
-            doc.set("labels", json)
-        })
-
-        github.getAssignees(project, id, repo, function(status, response) {
-            if (lastRefreshed === "")
-                project.loading--
-            //print("Labels:", response)
-            var json = JSON.parse(response)
-            doc.set("assignees", json)
-        })
-
-        github.getMilestones(project, id, repo, function(status, response) {
-            if (lastRefreshed === "")
-                project.loading--
-            //print("Labels:", response)
-            var json = JSON.parse(response)
-            doc.set("milestones", json)
         })
 
         github.getRepository(project, id, repo, function(status, response) {
@@ -331,12 +307,42 @@ Plugin {
             //print("Info:", response)
             var json = JSON.parse(response)
             doc.set("repo", json)
-        })
 
-        github.get(project, id, "/repos/" + repo + "/releases", function(status, response) {
-            if (lastRefreshed === "")
-                project.loading--
-            doc.set("releases", JSON.parse(response))
+            if (!isFork) {
+                github.getIssues(project, id, repo, "open", lastRefreshed,  handler)
+                github.getIssues(project, id, repo, "closed", lastRefreshed, handler)
+
+                github.getLabels(project, id, repo, function(status, response) {
+                    if (lastRefreshed === "")
+                        project.loading--
+                    //print("Labels:", response)
+                    var json = JSON.parse(response)
+                    doc.set("labels", json)
+                })
+
+                github.getAssignees(project, id, repo, function(status, response) {
+                    if (lastRefreshed === "")
+                        project.loading--
+                    //print("Labels:", response)
+                    var json = JSON.parse(response)
+                    doc.set("assignees", json)
+                })
+
+                github.getMilestones(project, id, repo, function(status, response) {
+                    if (lastRefreshed === "")
+                        project.loading--
+                    //print("Labels:", response)
+                    var json = JSON.parse(response)
+                    doc.set("milestones", json)
+                })
+
+
+                github.get(project, id, "/repos/" + repo + "/releases", function(status, response) {
+                    if (lastRefreshed === "")
+                        project.loading--
+                    doc.set("releases", JSON.parse(response))
+                })
+            }
         })
 
         github.get(project, id, "/repos/" + repo + "/stats/participation", function(status, response) {
