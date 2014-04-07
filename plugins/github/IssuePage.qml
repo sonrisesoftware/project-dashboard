@@ -218,6 +218,7 @@ Page {
                                 if (model[i].number === issue.milestone.number)
                                     return i
                             }
+                            return model.length - 1
                         } else {
                             return model.length - 1
                         }
@@ -529,6 +530,7 @@ Page {
                             if (model[i].number === issue.milestone.number)
                                 return i
                         }
+                        return model.length - 1
                     } else {
                         return model.length - 1
                     }
@@ -576,7 +578,7 @@ Page {
                 }
 
                 delegate: OptionSelectorDelegate {
-                    text: modelData.login
+                    text: modelData.login ? modelData.login : modelData
                 }
 
                 onSelectedIndexChanged: {
