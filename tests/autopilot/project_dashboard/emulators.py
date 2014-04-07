@@ -46,6 +46,9 @@ class ProjectsPage(toolkit_emulators.UbuntuUIToolkitEmulatorBase):
     
     def get_projects_count(self):
         return len(self.select_many(toolkit_emulators.SingleValue))
+    
+    def get_action_popover(self):
+        return self.select_single(toolkit_emulators.ActionSelectionPopover)
 
 class InitialWalkthrough(toolkit_emulators.UbuntuUIToolkitEmulatorBase):
         pass

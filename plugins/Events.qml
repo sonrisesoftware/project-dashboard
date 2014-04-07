@@ -307,7 +307,7 @@ Plugin {
                     color: "gray"
 
                     onClicked: {
-                        PopupUtils.close(root)
+                        PopupUtils.close(dialog)
                     }
                 }
 
@@ -324,7 +324,7 @@ Plugin {
                     enabled: titleField.text !== ""
 
                     onClicked: {
-                        PopupUtils.close(root)
+                        PopupUtils.close(dialog)
                         addEvent(titleField.text, datePicker.date)
                     }
                 }
