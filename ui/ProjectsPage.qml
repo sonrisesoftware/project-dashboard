@@ -50,22 +50,44 @@ Page {
             text: project.name
             value: project.inbox.count > 0 ? project.inbox.count : ""
             onClicked: pageStack.push(Qt.resolvedUrl("ProjectPage.qml"), {project: project})
-            onPressAndHold: PopupUtils.open(projectActionPopover, projectDelegate, {project: project})
 
             property Project project: modelData
-        }
 
-        remove: Transition {
-            SequentialAnimation {
-                UbuntuNumberAnimation { property: "opacity"; to: 0 }
-                UbuntuNumberAnimation { property: "height"; to: 0 }
+            removable: true
+            confirmRemoval: true
+
+            backgroundIndicator: ListItemBackground {
+                state: swipingState
+                iconSource: getIcon("delete-white")
+                text: "Delete"
             }
-        }
 
-        removeDisplaced: Transition {
-            SequentialAnimation {
-                PauseAnimation { duration: UbuntuAnimation.FastDuration } // Pause while the opacity goes to zero
-                UbuntuNumberAnimation { property: "y" } // Move up as the item gets removed
+            // TODO: Nasty hack to improve the appearnce of the confirm removal dialog
+            Component.onCompleted: {
+                var image = findChild(projectDelegate, "confirmRemovalDialog").children[0].children[0]
+                image.source = ""
+
+                var label = findChild(projectDelegate, "confirmRemovalDialog").children[0].children[1]
+                label.text = ""
+            }
+
+            onItemRemoved: {
+                project.remove()
+            }
+
+            function findChild(obj,objectName) {
+                var childs = new Array(0);
+                childs.push(obj)
+                while (childs.length > 0) {
+                    if (childs[0].objectName == objectName) {
+                        return childs[0]
+                    }
+                    for (var i in childs[0].data) {
+                        childs.push(childs[0].data[i])
+                    }
+                    childs.splice(0, 1);
+                }
+                return null;
             }
         }
     }
@@ -96,22 +118,6 @@ Page {
 
         ToolbarButton {
             action: settingsAction
-        }
-    }
-
-    Component {
-        id: projectActionPopover
-
-        ActionSelectionPopover {
-            property Project project
-
-            actions: [
-                Action {
-                    text: i18n.tr("Delete")
-                    // TODO: Add confirm dialog
-                    onTriggered: project.remove()
-                }
-            ]
         }
     }
 
