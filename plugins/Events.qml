@@ -203,8 +203,7 @@ Plugin {
                         placeholderText: i18n.tr("Title")
                         text: events[index].title
 
-                        onAccepted: textField.forceActiveFocus()
-                        Keys.onTabPressed: descriptionField.forceActiveFocus()
+                        onAccepted: okButton.click()
                         style: DialogTextFieldStyle {}
                     }
 
@@ -279,8 +278,7 @@ Plugin {
 
                 placeholderText: i18n.tr("Title")
 
-                onAccepted: textField.forceActiveFocus()
-                Keys.onTabPressed: textField.forceActiveFocus()
+                onAccepted: okButton.click()
                 style: DialogTextFieldStyle {}
             }
 

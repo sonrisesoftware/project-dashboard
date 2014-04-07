@@ -133,15 +133,21 @@ Plugin {
         refresh()
     }
 
+    property int syncId: -1
+
     function refresh() {
         var lastRefreshed = doc.get("lastRefreshed", "")
 
         if (lastRefreshed === "")
             project.loading += 2
 
-        var id = project.syncQueue.newGroup(i18n.tr("Updating Travis CI"))
+        if (syncId !== -1 && project.syncQueue.groups.hasOwnProperty(syncId)) {
+            delete groups[syncId]
+        }
 
-        travisCI.getRepo(project, id, repo, function(status, response) {
+        syncId = project.syncQueue.newGroup(i18n.tr("Updating Travis CI"))
+
+        travisCI.getRepo(project, syncId, repo, function(status, response) {
             if (lastRefreshed === "")
                 project.loading--
 
@@ -154,7 +160,7 @@ Plugin {
             doc.set("repo", JSON.parse(response))
         })
 
-        travisCI.getBuilds(project, id, repo, function(status, response) {
+        travisCI.getBuilds(project, syncId, repo, function(status, response) {
             if (lastRefreshed === "")
                 project.loading--
 

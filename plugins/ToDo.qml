@@ -247,6 +247,7 @@ Plugin {
 
                 placeholderText: i18n.tr("Title")
 
+                onAccepted: okButton.click()
                 style: DialogTextFieldStyle {}
             }
 
@@ -350,6 +351,7 @@ Plugin {
                 placeholderText: i18n.tr("Title")
 
                 style: DialogTextFieldStyle {}
+                onAccepted: okButton.click()
                 text: tasks[index].text
             }
 

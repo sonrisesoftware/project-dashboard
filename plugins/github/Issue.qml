@@ -89,6 +89,8 @@ Object {
         notification.show(i18n.tr("Comment posted"))
     }
 
+    property int syncId: -1
+
     property var allEvents: {
         if (!loaded)
             return []

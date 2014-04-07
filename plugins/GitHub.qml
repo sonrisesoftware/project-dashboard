@@ -177,6 +177,8 @@ Plugin {
         PopupUtils.open(Qt.resolvedUrl("github/RepositorySelectionSheet.qml"), mainView, {plugin: plugin})
     }
 
+    property int syncId: -1
+
     function refresh() {
         if (!repo)
             return
@@ -216,25 +218,29 @@ Plugin {
 
                 if (!found) {
                     var issue = issueComponent.createObject(mainView, {info: json[i]})
-                    issue.refresh(id)
+                    issue.refresh(syncId)
                     issues.append({"modelData": issue})
                     nextNumber = Math.max(nextNumber, issue.number + 1)
                 }
             }
         }
 
-        var id = project.syncQueue.newGroup(i18n.tr("Updating GitHub project"))
+        if (syncId !== -1 && project.syncQueue.groups.hasOwnProperty(syncId)) {
+            delete groups[syncId]
+        }
+
+        syncId = project.syncQueue.newGroup(i18n.tr("Updating GitHub project"))
 
         for (var i = 0; i < issues.count; i++) {
             var issue = issues.get(i).modelData
-            issue.refresh(id)
+            issue.refresh(syncId)
         }
 
-        github.getPullRequests(project, id, repo, "open", lastRefreshed,  handler)
-        github.getPullRequests(project, id, repo, "closed", lastRefreshed, handler)
+        github.getPullRequests(project, syncId, repo, "open", lastRefreshed,  handler)
+        github.getPullRequests(project, syncId, repo, "closed", lastRefreshed, handler)
 
 
-        github.getEvents(project, id, repo, function (status, response) {
+        github.getEvents(project, syncId, repo, function (status, response) {
             if (lastRefreshed === "")
                 project.loading--
 
@@ -301,7 +307,7 @@ Plugin {
             }
         })
 
-        github.getRepository(project, id, repo, function(status, response) {
+        github.getRepository(project, syncId, repo, function(status, response) {
             if (lastRefreshed === "")
                 project.loading--
             //print("Info:", response)
@@ -309,10 +315,10 @@ Plugin {
             doc.set("repo", json)
 
             if (!isFork) {
-                github.getIssues(project, id, repo, "open", lastRefreshed,  handler)
-                github.getIssues(project, id, repo, "closed", lastRefreshed, handler)
+                github.getIssues(project, syncId, repo, "open", lastRefreshed,  handler)
+                github.getIssues(project, syncId, repo, "closed", lastRefreshed, handler)
 
-                github.getLabels(project, id, repo, function(status, response) {
+                github.getLabels(project, syncId, repo, function(status, response) {
                     if (lastRefreshed === "")
                         project.loading--
                     //print("Labels:", response)
@@ -320,7 +326,7 @@ Plugin {
                     doc.set("labels", json)
                 })
 
-                github.getAssignees(project, id, repo, function(status, response) {
+                github.getAssignees(project, syncId, repo, function(status, response) {
                     if (lastRefreshed === "")
                         project.loading--
                     //print("Labels:", response)
@@ -328,7 +334,7 @@ Plugin {
                     doc.set("assignees", json)
                 })
 
-                github.getMilestones(project, id, repo, function(status, response) {
+                github.getMilestones(project, syncId, repo, function(status, response) {
                     if (lastRefreshed === "")
                         project.loading--
                     //print("Labels:", response)
@@ -337,7 +343,7 @@ Plugin {
                 })
 
 
-                github.get(project, id, "/repos/" + repo + "/releases", function(status, response) {
+                github.get(project, syncId, "/repos/" + repo + "/releases", function(status, response) {
                     if (lastRefreshed === "")
                         project.loading--
                     doc.set("releases", JSON.parse(response))
@@ -345,13 +351,13 @@ Plugin {
             }
         })
 
-        github.get(project, id, "/repos/" + repo + "/stats/participation", function(status, response) {
+        github.get(project, syncId, "/repos/" + repo + "/stats/participation", function(status, response) {
             if (lastRefreshed === "")
                 project.loading--
             doc.set("commit_stats", JSON.parse(response))
         })
 
-        github.get(project, id, "/repos/" + repo + "/branches", function(status, response) {
+        github.get(project, syncId, "/repos/" + repo + "/branches", function(status, response) {
             if (lastRefreshed === "")
                 project.loading--
             doc.set("branches", JSON.parse(response))
