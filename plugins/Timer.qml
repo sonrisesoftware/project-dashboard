@@ -49,6 +49,11 @@ Plugin {
 
     onLoaded: {
         dates = doc.get("dates", {})
+        for (var key in dates) {
+            if (dates[key].time === 0)
+                delete dates[key]
+        }
+
         if (!dates.hasOwnProperty(today)) {
             dates[today] = {
                 "date": today,

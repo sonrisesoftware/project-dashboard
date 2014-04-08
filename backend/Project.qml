@@ -38,9 +38,7 @@ Item {
 
     property int maxRecent: wideAspect ? 4 : 3
 
-    property SyncQueue syncQueue: SyncQueue {
-        onError: syncError = true
-    }
+    property SyncQueue syncQueue: SyncQueue {}
 
     Document {
         id: doc
@@ -113,6 +111,13 @@ Item {
 
     property ListModel inbox: ListModel {
 
+    }
+
+    function refresh() {
+        for (var i = 0; i < plugins.count; i++) {
+            var plugin = plugins.get(i).modelData
+            plugin.refresh()
+        }
     }
 
     function clearInbox() {
@@ -196,5 +201,13 @@ Item {
             if (plugin.type === type)
                 plugins.remove(i)
         }
+    }
+
+
+    Timer {
+        interval: 2 * 60 * 1000 // 2 minutes
+        running: true
+        repeat: true
+        onTriggered: refresh()
     }
 }

@@ -59,15 +59,14 @@ TabbedPage {
             text: i18n.tr("Actions")
             iconSource: getIcon("navigation-menu")
             onTriggered: PopupUtils.open(actionMenu, value)
-        }//,
+        },
 
-        // TODO: Is there a way to enable auto-refresh in a useable and efficient manner?
-//        Action {
-//            id: refreshAction
-//            text: i18n.tr("Refresh")
-//            iconSource: getIcon("reload")
-//            onTriggered: project.reload()
-//        }
+        Action {
+            id: refreshAction
+            text: i18n.tr("Refresh")
+            iconSource: getIcon("reload")
+            onTriggered: project.refresh()
+        }
     ]
 
     Item {
@@ -559,9 +558,9 @@ TabbedPage {
 //            }
 //        }
 
-//        ToolbarButton {
-//            action: refreshAction
-//        }
+        ToolbarButton {
+            action: refreshAction
+        }
 
         ToolbarButton {
             action: inboxAction

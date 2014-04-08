@@ -16,6 +16,15 @@ Object {
     property var groups: { return {} }
     property int nextGroup: 0
 
+    property bool hasError: {
+        for (var key in groups) {
+            if (groups[key].errors.length > 0)
+                return true
+        }
+
+        return false
+    }
+
     function append(id, operation) {
         if (list === undefined)
             list = []

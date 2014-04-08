@@ -141,7 +141,9 @@ MainView {
         }
     }
 
-    property bool syncError: false
+    property bool syncError: List.iter(backend.projects, function(project) {
+        return project.syncQueue.hasError
+    }) > 0
     property bool busy: List.iter(backend.projects, function(project) {
         return project.syncQueue.count
     }) > 0

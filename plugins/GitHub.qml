@@ -226,7 +226,9 @@ Plugin {
         }
 
         if (syncId !== -1 && project.syncQueue.groups.hasOwnProperty(syncId)) {
-            delete groups[syncId]
+            print("Deleting existing sync operation for GitHub")
+            delete project.syncQueue.groups[syncId]
+            project.syncQueue.groups = project.syncQueue.groups
         }
 
         syncId = project.syncQueue.newGroup(i18n.tr("Updating GitHub project"))
@@ -446,12 +448,5 @@ Plugin {
         }
 
         throw "Unable to display message: " + JSON.stringify(message)
-    }
-
-    Timer {
-        interval: 2 * 60 * 1000 // 2 minutes
-        running: true
-        repeat: true
-        onTriggered: refresh()
     }
 }

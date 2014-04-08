@@ -142,7 +142,9 @@ Plugin {
             project.loading += 2
 
         if (syncId !== -1 && project.syncQueue.groups.hasOwnProperty(syncId)) {
-            delete groups[syncId]
+            print("Deleting existing sync operation for Travis CI")
+            delete project.syncQueue.groups[syncId]
+            project.syncQueue.groups = project.syncQueue.groups
         }
 
         syncId = project.syncQueue.newGroup(i18n.tr("Updating Travis CI"))
