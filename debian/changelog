@@ -1,3 +1,10 @@
+project-dashboard (0.4.5) trusty; urgency=low
+
+  * Sync error resets properly now
+  * Removed sidebar which accidentally made it into the PPA & app store
+
+ -- Michael Spencer <sonrisesoftware@gmail.com>  Tue, 08 Apr 2014 13:45:38 -0500
+
 project-dashboard (0.4.4) trusty; urgency=medium
 
   * Bug fixes
