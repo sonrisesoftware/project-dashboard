@@ -31,6 +31,8 @@ sudo apt-get install project-dashboard
 
 [LP #1208833](https://bugs.launchpad.net/ubuntu-ui-toolkit/+bug/1208833) - The pointer on the popover that opens for the sync item isn't correctly positioned when the app's width is too small.
 
+[LP #1304034](https://bugs.launchpad.net/ubuntu/+source/unity-scope-click/+bug/1304034) - App data is not saved when quitting the app from the Apps scope since onDestruction() isn't called when closing from the Apps scope.
+
 ### Licensing ###
 
 Project Dashboard is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
