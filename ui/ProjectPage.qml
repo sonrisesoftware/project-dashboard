@@ -16,177 +16,72 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.Components.Popups 0.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
 import "../backend"
-import "../ubuntu-ui-extras"
 import "../components"
 
-TabbedPage {
+import "../qml-extras"
+import "../qml-air"
+import "../qml-air/ListItems" as ListItem
+
+Page {
     id: page
     
     title: project.name
 
-    tabs: wideAspect ? [i18n.tr("Pulse")] : [i18n.tr("Pulse"), i18n.tr("Overview")]
-
     property Project project
 
-    selectedIndex: project.selectedTab
-
-    onSelectedIndexChanged: {
-        project.selectedTab = selectedIndex
-    }
-
-    actions: [
-        Action {
-            id: configAction
-            text: i18n.tr("Edit")
-            iconSource: getIcon("edit")
-            onTriggered:pageStack.push(Qt.resolvedUrl("ConfigPage.qml"), {project: project})
-        },
-
-        Action {
-            id: inboxAction
-            text: i18n.tr("Inbox")
-            iconSource: enabled ? getIcon("bell") : getIcon("bell-o")
+    rightWidgets: [
+        Button {
+            iconName: enabled ? "bell" : "bell-o"
             enabled: project.inbox.count > 0
-            onTriggered: pageStack.push(Qt.resolvedUrl("InboxPage.qml"), {project: project})
+            onClicked: pageStack.push(Qt.resolvedUrl("InboxPage.qml"), {project: project})
+            toolTip: project.inbox.count > 0 ? "%1 notifications".arg(project.inbox.count) : "No notifications"
         },
 
-        Action {
-            id: actionsAction
-            text: i18n.tr("Actions")
-            iconSource: getIcon("navigation-menu")
-            onTriggered: PopupUtils.open(actionMenu, value)
+        Button {
+            iconName: "bars"
+            onClicked: pageStack.open(Qt.resolvedUrl("ConfigPage.qml"), {project: project})
+            toolTip: "Project configuration"
         },
 
-        Action {
-            id: refreshAction
-            text: i18n.tr("Refresh")
-            iconSource: getIcon("reload")
-            onTriggered: project.refresh()
+        Button {
+            iconName: "cog"
+            onClicked: settingsPage.open()
+            toolTip: "Settings"
         }
+
     ]
 
-    Item {
-        visible: !wideAspect
-        anchors {
-            left: parent.left
-            top: parent.top
-            bottom: parent.bottom
-            leftMargin: show ? 0 : -width
+//    actions: [
+//        Action {
+//            id: configAction
+//            text: i18n.tr("Edit")
+//            iconSource: getIcon("edit")
+//            onTriggered:pageStack.push(Qt.resolvedUrl("ConfigPage.qml"), {project: project})
+//        },
 
-            Behavior on leftMargin {
-                UbuntuNumberAnimation {}
-            }
-        }
+//        Action {
+//            id: inboxAction
+//            text: i18n.tr("Inbox")
+//            iconSource: enabled ? getIcon("bell") : getIcon("bell-o")
+//            enabled: project.inbox.count > 0
+//            onTriggered: pageStack.push(Qt.resolvedUrl("InboxPage.qml"), {project: project})
+//        },
 
-        width: parent.width
+//        Action {
+//            id: actionsAction
+//            text: i18n.tr("Actions")
+//            iconSource: getIcon("navigation-menu")
+//            onTriggered: PopupUtils.open(actionMenu, value)
+//        },
 
-        opacity: show ? 1 : 0
-
-        Behavior on opacity {
-            UbuntuNumberAnimation {}
-        }
-
-        property bool show: selectedTab === i18n.tr("Pulse")
-
-        ListView {
-            id: pulseListView
-
-            topMargin: units.gu(12)
-            anchors.fill: parent
-
-            model: project.plugins
-            delegate: Column {
-                property Plugin plugin: modelData
-                width: parent.width
-                visible: modelData.enabled
-                height: visible ? implicitHeight : 0
-                Repeater {
-                    model: plugin.items
-                    delegate: Loader {
-                        width: parent.width
-                        height: sourceComponent ? item.height : 0
-                        sourceComponent: modelData.pulseItem
-                    }
-                }
-            }
-        }
-
-        Column {
-            anchors.centerIn: parent
-            anchors.verticalCenterOffset: header.height/2
-
-            visible: pulseListView.contentHeight === 0 && project.plugins.count > 0
-            opacity: 0.5
-            spacing: units.gu(1)
-
-            AwesomeIcon {
-                anchors.horizontalCenter: parent.horizontalCenter
-                name: "dashboard"
-                size: units.gu(7)
-            }
-
-            Label {
-                fontSize: "large"
-                text: i18n.tr("Nothing to show")
-
-                anchors.horizontalCenter: parent.horizontalCenter
-            }
-        }
-    }
-
-    Item {
-        visible: !wideAspect
-        anchors {
-            right: parent.right
-            top: parent.top
-            bottom: parent.bottom
-            rightMargin: show ? 0 : -width
-
-            Behavior on rightMargin {
-                UbuntuNumberAnimation {}
-            }
-        }
-
-        width: parent.width
-
-        opacity: show ? 1 : 0
-
-        Behavior on opacity {
-            UbuntuNumberAnimation {}
-        }
-
-        property bool show: selectedTab === i18n.tr("Overview")
-
-        ListView {
-            id: listView
-
-            anchors.fill: parent
-
-            model: project.plugins
-            delegate: Column {
-                property Plugin plugin: modelData
-                width: parent.width
-                Repeater {
-                    model: plugin.items
-                    delegate: ListItem.SingleValue {
-                        text: modelData.title
-                        value: modelData.value
-                        progression: modelData.page
-                        onClicked: {
-                            if (modelData.page)
-                                pageStack.push(modelData.page)
-                        }
-                        visible: modelData.enabled
-                        height: visible ? implicitHeight : 0
-                    }
-                }
-            }
-        }
-    }
+//        Action {
+//            id: refreshAction
+//            text: i18n.tr("Refresh")
+//            iconSource: getIcon("reload")
+//            onTriggered: project.refresh()
+//        }
+//    ]
 
     Column {
         anchors.centerIn: parent
@@ -205,25 +100,8 @@ TabbedPage {
             horizontalAlignment: Text.AlignHCenter
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
             width: parent.width
+            color: theme.secondaryColor
             text: i18n.tr("Add some plugins by tapping \"Edit\" in the toolbar.")
-        }
-    }
-
-    property Flickable oldFlickable
-
-    flickable: wideAspect ? mainFlickable : selectedTab === i18n.tr("Pulse") ? pulseListView : listView
-
-    onFlickableChanged: {
-        if (oldFlickable && wideAspect) {
-            oldFlickable.topMargin = 0
-            oldFlickable.contentY = 0
-        }
-
-        oldFlickable = flickable
-
-        if (flickable != null && header != null) {
-            flickable.topMargin = header.height
-            flickable.contentY = -header.height
         }
     }
 
@@ -231,7 +109,7 @@ TabbedPage {
         id: mainFlickable
         anchors {
 //            fill: parent
-            left: sidebar.right
+            left: parent.left
             right: parent.right
             top: parent.top
             bottom: parent.bottom
@@ -309,129 +187,7 @@ TabbedPage {
         }
     }
 
-    Sidebar {
-        id: sidebar
-        expanded: false
-        width: showTitles ? units.gu(8) : units.gu(6)
-        color: Qt.rgba(0,0,0,0.4)
-
-        property int itemHeight: showTitles ? units.gu(7) : units.gu(6)
-        property bool showTitles: false
-
-        Column {
-            width: parent.width
-
-            ListItem.Standard {
-                id: item
-                height: sidebar.itemHeight
-                //onClicked: selectedPlugin = null
-                //selected: selectedPlugin === null
-
-                Column {
-                    anchors.centerIn: parent
-                    spacing: units.gu(0.5)
-
-                    AwesomeIcon {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        name: "dashboard"
-                        size: units.gu(3.5)
-                        color: item.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
-                    }
-
-                    Label {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: i18n.tr("Overview")
-                        fontSize: "small"
-                        color: item.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
-                        visible: sidebar.showTitles
-                    }
-                }
-            }
-
-//            ListItem.Standard {
-//                id: inboxItem
-//                height: units.gu(7)//width
-//                onClicked: selectedPlugin = null
-//                selected: selectedPlugin === null
-
-//                Column {
-//                    anchors.centerIn: parent
-//                    spacing: units.gu(0.5)
-
-//                    AwesomeIcon {
-//                        anchors.horizontalCenter: parent.horizontalCenter
-//                        name: "inbox"
-//                        size: units.gu(3)
-//                        color: inboxItem.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
-
-//                        Rectangle {
-//                            color: colors["red"]
-//                            width: label.text.length == 1 ? height: label.width + units.gu(1.2)
-//                            height: units.gu(2.5)
-//                            radius: height/2
-//                            border.color: Qt.darker(colors["red"])
-//                            antialiasing: true
-
-//                            Label {
-//                                id: label
-//                                anchors.centerIn: parent
-//                                text: "23"
-//                            }
-
-//                            anchors {
-//                                horizontalCenter: parent.right
-//                                verticalCenter: parent.top
-//                                verticalCenterOffset: units.gu(1)
-//                                horizontalCenterOffset: units.gu(0.5)
-//                            }
-//                        }
-//                    }
-
-//                    Label {
-//                        anchors.horizontalCenter: parent.horizontalCenter
-//                        text: i18n.tr("Inbox")
-//                        fontSize: "small"
-//                        color: inboxItem.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
-//                    }
-//                }
-//            }
-
-            Repeater {
-                model: project.plugins
-                delegate: Repeater {
-                    model: modelData.items
-                    delegate: ListItem.Standard {
-                        id: pluginSidebarItem
-                        height: sidebar.itemHeight
-                        opacity: enabled ? 1 : 0.5
-
-                        Column {
-                            anchors.centerIn: parent
-                            spacing: units.gu(0.5)
-
-                            AwesomeIcon {
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                name: modelData.icon
-                                size: units.gu(3.5)
-
-                                color: pluginSidebarItem.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
-                            }
-
-                            Label {
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                text: modelData.shortTitle
-                                color: pluginSidebarItem.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
-                                fontSize: "small"
-                                visible: sidebar.showTitles
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    Scrollbar {
+    ScrollBar {
         flickableItem: mainFlickable
     }
 
@@ -542,38 +298,38 @@ TabbedPage {
         }
     }
 
-    tools: ToolbarItems {
-        opened: wideAspect
-        locked: wideAspect
+//    tools: ToolbarItems {
+//        opened: wideAspect
+//        locked: wideAspect
 
-        onLockedChanged: opened = locked
+//        onLockedChanged: opened = locked
 
-//        Repeater {
-//            model: selectedPlugin ? pluginPage.item.actions : []
-//            delegate: ToolbarButton {
-//                id: toolbarButton
-//                action: modelData
-//                visible: action.visible
-//                function trigger(value) { action.triggered(toolbarButton) }
-//            }
+////        Repeater {
+////            model: selectedPlugin ? pluginPage.item.actions : []
+////            delegate: ToolbarButton {
+////                id: toolbarButton
+////                action: modelData
+////                visible: action.visible
+////                function trigger(value) { action.triggered(toolbarButton) }
+////            }
+////        }
+
+//        ToolbarButton {
+//            action: refreshAction
 //        }
 
-        ToolbarButton {
-            action: refreshAction
-        }
+//        ToolbarButton {
+//            action: inboxAction
+//        }
 
-        ToolbarButton {
-            action: inboxAction
-        }
+//        ToolbarButton {
+//            id: actionsButton
+//            action: actionsAction
+//            function trigger(value) { action.triggered(actionsButton) }
+//        }
 
-        ToolbarButton {
-            id: actionsButton
-            action: actionsAction
-            function trigger(value) { action.triggered(actionsButton) }
-        }
-
-        ToolbarButton {
-            action: configAction
-        }
-    }
+//        ToolbarButton {
+//            action: configAction
+//        }
+//    }
 }

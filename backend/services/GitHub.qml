@@ -16,11 +16,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.Components.Popups 0.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
-import "../../ubuntu-ui-extras/httplib.js" as Http
-import "../../ubuntu-ui-extras"
+
+import "../../qml-extras/httplib.js" as Http
+import "../../qml-extras"
+import "../../qml-air"
 import ".."
 
 Service {
@@ -185,30 +184,5 @@ Service {
 
     function status(value) {
         return i18n.tr("Connected to %1").arg(value)
-    }
-
-    Component {
-        id: accessRevokedDialog
-
-        Dialog {
-
-            title: i18n.tr("GitHub Access Revoked")
-            text: i18n.tr("You will no longer be able to access any projects on GitHub. Go to Settings to re-enable GitHub integration.")
-
-            Button {
-                text: i18n.tr("Ok")
-                onTriggered: {
-                    PopupUtils.close(accessRevokedDialog)
-                }
-            }
-
-            Button {
-                text: i18n.tr("Open Settings")
-                onTriggered: {
-                    PopupUtils.close(accessRevokedDialog)
-                    pageStack.push(Qt.resolvedUrl("ui/SettingsPage.qml"))
-                }
-            }
-        }
     }
 }

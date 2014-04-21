@@ -16,45 +16,26 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.PerformanceMetrics 0.1
-import Ubuntu.Components.Popups 0.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
 import "components"
 import "ui"
 import "backend"
 import "backend/services"
-import "ubuntu-ui-extras"
-import "ubuntu-ui-extras/listutils.js" as List
-import "ubuntu-ui-extras/httplib.js" as Http
-import Friends 0.2
-import "Markdown.Converter.js" as Markdown
+
+import "qml-air"
+import "qml-extras"
+import "qml-extras/listutils.js" as List
+import "qml-extras/httplib.js" as Http
 
 /*!
     \brief MainView with a Label and Button elements.
 */
 
-MainView {
+PageApplication {
     id: mainView
     // objectName for functional testing purposes (autopilot-qt5)
     objectName: "mainView"
 
-    // Note! applicationName needs to match the "name" field of the click manifest
-    applicationName: "com.ubuntu.developer.mdspencer.project-dashboard"
-
-    /*
-     This property enables the application to change orientation
-     when the device is rotated. The default is false.
-    */
-    automaticOrientation: true
-
-    anchorToKeyboard: true
-
-    backgroundColor: Qt.rgba(0.3,0.3,0.3,1)
-
-    // The size of the Nexus 4
-    //width: units.gu(42)
-    //height: units.gu(67)
+    title: "Project Dashboard"
 
     width: units.gu(100)
     height: units.gu(75)
@@ -64,236 +45,276 @@ MainView {
         "red": "#db3131",//"#d9534f",//"#db3131",
         "yellow": "#f0ad4e",//"#b68b01",
         "blue": "#5bc0de",
-        "default": Theme.palette.normal.baseText,
+        //"default": Theme.palette.normal.baseText,
     }
 
     property bool wideAspect: width > units.gu(80)
     property bool extraWideAspect: width > units.gu(150)
-    //property alias pageStack: pageStack
 
-    actions: [
-        Action {
-            id: settingsAction
-            text: i18n.tr("Settings")
-            iconSource: getIcon("settings")
-            onTriggered: pageStack.push(Qt.resolvedUrl("ui/SettingsPage.qml"))
-        }
-    ]
+    initialPage: tabs
 
-    PageStack {
-        id: pageStack
+    Tabs {
+        id: tabs
 
-        Tabs {
-            id: tabs
+        title: "Project Dashboard"
 
-
-            Tab {
-                title: page.title
-                page: ProjectsPage {
-                    id: projectsPage
-                }
-            }
-
-            Tab {
-                title: page.title
-                page: UniversalInboxPage {
-                    id: inboxPage
-                }
-            }
+        leftWidgets: Button {
+            style: "primary"
+            text: "New Project"
+            onClicked: newSheet.open()
         }
 
-        anchors.bottomMargin: wideAspect && mainView.toolbar.opened && mainView.toolbar.locked ? -mainView.toolbar.triggerSize : 0
+        rightWidgets: Button {
+            iconName: "cog"
+            onClicked: settingsPage.open()
+        }
+
+        UniversalInboxPage {
+            id: inboxPage
+        }
+
+        ProjectsPage {
+            id: projectsPage
+        }
 
         Component.onCompleted: {
-            if (inboxPage.count > 0)
-                tabs.selectedTabIndex = 1
-            pageStack.push(tabs)
-
-            if (!settings.get("existingInstallation", false)) {
-                pageStack.push(Qt.resolvedUrl("ui/InitialWalkthrough.qml"))
-            }
+            if (inboxPage.count == 0)
+                tabs.selectedPage = projectsPage
         }
     }
 
-    Component {
-        id: aboutPage
-        AboutPage {
+    InputDialog {
+        id: newSheet
 
-            linkColor: colors["blue"]
-
-            appName: i18n.tr("Project Dashboard")
-            icon: Qt.resolvedUrl("project-dashboard-shadowed.png")
-            iconFrame: false
-            version: "@APP_VERSION@"
-            credits: {
-                var credits = {}
-                credits[i18n.tr("Icon")] = "Sam Hewitt"
-                credits[i18n.tr("Debian Packaging")] = "Nekhelesh Ramananthan"
-                return credits
-            }
-
-            website: "http://www.sonrisesoftware.com/apps/project-dashboard"
-            reportABug: "https://github.com/iBeliever/project-dashboard/issues"
-
-            copyright: i18n.tr("Copyright (c) 2014 Michael Spencer")
-            author: "Sonrise Software"
-            contactEmail: "sonrisesoftware@gmail.com"
+        title: i18n.tr("Create New Project")
+        text: i18n.tr("Please enter a name for your new project.")
+        placeholderText: i18n.tr("Name")
+        onAccepted: {
+            var project = backend.newProject(value)
+            pageStack.push(Qt.resolvedUrl("ui/ProjectPage.qml"), {project: project})
+            notification.show(i18n.tr("Project created"))
         }
     }
 
-    property bool syncError: List.iter(backend.projects, function(project) {
-        return project.syncQueue.hasError
-    }) > 0
-    property bool busy: List.iter(backend.projects, function(project) {
-        return project.syncQueue.count
-    }) > 0
-
-    Notification {
-        id: notification
+    SettingsPage {
+        id: settingsPage
     }
 
-    Item {
-        anchors.fill: parent
-        anchors.bottomMargin: header.height - header.__styleInstance.contentHeight
-        parent: header
+//    actions: [
+//        Action {
+//            id: settingsAction
+//            text: i18n.tr("Settings")
+//            iconSource: getIcon("settings")
+//            onTriggered: pageStack.push(Qt.resolvedUrl("ui/SettingsPage.qml"))
+//        }
+//    ]
 
-        AwesomeIcon {
-            name: "exclamation-triangle"
-            color: colors["yellow"]
-            anchors.centerIn: syncIndicator
-            size: units.gu(2.6)
-            opacity: !busy && syncError ? 1 : 0
+//    PageStack {
+//        id: pageStack
 
-            Behavior on opacity {
-                UbuntuNumberAnimation {
-                    duration: UbuntuAnimation.SlowDuration
-                }
-            }
-        }
+//        Tabs {
+//            id: tabs
 
-        ActivityIndicator {
-            id: syncIndicator
-            anchors {
-                right: parent.right
-                verticalCenter: parent.verticalCenter
-                rightMargin: (parent.height - height)/2
-            }
 
-            height: units.gu(4)
-            width: height
-            running: opacity > 0
-            opacity: busy ? 1 : 0
+//            Tab {
+//                title: page.title
+//                page: ProjectsPage {
+//                    id: projectsPage
+//                }
+//            }
 
-            Behavior on opacity {
-                UbuntuNumberAnimation {
-                    duration: UbuntuAnimation.SlowDuration
-                }
-            }
+//            Tab {
+//                title: page.title
+//                page: UniversalInboxPage {
+//                    id: inboxPage
+//                }
+//            }
+//        }
 
-            MouseArea {
-                anchors.fill: parent
-                enabled: busy || syncError
-                onClicked: PopupUtils.open(syncPopover, syncIndicator)
-            }
-        }
-    }
+//        anchors.bottomMargin: wideAspect && mainView.toolbar.opened && mainView.toolbar.locked ? -mainView.toolbar.triggerSize : 0
 
-    Component {
-        id: syncPopover
+//        Component.onCompleted: {
+//            if (inboxPage.count > 0)
+//                tabs.selectedTabIndex = 1
+//            pageStack.push(tabs)
 
-        Popover {
-            id: popover
-            contentHeight: column.height
+//            if (!settings.get("existingInstallation", false)) {
+//                pageStack.push(Qt.resolvedUrl("ui/InitialWalkthrough.qml"))
+//            }
+//        }
+//    }
 
-            onContentHeightChanged: {
-                if (contentHeight == 0)
-                    PopupUtils.close(popover)
-            }
+//    Component {
+//        id: aboutPage
+//        AboutPage {
 
-            Column {
-                id: column
-                width: parent.width
+//            linkColor: colors["blue"]
 
-                Repeater {
-                    model: backend.projects
-                    delegate: Column {
-                        id: syncColumn
-                        width: parent.width
+//            appName: i18n.tr("Project Dashboard")
+//            icon: Qt.resolvedUrl("project-dashboard-shadowed.png")
+//            iconFrame: false
+//            version: "@APP_VERSION@"
+//            credits: {
+//                var credits = {}
+//                credits[i18n.tr("Icon")] = "Sam Hewitt"
+//                credits[i18n.tr("Debian Packaging")] = "Nekhelesh Ramananthan"
+//                return credits
+//            }
 
-                        property Project project: modelData
+//            website: "http://www.sonrisesoftware.com/apps/project-dashboard"
+//            reportABug: "https://github.com/iBeliever/project-dashboard/issues"
 
-                        visible: List.objectKeys(modelData.syncQueue.groups).length > 0
+//            copyright: i18n.tr("Copyright (c) 2014 Michael Spencer")
+//            author: "Sonrise Software"
+//            contactEmail: "sonrisesoftware@gmail.com"
+//        }
+//    }
 
-                        ListItem.Header {
-                            Label {
-                                text: modelData.name
-                                anchors {
-                                    verticalCenter: parent.verticalCenter
-                                    left: parent.left
-                                    leftMargin: units.gu(1)
-                                }
-                                color: "#888888"//Theme.palette.normal.overlayText
-                            }
-                            height: List.objectKeys(modelData.syncQueue.groups).length > 0 ? units.gu(4) : 0
-                        }
+//    property bool syncError: List.iter(backend.projects, function(project) {
+//        return project.syncQueue.hasError
+//    }) > 0
+//    property bool busy: List.iter(backend.projects, function(project) {
+//        return project.syncQueue.count
+//    }) > 0
 
-                        Repeater {
-                            model: List.objectKeys(modelData.syncQueue.groups)
-                            delegate: SubtitledListItem {
-                                id: item
-                                overlay: true
-                                property var group: syncColumn.project.syncQueue.groups[modelData]
-                                text: group.title
-                                subText: group.errors.length > 0 ? i18n.tr("Error: %1").arg(group.errors[0].status)
-                                                                 : ""
+//    Item {
+//        anchors.fill: parent
+//        anchors.bottomMargin: header.height - header.__styleInstance.contentHeight
+//        parent: header
 
-                                onClicked: {
-                                    print("Clicked")
-                                    error(i18n.tr("%1 Failed").arg(group.title), i18n.tr("Call: %1\n\n%2").arg(group.errors[0].call).arg(group.errors[0].response))
-                                }
+//        AwesomeIcon {
+//            name: "exclamation-triangle"
+//            color: colors["yellow"]
+//            anchors.centerIn: syncIndicator
+//            size: units.gu(2.6)
+//            opacity: !busy && syncError ? 1 : 0
 
-                                ProgressBar {
-                                    anchors {
-                                        right: parent.right
-                                        verticalCenter: parent.verticalCenter
-                                        rightMargin: units.gu(2)
-                                    }
-                                    minimumValue: 0
-                                    maximumValue: group.total
-                                    value: item.group.total - item.group.count
-                                    visible: item.group.count > 0
-                                    width: units.gu(10)
-                                    height: units.gu(2.5)
-                                }
+//            Behavior on opacity {
+//                UbuntuNumberAnimation {
+//                    duration: UbuntuAnimation.SlowDuration
+//                }
+//            }
+//        }
 
-                                AwesomeIcon {
-                                    name: "exclamation-triangle"
-                                    color: colors["yellow"]
-                                    anchors {
-                                        right: parent.right
-                                        verticalCenter: parent.verticalCenter
-                                        rightMargin: (parent.height - height)/2
-                                    }
-                                    size: units.gu(2.6)
-                                    opacity: item.group.errors.length > 0 ? 1 : 0
+//        ActivityIndicator {
+//            id: syncIndicator
+//            anchors {
+//                right: parent.right
+//                verticalCenter: parent.verticalCenter
+//                rightMargin: (parent.height - height)/2
+//            }
 
-                                    Behavior on opacity {
-                                        UbuntuNumberAnimation {
-                                            duration: UbuntuAnimation.SlowDuration
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+//            height: units.gu(4)
+//            width: height
+//            running: opacity > 0
+//            opacity: busy ? 1 : 0
 
-    FriendsUtils {
-        id: friendsUtils
-    }
+//            Behavior on opacity {
+//                UbuntuNumberAnimation {
+//                    duration: UbuntuAnimation.SlowDuration
+//                }
+//            }
+
+//            MouseArea {
+//                anchors.fill: parent
+//                enabled: busy || syncError
+//                onClicked: PopupUtils.open(syncPopover, syncIndicator)
+//            }
+//        }
+//    }
+
+//    Component {
+//        id: syncPopover
+
+//        Popover {
+//            id: popover
+//            contentHeight: column.height
+
+//            onContentHeightChanged: {
+//                if (contentHeight == 0)
+//                    PopupUtils.close(popover)
+//            }
+
+//            Column {
+//                id: column
+//                width: parent.width
+
+//                Repeater {
+//                    model: backend.projects
+//                    delegate: Column {
+//                        id: syncColumn
+//                        width: parent.width
+
+//                        property Project project: modelData
+
+//                        visible: List.objectKeys(modelData.syncQueue.groups).length > 0
+
+//                        ListItem.Header {
+//                            Label {
+//                                text: modelData.name
+//                                anchors {
+//                                    verticalCenter: parent.verticalCenter
+//                                    left: parent.left
+//                                    leftMargin: units.gu(1)
+//                                }
+//                                color: "#888888"//Theme.palette.normal.overlayText
+//                            }
+//                            height: List.objectKeys(modelData.syncQueue.groups).length > 0 ? units.gu(4) : 0
+//                        }
+
+//                        Repeater {
+//                            model: List.objectKeys(modelData.syncQueue.groups)
+//                            delegate: SubtitledListItem {
+//                                id: item
+//                                overlay: true
+//                                property var group: syncColumn.project.syncQueue.groups[modelData]
+//                                text: group.title
+//                                subText: group.errors.length > 0 ? i18n.tr("Error: %1").arg(group.errors[0].status)
+//                                                                 : ""
+
+//                                onClicked: {
+//                                    print("Clicked")
+//                                    error(i18n.tr("%1 Failed").arg(group.title), i18n.tr("Call: %1\n\n%2").arg(group.errors[0].call).arg(group.errors[0].response))
+//                                }
+
+//                                ProgressBar {
+//                                    anchors {
+//                                        right: parent.right
+//                                        verticalCenter: parent.verticalCenter
+//                                        rightMargin: units.gu(2)
+//                                    }
+//                                    minimumValue: 0
+//                                    maximumValue: group.total
+//                                    value: item.group.total - item.group.count
+//                                    visible: item.group.count > 0
+//                                    width: units.gu(10)
+//                                    height: units.gu(2.5)
+//                                }
+
+//                                AwesomeIcon {
+//                                    name: "exclamation-triangle"
+//                                    color: colors["yellow"]
+//                                    anchors {
+//                                        right: parent.right
+//                                        verticalCenter: parent.verticalCenter
+//                                        rightMargin: (parent.height - height)/2
+//                                    }
+//                                    size: units.gu(2.6)
+//                                    opacity: item.group.errors.length > 0 ? 1 : 0
+
+//                                    Behavior on opacity {
+//                                        UbuntuNumberAnimation {
+//                                            duration: UbuntuAnimation.SlowDuration
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     Backend {
         id: backend
@@ -301,17 +322,18 @@ MainView {
 
     Database {
         id: db
-        path: "project-dashboard.db"
+        name: "project-dashboard"
+        description: "Project Dashboard"
 
         onLoaded: {
-            settings.fromJSON(db.get("settings", {}))
-            backend.fromJSON(db.get("backend", {}))
+            settings.fromJSON(JSON.parse(db.get("settings", "{}")))
+            backend.fromJSON(JSON.parse(db.get("backend", "{}")))
         }
 
         onSave: {
             print("Saving...")
-            db.set("backend", backend.toJSON())
-            db.set("settings", settings.toJSON())
+            db.set("backend", JSON.stringify(backend.toJSON()))
+            db.set("settings", JSON.stringify(settings.toJSON()))
         }
     }
 
@@ -323,23 +345,6 @@ MainView {
         }
     }
 
-//    SyncQueue {
-//        id: queue
-
-//        onError: {
-//            print("Error", call, status, response, args)
-//            if (status === 0) {
-//                mainView.error(i18n.tr("Connection Error"), i18n.tr("Timeout error. Please check your internet and firewall settings:\n\n%1").arg(call))
-//            } else {
-//                if (args) {
-//                    mainView.error(i18n.tr("Connection Error"), i18n.tr("Unable to complete action:\n\n%1").arg(args))
-//                } else {
-//                    mainView.error(i18n.tr("Connection Error"), i18n.tr("Unable to complete operation. HTTP Error: %1\n\n%2").arg(status).arg(call))
-//                }
-//            }
-//        }
-//    }
-
     GitHub {
         id: github
     }
@@ -350,20 +355,6 @@ MainView {
 
     TravisCI {
         id: travisCI
-    }
-
-    function getIcon(name) {
-        var mainView = "icons/"
-        var ext = ".png"
-
-        //return "image://theme/" + name
-
-        if (name.indexOf(".") === -1)
-            name = mainView + name + ext
-        else
-            name = mainView + name
-
-        return Qt.resolvedUrl(name)
     }
 
     /*!
@@ -399,7 +390,13 @@ MainView {
             args = {}
         print(type)
         var component = Qt.createComponent(type);
-        return component.createObject(mainView, args);
+        if (component.errorString()) {
+            print(component.errorString())
+        }
+
+        var obj = component.createObject(mainView, args);
+        print("Done")
+        return obj
     }
 
     property var markdownCache: settings.get("markdownCache", {})

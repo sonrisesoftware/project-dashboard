@@ -16,26 +16,29 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.Components.Popups 0.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
 import "../backend"
 import "../components"
-import "../ubuntu-ui-extras"
 
-Page {
+import "../qml-air"
+import "../qml-air/ListItems" as ListItem
+
+Sheet {
     id: page
     
     title: i18n.tr("Project Configuration")
 
+    confirmButton: false
+
     property Project project
 
+    margins: 0
     Flickable {
         id: flickable
         anchors.fill: parent
 
         contentWidth: width
         contentHeight: column.height
+        clip: true
 
         Column {
             id: column
@@ -43,10 +46,21 @@ Page {
 
             ListItem.Standard {
                 text: i18n.tr("Name")
-                control: TextField {
-                    color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
+                height: units.gu(6)
+                highlightable: false
+
+                TextField {
                     text: project.name
-                    Component.onDestruction: project.name = text
+                    Component.onDestruction: {
+                        print("Destroying")
+                        project.name = text
+                    }
+
+                    anchors {
+                        right: parent.right
+                        rightMargin: units.gu(2)
+                        verticalCenter: parent.verticalCenter
+                    }
                 }
             }
 
@@ -61,22 +75,24 @@ Page {
                     id: listItem
 
                     enabled: type != ""
+                    height: units.gu(5)
+                    highlightable: false
 
-                    control: Switch {
+                    Switch {
                         checked: project.hasPlugin(type)
                         onCheckedChanged: {
                             project.enablePlugin(type, checked)
                             checked = Qt.binding(function () {return project.hasPlugin(type)})
                         }
+
+                        anchors {
+                            right: parent.right
+                            rightMargin: units.gu(2)
+                            verticalCenter: parent.verticalCenter
+                        }
                     }
 
                     property bool overlay: false
-
-                    height: opacity === 0 ? 0 : (__height + units.dp(2))
-
-                    Behavior on height {
-                        UbuntuNumberAnimation {}
-                    }
 
                     AwesomeIcon {
                         id: iconItem
@@ -109,7 +125,6 @@ Page {
                             elide: Text.ElideRight
                             maximumLineCount: 1
                             text: title
-                            color: overlay ? "#888888" : Theme.palette.selected.backgroundText
                         }
 
                         Label {
@@ -125,17 +140,9 @@ Page {
                             visible: text !== ""
                             elide: Text.ElideRight
                             text: project.hasPlugin(type) ? project.getPlugin(type).configuration : ""
-                            color: overlay ? "#888888" : Theme.palette.selected.backgroundText
+                            color: theme.secondaryColor
                         }
                     }
-
-                    opacity: show ? 1 : 0
-
-                    Behavior on opacity {
-                        UbuntuNumberAnimation {}
-                    }
-
-                    property bool show: true
                 }
             }
 
@@ -145,10 +152,13 @@ Page {
                 delegate: ListItem.Standard {
                     id: listItem
 
+                    highlightable: false
+
                     property alias text: titleLabel.text
                     property alias subText: subLabel.text
+                    height: units.gu(5)
 
-                    control: Switch {
+                    Switch {
                         enabled: modelData.isEnabled(project) === ""
                         onEnabledChanged: {
                             if (!enabled)
@@ -160,15 +170,15 @@ Page {
                             project.enablePlugin(modelData.type, checked)
                             checked = Qt.binding(function () {return project.hasPlugin(modelData.type)})
                         }
+
+                        anchors {
+                            right: parent.right
+                            rightMargin: units.gu(2)
+                            verticalCenter: parent.verticalCenter
+                        }
                     }
 
                     property bool overlay: false
-
-                    height: opacity === 0 ? 0 : (__height + units.dp(2))
-
-                    Behavior on height {
-                        UbuntuNumberAnimation {}
-                    }
 
                     AwesomeIcon {
                         id: icon2
@@ -200,7 +210,6 @@ Page {
                             elide: Text.ElideRight
                             maximumLineCount: 1
                             text: modelData.title
-                            color: overlay ? "#888888" : Theme.palette.selected.backgroundText
                         }
 
                         Label {
@@ -218,31 +227,16 @@ Page {
                             text: modelData.isEnabled(project) === "" ? project.hasPlugin(modelData.type) ? project.getPlugin(modelData.type).configuration
                                                                                                           : ""
                                                                       : modelData.isEnabled(project)
-                            color: overlay ? "#888888" : Theme.palette.selected.backgroundText
+                            color: theme.secondaryColor
                         }
                     }
-
-                    opacity: show ? 1 : 0
-
-                    Behavior on opacity {
-                        UbuntuNumberAnimation {}
-                    }
-
-                    property bool show: true
                 }
             }
         }
 
     }
 
-    Scrollbar {
+    ScrollBar {
         flickableItem: flickable
-    }
-
-    tools: ToolbarItems {
-        opened: wideAspect
-        locked: wideAspect
-
-        onLockedChanged: opened = locked
     }
 }

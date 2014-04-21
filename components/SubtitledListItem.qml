@@ -16,9 +16,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.Components.Popups 0.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
+
+import "../qml-air"
+import "../qml-air/ListItems" as ListItem
 
 ListItem.Standard {
     id: listItem
@@ -31,7 +31,9 @@ ListItem.Standard {
     height: opacity === 0 ? 0 : (__height + units.dp(2))
 
     Behavior on height {
-        UbuntuNumberAnimation {}
+        NumberAnimation {
+            duration: 200
+        }
     }
 
     Column {
@@ -53,7 +55,7 @@ ListItem.Standard {
             width: parent.width
             elide: Text.ElideRight
             maximumLineCount: 1
-            color: overlay ? "#888888" : Theme.palette.selected.backgroundText
+            color: theme.textColor
         }
 
         Label {
@@ -68,14 +70,16 @@ ListItem.Standard {
             fontSize: "small"
             visible: text !== ""
             elide: Text.ElideRight
-            color: overlay ? "#888888" : Theme.palette.selected.backgroundText
+            color: theme.secondaryColor
         }
     }
 
     opacity: show ? 1 : 0
 
     Behavior on opacity {
-        UbuntuNumberAnimation {}
+        NumberAnimation {
+            duration: 200
+        }
     }
 
     property bool show: true

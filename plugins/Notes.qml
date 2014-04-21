@@ -16,14 +16,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.Components.Popups 0.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
 import "../backend"
 import "../components"
-import "../ubuntu-ui-extras/listutils.js" as List
-import "../ubuntu-ui-extras/dateutils.js" as DateUtils
-import "../ubuntu-ui-extras"
+
+import "../qml-extras/listutils.js" as List
+import "../qml-extras/dateutils.js" as DateUtils
+import "../qml-air"
+import "../qml-air/ListItems" as ListItem
 
 Plugin {
     id: plugin
@@ -48,10 +47,10 @@ Plugin {
         value: notes.length > 0 ? notes.length : ""
 
         action: Action {
-            text: i18n.tr("Add Note")
+            name: i18n.tr("Add Note")
             description: i18n.tr("Add a new note to your project")
-            iconSource: getIcon("add")
-            onTriggered: PopupUtils.open(newNotePage)
+            iconName: "plus"
+            onTriggered: newNotePage.open()
         }
 
         pulseItem: PulseItem {
@@ -63,7 +62,7 @@ Plugin {
                 text: i18n.tr("No notes")
                 enabled: false
                 visible: notes.length === 0
-                height: visible ? implicitHeight : 0
+                height: visible ? units.gu(6) : 0
             }
 
             Repeater {
@@ -73,19 +72,20 @@ Plugin {
                     id: item
                     text: escapeHTML(modelData.title) + " <font color=\"" + colors["green"] + "\">" + Qt.formatDate(new Date(modelData.date)) + "</font>"
                     subText: modelData.contents
+                    height: units.gu(6)
 
                     onClicked: pageStack.push(notePage, {index: index})
 
-                    removable: true
-                    backgroundIndicator: ListItemBackground {
-                        state: item.swipingState
-                        iconSource: getIcon("delete-white")
-                        text: i18n.tr("Delete")
-                    }
-                    onItemRemoved: {
-                        notes.splice(index, 1)
-                        notes = notes
-                    }
+//                    removable: true
+//                    backgroundIndicator: ListItemBackground {
+//                        state: item.swipingState
+//                        iconSource: getIcon("delete-white")
+//                        text: i18n.tr("Delete")
+//                    }
+//                    onItemRemoved: {
+//                        notes.splice(index, 1)
+//                        notes = notes
+//                    }
                 }
             }
         }
@@ -93,10 +93,9 @@ Plugin {
         page: PluginPage {
             title: i18n.tr("Notes")
 
-            actions: Action {
+            leftWidgets: Button {
                 text: i18n.tr("Add")
-                iconSource: getIcon("add")
-                onTriggered: PopupUtils.open(newNotePage)
+                onClicked: newNotePage.open()
             }
 
             ListView {
@@ -107,24 +106,25 @@ Plugin {
                     id: item
                     text: escapeHTML(modelData.title) + " <font color=\"" + colors["green"] + "\">" + Qt.formatDate(new Date(modelData.date)) + "</font>"
                     subText: modelData.contents
+                    height: units.gu(6)
 
                     onClicked: pageStack.push(notePage, {index: index})
 
-                    removable: true
-                    backgroundIndicator: ListItemBackground {
-                        state: item.swipingState
-                        iconSource: getIcon("delete-white")
-                        text: i18n.tr("Delete")
-                    }
+//                    removable: true
+//                    backgroundIndicator: ListItemBackground {
+//                        state: item.swipingState
+//                        iconSource: getIcon("delete-white")
+//                        text: i18n.tr("Delete")
+//                    }
 
-                    onItemRemoved: {
-                        notes.splice(index, 1)
-                        notes = notes
-                    }
+//                    onItemRemoved: {
+//                        notes.splice(index, 1)
+//                        notes = notes
+//                    }
                 }
             }
 
-            Scrollbar {
+            ScrollBar {
                 flickableItem: listView
             }
 
@@ -138,48 +138,40 @@ Plugin {
         }
     }
 
-    Component {
+    Sheet {
         id: newNotePage
 
-        ComposerSheet {
-            id: sheet
+        title: i18n.tr("New Note")
 
-            title: i18n.tr("New Note")
-            contentsHeight: wideAspect ? units.gu(40) : mainView.height
+        onAccepted: newNote(nameField.text, descriptionField.text)
 
-            onConfirmClicked: newNote(nameField.text, descriptionField.text)
+        Component.onCompleted: {
+            newNotePage.__leftButton.text = i18n.tr("Cancel")
+            newNotePage.__rightButton.text = i18n.tr("Create")
+        }
 
-            Component.onCompleted: {
-                sheet.__leftButton.text = i18n.tr("Cancel")
-                sheet.__leftButton.color = "gray"
-                sheet.__rightButton.text = i18n.tr("Create")
-                sheet.__rightButton.color = sheet.__rightButton.__styleInstance.defaultColor
-                sheet.__foreground.style = Theme.createStyleComponent(Qt.resolvedUrl("../ubuntu-ui-extras/SuruSheetStyle.qml"), sheet)
+        TextField {
+            id: nameField
+            placeholderText: i18n.tr("Title")
+            anchors {
+                left: parent.left
+                top: parent.top
+                right: parent.right
             }
 
-            TextField {
-                id: nameField
-                placeholderText: i18n.tr("Title")
-                anchors {
-                    left: parent.left
-                    top: parent.top
-                    right: parent.right
-                }
+            Keys.onTabPressed: descriptionField.forceActiveFocus()
+        }
 
-                Keys.onTabPressed: descriptionField.forceActiveFocus()
-            }
+        TextArea {
+            id: descriptionField
+            placeholderText: i18n.tr("Contents")
 
-            TextArea {
-                id: descriptionField
-                placeholderText: i18n.tr("Contents")
-
-                anchors {
-                    left: parent.left
-                    right: parent.right
-                    top: nameField.bottom
-                    bottom: parent.bottom
-                    topMargin: units.gu(2)
-                }
+            anchors {
+                left: parent.left
+                right: parent.right
+                top: nameField.bottom
+                bottom: parent.bottom
+                topMargin: units.gu(2)
             }
         }
     }
@@ -215,21 +207,14 @@ Plugin {
                 }
             }
 
-            tools: ToolbarItems {
-                opened: wideAspect
-                locked: wideAspect
+            rightWidgets: Button {
+                text: i18n.tr("Delete")
+                iconName: "trash"
 
-                onLockedChanged: opened = locked
-
-                ToolbarButton {
-                    text: i18n.tr("Delete")
-                    iconSource: getIcon("delete")
-
-                    onTriggered: {
-                        pageStack.pop()
-                        notes.splice(page.index, 1)
-                        notes = notes
-                    }
+                onClicked: {
+                    pageStack.pop()
+                    notes.splice(page.index, 1)
+                    notes = notes
                 }
             }
         }

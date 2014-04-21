@@ -1,6 +1,6 @@
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
+
+import "../qml-air/ListItems" as ListItem
 
 Column {
     id: column
@@ -34,8 +34,9 @@ Column {
         from: "*"
         to: "*"
 
-        UbuntuNumberAnimation {
+        NumberAnimation {
             target: column
+            duration: 250
             properties: "height,opacity"
         }
     }

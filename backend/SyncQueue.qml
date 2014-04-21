@@ -1,6 +1,7 @@
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import "../ubuntu-ui-extras/httplib.js" as Http
+
+import "../qml-extras"
+import "../qml-extras/httplib.js" as Http
 
 Object {
     id: queue

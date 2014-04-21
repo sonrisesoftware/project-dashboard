@@ -16,18 +16,15 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.Components.Popups 0.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
 import "../components"
-import "../ubuntu-ui-extras"
 
-UbuntuShape {
+import "../qml-air"
+import "../qml-air/ListItems" as ListItem
+
+BackgroundView {
     id: tile
 
-    color: Qt.rgba(0,0,0,0.2)
-
-    radius: "medium"
+    radius: units.gu(1.5)
 
     property alias title: titleLabel.text
     property string shortTitle: title
@@ -62,9 +59,10 @@ UbuntuShape {
             right: parent.right
         }
 
-        UbuntuShape {
-            radius: "medium"
-            color: Qt.rgba(0,0,0,0.2)
+        BackgroundView {
+            radius: tile.radius
+            color: "#eee"
+            border.color: Qt.rgba(0,0,0,0.1)
             height: tile.height
 
             anchors {
@@ -109,14 +107,14 @@ UbuntuShape {
             Button {
                 id: actionButton
                 visible: tile.action
-                height: units.gu(4)
+
                 anchors {
                     right: parent.right
                     margins: units.gu(1)
                     verticalCenter: titleLabel.verticalCenter
                 }
 
-                text: tile.action ? tile.action.text : ""
+                text: tile.action ? tile.action.name : ""
                 onClicked: tile.action.triggered(actionButton)
             }
         }
@@ -131,7 +129,9 @@ UbuntuShape {
             right: parent.right
         }
 
-        ListItem.ThinDivider {}
+        ListItem.ThinDivider {
+            color: Qt.rgba(0,0,0,0.2)
+        }
 
         Column {
             id: column
@@ -144,7 +144,8 @@ UbuntuShape {
             value: expanded ? "" : summaryValue
             progression: true
             showDivider: false
-            onTriggered: tile.triggered()
+            onClicked: tile.triggered()
+            height: units.gu(5)
         }
     }
 
@@ -164,11 +165,11 @@ UbuntuShape {
             from: "*"
             to: "*"
 
-            UbuntuNumberAnimation {
+            NumberAnimation {
                 target: column
                 property: "height"
 
-                duration: UbuntuAnimation.SlowDuration
+                duration: 500
             }
         }
     ]

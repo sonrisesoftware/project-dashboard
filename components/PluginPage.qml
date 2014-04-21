@@ -16,12 +16,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.Components.Popups 0.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
-import "../ubuntu-ui-extras"
 
-TabbedPage {
+import "../qml-air"
+
+Page {
     id: page
 
     //property string title
@@ -56,21 +54,4 @@ TabbedPage {
 //            visible: loading > 0
 //        }
 //    }
-
-    tools: ToolbarItems {
-        opened: wideAspect
-        locked: wideAspect
-
-        onLockedChanged: opened = locked
-
-        Repeater {
-            model: page.actions
-            delegate: ToolbarButton {
-                id: toolbarButton
-                action: modelData
-                visible: action.visible
-                function trigger(value) { action.triggered(toolbarButton) }
-            }
-        }
-    }
 }

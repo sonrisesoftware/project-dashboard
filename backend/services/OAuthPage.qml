@@ -1,6 +1,7 @@
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.Components.Extras.Browser 0.1
+import QtWebKit 3.0
+
+import "../../qml-air"
 
 Page {
     id: webPage
@@ -12,7 +13,7 @@ Page {
     property string otherGet: "&access_token=" + token
 
 
-    UbuntuWebView {
+    WebView {
         id: webView
         //the webview is bugged, anchors.fill: parent doesn't work
         anchors.bottom: parent.bottom
@@ -63,17 +64,18 @@ Page {
 
     }
 
-    UbuntuShape {
+    Rectangle {
         anchors.centerIn: parent
         width: column.width + units.gu(4)
         height: column.height + units.gu(4)
         color: Qt.rgba(0.2,0.2,0.2,0.8)
+        border.color: Qt.rgba(0.2,0.2,0.2,0.9)
 
         opacity: webView.loading ? 1 : 0
 
         Behavior on opacity {
-            UbuntuNumberAnimation {
-                duration: UbuntuAnimation.SlowDuration
+            NumberAnimation {
+                duration: 600
             }
         }
 
@@ -98,12 +100,5 @@ Page {
                 value: webView.loadProgress
             }
         }
-    }
-
-    tools: ToolbarItems {
-        opened: wideAspect
-        locked: wideAspect
-
-        onLockedChanged: opened = locked
     }
 }

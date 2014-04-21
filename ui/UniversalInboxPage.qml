@@ -16,22 +16,27 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.Components.Popups 0.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
 import "../backend"
 import "../components"
-import "../ubuntu-ui-extras"
-import "../ubuntu-ui-extras/listutils.js" as List
+
+import "../qml-air"
+import "../qml-air/ListItems" as ListItem
+import "../qml-extras/listutils.js" as List
 
 Page {
     id: page
 
     title: i18n.tr("Inbox")
 
-    flickable: listView.contentHeight > 0 ? listView : null
+    count: List.concat(backend.projects, "inbox").length
 
-    property int count: List.concat(backend.projects, "inbox").length
+    leftWidgets: Button {
+        text: i18n.tr("Clear")
+        enabled: count > 0
+        onClicked: {
+            backend.clearInbox()
+        }
+    }
 
     ListView {
         id: listView
@@ -56,23 +61,23 @@ Page {
                 }
 
                 Behavior on opacity {
-                    UbuntuNumberAnimation {}
+                    NumberAnimation { duration: 250; }
                 }
             }
 
             Repeater {
                 id: repeater
                 model: project.inbox
-                delegate: ListItem.Empty {
+                delegate: ListItem.BaseListItem {
                     id: listItem
                     onClicked: project.displayMessage(modelData)
 
-                    removable: true
-                    onItemRemoved: project.removeMessage(index)
-                    backgroundIndicator: ReadListItemBackground {
-                        willRemove: width > (listItem.width * 0.3) && width < listItem.width
-                        state: listItem.swipingState
-                    }
+//                    removable: true
+//                    onItemRemoved: project.removeMessage(index)
+//                    backgroundIndicator: ReadListItemBackground {
+//                        willRemove: width > (listItem.width * 0.3) && width < listItem.width
+//                        state: listItem.swipingState
+//                    }
 
                     AwesomeIcon {
                         id: icon
@@ -137,7 +142,7 @@ Page {
         }
     }
 
-    Scrollbar {
+    ScrollBar {
         flickableItem: listView
     }
 
@@ -166,21 +171,5 @@ Page {
         else if (hours < 24)
             return i18n.tr("%1 hours ago").arg(hours)
         return Qt.formatDate(time)
-    }
-
-    tools: ToolbarItems {
-        opened: wideAspect
-        locked: wideAspect
-
-        onLockedChanged: opened = locked
-
-        ToolbarButton {
-            iconSource: getIcon("edit-clear")
-            text: i18n.tr("Clear")
-            enabled: count > 0
-            onTriggered: {
-                backend.clearInbox()
-            }
-        }
     }
 }
