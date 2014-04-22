@@ -1,9 +1,11 @@
 import QtQuick 2.0
 import QtWebKit 3.0
+import QtQuick.Window 2.0
+
 
 import "../../qml-air"
 
-Page {
+Window {
     id: webPage
 
     title: i18n.tr("GitHub Access")
@@ -11,6 +13,9 @@ Page {
     property string token: ""
     property string firstGet: "?access_token=" + token
     property string otherGet: "&access_token=" + token
+
+    width: units.gu(100)
+    height: units.gu(75)
 
 
     WebView {
@@ -49,7 +54,8 @@ Page {
                         console.log("Oauth token is now : " + webPage.token)
 
                         settings.set("githubToken", xhr.responseText.substring(13, 53))
-                        pageStack.pop()
+                        webPage.close()
+                        webPage.destroy()
                     }
                 }
                 xhr.send();
@@ -70,6 +76,7 @@ Page {
         height: column.height + units.gu(4)
         color: Qt.rgba(0.2,0.2,0.2,0.8)
         border.color: Qt.rgba(0.2,0.2,0.2,0.9)
+        radius: units.gu(1)
 
         opacity: webView.loading ? 1 : 0
 
@@ -87,6 +94,7 @@ Page {
             Label {
                 anchors.horizontalCenter: parent.horizontalCenter
                 fontSize: "large"
+                color: "white"
                 text: webView.loading ? i18n.tr("Loading web page...")
                                       : i18n.tr("Success!")
             }

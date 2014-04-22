@@ -175,7 +175,8 @@ Service {
     }
 
     function authenticate() {
-        pageStack.push(Qt.resolvedUrl("OAuthPage.qml"))
+        var obj = newObject(Qt.resolvedUrl("OAuthPage.qml"))
+        obj.show()
     }
 
     function revoke() {
