@@ -22,6 +22,7 @@ import "backend"
 import "backend/services"
 
 import "qml-air"
+import "qml-air/ListItems" as ListItem
 import "qml-extras"
 import "qml-extras/listutils.js" as List
 import "qml-extras/httplib.js" as Http
@@ -64,10 +65,28 @@ PageApplication {
             onClicked: newSheet.open()
         }
 
-        rightWidgets: Button {
-            iconName: "cog"
-            onClicked: settingsPage.open()
-        }
+        rightWidgets: [
+            Button {
+                iconName: syncError ? "exclamation-triangle" : "spinner-rotate"
+                iconColor: syncError ? theme.danger : textColor
+                text: syncError ? "Sync error" : "Syncing..."
+                opacity: busy ? 1 : 0
+
+                Behavior on opacity {
+                    NumberAnimation { duration: 200 }
+                }
+            },
+
+            Button {
+                iconName: "user"
+                onClicked: userPopover.open(caller)
+            },
+
+            Button {
+                iconName: "cog"
+                onClicked: configMenu.open(caller)
+            }
+        ]
 
         UniversalInboxPage {
             id: inboxPage
@@ -96,86 +115,60 @@ PageApplication {
         }
     }
 
+    ActionPopover {
+        id: configMenu
+        actions: [
+            Action {
+                name: "About"
+                onTriggered: aboutSheet.open()
+            },
+
+            Action {
+                name: "Settings"
+                onTriggered: settingsPage.open()
+            }
+        ]
+    }
+
+    UserPopover {
+        id: userPopover
+    }
+
     SettingsPage {
         id: settingsPage
     }
 
-//    actions: [
-//        Action {
-//            id: settingsAction
-//            text: i18n.tr("Settings")
-//            iconSource: getIcon("settings")
-//            onTriggered: pageStack.push(Qt.resolvedUrl("ui/SettingsPage.qml"))
-//        }
-//    ]
+    AboutSheet {
+        id: aboutSheet
 
-//    PageStack {
-//        id: pageStack
+        appName: i18n.tr("Project Dashboard")
+        icon: Qt.resolvedUrl("project-dashboard-shadowed.png")
+        version: "@APP_VERSION@"
+        credits: {
+            var credits = {}
+            credits[i18n.tr("Icon")] = "Sam Hewitt"
+            credits[i18n.tr("Debian Packaging")] = "Nekhelesh Ramananthan"
+            return credits
+        }
 
-//        Tabs {
-//            id: tabs
+        website: "http://www.sonrisesoftware.com/apps/project-dashboard"
+        reportABug: "https://github.com/iBeliever/project-dashboard/issues"
 
-
-//            Tab {
-//                title: page.title
-//                page: ProjectsPage {
-//                    id: projectsPage
-//                }
-//            }
-
-//            Tab {
-//                title: page.title
-//                page: UniversalInboxPage {
-//                    id: inboxPage
-//                }
-//            }
-//        }
-
-//        anchors.bottomMargin: wideAspect && mainView.toolbar.opened && mainView.toolbar.locked ? -mainView.toolbar.triggerSize : 0
-
-//        Component.onCompleted: {
-//            if (inboxPage.count > 0)
-//                tabs.selectedTabIndex = 1
-//            pageStack.push(tabs)
-
-//            if (!settings.get("existingInstallation", false)) {
-//                pageStack.push(Qt.resolvedUrl("ui/InitialWalkthrough.qml"))
-//            }
-//        }
-//    }
+        copyright: i18n.tr("Copyright (c) 2014 Michael Spencer. All Rights Reserved.")
+        author: "Sonrise Software"
+        contactEmail: "sonrisesoftware@gmail.com"
+    }
 
 //    Component {
 //        id: aboutPage
-//        AboutPage {
-
-//            linkColor: colors["blue"]
-
-//            appName: i18n.tr("Project Dashboard")
-//            icon: Qt.resolvedUrl("project-dashboard-shadowed.png")
-//            iconFrame: false
-//            version: "@APP_VERSION@"
-//            credits: {
-//                var credits = {}
-//                credits[i18n.tr("Icon")] = "Sam Hewitt"
-//                credits[i18n.tr("Debian Packaging")] = "Nekhelesh Ramananthan"
-//                return credits
-//            }
-
-//            website: "http://www.sonrisesoftware.com/apps/project-dashboard"
-//            reportABug: "https://github.com/iBeliever/project-dashboard/issues"
-
-//            copyright: i18n.tr("Copyright (c) 2014 Michael Spencer")
-//            author: "Sonrise Software"
-//            contactEmail: "sonrisesoftware@gmail.com"
-//        }
 //    }
 
-//    property bool syncError: List.iter(backend.projects, function(project) {
-//        return project.syncQueue.hasError
-//    }) > 0
-//    property bool busy: List.iter(backend.projects, function(project) {
-//        return project.syncQueue.count
-//    }) > 0
+    property bool syncError: List.iter(backend.projects, function(project) {
+        return project.syncQueue.hasError
+    }) > 0
+    property bool busy: List.iter(backend.projects, function(project) {
+        return project.syncQueue.count
+    }) > 0
 
 //    Item {
 //        anchors.fill: parent
@@ -315,6 +308,13 @@ PageApplication {
 //            }
 //        }
 //    }
+
+    Account {
+        id: account
+        signedIn: true
+        name: "Michael Spencer"
+        email: "sonrisesoftware@gmail.com"
+    }
 
     Backend {
         id: backend

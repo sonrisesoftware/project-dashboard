@@ -63,23 +63,5 @@ Sheet {
                 }
             }
         }
-
-        ListItem.Header {
-            text: i18n.tr("Help and About")
-        }
-
-        ListItem.Standard {
-            text: i18n.tr("About Project Dashboard")
-            progression: true
-            onClicked: pageStack.push(aboutPage)
-            height: units.gu(6)
-        }
-
-        ListItem.Standard {
-            text: i18n.tr("View Tutorial")
-            progression: true
-            onClicked: pageStack.push(Qt.resolvedUrl("InitialWalkthrough.qml"), {exitable: true})
-            height: units.gu(6)
-        }
     }
 }

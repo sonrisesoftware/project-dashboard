@@ -232,6 +232,24 @@ Sheet {
                     }
                 }
             }
+
+            ListItem.BaseListItem {
+                height: textLabel.height + units.gu(2)
+                Label {
+                    id: textLabel
+
+                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+
+                    text: "Looking for more plugins or cloud syncronization?\nCreate a PRO account now!"
+
+                    anchors {
+                        verticalCenter: parent.verticalCenter
+                        left: parent.left
+                        right: parent.right
+                        margins: units.gu(2)
+                    }
+                }
+            }
         }
 
     }
