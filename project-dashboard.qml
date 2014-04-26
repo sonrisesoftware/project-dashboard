@@ -20,6 +20,7 @@ import "components"
 import "ui"
 import "backend"
 import "backend/services"
+import "parse_backend"
 
 import "qml-air"
 import "qml-air/ListItems" as ListItem
@@ -106,7 +107,7 @@ PageApplication {
         id: newSheet
 
         title: i18n.tr("Create New Project")
-        text: i18n.tr("Please enter a name for your new project.")
+        text: i18n.tr("Please enter a name for your new project:")
         placeholderText: i18n.tr("Name")
         onAccepted: {
             var project = backend.newProject(value)
@@ -309,11 +310,8 @@ PageApplication {
 //        }
 //    }
 
-    Account {
-        id: account
-        signedIn: true
-        name: "Michael Spencer"
-        email: "sonrisesoftware@gmail.com"
+    ParseBackend {
+        id: parseBackend
     }
 
     Backend {
@@ -326,6 +324,7 @@ PageApplication {
         description: "Project Dashboard"
 
         onLoaded: {
+            parseBackend.fromJSON(JSON.parse(db.get("parse", "{}")))
             settings.fromJSON(JSON.parse(db.get("settings", "{}")))
             backend.fromJSON(JSON.parse(db.get("backend", "{}")))
         }
@@ -334,6 +333,7 @@ PageApplication {
             print("Saving...")
             db.set("backend", JSON.stringify(backend.toJSON()))
             db.set("settings", JSON.stringify(settings.toJSON()))
+            db.set("parse", JSON.stringify(parseBackend.toJSON()))
         }
     }
 

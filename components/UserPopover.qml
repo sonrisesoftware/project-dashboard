@@ -5,19 +5,19 @@ import "../qml-air/ListItems" as ListItem
 Popover {
     id: userPopover
 
-    contentHeight: account.signedIn ? userColumn.height : noUserColumn.height
+    contentHeight: parseBackend.account.signedIn ? userColumn.height : noUserColumn.height
     width: units.gu(30)
 
     Gravatar {
         id: gravatar
-        email: account.email
+        email: parseBackend.account.email
         size: gravatarIcon.size
     }
 
     Column {
         id: noUserColumn
         width: parent.width
-        visible: !account.signedIn
+        visible: !parseBackend.account.signedIn
 
         Item {
             width: parent.width
@@ -66,6 +66,10 @@ Popover {
         ListItem.Standard {
             text: "Sign in.."
             height: units.gu(4)
+            onClicked: {
+                userPopover.close()
+                parseBackend.showLoginDialog()
+            }
         }
 
         ListItem.Standard {
@@ -77,6 +81,7 @@ Popover {
     Column {
         id: userColumn
         width: parent.width
+        visible: parseBackend.account.signedIn
 
         Item {
             width: parent.width
@@ -122,7 +127,7 @@ Popover {
                 }
 
                 Label {
-                    text: account.name
+                    text: parseBackend.account.name
                     fontSize: "large"
                     anchors.horizontalCenter: parent.horizontalCenter
                 }
@@ -136,6 +141,10 @@ Popover {
         ListItem.Standard {
             text: "Sign out.."
             height: units.gu(4)
+            onClicked: {
+                userPopover.close()
+                parseBackend.logout()
+            }
         }
 
         ListItem.Standard {

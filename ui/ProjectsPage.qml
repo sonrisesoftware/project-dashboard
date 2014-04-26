@@ -44,18 +44,19 @@ Page {
 
             property Project project: modelData
 
-//            removable: true
+            removable: true
 //            confirmRemoval: true
 
-//            backgroundIndicator: ListItemBackground {
-//                state: swipingState
-//                iconSource: getIcon("delete-white")
-//                text: "Delete"
-//            }
+            backgroundIndicator: ListItemBackground {
+                state: swipingState
+                iconName: "trash"
+                text: "Delete"
+            }
 
-//            onItemRemoved: {
-//                project.remove()
-//            }
+            onItemRemoved: {
+                print("Item removed")
+                project.remove()
+            }
         }
     }
 

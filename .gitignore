@@ -3,3 +3,7 @@
 ubuntu-ui-extras
 *.pyc
 Project Dashboard.app
+parse
+qml-air
+qml-extras
+api_keys.js

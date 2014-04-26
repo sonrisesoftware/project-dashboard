@@ -5,6 +5,9 @@ QtObject {
     property int size: -1
 
     property url url: {
+        if (email === "")
+            return ""
+
         var str = email.trim().toLowerCase()
         var hash = Qt.md5(str)
         var url = "http://www.gravatar.com/avatar/" + hash + ".jpg"
