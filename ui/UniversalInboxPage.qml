@@ -154,6 +154,23 @@ Page {
         visible: listView.contentHeight == 0
     }
 
+    Button {
+        anchors {
+            left: parent.left
+            right: parent.right
+            bottom: parent.bottom
+            bottomMargin: listView.contentHeight === 0 ? -height : units.gu(1)
+
+            Behavior on bottomMargin {
+                NumberAnimation { duration: 200 }
+            }
+
+            margins: units.gu(1)
+        }
+
+        text: "Mark all as read"
+    }
+
     function friendlyTime(time) {
         var now = new Date()
         var seconds = (now - time)/1000;

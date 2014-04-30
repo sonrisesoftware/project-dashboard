@@ -29,46 +29,91 @@ Page {
     // Needs custom property to show up in autopilot tests
     property bool test: true
 
-    ListView {
-        id: projectsList
-        anchors.fill: parent
-        model: backend.projects
-        delegate: ListItem.SingleValue {
-            id: projectDelegate
-            text: project.name
-            value: project.inbox.count > 0 ? project.inbox.count : ""
-            onClicked: pageStack.push(Qt.resolvedUrl("ProjectPage.qml"), {project: project})
+    Item {
+        anchors {
+            left: parent.left
+            right: sidebar.left
+            top: parent.top
+            bottom: parent.bottom
+        }
 
-            height: units.gu(6)
-            fontSize: "medium"
+        BackgroundView {
+            anchors.centerIn: parent
+            width: Math.max(height * 0.77, units.gu(35))
+            height: parent.height * 3/4
+            radius: units.gu(1)
 
-            property Project project: modelData
+            ListView {
+                id: projectsList
+                anchors.fill: parent
+                model: backend.projects
+                clip: true
+                delegate: ListItem.SingleValue {
+                    id: projectDelegate
+                    text: project.name
+                    value: project.inbox.count > 0 ? project.inbox.count : ""
+                    onClicked: pageStack.push(Qt.resolvedUrl("ProjectPage.qml"), {project: project})
 
-            removable: true
-//            confirmRemoval: true
+                    height: units.gu(6)
+                    fontSize: "medium"
 
-            backgroundIndicator: ListItemBackground {
-                state: swipingState
-                iconName: "trash"
-                text: "Delete"
+                    property Project project: modelData
+
+                    removable: true
+        //            confirmRemoval: true
+
+                    backgroundIndicator: ListItemBackground {
+                        state: swipingState
+                        ready: swipingReady
+                        iconName: "trash"
+                        text: "Delete"
+                        actionColor: Qt.lighter(theme.danger, 1.2)
+                    }
+
+                    onItemRemoved: {
+                        print("Item removed")
+                        project.remove()
+                    }
+                }
             }
 
-            onItemRemoved: {
-                print("Item removed")
-                project.remove()
+            Label {
+                anchors.centerIn: parent
+                visible: projectsList.count === 0
+                opacity: 0.5
+                fontSize: "large"
+                text: i18n.tr("No projects")
+            }
+
+            ScrollBar {
+                flickableItem: projectsList
             }
         }
     }
 
-    Label {
-        anchors.centerIn: parent
-        visible: projectsList.count === 0
-        opacity: 0.5
-        fontSize: "large"
-        text: i18n.tr("No projects")
-    }
+    Sidebar {
+        id: sidebar
+        mode: "right"
+        autoFlick: false
 
-    ScrollBar {
-        flickableItem: projectsList
+        Tabs {
+            anchors.fill: parent
+            visible: true
+
+            style: "mini"
+            color: "transparent"
+
+            UniversalInboxPage {
+                title: "Inbox"
+                color: sidebar.color
+            }
+
+            Page {
+                title: "Stream"
+                color: sidebar.color
+            }
+        }
+
+        width: units.gu(30)
     }
 }

@@ -150,6 +150,10 @@ Popover {
         ListItem.Standard {
             text: "View account..."
             height: units.gu(4)
+            onClicked: {
+                userPopover.close()
+                accountSheet.open()
+            }
         }
     }
 }

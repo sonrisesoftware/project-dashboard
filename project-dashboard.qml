@@ -28,6 +28,8 @@ import "qml-extras"
 import "qml-extras/listutils.js" as List
 import "qml-extras/httplib.js" as Http
 
+import "backend/diff_match_patch.js" as DiffMatchPatch
+
 /*!
     \brief MainView with a Label and Button elements.
 */
@@ -53,12 +55,10 @@ PageApplication {
     property bool wideAspect: width > units.gu(80)
     property bool extraWideAspect: width > units.gu(150)
 
-    initialPage: tabs
+    initialPage: rootPage
 
-    Tabs {
-        id: tabs
-
-        title: "Project Dashboard"
+    ProjectsPage {
+        id: rootPage
 
         leftWidgets: Button {
             style: "primary"
@@ -68,10 +68,10 @@ PageApplication {
 
         rightWidgets: [
             Button {
-                iconName: syncError ? "exclamation-triangle" : "spinner-rotate"
-                iconColor: syncError ? theme.danger : textColor
-                text: syncError ? "Sync error" : "Syncing..."
-                opacity: busy ? 1 : 0
+                iconName: syncError || noConnection ? "exclamation-triangle" : "spinner-rotate"
+                iconColor: noConnection ? theme.warning : syncError ? theme.danger : textColor
+                text: noConnection ? "No connection" : syncError ? "Sync error" : "Syncing..."
+                opacity: busy || syncError || noConnection ? 1 : 0
 
                 Behavior on opacity {
                     NumberAnimation { duration: 200 }
@@ -88,19 +88,6 @@ PageApplication {
                 onClicked: configMenu.open(caller)
             }
         ]
-
-        UniversalInboxPage {
-            id: inboxPage
-        }
-
-        ProjectsPage {
-            id: projectsPage
-        }
-
-        Component.onCompleted: {
-            if (inboxPage.count == 0)
-                tabs.selectedPage = projectsPage
-        }
     }
 
     InputDialog {
@@ -139,6 +126,13 @@ PageApplication {
         id: settingsPage
     }
 
+    Sheet {
+        id: accountSheet
+
+        title: "Account Details"
+        confirmButton: false
+    }
+
     AboutSheet {
         id: aboutSheet
 
@@ -160,16 +154,13 @@ PageApplication {
         contactEmail: "sonrisesoftware@gmail.com"
     }
 
-//    Component {
-//        id: aboutPage
-//    }
-
     property bool syncError: List.iter(backend.projects, function(project) {
         return project.syncQueue.hasError
     }) > 0
     property bool busy: List.iter(backend.projects, function(project) {
         return project.syncQueue.count
     }) > 0
+    property bool noConnection: true
 
 //    Item {
 //        anchors.fill: parent

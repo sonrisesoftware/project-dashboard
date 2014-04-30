@@ -52,143 +52,160 @@ Page {
 
     ]
 
-//    actions: [
-//        Action {
-//            id: configAction
-//            text: i18n.tr("Edit")
-//            iconSource: getIcon("edit")
-//            onTriggered:pageStack.push(Qt.resolvedUrl("ConfigPage.qml"), {project: project})
-//        },
-
-//        Action {
-//            id: inboxAction
-//            text: i18n.tr("Inbox")
-//            iconSource: enabled ? getIcon("bell") : getIcon("bell-o")
-//            enabled: project.inbox.count > 0
-//            onTriggered: pageStack.push(Qt.resolvedUrl("InboxPage.qml"), {project: project})
-//        },
-
-//        Action {
-//            id: actionsAction
-//            text: i18n.tr("Actions")
-//            iconSource: getIcon("navigation-menu")
-//            onTriggered: PopupUtils.open(actionMenu, value)
-//        },
-
-//        Action {
-//            id: refreshAction
-//            text: i18n.tr("Refresh")
-//            iconSource: getIcon("reload")
-//            onTriggered: project.refresh()
-//        }
-//    ]
-
-    Column {
-        anchors.centerIn: parent
-        width: parent.width - units.gu(3)
-        visible: project.plugins.count === 0
-        //opacity: 0.7
-
-        Label {
-            anchors.horizontalCenter: parent.horizontalCenter
-            fontSize: "large"
-            font.bold: true
-            text: i18n.tr("No plugins")
-        }
-
-        Label {
-            horizontalAlignment: Text.AlignHCenter
-            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-            width: parent.width
-            color: theme.secondaryColor
-            text: i18n.tr("Add some plugins by tapping \"Edit\" in the toolbar.")
-        }
-    }
-
-    Flickable {
-        id: mainFlickable
+    Item {
         anchors {
-//            fill: parent
-            left: parent.left
-            right: parent.right
+            left: sidebar.right
+            right: streamSidebar.left
             top: parent.top
             bottom: parent.bottom
         }
-        clip: wideAspect
-        visible: wideAspect
-        contentHeight: contents.height
-        contentWidth: width
 
-        Item {
-            id: contents
-            width: parent.width
-            height: column.contentHeight + units.gu(2)
+        Column {
+            anchors.centerIn: parent
+            width: parent.width - units.gu(3)
+            visible: project.plugins.count === 0
+            //opacity: 0.7
 
-            ColumnFlow {
-                id: column
-                width: parent.width - units.gu(2)
-                height: contentHeight
-                anchors.centerIn: parent
-                model: project.plugins
-                columns: extraWideAspect ? 3 : wideAspect ? 2 : 1
-                //spacing: units.gu(2)
-                delegate: Repeater {
-                    model: modelData.items
+            Label {
+                anchors.horizontalCenter: parent.horizontalCenter
+                fontSize: "large"
+                font.bold: true
+                text: i18n.tr("No plugins")
+            }
 
-                    delegate: Item {
-                        id: tile
-                        width: parent.width
+            Label {
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                width: parent.width
+                color: theme.secondaryColor
+                text: i18n.tr("Add some plugins by tapping \"Edit\" in the toolbar.")
+            }
+        }
 
-                        visible: modelData.enabled && pluginItem.pulseItem
-                        height: visible ? pluginTile.height + units.gu(2) : 0
+        Flickable {
+            id: mainFlickable
+            anchors {
+    //            fill: parent
+                left: parent.left
+                right: parent.right
+                top: parent.top
+                bottom: parent.bottom
+            }
+            clip: wideAspect
+            visible: wideAspect
+            contentHeight: contents.height
+            contentWidth: width
 
-                        onVisibleChanged: column.reEvalColumns()
+            Item {
+                id: contents
+                width: parent.width
+                height: column.contentHeight + units.gu(2)
 
-                        onHeightChanged: column.reEvalColumns()
+                ColumnFlow {
+                    id: column
+                    width: parent.width - units.gu(2)
+                    height: contentHeight
+                    anchors.centerIn: parent
+                    model: project.plugins
+                    columns: column.width > units.gu(150) ? 3 : column.width > units.gu(80) ? 2 : 1
+                    //spacing: units.gu(2)
+                    delegate: Repeater {
+                        model: modelData.items
 
-                        property PluginItem pluginItem: modelData
+                        delegate: Item {
+                            id: tile
+                            width: parent.width
 
-                        PluginTile {
-                            id: pluginTile
-                            iconSource: tile.pluginItem.icon
-                            title: tile.pluginItem.title
-                            viewAllMessage: loader.item.viewAll
-                            action: tile.pluginItem.action
-                            anchors.centerIn: parent
-                            width: parent.width - units.gu(2)
+                            visible: modelData.enabled && pluginItem.pulseItem
+                            height: visible ? pluginTile.height + units.gu(2) : 0
 
-                            onTriggered: {
-                                if (pluginItem.page)
-                                    pageStack.push(pluginItem.page)
-                            }
+                            onVisibleChanged: column.reEvalColumns()
 
-                            Loader {
-                                id: loader
-                                width: parent.width
-                                sourceComponent: tile.pluginItem.pulseItem
-                                onLoaded: {
-                                    column.reEvalColumns()
+                            onHeightChanged: column.reEvalColumns()
+
+                            property PluginItem pluginItem: modelData
+
+                            PluginTile {
+                                id: pluginTile
+                                iconSource: tile.pluginItem.icon
+                                title: tile.pluginItem.title
+                                viewAllMessage: loader.item.viewAll
+                                action: tile.pluginItem.action
+                                anchors.centerIn: parent
+                                width: parent.width - units.gu(2)
+
+                                onTriggered: {
+                                    if (pluginItem.page)
+                                        pageStack.push(pluginItem.page)
                                 }
-                                onHeightChanged: column.reEvalColumns()
+
+                                Loader {
+                                    id: loader
+                                    width: parent.width
+                                    sourceComponent: tile.pluginItem.pulseItem
+                                    onLoaded: {
+                                        column.reEvalColumns()
+                                    }
+                                    onHeightChanged: column.reEvalColumns()
+                                }
                             }
                         }
                     }
-                }
 
-                Timer {
-                    interval: 100
-                    running: true
-                    onTriggered: {
-                        print("Triggered!")
-                        column.updateWidths()
+                    Timer {
+                        interval: 100
+                        running: true
+                        onTriggered: {
+                            print("Triggered!")
+                            column.updateWidths()
+                        }
                     }
                 }
             }
         }
+
+        ScrollBar {
+            flickableItem: mainFlickable
+        }
     }
 
-    ScrollBar {
-        flickableItem: mainFlickable
+    Sidebar {
+        id: sidebar
+        mode: "left"
+        style: "dark"
+        width: units.gu(8)
+
+        autoFlick: false
+
+        Column {
+            width: parent.width
+
+            SidebarItem {
+                iconName: "dashboard"
+                text: "Overview"
+                selected: true
+            }
+
+            SidebarItem {
+                iconName: "inbox"
+                text: "Inbox"
+                count: 3
+            }
+        }
+
+        SidebarItem {
+            iconName: "cog"
+            text: "Settings"
+            anchor: Qt.TopEdge
+
+            anchors.bottom: parent.bottom
+        }
+    }
+
+    Sidebar {
+        id: streamSidebar
+        mode: "right"
+        width: units.gu(27)
     }
 
     Component {
@@ -214,7 +231,6 @@ Page {
                         horizontalAlignment: Text.AlignHCenter
 
                         text: i18n.tr("No available actions")
-                        color: Theme.palette.normal.overlayText
                     }
                 }
 
@@ -247,8 +263,6 @@ Page {
                                         leftMargin: units.gu(1.5)
                                     }
                                     opacity: actionListItem.enabled ? 1 : 0.5
-
-                                    color: Theme.palette.normal.overlayText
                                 }
 
                                 Column {
@@ -271,7 +285,6 @@ Page {
                                         width: parent.width
                                         elide: Text.ElideRight
                                         text: actionListItem.visible ? modelData.action.text : ""
-                                        color: Theme.palette.normal.overlayText
                                     }
 
                                     Label {
@@ -287,7 +300,7 @@ Page {
                                         text: actionListItem.visible ? modelData.action.description : ""
                                         visible: text !== ""
                                         elide: Text.ElideRight
-                                        color: Theme.palette.normal.overlayText
+                                        color: theme.secondaryColor
                                     }
                                 }
                             }
@@ -297,39 +310,4 @@ Page {
             }
         }
     }
-
-//    tools: ToolbarItems {
-//        opened: wideAspect
-//        locked: wideAspect
-
-//        onLockedChanged: opened = locked
-
-////        Repeater {
-////            model: selectedPlugin ? pluginPage.item.actions : []
-////            delegate: ToolbarButton {
-////                id: toolbarButton
-////                action: modelData
-////                visible: action.visible
-////                function trigger(value) { action.triggered(toolbarButton) }
-////            }
-////        }
-
-//        ToolbarButton {
-//            action: refreshAction
-//        }
-
-//        ToolbarButton {
-//            action: inboxAction
-//        }
-
-//        ToolbarButton {
-//            id: actionsButton
-//            action: actionsAction
-//            function trigger(value) { action.triggered(actionsButton) }
-//        }
-
-//        ToolbarButton {
-//            action: configAction
-//        }
-//    }
 }

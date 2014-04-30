@@ -54,7 +54,7 @@ Service {
                      undefined, {"Accept":"application/vnd.github.v3+json"})
 
             Http.get(github + "/user/repos", ["access_token=" + oauth], function(has_error, status, response) {
-                print("REPOS", response)
+                //print("REPOS", response)
                 if (status !== 304)
                     settings.set("githubRepos", JSON.parse(response))
             }, undefined, {"Accept":"application/vnd.github.v3+json"})

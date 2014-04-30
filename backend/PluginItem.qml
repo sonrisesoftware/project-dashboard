@@ -9,7 +9,7 @@ Item {
 
     property string value
 
-    property Component page
+    property Page page
 
     property Component pulseItem
 

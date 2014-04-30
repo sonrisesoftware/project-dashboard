@@ -16,16 +16,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
-import Ubuntu.Layouts 0.1
-import Ubuntu.Components 0.1
-import Ubuntu.Components.Popups 0.1
-import Ubuntu.Components.Pickers 0.1 as Picker
-import Ubuntu.Components.ListItems 0.1 as ListItem
+
 import "../backend"
 import "../components"
-import "../ubuntu-ui-extras/listutils.js" as List
-import "../ubuntu-ui-extras/dateutils.js" as DateUtils
-import "../ubuntu-ui-extras"
+import "../qml-extras/listutils.js" as List
+import "../qml-extras/dateutils.js" as DateUtils
+
+import "../qml-air"
+import "../qml-air/ListItems" as ListItem
 
 Plugin {
     id: plugin
@@ -110,7 +108,7 @@ Plugin {
         value: DateUtils.friendlyDuration(allTime)
 
         action: Action {
-            text: timer.running ? i18n.tr("Pause Timer") : i18n.tr("Start Timer")
+            name: timer.running ? i18n.tr("Pause Timer") : i18n.tr("Start Timer")
             onTriggered: startOrStop()
         }
 
@@ -125,6 +123,7 @@ Plugin {
                 visible: !pulseItem.show
                 enabled: false
                 height: visible ? implicitHeight : 0
+                implicitHeight: units.gu(5)
             }
 
             ListItem.SingleValue {
@@ -134,6 +133,7 @@ Plugin {
                 onClicked: PopupUtils.open(editDialog, todayItem, {date: today})
                 visible: pulseItem.show
                 height: visible ? implicitHeight : 0
+                implicitHeight: units.gu(5)
             }
         }
 
@@ -141,30 +141,18 @@ Plugin {
             id: page
             title: "Timer"
 
-            tabs: wideAspect ? [i18n.tr("Timer")] : [i18n.tr("Timer"), i18n.tr("History")]
-
-            Rectangle {
+            Item {
                 id: timerPage
+
                 anchors {
                     left: parent.left
                     top: parent.top
                     bottom: parent.bottom
-                    leftMargin: show ? 0 : -width
-
-                    Behavior on leftMargin {
-                        UbuntuNumberAnimation {}
-                    }
+                    right: parent.horizontalCenter
                 }
 
-                width: parent.width
-                property bool show: page.selectedTab === i18n.tr("Timer")
-                z: show ? 2 : 1
-
-                opacity: show ? 1 : 0
-                color: mainView.backgroundColor
-
                 Behavior on opacity {
-                    UbuntuNumberAnimation {}
+                    NumberAnimation { duration: 200 }
                 }
 
                 Column {
@@ -174,7 +162,7 @@ Plugin {
 
                     Label {
                         text: DateUtils.friendlyDuration(totalTime)
-                        fontSize: "x-large"
+                        font.pixelSize: units.gu(3.5)
                         anchors.horizontalCenter: parent.horizontalCenter
                     }
 
@@ -184,8 +172,8 @@ Plugin {
 
                         Button {
                             text: startTime !== undefined ? i18n.tr("Stop") : i18n.tr("Start")
-                            color: startTime === undefined ? colors["green"] : colors["red"]
-                            onTriggered: startOrStop()
+                            style: startTime === undefined ? "success" : "danger"
+                            onClicked: startOrStop()
                         }
 
                         Button {
@@ -196,53 +184,24 @@ Plugin {
                 }
             }
 
-            Rectangle {
+            Item {
                 id: historyPage
                 anchors {
                     right: parent.right
                     top: parent.top
                     bottom: parent.bottom
-                    rightMargin: show ? 0 : -width
-
-                    Behavior on rightMargin {
-                        UbuntuNumberAnimation {}
-                    }
+                    left: parent.horizontalCenter
                 }
 
-                width: parent.width
-                property bool show: !timerPage.show
-                z: show ? 2 : 1
-                color: mainView.backgroundColor
-
-                opacity: show ? 1 : 0
-
-                Behavior on opacity {
-                    UbuntuNumberAnimation {}
-                }
-
-//                ItemLayout {
-//                    anchors.fill: parent
-//                    anchors.topMargin: units.gu(1)
-//                    item: "list"
-//                }
-
-                Item {
+                BackgroundView {
                     id: list
                     anchors.fill: parent
-                    anchors.margins: wideAspect ? units.gu(2) : 0
+                    anchors.margins: units.gu(2)
+                    radius: units.gu(0.5)
+                    opacity: wideAspect ? 1 : 0
 
-                    Behavior on anchors.margins {
-                        UbuntuNumberAnimation {}
-                    }
-
-                    UbuntuShape {
-                        anchors.fill: parent
-                        color: Qt.rgba(0,0,0,0.2)
-                        opacity: wideAspect ? 1 : 0
-
-                        Behavior on opacity {
-                            UbuntuNumberAnimation {}
-                        }
+                    Behavior on opacity {
+                        NumberAnimation { duration: 200 }
                     }
 
                     ListView {
@@ -254,6 +213,7 @@ Plugin {
                         clip: true
                         delegate: ListItem.SingleValue {
                             id: item
+                            height: units.gu(5)
                             text: DateUtils.formattedDate(new Date(modelData))
                             value: modelData === today ? DateUtils.friendlyDuration(totalTime)
                                                              : DateUtils.friendlyDuration(dates[modelData].time)
@@ -265,20 +225,16 @@ Plugin {
                         anchors.bottom: parent.bottom
                         height: footer.height
                         width: parent.width
-                        visible: wideAspect
                         clip: true
-                        UbuntuShape {
+                        BackgroundView {
                             anchors.bottom: parent.bottom
                             height: list.height
                             width: parent.width
-                            color: Qt.rgba(0,0,0,0.2)
-                        }
-                    }
+                            radius: units.gu(0.5)
 
-                    Rectangle {
-                        anchors.fill: footer
-                        color: Qt.rgba(0,0,0,0.2)
-                        visible: !wideAspect
+                            color: "#eee"
+                            border.color: Qt.rgba(0,0,0,0.1)
+                        }
                     }
 
                     Column {
@@ -295,231 +251,94 @@ Plugin {
                             text: i18n.tr("Total Time")
                             value: DateUtils.friendlyDuration(allTime)
                             showDivider: false
+                            highlightable: false
                             height: units.gu(4.5)
                         }
                     }
                 }
             }
-
-            states: [
-                State {
-                    name: "wide"
-                    when: wideAspect
-                    PropertyChanges {
-                        restoreEntryValues: true
-                        target: timerPage
-                        width: parent.width/2
-                        show: true
-                    }
-
-                    PropertyChanges {
-                        restoreEntryValues: true
-                        target: historyPage
-                        width: parent.width/2
-                        show: true
-                    }
-                }
-
-            ]
-
-            transitions: [
-                Transition {
-                    from: "*"
-                    to: "*"
-
-                    UbuntuNumberAnimation {
-                        target: timerPage
-                        property: "width"
-                    }
-
-                    UbuntuNumberAnimation {
-                        target: historyPage
-                        property: "width"
-                    }
-                },
-
-                Transition {
-                    from: "wide"
-                    to: "*"
-
-                    NumberAnimation { target: timerPage; property: "anchors.leftMargin"; duration: 0;  }
-                    NumberAnimation { target: historyPage; property: "anchors.rightMargin"; duration: 0;  }
-                }
-
-            ]
-
-//            Layouts {
-//                id: layouts
-//                anchors.fill: parent
-
-//                layouts: [
-//                    ConditionalLayout {
-//                        name: "wideAspect"
-//                        when: wideAspect
-
-//                        Item {
-//                            anchors.fill: parent
-
-//                            Item {
-//                                anchors {
-//                                    left: parent.left
-//                                    right: parent.horizontalCenter
-//                                    top: parent.top
-//                                    bottom: parent.bottom
-//                                    margins: units.gu(2)
-//                                    rightMargin: units.gu(1)
-//                                }
-
-//                                ItemLayout {
-//                                    item: "timer"
-//                                    width: timerView.width
-//                                    height: timerView.height
-
-//                                    anchors.centerIn: parent
-//                                }
-//                            }
-
-//                            UbuntuShape {
-//                                id: shape
-//                                color: Qt.rgba(0,0,0,0.2)
-//                                anchors {
-//                                    right: parent.right
-//                                    left: parent.horizontalCenter
-//                                    top: parent.top
-//                                    bottom: parent.bottom
-//                                    margins: units.gu(2)
-//                                    leftMargin: units.gu(1)
-//                                }
-//                                clip: true
-
-//                                ItemLayout {
-//                                    item: "list"
-
-//                                    anchors.fill: parent
-//                                }
-
-//                                Item {
-//                                    anchors.bottom: parent.bottom
-//                                    height: footer.height
-//                                    width: parent.width
-//                                    clip: true
-//                                    UbuntuShape {
-//                                        anchors.bottom: parent.bottom
-//                                        height: shape.height
-//                                        width: parent.width
-//                                        color: Qt.rgba(0,0,0,0.2)
-//                                        ItemLayout {
-//                                            item: "footer"
-
-//                                            anchors {
-//                                                left: parent.left
-//                                                right: parent.right
-//                                                bottom: parent.bottom
-//                                            }
-
-//                                            height: footer.height
-//                                        }
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    },
-
-//                    ConditionalLayout {
-//                        name: "regularAspect"
-//                        when: !wideAspect
-
-
-//                    }
-//                ]
-
-//            }
         }
     }
 
-    Component {
+    Dialog {
         id: editDialog
 
-        Dialog {
-            id: root
+        property string date
 
-            property string date
+        title: i18n.tr("Edit Time")
+        text: i18n.tr("Edit the time logged for <b>%1</b>").arg(DateUtils.formattedDate(new Date(dates[date].date)))
 
-            title: i18n.tr("Edit Time")
-            text: i18n.tr("Edit the time logged for <b>%1</b>").arg(DateUtils.formattedDate(new Date(dates[date].date)))
+//        DatePicker {
+//            id: datePicker
+//            width: parent.width
+//            date: root.date === today ? DateUtils.toUTC(new Date(totalTime)) : DateUtils.toUTC(new Date(dates[root.date].time))
+//            mode: "Hours|Minutes|Seconds"
+//            style: SuruDatePickerStyle {}
+//        }
 
-            Picker.DatePicker {
-                id: datePicker
-                width: parent.width
-                date: root.date === today ? DateUtils.toUTC(new Date(totalTime)) : DateUtils.toUTC(new Date(dates[root.date].time))
-                mode: "Hours|Minutes|Seconds"
-                style: SuruDatePickerStyle {}
+        property bool running
+
+        Component.onCompleted: {
+            if (date == today ) {
+                //datePicker.date = new Date(totalTime).getUTCDate()
+                if (startTime) {
+                    doc.set("savedTime", savedTime + (new Date() - startTime))
+                    currentTime =  0
+                    doc.set("startTime", undefined)
+
+                    running = true
+                }
             }
+        }
 
-            property bool running
+        Item {
+            width: parent.width
+            height: childrenRect.height
 
-            Component.onCompleted: {
-                if (date == today ) {
-                    //datePicker.date = new Date(totalTime).getUTCDate()
-                    if (startTime) {
-                        doc.set("savedTime", savedTime + (new Date() - startTime))
-                        currentTime =  0
-                        doc.set("startTime", undefined)
+            Button {
+                objectName: "cancelButton"
+                text: i18n.tr("Cancel")
+                anchors {
+                    left: parent.left
+                    right: parent.horizontalCenter
+                    rightMargin: units.gu(1)
+                }
 
-                        running = true
+                color: "gray"
+
+                onClicked: {
+                    PopupUtils.close(root)
+                    if (running) {
+                        doc.set("startTime", new Date().toJSON())
+                        currentTime = 0
                     }
                 }
             }
 
-            Item {
-                width: parent.width
-                height: childrenRect.height
+            Button {
+                id: okButton
+                objectName: "okButton"
+                anchors {
+                    left: parent.horizontalCenter
+                    right: parent.right
+                    leftMargin: units.gu(1)
+                }
 
-                Button {
-                    objectName: "cancelButton"
-                    text: i18n.tr("Cancel")
-                    anchors {
-                        left: parent.left
-                        right: parent.horizontalCenter
-                        rightMargin: units.gu(1)
-                    }
+                text: i18n.tr("Ok")
 
-                    color: "gray"
+                onClicked: {
+                    PopupUtils.close(root)
+                    print(datePicker.date)
+                    if (date == today) {
+                        doc.set("savedTime", DateUtils.timeFromDate(datePicker.date))
 
-                    onClicked: {
-                        PopupUtils.close(root)
                         if (running) {
                             doc.set("startTime", new Date().toJSON())
                             currentTime = 0
                         }
-                    }
-                }
-
-                Button {
-                    id: okButton
-                    objectName: "okButton"
-                    anchors {
-                        left: parent.horizontalCenter
-                        right: parent.right
-                        leftMargin: units.gu(1)
-                    }
-
-                    text: i18n.tr("Ok")
-
-                    onClicked: {
-                        PopupUtils.close(root)
-                        print(datePicker.date)
-                        if (date == today) {
-                            doc.set("savedTime", DateUtils.timeFromDate(datePicker.date))
-
-                            if (running) {
-                                doc.set("startTime", new Date().toJSON())
-                                currentTime = 0
-                            }
-                        } else {
-                            dates[date].time = DateUtils.timeFromDate(datePicker.date)
-                            dates = dates
-                        }
+                    } else {
+                        dates[date].time = DateUtils.timeFromDate(datePicker.date)
+                        dates = dates
                     }
                 }
             }

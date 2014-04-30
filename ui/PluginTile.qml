@@ -24,7 +24,7 @@ import "../qml-air/ListItems" as ListItem
 BackgroundView {
     id: tile
 
-    radius: units.gu(1.5)
+    radius: units.gu(0.5)
 
     property alias title: titleLabel.text
     property string shortTitle: title
