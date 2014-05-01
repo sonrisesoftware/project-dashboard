@@ -1,17 +1,17 @@
 /*
  * Project Dashboard - Manage everything about your projects in one app
  * Copyright (C) 2014 Michael Spencer
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -152,8 +152,8 @@ Page {
 
                     Label {
                         text: issue.isPullRequest ? issue.merged ? i18n.tr("<b>%1</b> merged %2 commits").arg(issue.user.login).arg(issue.commits.length)
-                                                     : i18n.tr("<b>%1</b> wants to merge %2 commits").arg(issue.user.login).arg(issue.commits.length)
-                                            : i18n.tr("<b>%1</b> opened this issue %2").arg(issue.user.login).arg(friendsUtils.createTimeString(issue.created_at))
+                                                                 : i18n.tr("<b>%1</b> wants to merge %2 commits").arg(issue.user.login).arg(issue.commits.length)
+                        : i18n.tr("<b>%1</b> opened this issue %2").arg(issue.user.login).arg(friendsUtils.createTimeString(issue.created_at))
                         anchors.verticalCenter: parent.verticalCenter
                         width: parent.width - stateShape.width - parent.spacing
                         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
@@ -299,26 +299,26 @@ Page {
             }
 
             //TextArea {
-//                id: textArea
-//                width: parent.width
-//                text: issue.renderBody()
-//                height: Math.max(__internal.linesHeight(4), edit.height + textArea.__internal.frameSpacing * 2)
-//                placeholderText: i18n.tr("No description set.")
-//                readOnly: true
-//                textFormat: Text.RichText
-//                color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
+            //                id: textArea
+            //                width: parent.width
+            //                text: issue.renderBody()
+            //                height: Math.max(__internal.linesHeight(4), edit.height + textArea.__internal.frameSpacing * 2)
+            //                placeholderText: i18n.tr("No description set.")
+            //                readOnly: true
+            //                textFormat: Text.RichText
+            //                color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
 
-//                // FIXME: Hack necessary to get the correct line height
-//                TextEdit {
-//                    id: edit
-//                    visible: false
-//                    width: parent.width
-//                    textFormat: Text.RichText
-//                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-//                    text: textArea.text
-//                    font: textArea.font
-//                }
-//            }
+            //                // FIXME: Hack necessary to get the correct line height
+            //                TextEdit {
+            //                    id: edit
+            //                    visible: false
+            //                    width: parent.width
+            //                    textFormat: Text.RichText
+            //                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+            //                    text: textArea.text
+            //                    font: textArea.font
+            //                }
+            //            }
 
             UbuntuShape {
                 anchors {
@@ -379,11 +379,11 @@ Page {
                 EventItem {
                     event: {
                         "event": "testing",
-                        "actor": {
+                                "actor": {
                             "login": i18n.tr("Continous Integration")
                         },
                         "statusDescription": issue.statusDescription,
-                        "status": issue.status
+                                "status": issue.status
                     }
                     last: true
                     visible: issue.status !== ""
@@ -509,6 +509,7 @@ Page {
         expanded: wideAspect && !issue.isPullRequest
 
         Column {
+            id: sidebarColumn
             width: parent.width
 
             ListItem.Header {
@@ -594,48 +595,71 @@ Page {
                 id: labelsHeader
                 text: i18n.tr("Labels")
             }
+        }
+
+        Flow {
+            id: labelFlow
+
+            spacing: units.gu(1)
+            anchors {
+                top: sidebarColumn.bottom
+                left: parent.left
+                right: parent.right
+                topMargin: units.gu(1)
+                margins: units.gu(2)
+            }
 
             Repeater {
                 id: labelsRepeater
 
-                property bool editing
+                model: issue.labels
 
-                model: editing ? plugin.availableLabels : issue.labels
-                delegate: ListItem.Standard {
-                    height: units.gu(5)
+                delegate: UbuntuShape {
+                    id: labelContainer
+                    color: "#" + modelData.color
+                    width: labelName.contentWidth < labelFlow.width ? labelName.contentWidth + units.gu(2) : labelFlow.width - units.gu(2)
+                    height: units.gu(3.5)
+
                     Label {
-                        anchors {
-                            left: parent.left
-                            leftMargin: units.gu(2)
-                            verticalCenter: parent.verticalCenter
+                        id: labelName
+
+                        // Function to get the text color based on the background
+                        function getTextColor(backgroundColor) {
+                            var red = parseInt((backgroundColor).substring(0,2),16)
+                            var green = parseInt((backgroundColor).substring(2,4),16)
+                            var blue = parseInt((backgroundColor).substring(4,6),16)
+
+                            var a = 1 - ( 0.299 * red + 0.587 * green + 0.114 * blue)/255;
+
+                            if (a < 0.5)
+                                return UbuntuColors.coolGrey
+                            else
+                                return Theme.palette.normal.baseText
                         }
 
                         text: modelData.name
-                        color: "#" + modelData.color
-                    }
-
-                    control: CheckBox {
-                        visible: labelsRepeater.editing
-
-                        checked: {
-                            for (var i = 0; i < issue.labels.length; i++) {
-                                var label = issue.labels[i]
-
-                                if (label.name === modelData.name)
-                                    return true
-                            }
-
-                            return false
-                        }
-
-                        //onClicked: checked = doc.sync("done", checked)
-
-                        style: SuruCheckBoxStyle {}
+                        elide: Text.ElideRight
+                        anchors.centerIn: parent
+                        verticalAlignment: Text.AlignVCenter
+                        horizontalAlignment: Text.AlignHCenter
+                        color: getTextColor(modelData.color)
+                        width: labelContainer.width === labelFlow.width - units.gu(2) ? null : labelFlow.width - units.gu(2)
                     }
                 }
             }
+        }
+
+        Column {
+            width: parent.width
+            anchors.top: labelFlow.bottom
+            anchors.topMargin: noLabelMessage.visible ? -units.gu(1) : units.gu(1)
+
+            ListItem.ThinDivider {
+                visible: !noLabelMessage.visible
+            }
 
             ListItem.Standard {
+                id: noLabelMessage
                 text: i18n.tr("None Yet")
                 enabled: false
                 visible: issue.labels.length === 0
