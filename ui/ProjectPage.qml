@@ -20,6 +20,7 @@ import "../backend"
 import "../components"
 
 import "../qml-extras"
+import "../qml-extras/listutils.js" as List
 import "../qml-air"
 import "../qml-air/ListItems" as ListItem
 
@@ -29,20 +30,9 @@ Page {
     title: project.name
 
     property Project project
+    property string selectedView: "overview"
 
     rightWidgets: [
-        Button {
-            iconName: enabled ? "bell" : "bell-o"
-            enabled: project.inbox.count > 0
-            onClicked: pageStack.push(Qt.resolvedUrl("InboxPage.qml"), {project: project})
-            toolTip: project.inbox.count > 0 ? "%1 notifications".arg(project.inbox.count) : "No notifications"
-        },
-
-        Button {
-            iconName: "bars"
-            onClicked: pageStack.open(Qt.resolvedUrl("ConfigPage.qml"), {project: project})
-            toolTip: "Project configuration"
-        },
 
         Button {
             iconName: "cog"
@@ -52,120 +42,212 @@ Page {
 
     ]
 
+    function displayPluginItem(pluginItem) {
+        pageStack.push(pluginItem.page)
+    }
+
     Item {
         anchors {
             left: sidebar.right
-            right: streamSidebar.left
+            right: parent.right
             top: parent.top
             bottom: parent.bottom
         }
 
-        Column {
-            anchors.centerIn: parent
-            width: parent.width - units.gu(3)
-            visible: project.plugins.count === 0
-            //opacity: 0.7
+        Item {
+            visible: selectedView === "overview"
 
-            Label {
-                anchors.horizontalCenter: parent.horizontalCenter
-                fontSize: "large"
-                font.bold: true
-                text: i18n.tr("No plugins")
-            }
-
-            Label {
-                horizontalAlignment: Text.AlignHCenter
-                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                width: parent.width
-                color: theme.secondaryColor
-                text: i18n.tr("Add some plugins by tapping \"Edit\" in the toolbar.")
-            }
-        }
-
-        Flickable {
-            id: mainFlickable
-            anchors {
-    //            fill: parent
-                left: parent.left
-                right: parent.right
-                top: parent.top
-                bottom: parent.bottom
-            }
-            clip: wideAspect
-            visible: wideAspect
-            contentHeight: contents.height
-            contentWidth: width
+            anchors.fill: parent
 
             Item {
-                id: contents
-                width: parent.width
-                height: column.contentHeight + units.gu(2)
+                anchors {
+                    left: parent.left
+                    right: streamSidebar.left
+                    top: parent.top
+                    bottom: parent.bottom
+                }
 
-                ColumnFlow {
-                    id: column
-                    width: parent.width - units.gu(2)
-                    height: contentHeight
+                Column {
                     anchors.centerIn: parent
-                    model: project.plugins
-                    columns: column.width > units.gu(150) ? 3 : column.width > units.gu(80) ? 2 : 1
-                    //spacing: units.gu(2)
-                    delegate: Repeater {
-                        model: modelData.items
+                    width: parent.width - units.gu(3)
+                    visible: project.plugins.count === 0
+                    //opacity: 0.7
 
-                        delegate: Item {
-                            id: tile
-                            width: parent.width
+                    Label {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        fontSize: "large"
+                        font.bold: true
+                        text: i18n.tr("No plugins")
+                    }
 
-                            visible: modelData.enabled && pluginItem.pulseItem
-                            height: visible ? pluginTile.height + units.gu(2) : 0
+                    Label {
+                        horizontalAlignment: Text.AlignHCenter
+                        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                        width: parent.width
+                        color: theme.secondaryColor
+                        text: i18n.tr("Add some plugins by tapping \"Edit\" in the toolbar.")
+                    }
+                }
 
-                            onVisibleChanged: column.reEvalColumns()
+                Label {
+                    anchors.centerIn: parent
+                    fontSize: "large"
+                    opacity: 0.5
+                    text: "Nothing to show"
+                }
 
-                            onHeightChanged: column.reEvalColumns()
+                Flickable {
+                    id: mainFlickable
+                    anchors {
+            //            fill: parent
+                        left: parent.left
+                        right: parent.right
+                        top: parent.top
+                        bottom: parent.bottom
+                    }
+                    clip: wideAspect
+                    contentHeight: contents.height
+                    contentWidth: width
 
-                            property PluginItem pluginItem: modelData
+                    Item {
+                        id: contents
+                        width: parent.width
+                        height: column.contentHeight + units.gu(2)
 
-                            PluginTile {
-                                id: pluginTile
-                                iconSource: tile.pluginItem.icon
-                                title: tile.pluginItem.title
-                                viewAllMessage: loader.item.viewAll
-                                action: tile.pluginItem.action
-                                anchors.centerIn: parent
-                                width: parent.width - units.gu(2)
+                        ColumnFlow {
+                            id: column
+                            width: parent.width - units.gu(2)
+                            height: contentHeight
+                            anchors.centerIn: parent
+                            model: project.plugins
+                            columns: column.width > units.gu(120) ? 3 : column.width > units.gu(60) ? 2 : 1
+                            //spacing: units.gu(2)
+                            delegate: Repeater {
+                                model: modelData.items
 
-                                onTriggered: {
-                                    if (pluginItem.page)
-                                        pageStack.push(pluginItem.page)
-                                }
-
-                                Loader {
-                                    id: loader
+                                delegate: Item {
+                                    id: tile
                                     width: parent.width
-                                    sourceComponent: tile.pluginItem.pulseItem
-                                    onLoaded: {
-                                        column.reEvalColumns()
-                                    }
+
+                                    visible: modelData.enabled && pluginItem.pulseItem && loader.item.show
+                                    height: visible ? pluginTile.height + units.gu(2) : 0
+
+                                    onVisibleChanged: column.reEvalColumns()
+
                                     onHeightChanged: column.reEvalColumns()
+
+                                    property PluginItem pluginItem: modelData
+
+                                    PluginTile {
+                                        id: pluginTile
+                                        iconSource: tile.pluginItem.icon
+                                        title: tile.pluginItem.title
+                                        viewAllMessage: loader.item.viewAll
+                                        action: tile.pluginItem.action
+                                        anchors.centerIn: parent
+                                        width: parent.width - units.gu(2)
+
+                                        onTriggered: {
+                                            if (pluginItem.page)
+                                                displayPluginItem(pluginItem)
+                                        }
+
+                                        Loader {
+                                            id: loader
+                                            width: parent.width
+                                            sourceComponent: tile.pluginItem.pulseItem
+                                            onLoaded: {
+                                                column.reEvalColumns()
+                                            }
+                                            onHeightChanged: column.reEvalColumns()
+                                        }
+                                    }
+                                }
+                            }
+
+                            Timer {
+                                interval: 100
+                                running: true
+                                onTriggered: {
+                                    print("Triggered!")
+                                    column.updateWidths()
                                 }
                             }
                         }
                     }
+                }
 
-                    Timer {
-                        interval: 100
-                        running: true
-                        onTriggered: {
-                            print("Triggered!")
-                            column.updateWidths()
+                ScrollBar {
+                    flickableItem: mainFlickable
+                }
+            }
+
+            Sidebar {
+                id: streamSidebar
+                mode: "right"
+                autoFlick: false
+
+                //TODO: Remove once the stream is implemented
+                expanded: false
+
+                Rectangle {
+                    height: units.gu(4)
+                    width: parent.width
+                    color: "white"
+
+                    Label {
+                        anchors.centerIn: parent
+                        fontSize: "large"
+                        text: "Stream"
+                    }
+
+                    Rectangle {
+                        width: parent.width
+                        height: 1
+                        anchors.bottom: parent.bottom
+
+                        color: Qt.rgba(0,0,0,0.2)
+                    }
+                }
+
+                width: units.gu(27)
+            }
+        }
+
+        InboxPage {
+            visible: selectedView == "inbox"
+
+            project: page.project
+        }
+
+        Tabs {
+            id: tabs
+            visible: project.hasPlugin(selectedView)
+            anchors.fill: parent
+
+            property Plugin plugin: visible ? project.getPlugin(selectedView) : undefined
+
+            Repeater {
+                model: tabs.plugin.items
+                delegate: Page {
+                    title: modelData.title
+                    parent: tabs.tabsContent
+
+                    onVisibleChanged: {
+                        if (modelData.page) {
+                            modelData.page.parent = tabs
+                            modelData.page.anchors.fill = tabs.tabsContent
+                            modelData.page.visible = visible
                         }
                     }
                 }
             }
         }
 
-        ScrollBar {
-            flickableItem: mainFlickable
+        SettingsView {
+            visible: selectedView == "settings"
+
+            anchors.fill: parent
         }
     }
 
@@ -183,13 +265,26 @@ Page {
             SidebarItem {
                 iconName: "dashboard"
                 text: "Overview"
-                selected: true
+                selected: selectedView === "overview"
+                onClicked: selectedView = "overview"
             }
 
             SidebarItem {
                 iconName: "inbox"
                 text: "Inbox"
-                count: 3
+                count: project.inbox.count
+                selected: selectedView === "inbox"
+                onClicked: selectedView = "inbox"
+            }
+
+            Repeater {
+                model: project.plugins
+                delegate: SidebarItem {
+                    iconName: modelData.icon
+                    text: modelData.title
+                    onClicked: selectedView = modelData.type
+                    selected: selectedView === modelData.type
+                }
             }
         }
 
@@ -198,14 +293,11 @@ Page {
             text: "Settings"
             anchor: Qt.TopEdge
 
+            selected: selectedView === "settings"
+            onClicked: selectedView = "settings"
+
             anchors.bottom: parent.bottom
         }
-    }
-
-    Sidebar {
-        id: streamSidebar
-        mode: "right"
-        width: units.gu(27)
     }
 
     Component {

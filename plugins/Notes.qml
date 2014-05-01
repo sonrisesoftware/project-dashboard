@@ -28,6 +28,8 @@ Plugin {
     id: plugin
 
     name: "notes"
+    title: "Notes"
+    icon: "pencil-square-o"
 
     property var notes: doc.get("notes", [])
 

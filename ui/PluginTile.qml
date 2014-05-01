@@ -106,7 +106,7 @@ BackgroundView {
 
             Button {
                 id: actionButton
-                visible: tile.action
+                visible: tile.action && parent.width > units.gu(40)
 
                 anchors {
                     right: parent.right

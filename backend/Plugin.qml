@@ -24,6 +24,8 @@ Item {
     id: plugin
 
     property string name
+    property string title
+    property string icon
     property string type
     property Project project
     property string configuration

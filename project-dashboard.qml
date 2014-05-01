@@ -76,12 +76,20 @@ PageApplication {
                 Behavior on opacity {
                     NumberAnimation { duration: 200 }
                 }
+
+                onClicked: if (!noConnection) syncPopover.open()
             },
 
             Button {
-                iconName: "user"
-                onClicked: userPopover.open(caller)
+                iconName: inboxPopover.count > 0 ? "bell" : "bell-o"
+                iconColor: inboxPopover.count > 0 ? theme.danger : textColor
+                onClicked: inboxPopover.open(caller)
             },
+
+//            Button {
+//                iconName: "user"
+//                onClicked: userPopover.open(caller)
+//            },
 
             Button {
                 iconName: "cog"
@@ -160,146 +168,247 @@ PageApplication {
     property bool busy: List.iter(backend.projects, function(project) {
         return project.syncQueue.count
     }) > 0
-    property bool noConnection: true
+    property bool noConnection: !connection.connected
 
-//    Item {
-//        anchors.fill: parent
-//        anchors.bottomMargin: header.height - header.__styleInstance.contentHeight
-//        parent: header
+    InternetConnection {
+        id: connection
+    }
 
-//        AwesomeIcon {
-//            name: "exclamation-triangle"
-//            color: colors["yellow"]
-//            anchors.centerIn: syncIndicator
-//            size: units.gu(2.6)
-//            opacity: !busy && syncError ? 1 : 0
+    Popover {
+        id: inboxPopover
 
-//            Behavior on opacity {
-//                UbuntuNumberAnimation {
-//                    duration: UbuntuAnimation.SlowDuration
-//                }
-//            }
-//        }
+        property int count: List.concat(backend.projects, "inbox").length
 
-//        ActivityIndicator {
-//            id: syncIndicator
-//            anchors {
-//                right: parent.right
-//                verticalCenter: parent.verticalCenter
-//                rightMargin: (parent.height - height)/2
-//            }
+        contentHeight: count > 0 ? inboxList.height + clearButton.height + units.gu(2) : noMessagesView.height
 
-//            height: units.gu(4)
-//            width: height
-//            running: opacity > 0
-//            opacity: busy ? 1 : 0
+        Item {
+            id: noMessagesView
+            width: parent.width
+            height: inboxPopover.count === 0 ? units.gu(6) : 0
+            visible: inboxPopover.count === 0
 
-//            Behavior on opacity {
-//                UbuntuNumberAnimation {
-//                    duration: UbuntuAnimation.SlowDuration
-//                }
-//            }
+            Label {
+               anchors.centerIn: parent
+               text: "No unread messages"
+               opacity: 0.5
+            }
+        }
 
-//            MouseArea {
-//                anchors.fill: parent
-//                enabled: busy || syncError
-//                onClicked: PopupUtils.open(syncPopover, syncIndicator)
-//            }
-//        }
-//    }
+        Button {
+            id: clearButton
+            visible: inboxPopover.count > 0
+            onClicked: backend.clearInbox()
+            anchors {
+                left: parent.left
+                right: parent.right
+                bottom: parent.bottom
 
-//    Component {
-//        id: syncPopover
+                margins: units.gu(1)
+            }
 
-//        Popover {
-//            id: popover
-//            contentHeight: column.height
+            text: "Mark all as read"
+        }
 
-//            onContentHeightChanged: {
-//                if (contentHeight == 0)
-//                    PopupUtils.close(popover)
-//            }
+        ListView {
+            id: inboxList
+            width: parent.width
+            height: Math.min(contentHeight, units.gu(5 * 10))
 
-//            Column {
-//                id: column
-//                width: parent.width
+            model: backend.projects
+            clip: true
+            delegate: Column {
+                width: parent.width
+                property Project project: modelData
 
-//                Repeater {
-//                    model: backend.projects
-//                    delegate: Column {
-//                        id: syncColumn
-//                        width: parent.width
+                ListItem.Header {
+                    text: project.name
+                    opacity: repeater.count > 0 ? 1 : 0
+                    visible: opacity > 0
 
-//                        property Project project: modelData
+                    Label {
+                        anchors {
+                            verticalCenter: parent.verticalCenter
+                            right: parent.right
+                            rightMargin: units.gu(2)
+                        }
+                        text: repeater.count
+                    }
 
-//                        visible: List.objectKeys(modelData.syncQueue.groups).length > 0
+                    Behavior on opacity {
+                        NumberAnimation { duration: 250; }
+                    }
+                }
 
-//                        ListItem.Header {
-//                            Label {
-//                                text: modelData.name
-//                                anchors {
-//                                    verticalCenter: parent.verticalCenter
-//                                    left: parent.left
-//                                    leftMargin: units.gu(1)
-//                                }
-//                                color: "#888888"//Theme.palette.normal.overlayText
-//                            }
-//                            height: List.objectKeys(modelData.syncQueue.groups).length > 0 ? units.gu(4) : 0
-//                        }
+                Repeater {
+                    id: repeater
+                    model: project.inbox
+                    delegate: ListItem.BaseListItem {
+                        id: listItem
+                        onClicked: project.displayMessage(modelData)
 
-//                        Repeater {
-//                            model: List.objectKeys(modelData.syncQueue.groups)
-//                            delegate: SubtitledListItem {
-//                                id: item
-//                                overlay: true
-//                                property var group: syncColumn.project.syncQueue.groups[modelData]
-//                                text: group.title
-//                                subText: group.errors.length > 0 ? i18n.tr("Error: %1").arg(group.errors[0].status)
-//                                                                 : ""
+                        height: units.gu(5)
 
-//                                onClicked: {
-//                                    print("Clicked")
-//                                    error(i18n.tr("%1 Failed").arg(group.title), i18n.tr("Call: %1\n\n%2").arg(group.errors[0].call).arg(group.errors[0].response))
-//                                }
+                        removable: true
+                        onItemRemoved: project.removeMessage(index)
+                        backgroundIndicator: ListItemBackground {
+                            ready: swipingReady
+                            iconName: "check"
+                            actionBackground: theme.success
+                            state: listItem.swipingState
+                        }
 
-//                                ProgressBar {
-//                                    anchors {
-//                                        right: parent.right
-//                                        verticalCenter: parent.verticalCenter
-//                                        rightMargin: units.gu(2)
-//                                    }
-//                                    minimumValue: 0
-//                                    maximumValue: group.total
-//                                    value: item.group.total - item.group.count
-//                                    visible: item.group.count > 0
-//                                    width: units.gu(10)
-//                                    height: units.gu(2.5)
-//                                }
+                        AwesomeIcon {
+                            id: icon
+                            name: modelData.icon
+                            size: units.gu(3.5)
+                            anchors {
+                                verticalCenter: parent.verticalCenter
+                                left: parent.left
+                                leftMargin: units.gu(1.5)
+                            }
+                        }
 
-//                                AwesomeIcon {
-//                                    name: "exclamation-triangle"
-//                                    color: colors["yellow"]
-//                                    anchors {
-//                                        right: parent.right
-//                                        verticalCenter: parent.verticalCenter
-//                                        rightMargin: (parent.height - height)/2
-//                                    }
-//                                    size: units.gu(2.6)
-//                                    opacity: item.group.errors.length > 0 ? 1 : 0
+                        Column {
+                            id: labels
 
-//                                    Behavior on opacity {
-//                                        UbuntuNumberAnimation {
-//                                            duration: UbuntuAnimation.SlowDuration
-//                                        }
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
+                            spacing: units.gu(0.1)
+
+                            anchors {
+                                verticalCenter: parent.verticalCenter
+                                left: icon.right
+                                leftMargin: units.gu(1.5)
+                                rightMargin: units.gu(2)
+                                right: parent.right
+                            }
+
+                            Item {
+                                width: parent.width
+                                height: childrenRect.height
+                                Label {
+                                    id: titleLabel
+
+                                    width: parent.width - dateLabel.width - units.gu(1)
+                                    elide: Text.ElideRight
+                                    text: modelData.title
+                                }
+
+                                Label {
+                                    id: dateLabel
+                                    font.italic: true
+                                    text: friendlyTime(new Date(modelData.date))
+                                    anchors.right: parent.right
+                                    color: theme.secondaryColor
+                                    fontSize: "small"
+                                }
+                            }
+
+                            Label {
+                                id: subLabel
+                                width: parent.width
+
+                                height: visible ? implicitHeight: 0
+                                color: theme.secondaryColor
+                                maximumLineCount: 1
+                                font.weight: Font.Light
+                                fontSize: "small"
+                                text: modelData.message
+                                visible: text !== ""
+                                elide: Text.ElideRight
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        ListItem.ThinDivider {
+            anchors.bottom: inboxList.bottom
+        }
+
+        ScrollBar {
+            flickableItem: inboxList
+        }
+    }
+
+    Popover {
+        id: syncPopover
+        contentHeight: column.height
+
+        onContentHeightChanged: {
+            if (contentHeight == 0)
+                syncPopover.close()
+        }
+
+        Column {
+            id: column
+            width: parent.width
+
+            Repeater {
+                model: backend.projects
+                delegate: Column {
+                    id: syncColumn
+                    width: parent.width
+
+                    property Project project: modelData
+
+                    visible: List.objectKeys(modelData.syncQueue.groups).length > 0
+
+                    ListItem.Header {
+                        text: modelData.name
+                        height: List.objectKeys(modelData.syncQueue.groups).length > 0 ? units.gu(4) : 0
+                    }
+
+                    Repeater {
+                        model: List.objectKeys(modelData.syncQueue.groups)
+                        delegate: SubtitledListItem {
+                            id: item
+                            property var group: syncColumn.project.syncQueue.groups[modelData]
+                            text: group.title
+                            subText: group.errors.length > 0 ? i18n.tr("Error: %1").arg(group.errors[0].status)
+                                                             : ""
+
+                            onClicked: {
+                                print("Clicked")
+                                error(i18n.tr("%1 Failed").arg(group.title), i18n.tr("Call: %1\n\n%2").arg(group.errors[0].call).arg(group.errors[0].response))
+                            }
+
+                            ProgressBar {
+                                anchors {
+                                    right: parent.right
+                                    verticalCenter: parent.verticalCenter
+                                    rightMargin: units.gu(2)
+                                }
+                                minimumValue: 0
+                                maximumValue: group.total
+                                value: item.group.total - item.group.count
+                                visible: item.group.count > 0
+                                width: units.gu(10)
+                                height: units.gu(2.5)
+                            }
+
+                            AwesomeIcon {
+                                name: "exclamation-triangle"
+                                color: colors["yellow"]
+                                anchors {
+                                    right: parent.right
+                                    verticalCenter: parent.verticalCenter
+                                    rightMargin: (parent.height - height)/2
+                                }
+                                size: units.gu(2.6)
+                                opacity: item.group.errors.length > 0 ? 1 : 0
+
+                                Behavior on opacity {
+                                    NumberAnimation {
+                                        duration: 500
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     ParseBackend {
         id: parseBackend
@@ -399,5 +508,24 @@ PageApplication {
                             text: message,
                             action:action
                         })
+    }
+
+    function friendlyTime(time) {
+        var now = new Date()
+        var seconds = (now - time)/1000;
+        //print("Difference:", now, time, now - time)
+        var minutes = Math.round(seconds/60);
+        if (minutes < 1)
+            return i18n.tr("Now")
+        else if (minutes == 1)
+            return i18n.tr("1 minute ago")
+        else if (minutes < 60)
+            return i18n.tr("%1 minutes ago").arg(minutes)
+        var hours = Math.round(minutes/24);
+        if (hours == 1)
+            return i18n.tr("1 hour ago")
+        else if (hours < 24)
+            return i18n.tr("%1 hours ago").arg(hours)
+        return Qt.formatDate(time)
     }
 }

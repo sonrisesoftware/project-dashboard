@@ -16,12 +16,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.Components.Popups 0.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
+import "../qml-air"
+import "../qml-air/ListItems" as ListItem
+
 import "../backend"
 import "../components"
-import "../ubuntu-ui-extras"
 
 Page {
     id: page
@@ -34,18 +33,20 @@ Page {
         id: listView
         anchors.fill: parent
         model: project.inbox
-        delegate: ListItem.Empty {
+        delegate: ListItem.BaseListItem {
             id: listItem
             onClicked: project.displayMessage(modelData)
+            height: units.gu(5)
 
             removable: true
             onItemRemoved: project.removeMessage(index)
-            backgroundIndicator: ReadListItemBackground {
-                willRemove: width > (listItem.width * 0.3) && width < listItem.width
+            backgroundIndicator: ListItemBackground {
+                ready: swipingReady
+                actionBackground: theme.success
                 state: listItem.swipingState
             }
 
-            AwesomeIcon {
+            Icon {
                 id: icon
                 name: modelData.icon
                 size: units.gu(3.5)
@@ -84,6 +85,8 @@ Page {
                         id: dateLabel
                         font.italic: true
                         text: friendlyTime(new Date(modelData.date))
+                        fontSize: "small"
+                        color: theme.secondaryColor
                         anchors.right: parent.right
                     }
                 }
@@ -93,10 +96,8 @@ Page {
                     width: parent.width
 
                     height: visible ? implicitHeight: 0
-                    //color:  Theme.palette.normal.backgroundText
+                    color:  theme.secondaryColor
                     maximumLineCount: 1
-                    opacity: 0.65
-                    font.weight: Font.Light
                     fontSize: "small"
                     text: modelData.message
                     visible: text !== ""
@@ -106,7 +107,7 @@ Page {
         }
     }
 
-    Scrollbar {
+    ScrollBar {
         flickableItem: listView
     }
 
@@ -135,21 +136,5 @@ Page {
         else if (hours < 24)
             return i18n.tr("%1 hours ago").arg(hours)
         return Qt.formatDate(time)
-    }
-
-    tools: ToolbarItems {
-        opened: wideAspect
-        locked: wideAspect
-
-        onLockedChanged: opened = locked
-
-        ToolbarButton {
-            iconSource: getIcon("edit-clear")
-            text: i18n.tr("Clear")
-            enabled: project.inbox.count > 0
-            onTriggered: {
-                project.clearInbox()
-            }
-        }
     }
 }

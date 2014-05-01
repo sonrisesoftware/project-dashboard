@@ -41,7 +41,7 @@ Page {
             anchors.centerIn: parent
             width: Math.max(height * 0.77, units.gu(35))
             height: parent.height * 3/4
-            radius: units.gu(1)
+            radius: units.gu(0.5)
 
             ListView {
                 id: projectsList
@@ -96,6 +96,29 @@ Page {
         mode: "right"
         autoFlick: false
 
+        // TODO: Remove later once stream is implemented
+        expanded: false
+
+        Rectangle {
+            height: units.gu(4)
+            width: parent.width
+            color: "white"
+
+            Label {
+                anchors.centerIn: parent
+                fontSize: "large"
+                text: "Stream"
+            }
+
+            Rectangle {
+                width: parent.width
+                height: 1
+                anchors.bottom: parent.bottom
+
+                color: Qt.rgba(0,0,0,0.2)
+            }
+        }/*
+
         Tabs {
             anchors.fill: parent
             visible: true
@@ -112,8 +135,8 @@ Page {
                 title: "Stream"
                 color: sidebar.color
             }
-        }
+        }*/
 
-        width: units.gu(30)
+        width: units.gu(27)
     }
 }

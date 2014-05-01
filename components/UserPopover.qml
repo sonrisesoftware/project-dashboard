@@ -131,6 +131,13 @@ Popover {
                     fontSize: "large"
                     anchors.horizontalCenter: parent.horizontalCenter
                 }
+
+                Label {
+                    text: "Basic Account"
+                    font.italic: true
+                    color: theme.secondaryColor
+                    anchors.horizontalCenter: parent.horizontalCenter
+                }
             }
         }
 

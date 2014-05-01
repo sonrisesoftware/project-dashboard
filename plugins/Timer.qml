@@ -29,6 +29,8 @@ Plugin {
     id: plugin
 
     name: "timer"
+    title: "Timer"
+    icon: "clock"
 
     onSave: {
         dates[today].time = totalTime
