@@ -1,3 +1,13 @@
+project-dashboard (0.5) trusty; urgency=medium
+
+  * Labels are now displayed in a flow layout on the Issue page
+  * New notifications display at the top of the list
+  * Fixed pull requests page not working correctly
+  * More clear how to add other users' repository
+  * Fixed overlapping titles in the pull requests list
+
+ -- Michael Spencer <sonrisesoftware@gmail.com>  Fri, 02 May 2014 10:25:14 -0500
+
 project-dashboard (0.4.5) trusty; urgency=low
 
   * Sync error resets properly now

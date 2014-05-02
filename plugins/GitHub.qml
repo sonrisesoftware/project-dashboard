@@ -287,6 +287,14 @@ Plugin {
                                        .arg(issue.number),
                                        issue.title, new Date(date),
                                        {"type": "issue", "number": issue.number})
+                } else if (type === "PullRequestEvent") {
+                    var pull = payload.pull_request
+                    project.newMessage("github", "code-fork", i18n.tr("<b>%1</b> %2 issue %3")
+                                       .arg(actor)
+                                       .arg(payload.action)
+                                       .arg(pull.number),
+                                       pull.title, new Date(date),
+                                       {"type": "issue", "number": pull.number})
                 } else if (type === "IssueCommentEvent") {
                     // TODO: Only display if the actor is other than the authenticated user
                     var issue = payload.issue

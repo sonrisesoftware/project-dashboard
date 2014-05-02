@@ -1,17 +1,17 @@
 /*
  * Project Dashboard - Manage everything about your projects in one app
  * Copyright (C) 2014 Michael Spencer
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -144,8 +144,8 @@ Page {
 
                     Label {
                         text: issue.isPullRequest ? issue.merged ? i18n.tr("<b>%1</b> merged %2 commits").arg(issue.user.login).arg(issue.commits.length)
-                                                     : i18n.tr("<b>%1</b> wants to merge %2 commits").arg(issue.user.login).arg(issue.commits.length)
-                                            : i18n.tr("<b>%1</b> opened this issue %2").arg(issue.user.login).arg(friendlyTime(issue.created_at))
+                                                                 : i18n.tr("<b>%1</b> wants to merge %2 commits").arg(issue.user.login).arg(issue.commits.length)
+                                                  : i18n.tr("<b>%1</b> opened this issue %2").arg(issue.user.login).arg(friendlyTime(issue.created_at))
                         anchors.verticalCenter: parent.verticalCenter
                         width: parent.width - stateShape.width - parent.spacing
                         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
@@ -292,26 +292,26 @@ Page {
             }
 
             //TextArea {
-//                id: textArea
-//                width: parent.width
-//                text: issue.renderBody()
-//                height: Math.max(__internal.linesHeight(4), edit.height + textArea.__internal.frameSpacing * 2)
-//                placeholderText: i18n.tr("No description set.")
-//                readOnly: true
-//                textFormat: Text.RichText
-//                color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
+            //                id: textArea
+            //                width: parent.width
+            //                text: issue.renderBody()
+            //                height: Math.max(__internal.linesHeight(4), edit.height + textArea.__internal.frameSpacing * 2)
+            //                placeholderText: i18n.tr("No description set.")
+            //                readOnly: true
+            //                textFormat: Text.RichText
+            //                color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
 
-//                // FIXME: Hack necessary to get the correct line height
-//                TextEdit {
-//                    id: edit
-//                    visible: false
-//                    width: parent.width
-//                    textFormat: Text.RichText
-//                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-//                    text: textArea.text
-//                    font: textArea.font
-//                }
-//            }
+            //                // FIXME: Hack necessary to get the correct line height
+            //                TextEdit {
+            //                    id: edit
+            //                    visible: false
+            //                    width: parent.width
+            //                    textFormat: Text.RichText
+            //                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+            //                    text: textArea.text
+            //                    font: textArea.font
+            //                }
+            //            }
 
             BackgroundView {
                 anchors {
@@ -372,11 +372,11 @@ Page {
                 EventItem {
                     event: {
                         "event": "testing",
-                        "actor": {
+                                "actor": {
                             "login": i18n.tr("Continous Integration")
                         },
                         "statusDescription": issue.statusDescription,
-                        "status": issue.status
+                                "status": issue.status
                     }
                     last: true
                     visible: issue.status !== ""
@@ -502,6 +502,7 @@ Page {
         expanded: wideAspect && !issue.isPullRequest
 
         Column {
+            id: sidebarColumn
             width: parent.width
 
             ListItem.Header {
@@ -587,27 +588,72 @@ Page {
                 id: labelsHeader
                 text: i18n.tr("Labels")
             }
+        }
+
+        Flow {
+            id: labelFlow
+
+            spacing: units.gu(1)
+            anchors {
+                top: sidebarColumn.bottom
+                left: parent.left
+                right: parent.right
+                topMargin: units.gu(1)
+                margins: units.gu(2)
+            }
 
             Repeater {
                 id: labelsRepeater
 
                 model: issue.labels
-                delegate: ListItem.Standard {
-                    height: units.gu(5)
+                delegate: BackgroundView {
+                    id: labelContainer
+                    color: "#" + modelData.color
+                    border.color: Qt.darker(color, 1.4)
+                    radius: units.gu(0.5)
+                    width: labelName.contentWidth < labelFlow.width ? labelName.contentWidth + units.gu(2) : labelFlow.width - units.gu(2)
+                    height: units.gu(3.5)
+
                     Label {
-                        anchors {
-                            left: parent.left
-                            leftMargin: units.gu(2)
-                            verticalCenter: parent.verticalCenter
+                        id: labelName
+
+                        // Function to get the text color based on the background
+                        function getTextColor(backgroundColor) {
+                            var red = parseInt((backgroundColor).substring(0,2),16)
+                            var green = parseInt((backgroundColor).substring(2,4),16)
+                            var blue = parseInt((backgroundColor).substring(4,6),16)
+
+                            var a = 1 - ( 0.299 * red + 0.587 * green + 0.114 * blue)/255;
+
+                            if (a < 0.3)
+                                return "#333"
+                            else
+                                return "white"
                         }
 
                         text: modelData.name
-                        color: "#" + modelData.color
+                        elide: Text.ElideRight
+                        anchors.centerIn: parent
+                        verticalAlignment: Text.AlignVCenter
+                        horizontalAlignment: Text.AlignHCenter
+                        color: getTextColor(modelData.color)
+                        width: labelContainer.width === labelFlow.width - units.gu(2) ? null : labelFlow.width - units.gu(2)
                     }
                 }
             }
+        }
+
+        Column {
+            width: parent.width
+            anchors.top: labelFlow.bottom
+            anchors.topMargin: noLabelMessage.visible ? -units.gu(1) : units.gu(1)
+
+            ListItem.ThinDivider {
+                visible: !noLabelMessage.visible
+            }
 
             ListItem.Standard {
+                id: noLabelMessage
                 text: i18n.tr("None Yet")
                 enabled: false
                 visible: issue.labels.length === 0
@@ -616,7 +662,7 @@ Page {
             ListItem.Standard {
                 text: i18n.tr("Edit...")
                 visible: plugin.hasPushAccess
-                onClicked: PopupUtils.open(labelsPopover, labelsHeader)
+                onClicked: labelsPopover.open()
             }
         }
     }
@@ -651,132 +697,82 @@ Page {
         }
     }
 
-//    Component {
-//        id: labelsPopover
+    SelectorSheet {
+        id: labelsPopover
+        property var labels: JSON.parse(JSON.stringify(issue.labels))
+        property bool edited: false
 
-//        SelectorSheet {
-//            id: popover
-//            property var labels: JSON.parse(JSON.stringify(issue.labels))
-//            property bool edited: false
+        title: i18n.tr("Labels")
 
-//            title: i18n.tr("Labels")
+        onAccepted: {
+            if (edited) {
+                issue.updateLabels(labelsPopover.labels)
+            }
+        }
 
-//            onConfirmClicked: {
-//                if (edited) {
-//                    issue.updateLabels(popover.labels)
-//                }
-//            }
 
-//            model: plugin.availableLabels
-//            delegate: ListItem.Standard {
-//                height: units.gu(5)
-//                Label {
-//                    anchors {
-//                        left: parent.left
-//                        leftMargin: units.gu(2)
-//                        verticalCenter: parent.verticalCenter
-//                    }
+        model: plugin.availableLabels
+        delegate: ListItem.Standard {
+            height: units.gu(5)
 
-//                    text: modelData.name
-//                    color: "#" + modelData.color
-//                }
+            Rectangle {
+                id: labelTag
+                width: units.gu(3)
+                height: width
+                color: "#" + modelData.color
+                border.color: Qt.darker(color, 1.4)
+                radius: units.gu(0.5)
+                anchors {
+                    left: parent.left
+                    leftMargin: units.gu(2)
+                    verticalCenter: parent.verticalCenter
+                }
+            }
 
-//                control: CheckBox {
-//                    checked: {
-//                        for (var i = 0; i < popover.labels.length; i++) {
-//                            var label = popover.labels[i]
+            Label {
+                anchors {
+                    left: labelTag.right
+                    leftMargin: units.gu(2)
+                    verticalCenter: parent.verticalCenter
+                }
 
-//                            if (label.name === modelData.name)
-//                                return true
-//                        }
+                text: modelData.name
+            }
 
-//                        return false
-//                    }
+            CheckBox {
+                anchors {
+                    right: parent.right
+                    rightMargin: units.gu(2)
+                    verticalCenter: parent.verticalCenter
+                }
 
-//                    onClicked: {
-//                        popover.edited = true
-//                        for (var i = 0; i < popover.labels.length; i++) {
-//                            var label = popover.labels[i]
+                selected: {
+                    for (var i = 0; i < labelsPopover.labels.length; i++) {
+                        var label = labelsPopover.labels[i]
+                            if (label.name === modelData.name)
+                                return true
+                    }
 
-//                            if (label.name === modelData.name) {
-//                                popover.labels.splice(i, 1)
-//                                return
-//                            }
-//                        }
 
-//                        popover.labels.push(modelData)
-//                    }
+                    return false
+                }
 
-//                    style: SuruCheckBoxStyle {}
-//                }
-//            }
+                onClicked: {
+                    labelsPopover.edited = true
+                    for (var i = 0; i < labelsPopover.labels.length; i++) {
+                        var label = labelsPopover.labels[i]
 
-////            Component.onDestruction: {
-////                if (edited) {
-////                    issue.updateLabels(popover.labels)
-////                }
-////            }
+                        if (label.name === modelData.name) {
+                            labelsPopover.labels.splice(i, 1)
+                            return
+                        }
+                    }
 
-////            contentHeight: labelsColumn.height
-////            Column {
-////                id: labelsColumn
-////                width: parent.width
-
-////                ListItem.Header {
-////                    text: i18n.tr("Available Labels")
-////                }
-
-////                Repeater {
-////                    id: repeater
-
-////                    model: plugin.availableLabels
-////                    delegate: ListItem.Standard {
-////                        showDivider: index < repeater.count - 1
-////                        height: units.gu(5)
-////                        Label {
-////                            anchors {
-////                                left: parent.left
-////                                leftMargin: units.gu(2)
-////                                verticalCenter: parent.verticalCenter
-////                            }
-
-////                            text: modelData.name
-////                            color: "#" + modelData.color
-////                        }
-
-////                        control: CheckBox {
-////                            checked: {
-////                                for (var i = 0; i < popover.labels.length; i++) {
-////                                    var label = popover.labels[i]
-
-////                                    if (label.name === modelData.name)
-////                                        return true
-////                                }
-
-////                                return false
-////                            }
-
-////                            onClicked: {
-////                                popover.edited = true
-////                                for (var i = 0; i < popover.labels.length; i++) {
-////                                    var label = popover.labels[i]
-
-////                                    if (label.name === modelData.name) {
-////                                        popover.labels.splice(i, 1)
-////                                        return
-////                                    }
-////                                }
-
-////                                popover.labels.push(modelData)
-////                            }
-
-////                            style: SuruCheckBoxStyle {}
-////                        }
-////                    }
-////                }
-////            }
-//        }
-//    }
+                    labelsPopover.labels.push(modelData)
+                }
+            }
+        }
+    }
 
 //    Component {
 //        id: editSheet

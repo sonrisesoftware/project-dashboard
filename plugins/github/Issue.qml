@@ -279,7 +279,7 @@ Object {
     }
 
     function edit(title, body) {
-        github.editIssue(plugin.repo, issue.number, {"title": title, "body": body}, i18n.tr("Changing title and description for issue <b>%1</b>").arg(number))
+        github.editIssue(project, plugin.repo, issue.number, {"title": title, "body": body}, i18n.tr("Changing title and description for issue <b>%1</b>").arg(number))
 
         info.title = title
         info.body = body

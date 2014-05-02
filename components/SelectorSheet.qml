@@ -16,29 +16,21 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.Components.Popups 0.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
 
-ComposerSheet {
+import "../qml-air"
+
+Sheet {
     id: sheet
-
-    Component.onCompleted: {
-        sheet.__leftButton.text = i18n.tr("Cancel")
-        sheet.__leftButton.color = "gray"
-        sheet.__rightButton.text = i18n.tr("Confirm")
-        sheet.__rightButton.color = sheet.__rightButton.__styleInstance.defaultColor
-        sheet.__foreground.style = Theme.createStyleComponent(Qt.resolvedUrl("../ubuntu-ui-extras/SuruSheetStyle.qml"), sheet)
-    }
 
     property alias model: listView.model
     property alias delegate: listView.delegate
+
+    margins: 0
 
     ListView {
         id: listView
         clip: true
         anchors {
-            margins: units.gu(-1)
             fill: parent
         }
     }

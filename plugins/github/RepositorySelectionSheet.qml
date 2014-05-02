@@ -49,7 +49,7 @@ Sheet {
                 height: units.gu(5)
                 TextField {
                     id: textField
-                    placeholderText: i18n.tr("Repository name")
+                    placeholderText: i18n.tr("user/project-name")
                     anchors {
                         left: parent.left
                         leftMargin: units.gu(2)

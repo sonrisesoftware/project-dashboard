@@ -24,7 +24,7 @@ IssueListItem {
 
     property string status: issue.status
 
-    rightMargin: icon.width + units.gu(3.5)
+    iconWidth: icon.visible ? icon.width : 0
 
     Icon {
         anchors.centerIn: icon
