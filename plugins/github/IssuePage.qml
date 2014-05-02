@@ -754,15 +754,28 @@ Page {
             model: plugin.availableLabels
             delegate: ListItem.Standard {
                 height: units.gu(5)
-                Label {
+
+                UbuntuShape {
+                    id: labelTag
+                    width: units.gu(3)
+                    height: width
+                    color: "#" + modelData.color
                     anchors {
                         left: parent.left
                         leftMargin: units.gu(2)
                         verticalCenter: parent.verticalCenter
                     }
+                }
+
+                Label {
+                    anchors {
+                        left: labelTag.right
+                        leftMargin: units.gu(2)
+                        verticalCenter: parent.verticalCenter
+                    }
 
                     text: modelData.name
-                    color: "#" + modelData.color
+                    color: "White"
                 }
 
                 control: CheckBox {
