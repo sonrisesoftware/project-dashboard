@@ -102,6 +102,10 @@ Item {
             args = {}
         print(type)
         var component = Qt.createComponent(type);
+        if (component.status == Component.Error) {
+            // Error Handling
+            console.log("Error loading component:", component.errorString());
+        }
         return component.createObject(project, args);
     }
 
@@ -125,7 +129,7 @@ Item {
     }
 
     function newMessage(plugin, icon, title, message, date, data) {
-        inbox.append({
+        inbox.insert(0, {
                          "modelData": {
                              "plugin": plugin,
                              "icon": icon,
