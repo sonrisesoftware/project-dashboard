@@ -129,7 +129,7 @@ Item {
     }
 
     function newMessage(plugin, icon, title, message, date, data) {
-        inbox.append({
+        inbox.insert(0, {
                          "modelData": {
                              "plugin": plugin,
                              "icon": icon,
