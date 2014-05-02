@@ -775,7 +775,7 @@ Page {
                     }
 
                     text: modelData.name
-                    color: "White"
+                    color: Theme.palette.normal.baseText
                 }
 
                 control: CheckBox {
