@@ -16,15 +16,16 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.Components.Popups 0.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
+import "../qml-air"
+import "../qml-air/ListItems" as ListItem
 
-UbuntuShape {
+
+BackgroundView {
     id: comment
     color: Theme.palette.normal.field//Qt.rgba(0,0,0,0.2)
     width: parent.width
     height: childrenRect.height
+    radius: units.gu(0.5)
 
     property var event
 
@@ -42,8 +43,10 @@ UbuntuShape {
         width: parent.width
         clip: true
 
-        UbuntuShape {
-            color: Qt.rgba(0,0,0,0.2)
+        BackgroundView {
+            color: "#eee"
+            border.color: Qt.rgba(0,0,0,0.1)
+            radius: units.gu(0.5)
             height: comment.height
             width: parent.width
         }

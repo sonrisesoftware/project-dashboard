@@ -16,9 +16,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.Components.Popups 0.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
+import "../../qml-air"
 import "../../components"
 
 IssueListItem {
@@ -26,7 +24,9 @@ IssueListItem {
 
     property string status: issue.status
 
-    AwesomeIcon {
+    rightMargin: icon.width + units.gu(3.5)
+
+    Icon {
         anchors.centerIn: icon
         anchors.verticalCenterOffset: status === "error" ? units.gu(-0.1) : 0
         anchors.horizontalCenterOffset: status === "error" ? units.gu(-0) : 0
@@ -50,7 +50,7 @@ IssueListItem {
         }
     }
 
-    AwesomeIcon {
+    Icon {
         id: icon
         anchors {
             right: parent.right

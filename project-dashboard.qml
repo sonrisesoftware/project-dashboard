@@ -45,11 +45,11 @@ PageApplication {
     height: units.gu(75)
 
     property var colors: {
-        "green": "#5cb85c",//"#59B159",//"#859a01",
-        "red": "#db3131",//"#d9534f",//"#db3131",
-        "yellow": "#f0ad4e",//"#b68b01",
-        "blue": "#5bc0de",
-        //"default": Theme.palette.normal.baseText,
+        "green": theme.success,//"#5cb85c",//"#59B159",//"#859a01",
+        "red": theme.danger,//"#db3131",//"#d9534f",//"#db3131",
+        "yellow": theme.warning,//"#f0ad4e",//"#b68b01",
+        "blue": theme.primary,//"#5bc0de",
+        "default": theme.textColor
     }
 
     property bool wideAspect: width > units.gu(80)

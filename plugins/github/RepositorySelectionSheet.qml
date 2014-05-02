@@ -16,30 +16,26 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.Components.Popups 0.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
+import "../../qml-air"
+import "../../qml-air/ListItems" as ListItem
 import ".."
+import "../../components"
 
-DefaultSheet {
+Sheet {
     id: configureSheet
 
     title: width > units.gu(50) ? i18n.tr("Select Repository") :i18n.tr("Repository")
 
-    contentsHeight: wideAspect ? (units.gu(6) + units.dp(2)) * 9 : mainView.height
+    confirmButton: false
+    height: (units.gu(5)) * 9
+    margins: 0
 
     property GitHub plugin
 
-    onCloseClicked: {
-        plugin.project.removePlugin("GitHub")
-    }
+    Component.onCompleted: __leftButton.text = "Cancel"
 
-    Component.onCompleted: {
-        configureSheet.__leftButton.text = i18n.tr("Cancel")
-        configureSheet.__leftButton.color = "gray"
-        //configureSheet.__rightButton.text = i18n.tr("Confirm")
-        //configureSheet.__rightButton.color = configureSheet.__rightButton.__styleInstance.defaultColor
-        configureSheet.__foreground.style = Theme.createStyleComponent(Qt.resolvedUrl("../../ubuntu-ui-extras/SuruSheetStyle.qml"), configureSheet)
+    onAccepted: {
+        plugin.project.removePlugin("GitHub")
     }
 
     ListView {
@@ -49,7 +45,8 @@ DefaultSheet {
 
         header: Column {
             width: parent.width
-            ListItem.Empty {
+            ListItem.BaseListItem {
+                height: units.gu(5)
                 TextField {
                     id: textField
                     placeholderText: i18n.tr("Repository name")
@@ -60,7 +57,7 @@ DefaultSheet {
                         rightMargin: units.gu(1)
                         verticalCenter: parent.verticalCenter
                     }
-                    onAccepted: okButton.trigger()
+                    onTriggered: okButton.clicked()
 
                     validator: RegExpValidator {
                         regExp: /.+/
@@ -78,10 +75,10 @@ DefaultSheet {
 
                     enabled: textField.acceptableInput
 
-                    onTriggered: {
+                    onClicked: {
                         plugin.doc.set("repoName", textField.text)
                         plugin.refresh()
-                        PopupUtils.close(configureSheet)
+                        configureSheet.close()
                     }
                 }
             }
@@ -91,19 +88,18 @@ DefaultSheet {
             }
         }
 
-        delegate: ListItem.Subtitled {
+        delegate: SubtitledListItem {
             text: modelData.description
             subText: modelData.full_name
             selected: plugin.doc.get("repoName") === modelData.full_name
             onClicked: {
                 plugin.doc.set("repoName", modelData.full_name)
                 plugin.refresh()
-                PopupUtils.close(configureSheet)
+                configureSheet.close()
             }
         }
 
         anchors {
-            margins: units.gu(-1)
             fill: parent
         }
     }

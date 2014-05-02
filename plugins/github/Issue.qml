@@ -1,6 +1,7 @@
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import "../../ubuntu-ui-extras"
+
+import "../../qml-air"
+import "../../qml-extras"
 import "../../backend/utils.js" as Utils
 
 Object {

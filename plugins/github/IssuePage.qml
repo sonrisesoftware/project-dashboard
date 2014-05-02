@@ -16,10 +16,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.Components.Popups 0.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
-import "../../ubuntu-ui-extras"
+import "../../qml-air"
+import "../../qml-air/ListItems" as ListItem
+
 import "../../components"
 import "../../backend/utils.js" as Utils
 import "../../backend/"
@@ -44,7 +43,7 @@ Page {
     InputDialog {
         id: mergeDialog
         title: i18n.tr("Merge Pull Request")
-        text: i18n.tr("Enter the commit message for the merge")
+        text: i18n.tr("Enter the commit message for the merge:")
 
         onAccepted: {
             mergeDialog.hide()
@@ -52,47 +51,37 @@ Page {
         }
     }
 
-    actions: [
-        Action {
+    ToolBar {
+        id: toolbar
+        Button {
             id: editAction
             text: i18n.tr("Edit")
-            iconSource: getIcon("edit")
+            iconName: "pencil-square-o"
             enabled: plugin.hasPushAccess
-            onTriggered: PopupUtils.open(editSheet, page)
-        },
+            onClicked: PopupUtils.open(editSheet, page)
+        }
 
-        Action {
+        Button {
             id: mergeAction
             text: i18n.tr("Merge")
-            iconSource: getIcon("code-fork")
+            iconName: "code-fork"
             enabled: plugin.hasPushAccess && issue.isPullRequest && !issue.merged && issue.mergeable
-            onTriggered: mergeDialog.show()
-        },
+            onClicked: mergeDialog.show()
+            visible: issue.isPullRequest
+        }
 
-        Action {
+        Button {
             id: closeAction
             text: issue.open ? i18n.tr("Close") : i18n.tr("Reopen")
-            iconSource: issue.open ? getIcon("close") : getIcon("reset")
+            iconName: issue.open ? "times" : getIcon("reset")
             enabled: !issue.merged && plugin.hasPushAccess
-            onTriggered: {
+            onClicked: {
                 issue.closeOrReopen()
             }
         }
-    ]
-
-
-
-    flickable: sidebar.expanded ? null : mainFlickable
-
-    onFlickableChanged: {
-        if (flickable === null) {
-            mainFlickable.topMargin = 0
-            mainFlickable.contentY = 0
-        } else {
-            mainFlickable.topMargin = units.gu(9.5)
-            mainFlickable.contentY = -units.gu(9.5)
-        }
     }
+
+
 
     Flickable {
         id: mainFlickable
@@ -101,7 +90,7 @@ Page {
             left: parent.left
             right: sidebar.left
             top: parent.top
-            bottom: parent.bottom
+            bottom: toolbar.top
         }
 
         contentHeight: column.height + (sidebar.expanded ? units.gu(4) : units.gu(2))
@@ -136,24 +125,27 @@ Page {
                 Row {
                     width: parent.width
                     spacing: units.gu(1)
-                    UbuntuShape {
+                    Rectangle {
                         id: stateShape
                         height: stateLabel.height + units.gu(1)
                         width: stateLabel.width + units.gu(2)
                         color: issue.merged ? colors["blue"] : issue.open ? colors["green"] : colors["red"]
+                        border.color: Qt.darker(color, 1.2)
+                        radius: units.gu(0.5)
                         anchors.verticalCenter: parent.verticalCenter
 
                         Label {
                             id: stateLabel
                             anchors.centerIn: parent
                             text: issue.merged ? i18n.tr("Merged") : issue.open ? i18n.tr("Open") : i18n.tr("Closed")
+                            color: "white"
                         }
                     }
 
                     Label {
                         text: issue.isPullRequest ? issue.merged ? i18n.tr("<b>%1</b> merged %2 commits").arg(issue.user.login).arg(issue.commits.length)
                                                      : i18n.tr("<b>%1</b> wants to merge %2 commits").arg(issue.user.login).arg(issue.commits.length)
-                                            : i18n.tr("<b>%1</b> opened this issue %2").arg(issue.user.login).arg(friendsUtils.createTimeString(issue.created_at))
+                                            : i18n.tr("<b>%1</b> opened this issue %2").arg(issue.user.login).arg(friendlyTime(issue.created_at))
                         anchors.verticalCenter: parent.verticalCenter
                         width: parent.width - stateShape.width - parent.spacing
                         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
@@ -193,8 +185,9 @@ Page {
                     Transition {
                         from: "*"
                         to: "*"
-                        UbuntuNumberAnimation {
+                        NumberAnimation {
                             target: optionsColumn
+                            duration: 200
                             properties: "height, opacity"
                         }
                     }
@@ -208,7 +201,7 @@ Page {
                     height: units.gu(5)
                 }
 
-                SuruItemSelector {
+                ListItem.ItemSelector {
                     model: plugin.milestones.concat(i18n.tr("No milestone"))
 
                     visible: plugin.hasPushAccess
@@ -224,8 +217,8 @@ Page {
                         }
                     }
 
-                    delegate: OptionSelectorDelegate {
-                        text: modelData.title
+                    delegate: OptionDelegate {
+                        text: modelData.title || modelData
                     }
 
                     onSelectedIndexChanged: {
@@ -243,7 +236,7 @@ Page {
                     height: units.gu(5)
                 }
 
-                SuruItemSelector {
+                ListItem.ItemSelector {
                     model: plugin.availableAssignees.concat(i18n.tr("No one assigned"))
                     visible: plugin.hasPushAccess
                     selectedIndex: {
@@ -262,8 +255,8 @@ Page {
                         }
                     }
 
-                    delegate: OptionSelectorDelegate {
-                        text: modelData.login
+                    delegate: OptionDelegate {
+                        text: modelData.login || modelData
                     }
 
                     onSelectedIndexChanged: {
@@ -320,20 +313,20 @@ Page {
 //                }
 //            }
 
-            UbuntuShape {
+            BackgroundView {
                 anchors {
                     left: parent.left
                     right: parent.right
                     margins: units.gu(2)
                 }
+                radius: units.gu(0.5)
                 height: body.height + units.gu(2)
-                color: Theme.palette.normal.field
 
                 Label {
                     id: body
                     text: empty ? "No description" : issue.renderBody()
                     property bool empty: issue.body === ""
-                    color: empty ? Theme.palette.normal.backgroundText : Theme.palette.selected.backgroundText
+                    opacity: empty ? 0.5 : 1
                     width: parent.width - units.gu(2)
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                     anchors.centerIn: parent
@@ -405,14 +398,14 @@ Page {
 
                     property bool show
 
-                    height: show ? implicitHeight : 0
+                    height: show ? units.gu(15) : 0
 
                     onHeightChanged: {
                         mainFlickable.contentY = mainFlickable.contentHeight - mainFlickable.height
                     }
 
                     Behavior on height {
-                        UbuntuNumberAnimation {}
+                        NumberAnimation { duration: 200 }
                     }
                 }
 
@@ -420,14 +413,14 @@ Page {
                     width: parent.width
                     height: childrenRect.height
 
-                    ActivityIndicator {
+                    Icon {
                         id: eventLoadingIndicator
                         anchors {
                             left: parent.left
                             verticalCenter: parent.verticalCenter
                         }
                         visible: issue.loading > 0
-                        running: visible
+                        name: visible ? "spinner-rotate" : "spinner"
                     }
 
                     Label {
@@ -447,7 +440,6 @@ Page {
 
                         Button {
                             text: i18n.tr("Cancel")
-                            color: "gray"
 
                             opacity: commentBox.show ? 1 : 0
 
@@ -457,13 +449,13 @@ Page {
                             }
 
                             Behavior on opacity {
-                                UbuntuNumberAnimation {}
+                                NumberAnimation { duration: 200 }
                             }
                         }
 
                         Button {
                             text:  issue.open ? i18n.tr("Comment and Close") : i18n.tr("Comment and Reopen")
-                            color: issue.open ? colors["red"] : colors["green"]
+                            style: issue.open ? "danger" : "success"
 
                             visible: wideAspect
                             opacity: commentBox.show ? 1 : 0
@@ -478,12 +470,13 @@ Page {
                             }
 
                             Behavior on opacity {
-                                UbuntuNumberAnimation {}
+                                NumberAnimation { duration: 200 }
                             }
                         }
 
                         Button {
                             text: i18n.tr("Comment")
+                            style: "info"
                             enabled: commentBox.text !== "" || !commentBox.show
                             onClicked: {
                                 if (commentBox.show) {
@@ -506,6 +499,7 @@ Page {
     Sidebar {
         id: sidebar
         mode: "right"
+        anchors.bottom: toolbar.top
         expanded: wideAspect && !issue.isPullRequest
 
         Column {
@@ -520,7 +514,7 @@ Page {
                 visible: !plugin.hasPushAccess
             }
 
-            SuruItemSelector {
+            ListItem.ItemSelector {
                 model: plugin.milestones.concat(i18n.tr("No milestone"))
 
                 visible: plugin.hasPushAccess
@@ -536,8 +530,8 @@ Page {
                     }
                 }
 
-                delegate: OptionSelectorDelegate {
-                    text: modelData.title
+                delegate: OptionDelegate {
+                    text: modelData.title || modelData
                 }
 
                 onSelectedIndexChanged: {
@@ -558,7 +552,7 @@ Page {
                 visible: !plugin.hasPushAccess
             }
 
-            SuruItemSelector {
+            ListItem.ItemSelector {
                 model: plugin.availableAssignees.concat(i18n.tr("No one assigned"))
                 visible: plugin.hasPushAccess
                 selectedIndex: {
@@ -577,8 +571,8 @@ Page {
                     }
                 }
 
-                delegate: OptionSelectorDelegate {
-                    text: modelData.login ? modelData.login : modelData
+                delegate: OptionDelegate {
+                    text: modelData.login || modelData
                 }
 
                 onSelectedIndexChanged: {
@@ -598,9 +592,7 @@ Page {
             Repeater {
                 id: labelsRepeater
 
-                property bool editing
-
-                model: editing ? plugin.availableLabels : issue.labels
+                model: issue.labels
                 delegate: ListItem.Standard {
                     height: units.gu(5)
                     Label {
@@ -612,25 +604,6 @@ Page {
 
                         text: modelData.name
                         color: "#" + modelData.color
-                    }
-
-                    control: CheckBox {
-                        visible: labelsRepeater.editing
-
-                        checked: {
-                            for (var i = 0; i < issue.labels.length; i++) {
-                                var label = issue.labels[i]
-
-                                if (label.name === modelData.name)
-                                    return true
-                            }
-
-                            return false
-                        }
-
-                        //onClicked: checked = doc.sync("done", checked)
-
-                        style: SuruCheckBoxStyle {}
                     }
                 }
             }
@@ -645,38 +618,6 @@ Page {
                 text: i18n.tr("Edit...")
                 visible: plugin.hasPushAccess
                 onClicked: PopupUtils.open(labelsPopover, labelsHeader)
-            }
-        }
-    }
-
-    tools: ToolbarItems {
-        opened: wideAspect
-        locked: wideAspect
-
-        onLockedChanged: opened = locked
-
-        ToolbarButton { action: editAction }
-        ToolbarButton { action: mergeAction; visible: issue.isPullRequest }
-        ToolbarButton { action: closeAction }
-    }
-
-    property alias busyDialog: busyDialog
-
-    Dialog {
-        id: busyDialog
-
-        ActivityIndicator {
-            running: busyDialog.visible
-            implicitHeight: units.gu(5)
-            implicitWidth: implicitHeight
-            anchors.horizontalCenter: parent.horizontalCenter
-        }
-
-        Button {
-            text: i18n.tr("Cancel")
-            onTriggered: {
-                request.abort()
-                busyDialog.hide()
             }
         }
     }
@@ -705,192 +646,228 @@ Page {
                 text: i18n.tr("No commits")
             }
 
-            Scrollbar {
+            ScrollBar {
                 flickableItem: commitsList
             }
         }
     }
 
-    Component {
-        id: labelsPopover
+//    Component {
+//        id: labelsPopover
 
-        SelectorSheet {
-            id: popover
-            property var labels: JSON.parse(JSON.stringify(issue.labels))
-            property bool edited: false
+//        SelectorSheet {
+//            id: popover
+//            property var labels: JSON.parse(JSON.stringify(issue.labels))
+//            property bool edited: false
 
-            title: i18n.tr("Labels")
+//            title: i18n.tr("Labels")
 
-            onConfirmClicked: {
-                if (edited) {
-                    issue.updateLabels(popover.labels)
-                }
-            }
-
-            model: plugin.availableLabels
-            delegate: ListItem.Standard {
-                height: units.gu(5)
-                Label {
-                    anchors {
-                        left: parent.left
-                        leftMargin: units.gu(2)
-                        verticalCenter: parent.verticalCenter
-                    }
-
-                    text: modelData.name
-                    color: "#" + modelData.color
-                }
-
-                control: CheckBox {
-                    checked: {
-                        for (var i = 0; i < popover.labels.length; i++) {
-                            var label = popover.labels[i]
-
-                            if (label.name === modelData.name)
-                                return true
-                        }
-
-                        return false
-                    }
-
-                    onClicked: {
-                        popover.edited = true
-                        for (var i = 0; i < popover.labels.length; i++) {
-                            var label = popover.labels[i]
-
-                            if (label.name === modelData.name) {
-                                popover.labels.splice(i, 1)
-                                return
-                            }
-                        }
-
-                        popover.labels.push(modelData)
-                    }
-
-                    style: SuruCheckBoxStyle {}
-                }
-            }
-
-//            Component.onDestruction: {
+//            onConfirmClicked: {
 //                if (edited) {
 //                    issue.updateLabels(popover.labels)
 //                }
 //            }
 
-//            contentHeight: labelsColumn.height
-//            Column {
-//                id: labelsColumn
-//                width: parent.width
+//            model: plugin.availableLabels
+//            delegate: ListItem.Standard {
+//                height: units.gu(5)
+//                Label {
+//                    anchors {
+//                        left: parent.left
+//                        leftMargin: units.gu(2)
+//                        verticalCenter: parent.verticalCenter
+//                    }
 
-//                ListItem.Header {
-//                    text: i18n.tr("Available Labels")
+//                    text: modelData.name
+//                    color: "#" + modelData.color
 //                }
 
-//                Repeater {
-//                    id: repeater
+//                control: CheckBox {
+//                    checked: {
+//                        for (var i = 0; i < popover.labels.length; i++) {
+//                            var label = popover.labels[i]
 
-//                    model: plugin.availableLabels
-//                    delegate: ListItem.Standard {
-//                        showDivider: index < repeater.count - 1
-//                        height: units.gu(5)
-//                        Label {
-//                            anchors {
-//                                left: parent.left
-//                                leftMargin: units.gu(2)
-//                                verticalCenter: parent.verticalCenter
-//                            }
-
-//                            text: modelData.name
-//                            color: "#" + modelData.color
+//                            if (label.name === modelData.name)
+//                                return true
 //                        }
 
-//                        control: CheckBox {
-//                            checked: {
-//                                for (var i = 0; i < popover.labels.length; i++) {
-//                                    var label = popover.labels[i]
-
-//                                    if (label.name === modelData.name)
-//                                        return true
-//                                }
-
-//                                return false
-//                            }
-
-//                            onClicked: {
-//                                popover.edited = true
-//                                for (var i = 0; i < popover.labels.length; i++) {
-//                                    var label = popover.labels[i]
-
-//                                    if (label.name === modelData.name) {
-//                                        popover.labels.splice(i, 1)
-//                                        return
-//                                    }
-//                                }
-
-//                                popover.labels.push(modelData)
-//                            }
-
-//                            style: SuruCheckBoxStyle {}
-//                        }
+//                        return false
 //                    }
+
+//                    onClicked: {
+//                        popover.edited = true
+//                        for (var i = 0; i < popover.labels.length; i++) {
+//                            var label = popover.labels[i]
+
+//                            if (label.name === modelData.name) {
+//                                popover.labels.splice(i, 1)
+//                                return
+//                            }
+//                        }
+
+//                        popover.labels.push(modelData)
+//                    }
+
+//                    style: SuruCheckBoxStyle {}
 //                }
 //            }
-        }
-    }
 
-    Component {
-        id: editSheet
-        ComposerSheet {
-            id: sheet
+////            Component.onDestruction: {
+////                if (edited) {
+////                    issue.updateLabels(popover.labels)
+////                }
+////            }
 
-            title: issue.isPullRequest ? i18n.tr("Edit Pull") : i18n.tr("Edit Issue")
+////            contentHeight: labelsColumn.height
+////            Column {
+////                id: labelsColumn
+////                width: parent.width
 
-            Component.onCompleted: {
-                sheet.__leftButton.text = i18n.tr("Cancel")
-                sheet.__leftButton.color = "gray"
-                sheet.__rightButton.text = i18n.tr("Update")
-                sheet.__rightButton.color = sheet.__rightButton.__styleInstance.defaultColor
-                sheet.__foreground.style = Theme.createStyleComponent(Qt.resolvedUrl("../../ubuntu-ui-extras/SuruSheetStyle.qml"), sheet)
-            }
+////                ListItem.Header {
+////                    text: i18n.tr("Available Labels")
+////                }
 
-            property string repo
-            property var action
+////                Repeater {
+////                    id: repeater
 
-            onConfirmClicked: {
-                PopupUtils.close(sheet)
-                issue.edit(nameField.text, descriptionField.text)
-            }
+////                    model: plugin.availableLabels
+////                    delegate: ListItem.Standard {
+////                        showDivider: index < repeater.count - 1
+////                        height: units.gu(5)
+////                        Label {
+////                            anchors {
+////                                left: parent.left
+////                                leftMargin: units.gu(2)
+////                                verticalCenter: parent.verticalCenter
+////                            }
 
-            TextField {
-                id: nameField
-                placeholderText: i18n.tr("Title")
-                anchors {
-                    left: parent.left
-                    top: parent.top
-                    right: parent.right
-                    //margins: units.gu(1)
-                }
-                text: issue.title
-                color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
+////                            text: modelData.name
+////                            color: "#" + modelData.color
+////                        }
 
-                Keys.onTabPressed: descriptionField.forceActiveFocus()
-            }
+////                        control: CheckBox {
+////                            checked: {
+////                                for (var i = 0; i < popover.labels.length; i++) {
+////                                    var label = popover.labels[i]
 
-            TextArea {
-                id: descriptionField
-                placeholderText: i18n.tr("Description")
-                text: issue.body
-                color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
+////                                    if (label.name === modelData.name)
+////                                        return true
+////                                }
 
-                anchors {
-                    left: parent.left
-                    right: parent.right
-                    top: nameField.bottom
-                    bottom: parent.bottom
-                    topMargin: units.gu(1)
-                }
-            }
-        }
+////                                return false
+////                            }
 
+////                            onClicked: {
+////                                popover.edited = true
+////                                for (var i = 0; i < popover.labels.length; i++) {
+////                                    var label = popover.labels[i]
+
+////                                    if (label.name === modelData.name) {
+////                                        popover.labels.splice(i, 1)
+////                                        return
+////                                    }
+////                                }
+
+////                                popover.labels.push(modelData)
+////                            }
+
+////                            style: SuruCheckBoxStyle {}
+////                        }
+////                    }
+////                }
+////            }
+//        }
+//    }
+
+//    Component {
+//        id: editSheet
+//        ComposerSheet {
+//            id: sheet
+
+//            title: issue.isPullRequest ? i18n.tr("Edit Pull") : i18n.tr("Edit Issue")
+
+//            Component.onCompleted: {
+//                sheet.__leftButton.text = i18n.tr("Cancel")
+//                sheet.__leftButton.color = "gray"
+//                sheet.__rightButton.text = i18n.tr("Update")
+//                sheet.__rightButton.color = sheet.__rightButton.__styleInstance.defaultColor
+//                sheet.__foreground.style = Theme.createStyleComponent(Qt.resolvedUrl("../../ubuntu-ui-extras/SuruSheetStyle.qml"), sheet)
+//            }
+
+//            property string repo
+//            property var action
+
+//            onConfirmClicked: {
+//                PopupUtils.close(sheet)
+//                issue.edit(nameField.text, descriptionField.text)
+//            }
+
+//            TextField {
+//                id: nameField
+//                placeholderText: i18n.tr("Title")
+//                anchors {
+//                    left: parent.left
+//                    top: parent.top
+//                    right: parent.right
+//                    //margins: units.gu(1)
+//                }
+//                text: issue.title
+//                color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
+
+//                Keys.onTabPressed: descriptionField.forceActiveFocus()
+//            }
+
+//            TextArea {
+//                id: descriptionField
+//                placeholderText: i18n.tr("Description")
+//                text: issue.body
+//                color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
+
+//                anchors {
+//                    left: parent.left
+//                    right: parent.right
+//                    top: nameField.bottom
+//                    bottom: parent.bottom
+//                    topMargin: units.gu(1)
+//                }
+//            }
+//        }
+
+//    }
+
+    function friendlyTime(time) {
+        var now = new Date()
+        var seconds = (now - new Date(time))/1000;
+        //print("Difference:", now, new Date(time), now - time)
+        var minutes = Math.round(seconds/60);
+        if (minutes < 1)
+            return i18n.tr("just now")
+        else if (minutes == 1)
+            return i18n.tr("1 minute ago")
+        else if (minutes < 60)
+            return i18n.tr("%1 minutes ago").arg(minutes)
+        var hours = Math.round(minutes/60);
+        if (hours == 1)
+            return i18n.tr("1 hour ago")
+        else if (hours < 24)
+            return i18n.tr("%1 hours ago").arg(hours)
+
+        var days = Math.round(hours/24);
+        if (days == 1)
+            return i18n.tr("1 day ago")
+        else if (days < 7)
+            return i18n.tr("%1 days ago").arg(days)
+
+        var weeks = Math.round(days/7);
+        if (days == 1)
+            return i18n.tr("1 week ago")
+        else if (days < 24)
+            return i18n.tr("%1 weeks ago").arg(days)
+
+        var months = Math.round(weeks/4);
+        if (months == 1)
+            return i18n.tr("1 month ago")
+        else
+            return i18n.tr("%1 months ago").arg(months)
     }
 }

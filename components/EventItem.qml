@@ -1,6 +1,7 @@
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
+import "../qml-air"
+import "../qml-air/ListItems" as ListItem
+
 
 Item {
     id: root
@@ -101,7 +102,7 @@ Item {
         width: parent.width
     }
 
-    ListItem.Empty {
+    ListItem.BaseListItem {
         id: smallLayout
         visible: !wideAspect
         height: row.height + body.height + body.anchors.topMargin + row.anchors.topMargin * 2
@@ -114,7 +115,7 @@ Item {
             }
             spacing: units.gu(1)
 
-            AwesomeIcon {
+            Icon {
                 name: icon
                 anchors.verticalCenter: parent.verticalCenter
                 size: units.gu(2)
@@ -191,7 +192,7 @@ Item {
                                                                                   : Qt.rgba(0.6,0.6,0.6,1)
                 antialiasing: true
 
-                AwesomeIcon {
+                Icon {
                     name: icon
                     anchors.centerIn: parent
                 }

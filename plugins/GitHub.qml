@@ -16,14 +16,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.Components.Popups 0.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
 import "../backend"
 import "../components"
 import "../backend/services"
-import "../ubuntu-ui-extras"
-import "../ubuntu-ui-extras/listutils.js" as List
+
+import "../qml-air"
+import "../qml-air/ListItems" as ListItem
+import "../qml-extras/listutils.js" as List
 import "github"
 
 Plugin {
@@ -32,6 +31,8 @@ Plugin {
     property alias githubPlugin: plugin
 
     name: "github"
+    title: "GitHub"
+    icon: "github"
     canReload: false
     configuration: repo ? repo : "Not connected to a repository"
 
@@ -73,7 +74,7 @@ Plugin {
             }
 
             action: Action {
-                text: i18n.tr("New Issue")
+                name: i18n.tr("New Issue")
                 description: i18n.tr("Create new issue")
                 onTriggered: PopupUtils.open(Qt.resolvedUrl("github/NewIssuePage.qml"), mainView, {plugin: githubPlugin})
             }
@@ -110,7 +111,7 @@ Plugin {
             value: openPulls.length > 0 ? openPulls.length : ""
 
             action: Action {
-                text: wideAspect && width < units.gu(90) ? i18n.tr("Open Pull") : i18n.tr("Open Pull Request")
+                name: wideAspect && width < units.gu(90) ? i18n.tr("Open Pull") : i18n.tr("Open Pull Request")
                 description: i18n.tr("Open a new pull request")
                 onTriggered: PopupUtils.open(Qt.resolvedUrl("github/NewPullRequestPage.qml"), mainView, {plugin: githubPlugin})
             }
@@ -174,7 +175,7 @@ Plugin {
     }
 
     function setup() {
-        PopupUtils.open(Qt.resolvedUrl("github/RepositorySelectionSheet.qml"), mainView, {plugin: plugin})
+        pageStack.open(Qt.resolvedUrl("github/RepositorySelectionSheet.qml"), {plugin: plugin})
     }
 
     property int syncId: -1

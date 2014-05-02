@@ -28,7 +28,7 @@ ListItem.Standard {
 
     property bool overlay: false
 
-    height: opacity === 0 ? 0 : (__height + units.dp(2))
+    height: opacity === 0 ? 0 : units.gu(5)
 
     Behavior on height {
         NumberAnimation {

@@ -16,9 +16,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.Components.Popups 0.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
+import "../../qml-air"
+import "../../qml-air/ListItems" as ListItem
 
 Column {
     width: parent.width
@@ -71,7 +70,7 @@ Column {
             }
         }
 
-        delegate: OptionSelectorDelegate {
+        delegate: OptionDelegate {
             text: modelData.title
         }
 
@@ -128,7 +127,7 @@ Column {
             }
         }
 
-        delegate: OptionSelectorDelegate {
+        delegate: OptionDelegate {
             text: modelData.login
         }
 
