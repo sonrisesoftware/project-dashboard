@@ -339,8 +339,15 @@ Page {
                     anchors.centerIn: parent
                     textFormat: Text.RichText
 
+                    property Issue linkIssue
+
                     onLinkActivated: {
-                        Qt.openUrlExternally(link)
+                        var bugNumber = link.split("/", 7)[6] // This gives us the bug number
+                        console.log("Bug Number: " + bugNumber)
+                        linkIssue = plugin.issues.get(bugNumber-1).modelData
+                        console.log(linkIssue.title)
+                        //pageStack.push(Qt.resolvedUrl("IssuePage.qml"), {issue: linkIssue, plugin:plugin})
+                        //Qt.openUrlExternally(link)
                     }
                 }
             }
