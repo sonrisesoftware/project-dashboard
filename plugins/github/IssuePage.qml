@@ -394,7 +394,6 @@ Page {
                 TextArea {
                     id: commentBox
                     width: parent.width
-                    color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
 
                     property bool show
 

@@ -1,7 +1,7 @@
 import QtQuick 2.0
 import "../qml-air"
 import "../qml-air/ListItems" as ListItem
-
+import "../backend/utils.js" as Utils
 
 Item {
     id: root
@@ -15,20 +15,20 @@ Item {
 
     property string title: {
         if (type == "referenced") {
-            return i18n.tr("<b>%1</b> referenced this issue from a commit %2").arg(author).arg(friendsUtils.createTimeString(date))
+            return i18n.tr("<b>%1</b> referenced this issue from a commit %2").arg(author).arg(Utils.friendlyTime(date))
         } else if (type == "assigned") {
-            return i18n.tr("Assigned to <b>%1</b> %2").arg(author).arg(friendsUtils.createTimeString(date))
+            return i18n.tr("Assigned to <b>%1</b> %2").arg(author).arg(Utils.friendlyTime(date))
         } else if (type == "closed") {
-            return i18n.tr("<b>%1</b> closed this %2").arg(author).arg(friendsUtils.createTimeString(date))
+            return i18n.tr("<b>%1</b> closed this %2").arg(author).arg(Utils.friendlyTime(date))
         } else if (type == "reopened") {
-            return i18n.tr("<b>%1</b> reopened this %2").arg(author).arg(friendsUtils.createTimeString(date))
+            return i18n.tr("<b>%1</b> reopened this %2").arg(author).arg(Utils.friendlyTime(date))
         } else if (type == "merged") {
-            return i18n.tr("<b>%1</b> merged this %2").arg(author).arg(friendsUtils.createTimeString(date))
+            return i18n.tr("<b>%1</b> merged this %2").arg(author).arg(Utils.friendlyTime(date))
         } else if (type == "commit") {
             if (event.commits.length === 1)
-                return i18n.tr("<b>%1</b> pushed 1 commit %2").arg(author).arg(friendsUtils.createTimeString(date))
+                return i18n.tr("<b>%1</b> pushed 1 commit %2").arg(author).arg(Utils.friendlyTime(date))
             else
-                return i18n.tr("<b>%1</b> pushed %3 commits %2").arg(author).arg(friendsUtils.createTimeString(date)).arg(event.commits.length)
+                return i18n.tr("<b>%1</b> pushed %3 commits %2").arg(author).arg(Utils.friendlyTime(date)).arg(event.commits.length)
         } else if (type == "testing") {
             var color =  event.status == "success" ? colors["green"]
                                              : event.status == "failure" ? colors["red"]
@@ -189,12 +189,13 @@ Item {
                 color: type == "closed" ? colors["red"]
                                         : type === "reopened" ? colors["green"]
                                                               : type === "merged" ? colors["blue"]
-                                                                                  : Qt.rgba(0.6,0.6,0.6,1)
+                                                                                  : theme.textColor//"#eee"
                 antialiasing: true
 
                 Icon {
                     name: icon
                     anchors.centerIn: parent
+                    color: "white"
                 }
             }
 
@@ -239,7 +240,7 @@ Item {
                         width: 0.2 * parent.width
                         anchors.verticalCenter: parent.verticalCenter
                         anchors.right: parent.right
-                        color: Theme.palette.normal.backgroundText
+                        color: theme.secondaryColor
                         horizontalAlignment: Text.AlignRight
                         visible: commitsColumn.wide
                     }

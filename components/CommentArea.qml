@@ -18,11 +18,10 @@
 import QtQuick 2.0
 import "../qml-air"
 import "../qml-air/ListItems" as ListItem
-
+import "../backend/utils.js" as Utils
 
 BackgroundView {
     id: comment
-    color: Theme.palette.normal.field//Qt.rgba(0,0,0,0.2)
     width: parent.width
     height: childrenRect.height
     radius: units.gu(0.5)
@@ -35,7 +34,7 @@ BackgroundView {
                                                        : ""
     property string type: event.hasOwnProperty("event") ? event.event : "comment"
 
-    property string title: i18n.tr("<b>%1</b> commented %2").arg(author).arg(friendsUtils.createTimeString(date))
+    property string title: i18n.tr("<b>%1</b> commented %2").arg(author).arg(Utils.friendlyTime(date))
 
     Item {
         id: titleItem

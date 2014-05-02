@@ -47,3 +47,39 @@ function findObject(list, prop, value) {
 
     return -1
 }
+
+function friendlyTime(time) {
+    var now = new Date()
+    var seconds = (now - new Date(time))/1000;
+    //print("Difference:", now, new Date(time), now - time)
+    var minutes = Math.round(seconds/60);
+    if (minutes < 1)
+        return "just now"
+    else if (minutes == 1)
+        return "1 minute ago"
+    else if (minutes < 60)
+        return "%1 minutes ago".arg(minutes)
+    var hours = Math.round(minutes/60);
+    if (hours == 1)
+        return "1 hour ago"
+    else if (hours < 24)
+        return "%1 hours ago".arg(hours)
+
+    var days = Math.round(hours/24);
+    if (days == 1)
+        return "1 day ago"
+    else if (days < 7)
+        return "%1 days ago".arg(days)
+
+    var weeks = Math.round(days/7);
+    if (days == 1)
+        return "1 week ago"
+    else if (days < 24)
+        return "%1 weeks ago".arg(days)
+
+    var months = Math.round(weeks/4);
+    if (months == 1)
+        return "1 month ago"
+    else
+        return "%1 months ago".arg(months)
+}
