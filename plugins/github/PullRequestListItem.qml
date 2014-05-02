@@ -26,6 +26,8 @@ IssueListItem {
 
     property string status: issue.status
 
+    iconWidth: icon.visible ? icon.width : 0
+
     AwesomeIcon {
         anchors.centerIn: icon
         anchors.verticalCenterOffset: status === "error" ? units.gu(-0.1) : 0

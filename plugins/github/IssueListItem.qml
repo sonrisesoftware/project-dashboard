@@ -28,6 +28,9 @@ ListItem.Standard {
 
     property bool isPullRequest: issue.isPullRequest
 
+    // Property to set the width of the pull request status icon if visible so that the title gets truncated properly.
+    property double iconWidth: 0
+
     onClicked: pageStack.push(Qt.resolvedUrl("IssuePage.qml"), {issue: issue, plugin:plugin})
 
     height: opacity === 0 ? 0 : (__height + units.dp(2))
@@ -54,7 +57,7 @@ ListItem.Standard {
         Label {
             id: titleLabel
 
-            width: parent.width
+            width: issue.isPullRequest ? parent.width - iconWidth : parent.width
             elide: Text.ElideRight
             text: i18n.tr("<b>#%1</b> - %2").arg(issue.number).arg(issue.title)
 
