@@ -134,7 +134,7 @@ Service {
         return get(project, id, "/repos/" + repo + "/pulls", callback, ["state=" + state, "since=" + since])
     }
 
-    function getPullRequest(repo, number, callback) {
+    function getPullRequest(project, id, repo, number, callback) {
         return get(project, id, "/repos/" + repo + "/pulls/" + number, callback)
     }
 
