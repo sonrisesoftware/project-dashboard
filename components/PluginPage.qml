@@ -22,36 +22,59 @@ import "../qml-air"
 Page {
     id: page
 
-    //property string title
-
     property list<Action> actions
 
-    //property Flickable flickable
+    rightWidgets: [
+        Repeater {
+            id: repeater
+            model: page.actions
+            delegate: Button {
+                text: modelData.name
+                iconName: modelData.icon
+                onClicked: modelData.triggered()
+            }
+        },
 
-//    property int loading: plugin.loading
+        Button {
+            iconName: syncError || noConnection ? "exclamation-triangle" : "spinner-rotate"
+            iconColor: noConnection ? theme.warning : syncError ? theme.danger : textColor
+            text: noConnection ? "No connection" : syncError ? "Sync error" : "Syncing..."
+            opacity: busy || syncError || noConnection ? 1 : 0
 
-//    onLoadingChanged: {
-//        if (loading > 0) {
-//            header.show()
+            Behavior on opacity {
+                NumberAnimation { duration: 200 }
+            }
+
+            onClicked: if (!noConnection) syncPopover.open(caller)
+        }
+    ]
+
+//    default property alias contents: content.children
+
+//    Item {
+//        id: content
+
+//        anchors {
+//            left: parent.left
+//            right: parent.right
+//            top: parent.top
+//            bottom: toolbar.top
 //        }
 //    }
 
-//    Item {
-//        anchors.fill: parent
-//        anchors.bottomMargin: header.height - header.__styleInstance.contentHeight
-//        parent: header
+//    ToolBar {
+//        id: toolbar
 
-//        ActivityIndicator {
-//            anchors {
-//                right: parent.right
-//                verticalCenter: parent.verticalCenter
-//                rightMargin: (parent.height - height)/2
+//        height: repeater.count > 0 ? implicitHeight : 0
+
+//        Repeater {
+//            id: repeater
+//            model: page.actions
+//            delegate: Button {
+//                text: modelData.name
+//                iconName: modelData.icon
+//                onClicked: modelData.triggered()
 //            }
-
-//            height: units.gu(4)
-//            width: height
-//            running: visible
-//            visible: loading > 0
 //        }
 //    }
 }

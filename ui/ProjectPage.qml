@@ -33,13 +33,34 @@ Page {
     property string selectedView: "overview"
 
     rightWidgets: [
+        Repeater {
+            id: repeater
+            model: tabs.plugin !== null ? tabs.selectedPage.item.page.actions : []
+            delegate: Button {
+                text: modelData.name
+                iconName: modelData.icon
+                onClicked: modelData.triggered()
+            }
+        },
+
+        Button {
+            iconName: syncError || noConnection ? "exclamation-triangle" : "spinner-rotate"
+            iconColor: noConnection ? theme.warning : syncError ? theme.danger : textColor
+            text: noConnection ? "No connection" : syncError ? "Sync error" : "Syncing..."
+            opacity: busy || syncError || noConnection ? 1 : 0
+
+            Behavior on opacity {
+                NumberAnimation { duration: 200 }
+            }
+
+            onClicked: if (!noConnection) syncPopover.open(caller)
+        },
 
         Button {
             iconName: "cog"
             onClicked: settingsPage.open()
             toolTip: "Settings"
         }
-
     ]
 
     function displayPluginItem(pluginItem) {
@@ -225,13 +246,15 @@ Page {
             visible: project.hasPlugin(selectedView)
             anchors.fill: parent
 
-            property Plugin plugin: visible ? project.getPlugin(selectedView) : undefined
+            property Plugin plugin: project.getPlugin(selectedView)
 
             Repeater {
-                model: tabs.plugin.items
+                model: tabs.plugin !== null ? tabs.plugin.items : []
                 delegate: Page {
                     title: modelData.title
                     parent: tabs.tabsContent
+
+                    property PluginItem item: modelData
 
                     onVisibleChanged: {
                         if (modelData.page) {
@@ -264,7 +287,7 @@ Page {
 
             SidebarItem {
                 iconName: "dashboard"
-                text: "Overview"
+                text: "Pulse"
                 selected: selectedView === "overview"
                 onClicked: selectedView = "overview"
             }

@@ -51,15 +51,14 @@ Page {
         }
     }
 
-    ToolBar {
-        id: toolbar
+    rightWidgets: [
         Button {
             id: editAction
             text: i18n.tr("Edit")
             iconName: "pencil-square-o"
             enabled: plugin.hasPushAccess
             onClicked: PopupUtils.open(editSheet, page)
-        }
+        },
 
         Button {
             id: mergeAction
@@ -68,7 +67,7 @@ Page {
             enabled: plugin.hasPushAccess && issue.isPullRequest && !issue.merged && issue.mergeable
             onClicked: mergeDialog.show()
             visible: issue.isPullRequest
-        }
+        },
 
         Button {
             id: closeAction
@@ -79,7 +78,7 @@ Page {
                 issue.closeOrReopen()
             }
         }
-    }
+    ]
 
 
 
@@ -90,7 +89,7 @@ Page {
             left: parent.left
             right: sidebar.left
             top: parent.top
-            bottom: toolbar.top
+            bottom: parent.bottom
         }
 
         contentHeight: column.height + (sidebar.expanded ? units.gu(4) : units.gu(2))
@@ -498,7 +497,7 @@ Page {
     Sidebar {
         id: sidebar
         mode: "right"
-        anchors.bottom: toolbar.top
+        //anchors.bottom: toolbar.top
         expanded: wideAspect && !issue.isPullRequest
 
         Column {

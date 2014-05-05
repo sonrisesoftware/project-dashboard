@@ -39,15 +39,7 @@ PluginPage {
             id: newIssueAction
             iconName: "plus"
             name: i18n.tr("New Issue")
-            onTriggered: PopupUtils.open(Qt.resolvedUrl("NewIssuePage.qml"), plugin, {plugin: plugin})
-        },
-
-        Action {
-            id: filterAction
-            name: i18n.tr("Filter")
-            //iconSource: getIcon("filter")
-            onTriggered: filterPopover.show()
-            //visible: !wideAspect
+            onTriggered: pageStack.open(Qt.resolvedUrl("NewIssuePage.qml"), {plugin: plugin})
         }
     ]
 

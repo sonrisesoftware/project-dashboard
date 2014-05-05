@@ -16,6 +16,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
+import QtQuick.Window 2.0
 import "components"
 import "ui"
 import "backend"
@@ -77,7 +78,7 @@ PageApplication {
                     NumberAnimation { duration: 200 }
                 }
 
-                onClicked: if (!noConnection) syncPopover.open()
+                onClicked: if (!noConnection) syncPopover.open(caller)
             },
 
             Button {
@@ -333,6 +334,7 @@ PageApplication {
     Popover {
         id: syncPopover
         contentHeight: column.height
+        implicitWidth: units.gu(40)
 
         onContentHeightChanged: {
             if (contentHeight == 0)
@@ -441,7 +443,16 @@ PageApplication {
         id: settings
 
         onSave: {
+            settings.set("windowState", mainView.visibility)
+            settings.set("windowWidth", mainView.width)
+            settings.set("windowHeight", mainView.height)
             settings.set("markdownCache", markdownCache)
+        }
+
+        onLoaded: {
+            mainView.visibility = settings.get("windowState", Window.AutomaticVisibility)
+            mainView.width = settings.get("windowWidth", width)
+            mainView.height = settings.get("windowHeight", width)
         }
     }
 

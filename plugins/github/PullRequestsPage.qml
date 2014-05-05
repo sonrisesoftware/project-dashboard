@@ -38,16 +38,8 @@ PluginPage {
         Action {
             id: newIssueAction
             iconName: "plus"
-            name: i18n.tr("New Pull")
+            name: i18n.tr("New Pull Request")
             onTriggered: PopupUtils.open(Qt.resolvedUrl("NewPullRequestsPage.qml"), plugin, {repo: repo, action: reload})
-        },
-
-        Action {
-            id: filterAction
-            name: i18n.tr("Filter")
-            //iconSource: getIcon("filter")
-            onTriggered: filterPopover.show()
-            //visible: !wideAspect
         }
     ]
 

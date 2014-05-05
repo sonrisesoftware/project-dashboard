@@ -122,7 +122,7 @@ Item {
                 color: type == "closed" ? colors["red"]
                                         : type === "reopened" ? colors["green"]
                                                               : type === "merged" ? colors["blue"]
-                                                                                  : Theme.palette.normal.baseText
+                                                                                  : theme.textColor
             }
 
             Label {
@@ -139,7 +139,7 @@ Item {
                 top: parent.top; topMargin: row.anchors.topMargin
             }
             font.italic: true
-            text: type === "testing" ? "" : friendsUtils.createTimeString(date)
+            text: type === "testing" ? "" : Utils.friendlyTime(date)
         }
 
         Label {
