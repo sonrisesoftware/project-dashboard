@@ -115,6 +115,7 @@ Page {
                     fontSize: "large"
                     opacity: 0.5
                     text: "Nothing to show"
+                    visible: column.contentHeight < units.gu(1)
                 }
 
                 Flickable {
