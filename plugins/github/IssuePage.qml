@@ -340,7 +340,21 @@ Page {
                     textFormat: Text.RichText
 
                     onLinkActivated: {
-                        Qt.openUrlExternally(link)
+                        var bugNumber = link.split("/", 7)[6] // This gives us the bug number
+                        var index = null
+                        var linkIssue
+
+                        for (var i = 0; i < plugin.issues.count;i++) {
+                            if (bugNumber == plugin.issues.get(i).modelData.number)
+                                index = i
+                        }
+
+                        if (index == null)
+                            console.log("Bug not found")
+                        else {
+                            linkIssue = plugin.issues.get(index).modelData
+                            pageStack.push(Qt.resolvedUrl("IssuePage.qml"), {issue: linkIssue, plugin:plugin})
+                        }
                     }
                 }
             }
