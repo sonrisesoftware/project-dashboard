@@ -339,11 +339,10 @@ Page {
                     anchors.centerIn: parent
                     textFormat: Text.RichText
 
-                    property Issue linkIssue
-
                     onLinkActivated: {
                         var bugNumber = link.split("/", 7)[6] // This gives us the bug number
                         var index = null
+                        var linkIssue
 
                         for (var i = 0; i < plugin.issues.count;i++) {
                             if (bugNumber == plugin.issues.get(i).modelData.number)
