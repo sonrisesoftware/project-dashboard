@@ -30,6 +30,7 @@ Plugin {
     id: plugin
 
     property var events: []
+    name: "events"
 
     onSave: {
         doc.set("events", events)
