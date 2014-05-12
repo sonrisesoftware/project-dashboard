@@ -63,6 +63,7 @@ Page {
                     enabled: type != ""
 
                     control: Switch {
+                        id: switchItem
                         checked: project.hasPlugin(type)
                         onCheckedChanged: {
                             project.enablePlugin(type, checked)
@@ -98,7 +99,7 @@ Page {
                             verticalCenter: parent.verticalCenter
                             left: iconItem.right
                             leftMargin: units.gu(1.5)
-                            rightMargin: units.gu(2)
+                            rightMargin: units.gu(4) + switchItem.width
                             right: parent.right
                         }
 
