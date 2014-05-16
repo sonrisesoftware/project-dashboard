@@ -53,7 +53,7 @@ class ProjectsPageTestCase(project_dashboard.ClickAppTestCase):
         dialog.enter_text(name)
         dialog.ok()
 
-        self.assertThat(page.get_projects_count, Eventually(Equals(count+1)))
+        self.assertThat(page.get_projects_count, Eventually(Equals(count + 1)))
 
     def delete_project(self, index):
         page = self.main_view.get_projects_page()
