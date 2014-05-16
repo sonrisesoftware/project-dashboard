@@ -45,7 +45,6 @@ Page {
             text: i18n.tr("Inbox")
             iconSource: inboxPage.count > 0 ? getIcon("bell") : getIcon("bell-o")
             onTriggered: pageStack.push(inboxPage)
-            visible: !wideAspect
         }
     ]
 

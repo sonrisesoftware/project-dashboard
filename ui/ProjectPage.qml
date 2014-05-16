@@ -61,7 +61,7 @@ TabbedPage {
             text: i18n.tr("Actions")
             iconSource: getIcon("navigation-menu")
             onTriggered: PopupUtils.open(actionMenu, value)
-            visible: wideAspect
+            //visible: wideAspect
         },
 
         Action {
@@ -279,7 +279,7 @@ TabbedPage {
                 fontSize: "large"
                 opacity: 0.5
                 text: "Nothing to show"
-                visible: column.contentHeight < units.gu(1) && selectedView === "overview"
+                visible: column.contentHeight < units.gu(1) && selectedView === "overview" && project.plugins.count > 0
             }
 
             InboxPage {
@@ -377,16 +377,14 @@ TabbedPage {
     Sidebar {
         id: sidebar
         expanded: wideAspect
-        width: showTitles ? units.gu(8) : units.gu(6)
+        width: Math.min(units.gu(8), height/(project.plugins.count + 4))
         color: Qt.rgba(0,0,0,0.4)
         dividerColor: Qt.rgba(0,0,0,0.4)
-
-        property int itemHeight: showTitles ? units.gu(7) : units.gu(6)
-        property bool showTitles: true
 
         autoFlick: false
 
         Column {
+            id: sidebarColumn
             width: parent.width
 
             SidebarItem {
@@ -415,16 +413,16 @@ TabbedPage {
             }
         }
 
-//        SidebarItem {
-//            iconName: "cog"
-//            text: "Settings"
-//            anchor: Qt.TopEdge
+        SidebarItem {
+            iconName: "cog"
+            text: "Settings"
+            anchor: Qt.TopEdge
 
-//            selected: selectedView === "settings"
-//            onClicked: selectedView = "settings"
+            selected: selectedView === "settings"
+            onClicked: selectedView = "settings"
 
-//            anchors.bottom: parent.bottom
-//        }
+            anchors.bottom: parent.bottom
+        }
     }
 
     Component {

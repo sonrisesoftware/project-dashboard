@@ -162,22 +162,77 @@ Plugin {
         page: PluginPage {
             title: "Reviews"
 
-            ListView {
+            Flickable {
                 id: reviewsList
                 anchors.fill: parent
 
-                model: reviews
-                delegate: ListItem.Subtitled {
-                    text: modelData.reviewer_displayname
-                    subText: new Date(modelData.date_created).toDateString()
-                    Label {
-                        anchors.right: parent.right
-                        anchors.verticalCenter: parent.verticalCenter
-                        font.family: "FontAwesome"
-                        text: ratingString(modelData.rating)
-                    }
+                contentWidth: width
+                contentHeight: column.contentHeight + units.gu(2)
 
-                    onClicked: PopupUtils.open(reviewSheet, null, {review: modelData})
+                Item {
+                    width: reviewsList.width
+                    height: column.contentHeight + units.gu(2)
+                    ColumnFlow {
+                        id: column
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                            top: parent.top
+                            margins: units.gu(1)
+                        }
+                        repeaterCompleted: true
+                        columns: extraWideAspect ? 3 : wideAspect ? 2 : 1
+
+                        Timer {
+                            interval: 100
+                            running: true
+                            onTriggered: {
+                                print("Triggered!")
+                                column.repeaterCompleted = true
+                                column.reEvalColumns()
+                            }
+                        }
+
+                        SettingsTile {
+                            title: "Overall Rating"
+
+                            ListItem.SingleValue {
+                                text: i18n.tr("<b>%1</b> reviews").arg(reviews.count)
+
+                                Label {
+                                    anchors.right: parent.right
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    font.family: "FontAwesome"
+                                    text: rating
+                                }
+                            }
+                        }
+
+                        Repeater {
+                            model: reviews
+                            delegate: SettingsTile {
+                                title: modelData.reviewer_displayname
+                                value: ratingString(modelData.rating, true)
+
+                                ListItem.Empty {
+                                    height: _desc.height + units.gu(4)
+                                    Label {
+                                        id: _desc
+                                        anchors {
+                                            verticalCenter: parent.verticalCenter
+                                            left: parent.left
+                                            right: parent.right
+                                            margins: units.gu(2)
+                                        }
+                                        text: modelData.review_text
+                                        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                                    }
+
+                                    showDivider: false
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -187,25 +242,8 @@ Plugin {
         }
 
         pulseItem: PulseItem {
-            show: true
+            title: i18n.tr("Recent Reviews")
             viewAll: i18n.tr("View all <b>%1</b> reviews").arg(reviews.count)
-
-            ListItem.SingleValue {
-                text: "Rating"
-                visible: wideAspect
-
-                Label {
-                    anchors.right: parent.right
-                    anchors.verticalCenter: parent.verticalCenter
-                    font.family: "FontAwesome"
-                    text: rating
-                }
-            }
-
-            ListItem.Header {
-                text: "Recent Reviews"
-                visible: reviews.count > 0
-            }
 
             Repeater {
                 model: Math.min(reviews.count, project.maxRecent)

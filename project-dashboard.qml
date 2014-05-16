@@ -52,13 +52,13 @@ MainView {
     backgroundColor: Qt.rgba(0.3,0.3,0.3,1)
 
     // The size of the Nexus 4
-    width: units.gu(42)
-    height: units.gu(67)
+    //width: units.gu(42)
+    //height: units.gu(67)
 
-    //width: units.gu(100)
-    //height: units.gu(75)
+    width: units.gu(100)
+    height: units.gu(75)
 
-    useDeprecatedToolbar: false
+    //useDeprecatedToolbar: false
 
     property var colors: {
         "green": "#5cb85c",//"#59B159",//"#859a01",
@@ -147,23 +147,36 @@ MainView {
         id: notification
     }
 
-    Rectangle {
-        anchors.fill: parent
-        parent: header
+//    Rectangle {
+//        anchors.fill: parent
+//        parent: header
 
-        z: -1
-        color: Qt.rgba(0,0,0,0.4)
-    }
+//        z: -1
+//        color: Qt.rgba(0,0,0,0.4)
+//    }
 
     Item {
         anchors.fill: parent
         parent: header
+
+        z: 50
 
         Rectangle {
             height: units.dp(1)
             width: busyCount === 0 ? 0 : parent.width * (1 - busyCount/busyTotal)
             color: UbuntuColors.orange
             anchors.top: parent.bottom
+
+            Rectangle {
+                width: units.dp(4)
+                radius: width/2
+                height: width
+                color: parent.color
+
+                anchors.right: parent.right
+                //anchors.rightMargin: units.gu(0.5)
+                anchors.verticalCenter: parent.verticalCenter
+            }
 
             Behavior on width {
                 UbuntuNumberAnimation {}

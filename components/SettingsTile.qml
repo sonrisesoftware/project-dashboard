@@ -30,6 +30,7 @@ Item {
     property alias title: titleLabel.text
     property string shortTitle: title
     property alias iconSource: iconImage.name
+    property alias value: valueLabel.text
 
     default property alias contents: column.data
 
@@ -82,9 +83,23 @@ Item {
                     id: titleLabel
 
                     fontSize: "large"
+                    elide: Text.ElideRight
 
                     anchors {
-                        left: iconImage.right
+                        left: iconSource === "" ? parent.left : iconImage.right
+                        right: valueLabel.left
+                        top: parent.top
+                        margins: units.gu(2)
+                        topMargin: units.gu(1.5)
+                    }
+                }
+
+                Label {
+                    id: valueLabel
+
+                    fontSize: "large"
+
+                    anchors {
                         right: parent.right
                         top: parent.top
                         margins: units.gu(2)
