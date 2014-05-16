@@ -288,7 +288,7 @@ Plugin {
                                        {"type": "issue", "number": issue.number})
                 } else if (type === "PullRequestEvent") {
                     var pull = payload.pull_request
-                    project.newMessage("github", "code-fork", i18n.tr("<b>%1</b> %2 issue %3")
+                    project.newMessage("github", "code-fork", i18n.tr("<b>%1</b> %2 pull request %3")
                                        .arg(actor)
                                        .arg(payload.action)
                                        .arg(pull.number),
