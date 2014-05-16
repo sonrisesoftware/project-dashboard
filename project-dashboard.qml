@@ -16,10 +16,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.PerformanceMetrics 0.1
-import Ubuntu.Components.Popups 0.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
+import Ubuntu.Components 1.0
+import Ubuntu.Components.Popups 1.0
+import Ubuntu.Components.ListItems 1.0 as ListItem
 import "components"
 import "ui"
 import "backend"
@@ -53,11 +52,13 @@ MainView {
     backgroundColor: Qt.rgba(0.3,0.3,0.3,1)
 
     // The size of the Nexus 4
-    //width: units.gu(42)
-    //height: units.gu(67)
+    width: units.gu(42)
+    height: units.gu(67)
 
-    width: units.gu(100)
-    height: units.gu(75)
+    //width: units.gu(100)
+    //height: units.gu(75)
+
+    useDeprecatedToolbar: false
 
     property var colors: {
         "green": "#5cb85c",//"#59B159",//"#859a01",
@@ -83,31 +84,19 @@ MainView {
     PageStack {
         id: pageStack
 
-        Tabs {
-            id: tabs
+        ProjectsPage {
+            id: projectsPage
+        }
 
-
-            Tab {
-                title: page.title
-                page: ProjectsPage {
-                    id: projectsPage
-                }
-            }
-
-            Tab {
-                title: page.title
-                page: UniversalInboxPage {
-                    id: inboxPage
-                }
-            }
+        UniversalInboxPage {
+            id: inboxPage
+            visible: false
         }
 
         anchors.bottomMargin: wideAspect && mainView.toolbar.opened && mainView.toolbar.locked ? -mainView.toolbar.triggerSize : 0
 
         Component.onCompleted: {
-            if (inboxPage.count > 0)
-                tabs.selectedTabIndex = 1
-            pageStack.push(tabs)
+            pageStack.push(projectsPage)
 
             if (!settings.get("existingInstallation", false)) {
                 pageStack.push(Qt.resolvedUrl("ui/InitialWalkthrough.qml"))
@@ -144,59 +133,95 @@ MainView {
     property bool syncError: List.iter(backend.projects, function(project) {
         return project.syncQueue.hasError
     }) > 0
-    property bool busy: List.iter(backend.projects, function(project) {
+    property int busyCount: List.iter(backend.projects, function(project) {
         return project.syncQueue.count
-    }) > 0
+    })
+    
+    property int busyTotal: List.iter(backend.projects, function(project) {
+        return project.syncQueue.totalCount
+    })
+
+    property int busy: busyCount > 0
 
     Notification {
         id: notification
     }
 
-    Item {
+    Rectangle {
         anchors.fill: parent
-        anchors.bottomMargin: header.height - header.__styleInstance.contentHeight
         parent: header
 
-        AwesomeIcon {
-            name: "exclamation-triangle"
-            color: colors["yellow"]
-            anchors.centerIn: syncIndicator
-            size: units.gu(2.6)
-            opacity: !busy && syncError ? 1 : 0
+        z: -1
+        color: Qt.rgba(0,0,0,0.4)
+    }
+
+    Item {
+        anchors.fill: parent
+        parent: header
+
+        Rectangle {
+            height: units.dp(1)
+            width: busyCount === 0 ? 0 : parent.width * (1 - busyCount/busyTotal)
+            color: UbuntuColors.orange
+            anchors.top: parent.bottom
+
+            Behavior on width {
+                UbuntuNumberAnimation {}
+            }
+
+            opacity: busyCount > 0
 
             Behavior on opacity {
-                UbuntuNumberAnimation {
-                    duration: UbuntuAnimation.SlowDuration
-                }
-            }
-        }
-
-        ActivityIndicator {
-            id: syncIndicator
-            anchors {
-                right: parent.right
-                verticalCenter: parent.verticalCenter
-                rightMargin: (parent.height - height)/2
-            }
-
-            height: units.gu(4)
-            width: height
-            running: opacity > 0
-            opacity: busy ? 1 : 0
-
-            Behavior on opacity {
-                UbuntuNumberAnimation {
-                    duration: UbuntuAnimation.SlowDuration
-                }
-            }
-
-            MouseArea {
-                anchors.fill: parent
-                enabled: busy || syncError
-                onClicked: PopupUtils.open(syncPopover, syncIndicator)
+                UbuntuNumberAnimation {}
             }
         }
     }
+
+//    Item {
+//        anchors.fill: parent
+//        anchors.bottomMargin: header.height - header.__styleInstance.contentHeight
+//        parent: header
+
+//        AwesomeIcon {
+//            name: "exclamation-triangle"
+//            color: colors["yellow"]
+//            anchors.centerIn: syncIndicator
+//            size: units.gu(2.6)
+//            opacity: !busy && syncError ? 1 : 0
+
+//            Behavior on opacity {
+//                UbuntuNumberAnimation {
+//                    duration: UbuntuAnimation.SlowDuration
+//                }
+//            }
+//        }
+
+//        ActivityIndicator {
+//            id: syncIndicator
+//            anchors {
+//                right: parent.right
+//                verticalCenter: parent.verticalCenter
+//                rightMargin: (parent.height - height)/2
+//            }
+
+//            height: units.gu(4)
+//            width: height
+//            running: opacity > 0
+//            opacity: busy ? 1 : 0
+
+//            Behavior on opacity {
+//                UbuntuNumberAnimation {
+//                    duration: UbuntuAnimation.SlowDuration
+//                }
+//            }
+
+//            MouseArea {
+//                anchors.fill: parent
+//                enabled: busy || syncError
+//                onClicked: PopupUtils.open(syncPopover, syncIndicator)
+//            }
+//        }
+//    }
 
     Component {
         id: syncPopover

@@ -44,6 +44,7 @@ TabbedPage {
             text: i18n.tr("Edit")
             iconSource: getIcon("edit")
             onTriggered:pageStack.push(Qt.resolvedUrl("ConfigPage.qml"), {project: project})
+            visible: !wideAspect
         },
 
         Action {
@@ -52,6 +53,7 @@ TabbedPage {
             iconSource: enabled ? getIcon("bell") : getIcon("bell-o")
             enabled: project.inbox.count > 0
             onTriggered: selectedView = "inbox"
+            visible: !wideAspect
         },
 
         Action {
@@ -59,6 +61,7 @@ TabbedPage {
             text: i18n.tr("Actions")
             iconSource: getIcon("navigation-menu")
             onTriggered: PopupUtils.open(actionMenu, value)
+            visible: wideAspect
         },
 
         Action {
@@ -549,16 +552,24 @@ TabbedPage {
 
         ToolbarButton {
             action: refreshAction
+            visible: action.visible
+        }
+
+        ToolbarButton {
+            action: inboxAction
+            visible: action.visible
         }
 
         ToolbarButton {
             id: actionsButton
             action: actionsAction
+            visible: action.visible
             function trigger(value) { action.triggered(actionsButton) }
         }
 
         ToolbarButton {
             action: configAction
+            visible: action.visible
         }
     }
 }

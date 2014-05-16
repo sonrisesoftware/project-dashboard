@@ -38,8 +38,15 @@ Page {
             text: i18n.tr("New Project")
             iconSource: getIcon("add")
             onTriggered: PopupUtils.open(newProjectDialog, page)
-        }
+        },
 
+        Action {
+            id: inboxAction
+            text: i18n.tr("Inbox")
+            iconSource: inboxPage.count > 0 ? getIcon("bell") : getIcon("bell-o")
+            onTriggered: pageStack.push(inboxPage)
+            visible: !wideAspect
+        }
     ]
 
     onVisibleChanged: column.reEvalColumns()
@@ -143,6 +150,10 @@ Page {
             objectName: "createProject"
             action: newProjectAction
             width: units.gu(8)
+        }
+
+        ToolbarButton {
+            action: inboxAction
         }
 
         ToolbarButton {
