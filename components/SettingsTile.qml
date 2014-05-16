@@ -23,8 +23,9 @@ import "../components"
 import "../ubuntu-ui-extras"
 
 Item {
-    height: tile.implicitHeight + tile.anchors.margins * 2
+    height: visible ? tile.implicitHeight + tile.anchors.margins * 2 : 0
 
+    visible: column.height > 0
 
     property alias title: titleLabel.text
     property string shortTitle: title
