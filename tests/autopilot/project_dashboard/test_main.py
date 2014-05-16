@@ -62,7 +62,7 @@ class ProjectsPageTestCase(project_dashboard.ClickAppTestCase):
         self.long_press(listItem)
         menu = page.get_action_popover()
         menu.click_button_by_text('Delete')
-        self.assertThat(page.get_projects_count, Eventually(Equals(count-1)))
+        self.assertThat(page.get_projects_count, Eventually(Equals(count - 1)))
 
     def wait_until_not_exists(self, obj, type='*', **kargs):
         self.assertThat(lambda: exists(obj, type, **kargs),
