@@ -25,7 +25,7 @@ import "../ubuntu-ui-extras"
 UbuntuShape {
     id: tile
 
-    color: Qt.rgba(0,0,0,0.2)
+    color: Qt.rgba(0,0,0,0.25) // 0.2
 
     radius: "medium"
 
@@ -64,7 +64,7 @@ UbuntuShape {
 
         UbuntuShape {
             radius: "medium"
-            color: Qt.rgba(0,0,0,0.2)
+            color: Qt.rgba(0,0,0,0.3) //0.2
             height: tile.height
 
             anchors {
@@ -131,7 +131,12 @@ UbuntuShape {
             right: parent.right
         }
 
-        ListItem.ThinDivider {}
+        Rectangle {
+            width: parent.width
+            height: units.dp(2)
+
+            color: UbuntuColors.orange
+        }
 
         Column {
             id: column
