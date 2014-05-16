@@ -95,21 +95,53 @@ TabbedPage {
         ListView {
             id: pulseListView
 
-            topMargin: units.gu(12)
             anchors.fill: parent
+            topMargin: units.gu(12)
 
             model: project.plugins
+
             delegate: Column {
                 property Plugin plugin: modelData
-                width: parent.width
-                visible: modelData.enabled
-                height: visible ? implicitHeight : 0
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                    margins: units.gu(2)
+                }
+
+                Item {
+                    width: parent.width
+                    height: visible ? units.gu(2) : 0
+                    visible: index === 0
+                }
+
                 Repeater {
                     model: plugin.items
-                    delegate: Loader {
+
+                    delegate: Item {
                         width: parent.width
-                        height: sourceComponent ? item.height : 0
-                        sourceComponent: modelData.pulseItem
+                        height: tile.visible ? tile.height + units.gu(2) : 0
+                        PluginTile {
+                            id: tile
+                            iconSource: pluginItem.icon
+                            title: pluginItem.title
+                            viewAllMessage: loader.item.viewAll
+                            action: tile.pluginItem.action
+                            width: parent.width
+                            visible: loader.item.show
+
+                            property PluginItem pluginItem: modelData
+
+                            onTriggered: {
+                                if (pluginItem.page)
+                                    pageStack.push(pluginItem.page)
+                            }
+
+                            Loader {
+                                id: loader
+                                width: parent.width
+                                sourceComponent: tile.pluginItem.pulseItem
+                            }
+                        }
                     }
                 }
             }
@@ -163,7 +195,6 @@ TabbedPage {
 
         ListView {
             id: listView
-
             anchors.fill: parent
 
             model: project.plugins

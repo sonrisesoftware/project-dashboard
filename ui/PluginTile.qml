@@ -44,7 +44,7 @@ UbuntuShape {
 
     //opacity: unread ? 1 : 0.5
 
-    height: titleLabel.height + units.gu(3) + contents.height
+    height: visible ? titleItem.height + contents.height : 0
 
     default property alias contents: column.data
 
@@ -55,7 +55,7 @@ UbuntuShape {
     Item {
         id: titleItem
         clip: true
-        height: titleLabel.height + units.gu(3)
+        height: titleLabel.height + (wideAspect ? units.gu(3) : units.gu(3))
         anchors {
             top: parent.top
             left: parent.left
@@ -99,16 +99,16 @@ UbuntuShape {
                 anchors {
                     left: iconImage.right
                     right: parent.right
-                    top: parent.top
                     margins: units.gu(2)
-                    topMargin: units.gu(1.5)
+                    top: parent.top
+                    topMargin: (titleItem.height - titleLabel.height)/2
                 }
                 //color: unread ? "#77ddff" : Theme.palette.normal.baseText
             }
 
             Button {
                 id: actionButton
-                visible: tile.action
+                visible: tile.action && wideAspect
                 height: units.gu(4)
                 anchors {
                     right: parent.right

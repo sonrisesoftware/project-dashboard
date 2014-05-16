@@ -33,6 +33,20 @@ Page {
 
     property int count: List.concat(backend.projects, "inbox").length
 
+    actions: [
+        Action {
+            id: clearAction
+
+            iconSource: getIcon("edit-clear")
+            text: i18n.tr("Clear")
+            enabled: count > 0
+            onTriggered: {
+                backend.clearInbox()
+            }
+        }
+
+    ]
+
     ListView {
         id: listView
         anchors.fill: parent
@@ -175,12 +189,7 @@ Page {
         onLockedChanged: opened = locked
 
         ToolbarButton {
-            iconSource: getIcon("edit-clear")
-            text: i18n.tr("Clear")
-            enabled: count > 0
-            onTriggered: {
-                backend.clearInbox()
-            }
+            action: clearAction
         }
     }
 }
