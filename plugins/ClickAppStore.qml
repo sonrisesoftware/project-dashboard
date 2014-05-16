@@ -32,6 +32,9 @@ Plugin {
     name: "appstore"
     configuration: appId ? appId : "Not connected to an app"
 
+    title: "App Store"
+    icon: "shopping-cart"
+
     ListModel {
         id: reviews
     }

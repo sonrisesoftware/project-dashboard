@@ -188,30 +188,9 @@ TabbedPage {
         }
     }
 
-    Column {
-        anchors.centerIn: parent
-        width: parent.width - units.gu(3)
-        visible: project.plugins.count === 0
-        //opacity: 0.7
-
-        Label {
-            anchors.horizontalCenter: parent.horizontalCenter
-            fontSize: "large"
-            font.bold: true
-            text: i18n.tr("No plugins")
-        }
-
-        Label {
-            horizontalAlignment: Text.AlignHCenter
-            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-            width: parent.width
-            text: i18n.tr("Add some plugins by tapping \"Edit\" in the toolbar.")
-        }
-    }
-
     property Flickable oldFlickable
 
-    flickable: wideAspect ? mainFlickable : selectedTab === i18n.tr("Pulse") ? pulseListView : listView
+    flickable: wideAspect ? null : selectedTab === i18n.tr("Pulse") ? pulseListView : listView
 
     onFlickableChanged: {
         if (oldFlickable && wideAspect) {
@@ -227,212 +206,189 @@ TabbedPage {
         }
     }
 
-    Flickable {
-        id: mainFlickable
+    Item {
+        clip: true
         anchors {
-//            fill: parent
             left: sidebar.right
             right: parent.right
             top: parent.top
             bottom: parent.bottom
         }
-        clip: wideAspect
-        visible: wideAspect
-        contentHeight: contents.height
-        contentWidth: width
+
+        Column {
+            anchors.centerIn: parent
+            width: parent.width - units.gu(3)
+            visible: project.plugins.count === 0
+            //opacity: 0.7
+
+            Label {
+                anchors.horizontalCenter: parent.horizontalCenter
+                fontSize: "large"
+                font.bold: true
+                text: i18n.tr("No plugins")
+            }
+
+            Label {
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                width: parent.width
+                text: i18n.tr("Add some plugins by tapping \"Edit\" in the toolbar.")
+            }
+        }
 
         Item {
-            id: contents
-            width: parent.width
-            height: column.contentHeight + units.gu(2)
+            anchors.fill: parent
+            visible: wideAspect
 
-            ColumnFlow {
-                id: column
-                width: parent.width - units.gu(2)
-                height: contentHeight
+            Label {
                 anchors.centerIn: parent
-                model: project.plugins
-                columns: extraWideAspect ? 3 : wideAspect ? 2 : 1
-                //spacing: units.gu(2)
-                delegate: Repeater {
-                    model: modelData.items
+                fontSize: "large"
+                opacity: 0.5
+                text: "Nothing to show"
+                visible: column.contentHeight < units.gu(1) && selectedView === "overview"
+            }
 
-                    delegate: Item {
-                        id: tile
-                        width: parent.width
+            InboxPage {
+                anchors.fill: parent
 
-                        visible: modelData.enabled && pluginItem.pulseItem
-                        height: visible ? pluginTile.height + units.gu(2) : 0
+                visible: selectedView === "inbox"
+            }
 
-                        onVisibleChanged: column.reEvalColumns()
+            Flickable {
+                id: mainFlickable
 
-                        onHeightChanged: column.reEvalColumns()
+                anchors.fill: parent
+                visible: selectedView === "overview"
+                contentHeight: contents.height
+                contentWidth: width
 
-                        property PluginItem pluginItem: modelData
+                Item {
+                    id: contents
+                    width: parent.width
+                    height: column.contentHeight + units.gu(2)
 
-                        PluginTile {
-                            id: pluginTile
-                            iconSource: tile.pluginItem.icon
-                            title: tile.pluginItem.title
-                            viewAllMessage: loader.item.viewAll
-                            action: tile.pluginItem.action
-                            anchors.centerIn: parent
-                            width: parent.width - units.gu(2)
+                    ColumnFlow {
+                        id: column
+                        width: parent.width - units.gu(2)
+                        height: contentHeight
+                        anchors.centerIn: parent
+                        model: project.plugins
+                        columns: extraWideAspect ? 3 : wideAspect ? 2 : 1
+                        //spacing: units.gu(2)
+                        delegate: Repeater {
+                            model: modelData.items
 
-                            onTriggered: {
-                                if (pluginItem.page)
-                                    pageStack.push(pluginItem.page)
-                            }
-
-                            Loader {
-                                id: loader
+                            delegate: Item {
+                                id: tile
                                 width: parent.width
-                                sourceComponent: tile.pluginItem.pulseItem
-                                onLoaded: {
-                                    column.reEvalColumns()
-                                }
+
+                                visible: modelData.enabled && pluginItem.pulseItem && loader.item.show
+                                height: visible ? pluginTile.height + units.gu(2) : 0
+
+                                onVisibleChanged: column.reEvalColumns()
+
                                 onHeightChanged: column.reEvalColumns()
+
+                                property PluginItem pluginItem: modelData
+
+                                PluginTile {
+                                    id: pluginTile
+                                    iconSource: tile.pluginItem.icon
+                                    title: tile.pluginItem.title
+                                    viewAllMessage: loader.item.viewAll
+                                    action: tile.pluginItem.action
+                                    anchors.centerIn: parent
+                                    width: parent.width - units.gu(2)
+
+                                    onTriggered: {
+                                        if (pluginItem.page)
+                                            pageStack.push(pluginItem.page)
+                                    }
+
+                                    Loader {
+                                        id: loader
+                                        width: parent.width
+                                        sourceComponent: tile.pluginItem.pulseItem
+                                        onLoaded: {
+                                            column.reEvalColumns()
+                                        }
+                                        onHeightChanged: column.reEvalColumns()
+                                    }
+                                }
+                            }
+                        }
+
+                        Timer {
+                            interval: 100
+                            running: true
+                            onTriggered: {
+                                print("Triggered!")
+                                column.updateWidths()
                             }
                         }
                     }
                 }
+            }
 
-                Timer {
-                    interval: 100
-                    running: true
-                    onTriggered: {
-                        print("Triggered!")
-                        column.updateWidths()
-                    }
-                }
+            Scrollbar {
+                flickableItem: mainFlickable
             }
         }
     }
 
+    property string selectedView: "overview"
+
     Sidebar {
         id: sidebar
-        expanded: false
+        expanded: wideAspect
         width: showTitles ? units.gu(8) : units.gu(6)
         color: Qt.rgba(0,0,0,0.4)
+        dividerColor: Qt.rgba(0,0,0,0.4)
 
         property int itemHeight: showTitles ? units.gu(7) : units.gu(6)
-        property bool showTitles: false
+        property bool showTitles: true
+
+        autoFlick: false
 
         Column {
             width: parent.width
 
-            ListItem.Standard {
-                id: item
-                height: sidebar.itemHeight
-                //onClicked: selectedPlugin = null
-                //selected: selectedPlugin === null
-
-                Column {
-                    anchors.centerIn: parent
-                    spacing: units.gu(0.5)
-
-                    AwesomeIcon {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        name: "dashboard"
-                        size: units.gu(3.5)
-                        color: item.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
-                    }
-
-                    Label {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: i18n.tr("Overview")
-                        fontSize: "small"
-                        color: item.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
-                        visible: sidebar.showTitles
-                    }
-                }
+            SidebarItem {
+                iconName: "dashboard"
+                text: "Pulse"
+                selected: selectedView === "overview"
+                onClicked: selectedView = "overview"
             }
 
-//            ListItem.Standard {
-//                id: inboxItem
-//                height: units.gu(7)//width
-//                onClicked: selectedPlugin = null
-//                selected: selectedPlugin === null
-
-//                Column {
-//                    anchors.centerIn: parent
-//                    spacing: units.gu(0.5)
-
-//                    AwesomeIcon {
-//                        anchors.horizontalCenter: parent.horizontalCenter
-//                        name: "inbox"
-//                        size: units.gu(3)
-//                        color: inboxItem.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
-
-//                        Rectangle {
-//                            color: colors["red"]
-//                            width: label.text.length == 1 ? height: label.width + units.gu(1.2)
-//                            height: units.gu(2.5)
-//                            radius: height/2
-//                            border.color: Qt.darker(colors["red"])
-//                            antialiasing: true
-
-//                            Label {
-//                                id: label
-//                                anchors.centerIn: parent
-//                                text: "23"
-//                            }
-
-//                            anchors {
-//                                horizontalCenter: parent.right
-//                                verticalCenter: parent.top
-//                                verticalCenterOffset: units.gu(1)
-//                                horizontalCenterOffset: units.gu(0.5)
-//                            }
-//                        }
-//                    }
-
-//                    Label {
-//                        anchors.horizontalCenter: parent.horizontalCenter
-//                        text: i18n.tr("Inbox")
-//                        fontSize: "small"
-//                        color: inboxItem.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
-//                    }
-//                }
-//            }
+            SidebarItem {
+                iconName: "inbox"
+                text: "Inbox"
+                count: project.inbox.count
+                selected: selectedView === "inbox"
+                onClicked: selectedView = "inbox"
+            }
 
             Repeater {
                 model: project.plugins
-                delegate: Repeater {
-                    model: modelData.items
-                    delegate: ListItem.Standard {
-                        id: pluginSidebarItem
-                        height: sidebar.itemHeight
-                        opacity: enabled ? 1 : 0.5
-
-                        Column {
-                            anchors.centerIn: parent
-                            spacing: units.gu(0.5)
-
-                            AwesomeIcon {
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                name: modelData.icon
-                                size: units.gu(3.5)
-
-                                color: pluginSidebarItem.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
-                            }
-
-                            Label {
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                text: modelData.shortTitle
-                                color: pluginSidebarItem.selected ? UbuntuColors.orange : Theme.palette.selected.backgroundText
-                                fontSize: "small"
-                                visible: sidebar.showTitles
-                            }
-                        }
-                    }
+                delegate: SidebarItem {
+                    iconName: modelData.icon
+                    text: modelData.title
+                    onClicked: selectedView = modelData.type
+                    selected: selectedView === modelData.type
                 }
             }
         }
-    }
 
-    Scrollbar {
-        flickableItem: mainFlickable
+//        SidebarItem {
+//            iconName: "cog"
+//            text: "Settings"
+//            anchor: Qt.TopEdge
+
+//            selected: selectedView === "settings"
+//            onClicked: selectedView = "settings"
+
+//            anchors.bottom: parent.bottom
+//        }
     }
 
     Component {

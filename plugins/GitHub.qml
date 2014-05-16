@@ -35,6 +35,9 @@ Plugin {
     canReload: false
     configuration: repo ? repo : "Not connected to a repository"
 
+    title: "GitHub"
+    icon: "github"
+
     property string repo: doc.get("repoName", "")
 
     property var milestones: doc.get("milestones", [])

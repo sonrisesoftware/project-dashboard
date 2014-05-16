@@ -30,6 +30,9 @@ Item {
     property Project project
     property string configuration
 
+    property string title
+    property string icon
+
     property bool canReload: false
     property bool changed
     function refresh() {}

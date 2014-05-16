@@ -23,10 +23,12 @@ import "../backend"
 import "../components"
 import "../ubuntu-ui-extras"
 
-Page {
+Item {
     id: page
     
-    title: i18n.tr("Inbox")
+    //title: i18n.tr("Inbox")
+
+    property int count: project.inbox.count
 
     property Project project
 
@@ -137,13 +139,8 @@ Page {
         return Qt.formatDate(time)
     }
 
-    tools: ToolbarItems {
-        opened: wideAspect
-        locked: wideAspect
-
-        onLockedChanged: opened = locked
-
-        ToolbarButton {
+    property list<Action> actions: [
+        Action {
             iconSource: getIcon("edit-clear")
             text: i18n.tr("Clear")
             enabled: project.inbox.count > 0
@@ -151,5 +148,5 @@ Page {
                 project.clearInbox()
             }
         }
-    }
+    ]
 }

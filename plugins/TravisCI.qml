@@ -29,6 +29,8 @@ Plugin {
     id: plugin
 
     name: "travis"
+    icon: "check-circle"
+    title: "Testing"
     canReload: true
 
     property var info: doc.get("repo", undefined)
