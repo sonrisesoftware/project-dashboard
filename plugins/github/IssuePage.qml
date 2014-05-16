@@ -277,25 +277,63 @@ Page {
                 }
 
                 ListItem.Standard {
-                    id: labelsItem
-                    text: {
-                        if (issue.labels.length > 0) {
-                            var text = ""
-                            for (var i = 0; i < issue.labels.length; i++) {
-                                var label = issue.labels[i]
-                                text += '<font color="#' + label.color + '">' + label.name + '</font>'
-                                if (i < issue.labels.length - 1)
-                                    text += ', '
+                    id: labelsItemSmall
+
+                    text: issue.labels.length > 0 ? "" : i18n.tr("No labels")
+
+                    height: issue.labels.length > 0 ? units.gu(5) : labelFlowSmall.height + units.gu(2)
+                    progression: plugin.hasPushAccess
+                    onClicked: if (progression) PopupUtils.open(labelsPopover, labelsItemSmall)
+
+                    Flow {
+                        id: labelFlowSmall
+
+                        spacing: units.gu(1)
+                        anchors {
+                            verticalCenter: parent.verticalCenter
+                            left: parent.left
+                            right: parent.right
+                            margins: units.gu(2)
+                            rightMargin: progression ? units.gu(4) : units.gu(2)
+                        }
+
+                        Repeater {
+                            model: issue.labels
+
+                            delegate: UbuntuShape {
+                                id: labelContainer
+                                color: "#" + modelData.color
+                                width: labelName.contentWidth < labelFlowSmall.width ? labelName.contentWidth + units.gu(2) : labelFlowSmall.width - units.gu(2)
+                                height: units.gu(3.5)
+
+                                Label {
+                                    id: labelName
+
+                                    // Function to get the text color based on the background
+                                    function getTextColor(backgroundColor) {
+                                        var red = parseInt((backgroundColor).substring(0,2),16)
+                                        var green = parseInt((backgroundColor).substring(2,4),16)
+                                        var blue = parseInt((backgroundColor).substring(4,6),16)
+
+                                        var a = 1 - ( 0.299 * red + 0.587 * green + 0.114 * blue)/255;
+
+                                        if (a < 0.3)
+                                            return UbuntuColors.coolGrey
+                                        else
+                                            return Theme.palette.normal.baseText
+                                    }
+
+                                    text: modelData.name
+                                    elide: Text.ElideRight
+                                    anchors.centerIn: parent
+                                    verticalAlignment: Text.AlignVCenter
+                                    horizontalAlignment: Text.AlignHCenter
+                                    color: getTextColor(modelData.color)
+                                    width: labelContainer.width === labelFlow.width - units.gu(2) ? null : labelFlow.width - units.gu(2)
+                                }
                             }
-                            return text
-                        } else {
-                            return i18n.tr("No labels")
                         }
                     }
-
-                    height: units.gu(5)
-                    progression: plugin.hasPushAccess
-                    onClicked: PopupUtils.open(labelsPopover, labelsItem)
                 }
             }
 
@@ -646,7 +684,7 @@ Page {
 
                             var a = 1 - ( 0.299 * red + 0.587 * green + 0.114 * blue)/255;
 
-                            if (a < 0.5)
+                            if (a < 0.3)
                                 return UbuntuColors.coolGrey
                             else
                                 return Theme.palette.normal.baseText
@@ -755,6 +793,7 @@ Page {
 
         SelectorSheet {
             id: popover
+
             property var labels: JSON.parse(JSON.stringify(issue.labels))
             property bool edited: false
 
