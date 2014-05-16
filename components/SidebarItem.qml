@@ -116,8 +116,8 @@ ListItem.Standard {
             margins: units.gu(1)
         }
 
-        color: "#d9534f"
-        border.color: Qt.darker(color, 1.2)
+        color: colors["red"]//"#d9534f"
+        border.color: Qt.darker(color, 1.5)
 
         Label {
             id: countLabel

@@ -133,7 +133,7 @@ UbuntuShape {
 
         Rectangle {
             width: parent.width
-            height: units.dp(2)
+            height: units.dp(1)
 
             color: UbuntuColors.orange
         }

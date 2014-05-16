@@ -51,7 +51,7 @@ TabbedPage {
             text: i18n.tr("Inbox")
             iconSource: enabled ? getIcon("bell") : getIcon("bell-o")
             enabled: project.inbox.count > 0
-            onTriggered: pageStack.push(Qt.resolvedUrl("InboxPage.qml"), {project: project})
+            onTriggered: selectedView = "inbox"
         },
 
         Action {
@@ -250,6 +250,8 @@ TabbedPage {
 
             InboxPage {
                 anchors.fill: parent
+
+                project: page.project
 
                 visible: selectedView === "inbox"
             }
@@ -516,10 +518,6 @@ TabbedPage {
 
         ToolbarButton {
             action: refreshAction
-        }
-
-        ToolbarButton {
-            action: inboxAction
         }
 
         ToolbarButton {

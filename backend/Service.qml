@@ -27,6 +27,7 @@ Item {
     property string icon
     property var type: []
     property string title
+    property string description
     property string authenticationStatus
     property string disabledMessage
     property bool authenticationRequired: true
@@ -37,4 +38,6 @@ Item {
     function status(value) {}
     function authenticate() {}
     function revoke() {}
+
+    property Component accountItem
 }

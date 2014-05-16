@@ -62,6 +62,7 @@ Item {
         "minus": "",
         "dashboard": "",
         "calendar-empty": "",
+        "question-circle": "",
         "calendar": "",
         "bars":"",
         "inbox": "",
