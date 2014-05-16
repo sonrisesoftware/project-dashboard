@@ -4,7 +4,7 @@ project-dashboard (0.5.1) trusty; urgency=low
   * New plugin for the Click App Store to display reviews
   * Fixed some bugs  
 
- -- Michael Spencer <mspencer@portable-ubuntu>  Mon, 12 May 2014 11:34:50 -0500
+ -- Michael Spencer <sonrisesoftware@gmail.com>  Mon, 12 May 2014 11:34:50 -0500
 
 project-dashboard (0.5) trusty; urgency=medium
 
