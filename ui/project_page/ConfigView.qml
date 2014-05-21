@@ -13,6 +13,10 @@ PageView {
     property Project project
     property string selection: "general"
 
+    property int pluginCount: project.plugins.count
+
+    onPluginCountChanged: selection = "general"
+
     MasterDetailView {
         anchors.fill: parent
 
@@ -40,23 +44,8 @@ PageView {
             }
         }
 
-        footer: Rectangle {
-            width: parent.width
-            height: addButton.height + units.gu(2)
-
-            color: Qt.rgba(0,0,0,0.2)
-
-            ListItem.ThinDivider {
-                anchors.top: parent.top
-            }
-
-            Button {
-                id: addButton
-                anchors.centerIn: parent
-                width: parent.width - units.gu(2)
-
-                text: "Add plugins"
-            }
+        action: Action {
+            text: "Add plugins"
         }
 
         model: project.plugins

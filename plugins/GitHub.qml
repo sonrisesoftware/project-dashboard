@@ -507,6 +507,8 @@ Plugin {
     }
 
     configView: PluginConfigView {
+        hasSettings: true
+
         Column {
             anchors.fill: parent
 

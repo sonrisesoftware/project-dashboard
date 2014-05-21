@@ -31,6 +31,7 @@ Item {
     property bool shadow: false
 
     property var icons: {
+        "pencil": "",
         "check-circle": "",
         "check-square-o": "",
         "circle": "",

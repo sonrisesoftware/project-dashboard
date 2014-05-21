@@ -21,6 +21,7 @@ import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
 
 import "../../backend"
+import "../../components"
 
 Popover {
     id: actionsPopover

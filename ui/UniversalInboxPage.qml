@@ -31,7 +31,7 @@ Page {
 
     flickable: listView.contentHeight > 0 ? listView : null
 
-    property int count: List.concat(backend.projects, "inbox").length
+    property int count: List.concat(backend.projects, "inbox", function(project) { return project.notificationsEnabled }).length
 
     actions: [
         Action {

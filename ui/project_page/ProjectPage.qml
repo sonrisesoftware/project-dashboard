@@ -57,7 +57,7 @@ TabbedPage {
             id: actionsAction
             text: i18n.tr("Actions")
             iconSource: getIcon("navigation-menu")
-            onTriggered: PopupUtils.open(Qt.resolvedUrl("ActionMenu.qml"), value, {project: projectPage.project})
+            onTriggered: PopupUtils.open(Qt.resolvedUrl("ActionMenu.qml"), _actionsButton, {project: projectPage.project})
             //visible: wideAspect
         },
 
@@ -83,6 +83,12 @@ TabbedPage {
 
         PulseView {
             visible: sidebar.selectedView === "pulse"
+
+            project: projectPage.project
+        }
+
+        InboxView {
+            visible: sidebar.selectedView === "inbox"
 
             project: projectPage.project
         }
@@ -119,6 +125,26 @@ TabbedPage {
         locked: wideAspect
 
         onLockedChanged: opened = locked
+
+        ToolbarButton {
+            action: refreshAction
+        }
+
+        ToolbarButton {
+            id: _actionsButton
+            action: actionsAction
+            visible: action.visible
+        }
+
+        ToolbarButton {
+            action: inboxAction
+            visible: action.visible
+        }
+
+        ToolbarButton {
+            action: configAction
+            visible: action.visible
+        }
     }
 
     Component {
