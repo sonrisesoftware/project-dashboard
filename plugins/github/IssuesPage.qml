@@ -238,7 +238,7 @@ PluginPage {
                     selectedIndex: model.length - 1
 
                     delegate: OptionSelectorDelegate {
-                        text: modelData.title
+                        text: modelData.title ? modelData.title : modelData
                     }
                 }
 

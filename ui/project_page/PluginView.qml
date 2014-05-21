@@ -93,7 +93,7 @@ PageView {
 
     property Plugin plugin: project.getPlugin(sidebar.selectedView)
 
-    Item {
+    Loader {
         anchors {
             left: parent.left
             right: parent.right
@@ -101,13 +101,17 @@ PageView {
             bottom: parent.bottom
         }
 
-        Repeater {
-            model: pluginView.plugin ? pluginView.plugin.items : []
-            delegate: Loader {
-                anchors.fill: parent
-                visible: pluginView.selectedIndex === index
+        sourceComponent: plugin.items[selectedIndex].page
 
-                sourceComponent: modelData.page
+        onItemChanged: {
+            if (visible) {
+                pluginView.actions = item.actions
+            }
+        }
+
+        Component.onCompleted:  {
+            if (visible) {
+                pluginView.actions = item.actions
             }
         }
     }

@@ -58,7 +58,7 @@ TabbedPage {
             text: i18n.tr("Actions")
             iconSource: getIcon("navigation-menu")
             onTriggered: PopupUtils.open(Qt.resolvedUrl("ActionMenu.qml"), _actionsButton, {project: projectPage.project})
-            //visible: wideAspect
+            visible: sidebar.selectedView === "pulse"
         },
 
         Action {
@@ -125,6 +125,17 @@ TabbedPage {
         locked: wideAspect
 
         onLockedChanged: opened = locked
+
+        Repeater {
+            model: pluginView.visible ? pluginView.actions : []
+            delegate: ToolbarButton {
+                id: _toolbarButton
+
+                text: modelData.text
+                iconSource: modelData.iconSource
+                onTriggered: modelData.triggered(_toolbarButton)
+            }
+        }
 
         ToolbarButton {
             action: refreshAction
