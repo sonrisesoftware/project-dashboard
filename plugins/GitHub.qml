@@ -25,6 +25,7 @@ import "../backend/services"
 import "../ubuntu-ui-extras"
 import "../ubuntu-ui-extras/listutils.js" as List
 import "github"
+import "../ui/project_page"
 
 Plugin {
     id: plugin
@@ -147,7 +148,7 @@ Plugin {
     ]
 
     onSave: {
-        print("Saving", project.name)
+        //print("Saving", project.name)
 
         // Save issues
         var start = new Date()
@@ -160,11 +161,11 @@ Plugin {
         doc.set("issues", list)
         doc.set("nextNumber", nextNumber)
         var end = new Date()
-        print("Average time to save an issue is " + (end - start)/list.length + " milliseconds")
+        //print("Average time to save an issue is " + (end - start)/list.length + " milliseconds")
     }
 
     onLoaded: {
-        print("Loading!")
+        //print("Loading!")
 
         var list = doc.get("issues", [])
         for (var i = 0; i < list.length; i++) {
@@ -203,15 +204,15 @@ Plugin {
 
             plugin.changed = true
 
-            //print(response)
+            ////print(response)
             var json = JSON.parse(response)
-            //print("LENGTH:", json.length)
+            ////print("LENGTH:", json.length)
             for (var i = 0; i < json.length; i++) {
                 var found = false
                 for (var j = 0; j < issues.count; j++) {
                     var issue = issues.get(j).modelData
 
-                    //print(issues.get(j).modelData.number + " === " + json[i].number)
+                    ////print(issues.get(j).modelData.number + " === " + json[i].number)
                     if (issue.number === json[i].number) {
                         issue.info = json[i]
                         found = true
@@ -229,7 +230,7 @@ Plugin {
         }
 
         if (syncId !== -1 && project.syncQueue.groups.hasOwnProperty(syncId)) {
-            print("Deleting existing sync operation for GitHub")
+            //print("Deleting existing sync operation for GitHub")
             delete project.syncQueue.groups[syncId]
             project.syncQueue.groups = project.syncQueue.groups
         }
@@ -262,7 +263,7 @@ Plugin {
 
             var json = JSON.parse(response)
 
-            print("LENGTH:", json.length)
+            //print("LENGTH:", json.length)
             for (var i = 0; i < json.length; i++) {
                 var event = json[i]
                 var actor = event.actor.login
@@ -271,7 +272,7 @@ Plugin {
                 var payload = event.payload
 
                 // TODO: When publishing, add: || actor === github.user.login
-                print(date, lastRefreshed, type, actor)
+                //print(date, lastRefreshed, type, actor)
                 if (new Date(lastRefreshed) >= new Date(date))
                     break
 
@@ -279,7 +280,7 @@ Plugin {
                     continue
 
                 // newMessage(plugin, icon, title, message, date, data)
-                print(type)
+                //print(type)
 
                 if (type === "IssuesEvent") {
                     var issue = payload.issue
@@ -323,7 +324,7 @@ Plugin {
         github.getRepository(project, syncId, repo, function(status, response) {
             if (lastRefreshed === "")
                 project.loading--
-            //print("Info:", response)
+            ////print("Info:", response)
             var json = JSON.parse(response)
             doc.set("repo", json)
 
@@ -334,7 +335,7 @@ Plugin {
                 github.getLabels(project, syncId, repo, function(status, response) {
                     if (lastRefreshed === "")
                         project.loading--
-                    //print("Labels:", response)
+                    ////print("Labels:", response)
                     var json = JSON.parse(response)
                     doc.set("labels", json)
                 })
@@ -342,7 +343,7 @@ Plugin {
                 github.getAssignees(project, syncId, repo, function(status, response) {
                     if (lastRefreshed === "")
                         project.loading--
-                    //print("Labels:", response)
+                    ////print("Labels:", response)
                     var json = JSON.parse(response)
                     doc.set("assignees", json)
                 })
@@ -350,7 +351,7 @@ Plugin {
                 github.getMilestones(project, syncId, repo, function(status, response) {
                     if (lastRefreshed === "")
                         project.loading--
-                    //print("Labels:", response)
+                    ////print("Labels:", response)
                     var json = JSON.parse(response)
                     doc.set("milestones", json)
                 })
@@ -459,5 +460,118 @@ Plugin {
         }
 
         throw "Unable to display message: " + JSON.stringify(message)
+    }
+
+    function getPreview(message) {
+        //print("Getting preview...")
+        if (message.data.type === "issue" || message.data.type === "comment") {
+            return issuePreview
+        }
+    }
+
+    Component {
+        id: issuePreview
+
+        MessagePreview {
+            id: _preview
+            title: message.title
+
+            property Issue issue: {
+                //print("PREVIEW", JSON.stringify(message), issues)
+                for (var i = 0; i < issues.count;i++) {
+                    var issue = issues.get(i).modelData
+                    //print(issue.number, message.data.number)
+                    if (issue.number == message.data.number) {
+                        //print("FOUND ISSUE")
+                        return issue
+                    }
+                }
+            }
+
+            actions: [
+                Action {
+                    text: issue.open ? i18n.tr("Close") : i18n.tr("Reopen")
+                },
+
+                Action {
+                    text: "View"
+                    onTriggered: displayMessage(message)
+                }
+            ]
+
+            IssueItem {
+                anchors.fill: parent
+                issue: _preview.issue
+            }
+        }
+    }
+
+    configView: PluginConfigView {
+        Column {
+            anchors.fill: parent
+
+            ListItem.Standard {
+                text: "Repository"
+
+                control: TextField {
+                    text: plugin.repo
+                }
+            }
+
+            ListItem.Header {
+                text: "Issues widget"
+            }
+
+            SuruItemSelector {
+                model: ["Assigned to me", "Recent", "Testable", "Don't show"]
+                delegate: OptionSelectorDelegate {
+                    text: modelData
+                }
+            }
+
+            ListItem.Header {
+                text: "Pull Requests widget"
+            }
+
+            ListItem.Standard {
+                text: "Show in dashboard"
+
+                control: Switch {
+                    checked: true
+                }
+            }
+
+            ListItem.Header {
+                text: "Notifications"
+            }
+
+            ListItem.Standard {
+                text: "New issues"
+                control: Switch {
+                    checked: true
+                }
+            }
+
+            ListItem.Standard {
+                text: "Issues assigned to me"
+                control: Switch {
+                    checked: true
+                }
+            }
+
+            ListItem.Standard {
+                text: "Testable issues"
+                control: Switch {
+
+                }
+            }
+
+            ListItem.Standard {
+                text: "New pull requests"
+                control: Switch {
+                    checked: true
+                }
+            }
+        }
     }
 }

@@ -64,7 +64,7 @@ Plugin {
                     return {}
                 }
 
-                repo: repo
+                repo: plugin.repo
                 message: plugin.info ? info.message ? info.message : "" : ""
                 visible: buildsExist
                 height: visible ? implicitHeight : 0
@@ -144,7 +144,7 @@ Plugin {
             project.loading += 2
 
         if (syncId !== -1 && project.syncQueue.groups.hasOwnProperty(syncId)) {
-            print("Deleting existing sync operation for Travis CI")
+            //print("Deleting existing sync operation for Travis CI")
             delete project.syncQueue.groups[syncId]
             project.syncQueue.groups = project.syncQueue.groups
         }
@@ -175,7 +175,7 @@ Plugin {
             }
 
             var builds =  JSON.parse(response)
-            print("BUILDS", builds.length, doc.get("builds", []).length)
+            //print("BUILDS", builds.length, doc.get("builds", []).length)
             if (builds.length > doc.get("builds", []).length) {
                 var build = builds[builds.length - 1]
                 if (build.result === 1)

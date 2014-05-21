@@ -69,12 +69,12 @@ Plugin {
 
     property var openTasks: {
         var list = []
-        print("Searching...")
+        //print("Searching...")
         for (var i = 0; i < tasks.length; i++) {
             var task = tasks[i]
-            print(task.text, task.done)
+            //print(task.text, task.done)
             if (!task.done) {
-                print("Open task:", task.text)
+                //print("Open task:", task.text)
                 task.index = i
                 list.push(task)
             }

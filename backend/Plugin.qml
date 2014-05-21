@@ -21,6 +21,7 @@ import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
 import "../components"
 import "../ubuntu-ui-extras"
+import "../ui/project_page"
 
 Item {
     id: plugin
@@ -38,9 +39,17 @@ Item {
     function refresh() {}
     function setup() {}
 
+    property Component configView: PluginConfigView {
+
+    }
+
     onChangedChanged: timer.start()
 
     function displayMessage(message) {}
+
+    function getPreview(message) {
+        //print("Getting preview", plugin)
+    }
 
     function toJSON() { return doc.toJSON() }
     function fromJSON(json) { doc.fromJSON(json) }
@@ -59,7 +68,7 @@ Item {
 //    Connections {
 //        target: project
 //        onReload: {
-//            print("Reloading" + plugin.name)
+//            //print("Reloading" + plugin.name)
 //            plugin.reload()
 //        }
 //    }

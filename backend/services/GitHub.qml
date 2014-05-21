@@ -66,7 +66,7 @@ Service {
                      undefined, {"Accept":"application/vnd.github.v3+json"})
 
             Http.get(github + "/user/repos", ["access_token=" + oauth], function(has_error, status, response) {
-                print("REPOS", response)
+                //print("REPOS", response)
                 if (status !== 304)
                     settings.set("githubRepos", JSON.parse(response))
             }, undefined, {"Accept":"application/vnd.github.v3+json"})
@@ -81,7 +81,7 @@ Service {
     }
 
     function get(project, id, request, callback, options) {
-        //print("OAuth", oauth)
+        ////print("OAuth", oauth)
         if (oauth === "")
             return undefined
         if (options === undefined)
@@ -92,7 +92,7 @@ Service {
     }
 
     function post(project, id, request, options, body, message) {
-        //print("OAuth", oauth)
+        ////print("OAuth", oauth)
         if (oauth === "")
             return undefined
         if (options === undefined)
@@ -103,7 +103,7 @@ Service {
     }
 
     function put(project, id, request, options, body, message) {
-        //print("OAuth", oauth)
+        ////print("OAuth", oauth)
         if (oauth === "")
             return undefined
         if (options === undefined)

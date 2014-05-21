@@ -28,7 +28,7 @@ Item {
         }
 
         onSave: {
-            print("Saving...")
+            //print("Saving...")
             db.set("backend", backend.toJSON())
             db.set("settings", settings.toJSON())
         }

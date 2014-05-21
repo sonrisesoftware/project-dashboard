@@ -102,6 +102,23 @@ MainView {
                 pageStack.push(Qt.resolvedUrl("ui/InitialWalkthrough.qml"))
             }
         }
+
+//        Image {
+//            id: _background
+
+//            z: -1
+//            fillMode: Image.PreserveAspectCrop
+//            source: Qt.resolvedUrl("background3.jpg")
+
+//            anchors {
+//                top: parent.top
+//                bottom: parent.bottom
+//                left: parent.left
+//                right: parent.right
+//                topMargin: -units.gu(10)
+//                bottomMargin: -units.gu(2)
+//            }
+//        }
     }
 
     Component {
@@ -286,7 +303,7 @@ MainView {
                                                                  : ""
 
                                 onClicked: {
-                                    print("Clicked")
+                                    //print("Clicked")
                                     error(i18n.tr("%1 Failed").arg(group.title), i18n.tr("Call: %1\n\n%2").arg(group.errors[0].call).arg(group.errors[0].response))
                                 }
 
@@ -347,7 +364,7 @@ MainView {
         }
 
         onSave: {
-            print("Saving...")
+            //print("Saving...")
             db.set("backend", backend.toJSON())
             db.set("settings", settings.toJSON())
         }
@@ -365,7 +382,7 @@ MainView {
 //        id: queue
 
 //        onError: {
-//            print("Error", call, status, response, args)
+//            //print("Error", call, status, response, args)
 //            if (status === 0) {
 //                mainView.error(i18n.tr("Connection Error"), i18n.tr("Timeout error. Please check your internet and firewall settings:\n\n%1").arg(call))
 //            } else {
@@ -415,7 +432,7 @@ MainView {
             var response = colorLinks(markdownCache[text])
             return response
         } else {
-            print("Calling Markdown API")
+            //print("Calling Markdown API")
             Http.post(github.github + "/markdown", ["access_token=" + github.oauth], function(has_error, status, response) {
                 markdownCache[text] = response
                 markdownCache = markdownCache
@@ -432,12 +449,19 @@ MainView {
         return text.replace(/<a(.*?)>(.*?)</g, "<a $1><font color=\"" + colors["blue"] + "\">$2</font><")
     }
 
-    function newObject(type, args) {
+    function newObject(type, args, parent) {
         if (!args)
             args = {}
-        print(type)
+        if (!parent)
+            parent = mainView
+
         var component = Qt.createComponent(type);
-        return component.createObject(mainView, args);
+        if (component.status == Component.Error) {
+            // Error Handling
+            console.log("Error loading component:", component.errorString());
+        }
+
+        return component.createObject(parent, args);
     }
 
     property var markdownCache: settings.get("markdownCache", {})
@@ -449,5 +473,11 @@ MainView {
                             text: message,
                             action:action
                         })
+    }
+
+    Keys.onSpacePressed: {
+        if (event.modifiers & Qt.ControlModifier) {
+            notification.show("Ctrl+Space")
+        }
     }
 }

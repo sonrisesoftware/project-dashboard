@@ -135,7 +135,7 @@ Object {
             index++
         }
 
-        //print("ALL EVENTS", allEvents.length)
+        ////print("ALL EVENTS", allEvents.length)
 
         return allEvents
     }
@@ -148,7 +148,7 @@ Object {
 
                 plugin.changed = true
 
-                 //print(response)
+                 ////print(response)
                  if (JSON.parse(response)[0] === undefined) {
                      doc.set("status", "")
                      doc.set("statusDescription", "")
@@ -173,8 +173,8 @@ Object {
                 plugin.changed = true
 
                 doc.set("pull", JSON.parse(response))
-                print("MERGED:", JSON.parse(response).merged, pull.merged)
-                print("MERGEABLE:", JSON.parse(response).mergeable, pull.mergeable)
+                //print("MERGED:", JSON.parse(response).merged, pull.merged)
+                //print("MERGEABLE:", JSON.parse(response).mergeable, pull.mergeable)
             })
 
             github.getPullCommits(project, id, plugin.repo, issue, function(status, response) {

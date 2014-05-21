@@ -8,7 +8,7 @@ import "../backend"
 SubtitledListItem {
     id: projectDelegate
     text: project.name
-    onClicked: pageStack.push(Qt.resolvedUrl("../ui/ProjectPage.qml"), {project: project})
+    onClicked: pageStack.push(Qt.resolvedUrl("../ui/project_page/ProjectPage.qml"), {project: project})
 
     property Project project
 

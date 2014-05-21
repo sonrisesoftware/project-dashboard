@@ -290,6 +290,13 @@ TabbedPage {
                 visible: selectedView === "inbox"
             }
 
+            ConfigView {
+                anchors.fill: parent
+
+                project: page.project
+                visible: selectedView === "settings"
+            }
+
             Flickable {
                 id: mainFlickable
 
@@ -358,7 +365,7 @@ TabbedPage {
                             interval: 100
                             running: true
                             onTriggered: {
-                                print("Triggered!")
+                                //print("Triggered!")
                                 column.updateWidths()
                             }
                         }

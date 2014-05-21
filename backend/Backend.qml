@@ -41,7 +41,7 @@ Item {
                 var project = projects.get(i).modelData
                 list.push(project.toJSON())
                 var end = new Date()
-                print("Project " + project.name + " saved in " + (end - start) + " milliseconds")
+                ////print("Project " + project.name + " saved in " + (end - start) + " milliseconds")
             }
 
             doc.set("projects", list)

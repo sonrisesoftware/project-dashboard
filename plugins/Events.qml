@@ -52,7 +52,7 @@ Plugin {
     }
 
     function addEvent(title, date) {
-        print("Adding", title, date)
+        //print("Adding", title, date)
         events.push({
                         "title": title,
                         "date": date.toJSON()

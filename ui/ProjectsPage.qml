@@ -75,7 +75,7 @@ Page {
                     interval: 100
                     running: true
                     onTriggered: {
-                        print("Triggered!")
+                        //print("Triggered!")
                         column.repeaterCompleted = true
                         column.reEvalColumns()
                     }
@@ -90,7 +90,7 @@ Page {
                         delegate: ProjectListItem {
                             project: modelData
                             visible: project.hasPlugin("GitHub")
-                            subText: project.getPlugin("GitHub").repo
+                            subText: visible ? project.getPlugin("GitHub").repo : ""
                         }
                     }
 
@@ -169,7 +169,7 @@ Page {
             placeholderText: i18n.tr("Name")
             onAccepted: {
                 var project = backend.newProject(value)
-                pageStack.push(Qt.resolvedUrl("ProjectPage.qml"), {project: project})
+                pageStack.push(Qt.resolvedUrl("project_page/ProjectPage.qml"), {project: project})
                 notification.show(i18n.tr("Project created"))
             }
         }

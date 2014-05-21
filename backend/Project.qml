@@ -25,6 +25,7 @@ Item {
     id: project
 
     property string name: doc.get("name", "")
+    property bool notificationsEnabled: doc.get("settings.notificationsEnabled", true)
     property int index
 
     function toJSON() { return doc.toJSON() }
@@ -45,10 +46,11 @@ Item {
 
         onSave: {
             doc.set("name", name)
+            doc.set("settings.notificationsEnabled", notificationsEnabled)
             doc.set("selectedTab", selectedTab)
 
             if (!loadedSuccessfully)
-                print("WARNING: Not saving project because it wasn't loaded succesfully!")
+                //print("WARNING: Not saving project because it wasn't loaded succesfully!")
 
             // Save messages
             var inboxList = []
@@ -89,7 +91,7 @@ Item {
 
             //TODO: Remove once the config page works!
 //            if (plugins.count === 0) {
-//                print("Adding first plugin!")
+//                //print("Adding first plugin!")
 //                addPlugin("Resources")
 //            }
 
@@ -100,7 +102,7 @@ Item {
     function newObject(type, args) {
         if (!args)
             args = {}
-        print(type)
+        //print(type)
         var component = Qt.createComponent(type);
         if (component.status == Component.Error) {
             // Error Handling
@@ -156,6 +158,18 @@ Item {
         }
     }
 
+    function getPluginForMessage(message) {
+        //print(JSON.stringify(message))
+        var name = message.plugin
+        for (var i = 0; i < plugins.count; i++) {
+            var plugin = plugins.get(i).modelData
+            if (plugin.name === name) {
+                //print("Found")
+                return plugin
+            }
+        }
+    }
+
     property ListModel plugins: ListModel {
 
     }
@@ -199,7 +213,7 @@ Item {
     }
 
     function removePlugin(type) {
-        print("Removing", type)
+        //print("Removing", type)
         for (var i = 0; i < plugins.count; i++) {
             var plugin = plugins.get(i).modelData
             if (plugin.type === type)

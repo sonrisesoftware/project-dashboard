@@ -82,7 +82,7 @@ ComposerSheet {
 
                 model: {
                     var list = plugin.branches
-                    print(JSON.stringify(list))
+                    //print(JSON.stringify(list))
                     for (var i = 0; i < list.length; i++) {
                         if (list[i].name === "master")
                             list.splice(i, 1)
@@ -96,9 +96,9 @@ ComposerSheet {
                 }
 
                 onHeightChanged: {
-                    print("CHANGING HEIGHT:", (branchPicker.y + branchPicker.height), flickable.height)
+                    //print("CHANGING HEIGHT:", (branchPicker.y + branchPicker.height), flickable.height)
                     if (((branchPicker.y + branchPicker.height) > flickable.height - units.gu(2))) {
-                        print("Going to expansion", flickable.height - (branchPicker.y + branchPicker.height))
+                        //print("Going to expansion", flickable.height - (branchPicker.y + branchPicker.height))
                         flickable.contentY = -(flickable.height - units.gu(1)) + branchPicker.y + branchPicker.height
                     }
                 }

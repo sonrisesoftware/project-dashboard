@@ -79,7 +79,7 @@ Plugin {
             loading--
             if (has_error)
                 error(i18n.tr("Connection Error"), i18n.tr("Unable to download list of issues. Check your connection and/or firewall settings.\n\nError: %1").arg(status))
-            print("Launchpad Results:", JSON.stringify(response[0]))
+            //print("Launchpad Results:", JSON.stringify(response[0]))
 //            var json = JSON.parse(response)
 //            var list = []
 //            for (var i = 0; i < json.length; i++) {

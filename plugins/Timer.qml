@@ -510,7 +510,7 @@ Plugin {
 
                     onClicked: {
                         PopupUtils.close(root)
-                        print(datePicker.date)
+                        //print(datePicker.date)
                         if (date == today) {
                             doc.set("savedTime", DateUtils.timeFromDate(datePicker.date))
 

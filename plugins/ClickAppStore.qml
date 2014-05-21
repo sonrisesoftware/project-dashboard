@@ -99,7 +99,7 @@ Plugin {
 
     function refresh() {
         if (syncId !== -1 && project.syncQueue.groups.hasOwnProperty(syncId)) {
-            print("Deleting existing sync operation for ClickAppStore")
+            //print("Deleting existing sync operation for ClickAppStore")
             delete project.syncQueue.groups[syncId]
             project.syncQueue.groups = project.syncQueue.groups
         }
@@ -187,7 +187,7 @@ Plugin {
                             interval: 100
                             running: true
                             onTriggered: {
-                                print("Triggered!")
+                                //print("Triggered!")
                                 column.repeaterCompleted = true
                                 column.reEvalColumns()
                             }

@@ -32,13 +32,15 @@ Item {
 
     property Project project
 
-    ListView {
+    MasterDetailView {
         id: listView
         anchors.fill: parent
         model: project.inbox
+        noneMessage: i18n.tr("No unread messages!")
         delegate: ListItem.Empty {
             id: listItem
-            onClicked: project.displayMessage(modelData)
+            onClicked: listView.message = modelData
+            selected: listView.message == modelData
 
             removable: true
             onItemRemoved: project.removeMessage(index)
@@ -106,24 +108,24 @@ Item {
                 }
             }
         }
-    }
 
-    Scrollbar {
-        flickableItem: listView
-    }
+        itemSelected: message !== undefined
 
-    Label {
-        anchors.centerIn: parent
-        fontSize: "large"
-        opacity: 0.5
-        text: i18n.tr("No unread messages")
-        visible: listView.count == 0
+        property var message: undefined
+        property Plugin plugin: message ? project.getPluginForMessage(message) : null
+
+        content: Loader {
+            anchors.fill: parent
+            sourceComponent: listView.plugin ? listView.plugin.getPreview(listView.message) : null
+
+            property var message: listView.message
+        }
     }
 
     function friendlyTime(time) {
         var now = new Date()
         var seconds = (now - time)/1000;
-        //print("Difference:", now, time, now - time)
+        ////print("Difference:", now, time, now - time)
         var minutes = Math.round(seconds/60);
         if (minutes < 1)
             return i18n.tr("Now")

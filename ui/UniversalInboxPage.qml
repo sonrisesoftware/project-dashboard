@@ -55,6 +55,8 @@ Page {
             width: parent.width
             property Project project: modelData
 
+            visible: project.notificationsEnabled
+
             ListItem.Header {
                 text: project.name
                 opacity: repeater.count > 0 ? 1 : 0
@@ -166,7 +168,7 @@ Page {
     function friendlyTime(time) {
         var now = new Date()
         var seconds = (now - time)/1000;
-        //print("Difference:", now, time, now - time)
+        ////print("Difference:", now, time, now - time)
         var minutes = Math.round(seconds/60);
         if (minutes < 1)
             return i18n.tr("Now")

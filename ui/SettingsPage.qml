@@ -38,7 +38,7 @@ Page {
             interval: 100
             running: true
             onTriggered: {
-                print("Triggered!")
+                //print("Triggered!")
                 column.reEvalColumns()
             }
         }
