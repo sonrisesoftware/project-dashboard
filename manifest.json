@@ -1,7 +1,7 @@
 {
     "architecture": "all",
     "description": "Manage everything about your projects, in one convenient app",
-    "framework": "ubuntu-sdk-14.04-qml-dev1",
+    "framework": "ubuntu-sdk-14.10-qml-dev1",
     "hooks": {
         "project-dashboard": {
             "apparmor": "project-dashboard.json",
