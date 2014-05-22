@@ -133,6 +133,7 @@ TabbedPage {
 
                 text: modelData.text
                 iconSource: modelData.iconSource
+                visible: modelData.visible
                 onTriggered: modelData.triggered(_toolbarButton)
             }
         }
