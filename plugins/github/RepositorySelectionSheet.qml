@@ -79,7 +79,7 @@ DefaultSheet {
                     enabled: textField.acceptableInput
 
                     onTriggered: {
-                        plugin.doc.set("repoName", textField.text)
+                        plugin.repo = textField.text
                         plugin.refresh()
                         PopupUtils.close(configureSheet)
                     }
@@ -96,7 +96,7 @@ DefaultSheet {
             subText: modelData.full_name
             selected: plugin.doc.get("repoName") === modelData.full_name
             onClicked: {
-                plugin.doc.set("repoName", modelData.full_name)
+                plugin.repo = modelData.full_name
                 plugin.refresh()
                 PopupUtils.close(configureSheet)
             }

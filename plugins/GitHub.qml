@@ -160,6 +160,7 @@ Plugin {
 
         doc.set("issues", list)
         doc.set("nextNumber", nextNumber)
+        doc.set("repoName", repo)
         var end = new Date()
         //print("Average time to save an issue is " + (end - start)/list.length + " milliseconds")
     }
@@ -515,65 +516,76 @@ Plugin {
             ListItem.Standard {
                 text: "Repository"
 
+                onTriggered: _repoField.triggered(_repoField.text)
+
                 control: TextField {
+                    id: _repoField
                     text: plugin.repo
+
+                    onTriggered: {
+                        plugin.repo = text
+                        plugin.issues.clear()
+                        plugin.doc.set("lastUpdated", "")
+                        plugin.refresh()
+                        notification.show("Repository updated")
+                    }
                 }
             }
 
-            ListItem.Header {
-                text: "Issues widget"
-            }
+//            ListItem.Header {
+//                text: "Issues widget"
+//            }
 
-            SuruItemSelector {
-                model: ["Assigned to me", "Recent", "Testable", "Don't show"]
-                delegate: OptionSelectorDelegate {
-                    text: modelData
-                }
-            }
+//            SuruItemSelector {
+//                model: ["Assigned to me", "Recent", "Testable", "Don't show"]
+//                delegate: OptionSelectorDelegate {
+//                    text: modelData
+//                }
+//            }
 
-            ListItem.Header {
-                text: "Pull Requests widget"
-            }
+//            ListItem.Header {
+//                text: "Pull Requests widget"
+//            }
 
-            ListItem.Standard {
-                text: "Show in dashboard"
+//            ListItem.Standard {
+//                text: "Show in dashboard"
 
-                control: Switch {
-                    checked: true
-                }
-            }
+//                control: Switch {
+//                    checked: true
+//                }
+//            }
 
-            ListItem.Header {
-                text: "Notifications"
-            }
+//            ListItem.Header {
+//                text: "Notifications"
+//            }
 
-            ListItem.Standard {
-                text: "New issues"
-                control: Switch {
-                    checked: true
-                }
-            }
+//            ListItem.Standard {
+//                text: "New issues"
+//                control: Switch {
+//                    checked: true
+//                }
+//            }
 
-            ListItem.Standard {
-                text: "Issues assigned to me"
-                control: Switch {
-                    checked: true
-                }
-            }
+//            ListItem.Standard {
+//                text: "Issues assigned to me"
+//                control: Switch {
+//                    checked: true
+//                }
+//            }
 
-            ListItem.Standard {
-                text: "Testable issues"
-                control: Switch {
+//            ListItem.Standard {
+//                text: "Testable issues"
+//                control: Switch {
 
-                }
-            }
+//                }
+//            }
 
-            ListItem.Standard {
-                text: "New pull requests"
-                control: Switch {
-                    checked: true
-                }
-            }
+//            ListItem.Standard {
+//                text: "New pull requests"
+//                control: Switch {
+//                    checked: true
+//                }
+//            }
         }
     }
 }

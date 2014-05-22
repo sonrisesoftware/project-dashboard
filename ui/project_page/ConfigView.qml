@@ -46,7 +46,7 @@ PageView {
 
         action: Action {
             text: "Add plugins"
-            onTriggered: PopupUtils.open(Qt.resolvedUrl("AddPluginsSheet.qml"), null, {project: configPage.project})
+            onTriggered: configPage.selection = "add"//PopupUtils.open(Qt.resolvedUrl("AddPluginsSheet.qml"), null, {project: configPage.project})
         }
 
         model: project.plugins
@@ -117,8 +117,37 @@ PageView {
         content: Item {
             anchors.fill: parent
 
+            Rectangle {
+                anchors.fill: _title
+                color: Qt.rgba(0,0,0,0.1)
+
+                visible: configPage.selection === "general"
+            }
+
+            ListItem.Standard {
+                id: _title
+
+                Label {
+                    anchors {
+                        verticalCenter: parent.verticalCenter
+                        left: parent.left
+                        leftMargin: units.gu(2)
+                    }
+                    fontSize: "large"
+                    text: title
+                }
+
+                visible: configPage.selection === "general"
+            }
+
             Column {
-                anchors.fill: parent
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                    top: _title.bottom
+                    bottom: parent.bottom
+                }
+
                 visible: configPage.selection === "general"
 
                 ListItem.Standard {
@@ -146,6 +175,12 @@ PageView {
                 sourceComponent: plugin ? plugin.configView : null
 
                 property Plugin plugin: project.getPlugin(selection)
+            }
+
+            AddPluginsView {
+                visible: configPage.selection === "add"
+
+                project: configPage.project
             }
         }
     }

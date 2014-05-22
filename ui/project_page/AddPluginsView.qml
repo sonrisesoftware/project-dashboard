@@ -23,25 +23,41 @@ import Ubuntu.Components.ListItems 0.1 as ListItem
 import "../../backend"
 import "../../components"
 
-DefaultSheet {
+PageView {
     id: sheet
 
     property Project project
 
-    Component.onCompleted: {
-        sheet.__leftButton.text = i18n.tr("Close")
-        sheet.__leftButton.color = "grey"
-        sheet.__rightButton.text = i18n.tr("Confirm")
-        sheet.__rightButton.color = sheet.__rightButton.__styleInstance.defaultColor
-        sheet.__foreground.style = Theme.createStyleComponent(Qt.resolvedUrl("../../ubuntu-ui-extras/SuruSheetStyle.qml"), sheet)
+    title: i18n.tr("Available Plugins")
+
+    Rectangle {
+        anchors.fill: _title
+        color: Qt.rgba(0,0,0,0.1)
     }
 
-    title: i18n.tr("Available Plugins")
+    ListItem.Standard {
+        id: _title
+
+        Label {
+            anchors {
+                verticalCenter: parent.verticalCenter
+                left: parent.left
+                leftMargin: units.gu(2)
+            }
+            fontSize: "large"
+            text: title
+        }
+    }
 
     Flickable {
         id: flickable
-        anchors.fill: parent
-        anchors.margins: units.gu(-1)
+        anchors {
+            left: parent.left
+            right: parent.right
+            top: _title.bottom
+            bottom: parent.bottom
+        }
+
 
         clip: true
         contentWidth: width
