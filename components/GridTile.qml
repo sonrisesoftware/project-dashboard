@@ -40,7 +40,7 @@ Item {
         anchors.fill: parent
         anchors.margins: units.gu(1)
 
-        implicitHeight: titleLabel.height + units.gu(3) + contents.height
+        implicitHeight: titleItem.height + contents.height
 
         color: Qt.rgba(0,0,0,0.25) // 0.2
 
@@ -90,20 +90,19 @@ Item {
                         right: valueLabel.left
                         top: parent.top
                         margins: units.gu(2)
-                        topMargin: units.gu(1.5)
+                        topMargin:(titleItem.height - height)/2
                     }
                 }
 
                 Label {
                     id: valueLabel
 
-                    fontSize: "large"
+                    //fontSize: "large"
 
                     anchors {
                         right: parent.right
-                        top: parent.top
+                        verticalCenter: titleLabel.verticalCenter
                         margins: units.gu(2)
-                        topMargin: units.gu(1.5)
                     }
                 }
             }

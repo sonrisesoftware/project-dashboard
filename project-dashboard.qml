@@ -474,10 +474,4 @@ MainView {
                             action:action
                         })
     }
-
-    Keys.onSpacePressed: {
-        if (event.modifiers & Qt.ControlModifier) {
-            notification.show("Ctrl+Space")
-        }
-    }
 }

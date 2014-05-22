@@ -81,7 +81,7 @@ Page {
                     }
                 }
 
-                SettingsTile {
+                GridTile {
                     title: "GitHub Projects"
                     iconSource: "github"
 
@@ -97,7 +97,7 @@ Page {
                     onHeightChanged: column.reEvalColumns()
                 }
 
-                SettingsTile {
+                GridTile {
                     title: "Launchpad Projects"
 
                     Repeater {
@@ -110,7 +110,7 @@ Page {
                     onHeightChanged: column.reEvalColumns()
                 }
 
-                SettingsTile {
+                GridTile {
                     title: "Local Projects"
                     iconSource: "cube"
 

@@ -168,6 +168,7 @@ Plugin {
 
                 contentWidth: width
                 contentHeight: column.contentHeight + units.gu(2)
+                clip: true
 
                 Item {
                     width: reviewsList.width
@@ -198,7 +199,7 @@ Plugin {
                             }
                         }
 
-                        SettingsTile {
+                        GridTile {
                             title: "Overall Rating"
 
                             ListItem.SingleValue {
@@ -210,12 +211,13 @@ Plugin {
                                     font.family: "FontAwesome"
                                     text: rating
                                 }
+                                showDivider: false
                             }
                         }
 
                         Repeater {
                             model: reviews
-                            delegate: SettingsTile {
+                            delegate: GridTile {
                                 title: modelData.reviewer_displayname
                                 value: ratingString(modelData.rating, true)
 

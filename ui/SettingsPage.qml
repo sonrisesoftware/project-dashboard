@@ -45,7 +45,7 @@ Page {
 
         Repeater {
             model: backend.availableServices
-            delegate: SettingsTile {
+            delegate: GridTile {
                 title: i18n.tr("%1 Account").arg(modelData.title)
                 iconSource: modelData.icon
 
@@ -91,7 +91,7 @@ Page {
             }
         }
 
-        SettingsTile {
+        GridTile {
             title: "Help and About"
             iconSource: "question-circle"
 
