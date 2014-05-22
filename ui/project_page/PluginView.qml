@@ -29,6 +29,8 @@ PageView {
     anchors.fill: parent
     property int selectedIndex: 0
 
+    onPluginChanged: selectedIndex = 0
+
     property Project project
 
     function displayItem(pluginItem) {

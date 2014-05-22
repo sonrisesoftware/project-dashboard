@@ -183,8 +183,13 @@ Plugin {
                         repeaterCompleted: true
                         columns: extraWideAspect ? 3 : wideAspect ? 2 : 1
 
+                        onVisibleChanged: {
+                            column.repeaterCompleted = true
+                            column.reEvalColumns()
+                        }
+
                         Timer {
-                            interval: 100
+                            interval: 10
                             running: true
                             onTriggered: {
                                 //print("Triggered!")

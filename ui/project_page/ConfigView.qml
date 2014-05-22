@@ -7,7 +7,7 @@ import "../../backend"
 import "../../components"
 
 PageView {
-    id: page
+    id: configPage
     title: "Project Settings"
 
     property Project project
@@ -118,7 +118,7 @@ PageView {
 
             Column {
                 anchors.fill: parent
-                visible: page.selection === "general"
+                visible: configPage.selection === "general"
 
                 ListItem.Standard {
                     text: "Project Name"

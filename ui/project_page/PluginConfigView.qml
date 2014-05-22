@@ -44,7 +44,7 @@ PageView {
                 text: "Remove"
                 color: colors["red"]
 
-                onClicked: PopupUtils.open(confirmDeleteDialog)
+                onClicked: confirmDeleteDialog.show()
             }
         }
     }
@@ -69,7 +69,10 @@ PageView {
         }
     }
 
-    property Component confirmDeleteDialog: ConfirmDialog {
+    property alias deleteText: confirmDeleteDialog.text
+
+    ConfirmDialog {
+        id: confirmDeleteDialog
         title: i18n.tr("Remove Plugin")
         text: i18n.tr("Are you sure you want to remove the %1 plugin from your project?<br><br><b>WARNING: Doing so will delete ALL data stored by the plugin!</b>").arg(plugin.title)
 
