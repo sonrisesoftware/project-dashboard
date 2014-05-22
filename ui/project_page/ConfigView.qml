@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import Ubuntu.Components 1.0
 import Ubuntu.Components.ListItems 1.0 as ListItem
+import Ubuntu.Components.Popups 1.0
 
 import "../../ubuntu-ui-extras"
 import "../../backend"
@@ -21,7 +22,6 @@ PageView {
         anchors.fill: parent
 
         forceSidebar: true
-
         itemSelected: selection !== ""
 
         header: Column {
@@ -46,6 +46,7 @@ PageView {
 
         action: Action {
             text: "Add plugins"
+            onTriggered: PopupUtils.open(Qt.resolvedUrl("AddPluginsSheet.qml"), null, {project: configPage.project})
         }
 
         model: project.plugins
