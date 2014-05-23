@@ -34,6 +34,8 @@ Item {
 
     default property alias contents: column.data
 
+    property int maxHeight: height
+
     UbuntuShape {
         id: tile
 
@@ -124,10 +126,18 @@ Item {
                 color: UbuntuColors.orange
             }
 
-            Column {
-                id: column
+            Flickable {
                 width: parent.width
+                height: Math.min(maxHeight - titleItem.height - tile.anchors.margins, column.height)
+
                 clip: true
+                contentWidth: parent.width
+                contentHeight: column.height
+
+                Column {
+                    id: column
+                    width: parent.width
+                }
             }
         }
     }

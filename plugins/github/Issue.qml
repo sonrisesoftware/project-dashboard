@@ -53,6 +53,22 @@ Object {
             return result
     }
 
+    property bool hasAssignee: {
+        var result = issue.assignee && issue.assignee.login
+        if (result === undefined)
+            return false
+        else
+            return result
+    }
+
+    property bool hasMilestone: {
+        var result = issue.milestone && issue.milestone.title
+        if (result === undefined)
+            return false
+        else
+            return result
+    }
+
     property var milestone: info.milestone
     property string title: info.title
     property var labels: info.labels

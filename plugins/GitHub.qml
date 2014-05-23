@@ -65,6 +65,32 @@ Plugin {
         return !issue.isPullRequest && issue.open
     })
 
+    property var components: {
+        var list = []
+
+        for (var i = 0; i < issues.count; i++) {
+            var issue = issues.get(i).modelData
+
+            if (!issue.open)
+                continue
+
+            var title = issue.title
+
+            if (title.match(/\[.*\].*/) !== null) {
+                var index = title.indexOf(']')
+                var component = title.substring(1, index)
+
+                print(title, component)
+
+                if (list.indexOf(component) == -1) {
+                    list.push(component)
+                }
+            }
+        }
+
+        return list
+    }
+
     items: [
         PluginItem {
             id: pluginItem
@@ -144,7 +170,12 @@ Plugin {
                     }
                 }
             }
+        },
+
+        PlannerView {
+            id: plannerItem
         }
+
     ]
 
     onSave: {
@@ -172,8 +203,11 @@ Plugin {
         for (var i = 0; i < list.length; i++) {
             var issue = issueComponent.createObject(mainView, {info: list[i].info})
             issue.fromJSON(list[i])
+
             issues.append({"modelData": issue})
         }
+
+        print(JSON.stringify(components))
 
         refresh()
     }
@@ -224,6 +258,7 @@ Plugin {
                 if (!found) {
                     var issue = issueComponent.createObject(mainView, {info: json[i]})
                     issue.refresh(syncId)
+
                     issues.append({"modelData": issue})
                     nextNumber = Math.max(nextNumber, issue.number + 1)
                 }

@@ -35,6 +35,8 @@ PageView {
 
     property Flickable flickable
 
+    clip: true
+
 //    property int loading: plugin.loading
 
 //    onLoadingChanged: {
