@@ -103,7 +103,7 @@ PageView {
             bottom: parent.bottom
         }
 
-        sourceComponent: plugin.items[selectedIndex].page
+        sourceComponent: plugin ? plugin.items[selectedIndex].page : []
 
         onItemChanged: {
             if (visible) {

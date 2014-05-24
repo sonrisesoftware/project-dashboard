@@ -174,6 +174,10 @@ Plugin {
 
         PlannerView {
             id: plannerItem
+        },
+
+        StatsView {
+            id: statsView
         }
 
     ]
