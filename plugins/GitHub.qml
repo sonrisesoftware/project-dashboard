@@ -193,6 +193,7 @@ Plugin {
             list.push(issue.toJSON())
         }
 
+        doc.set("plannerView", plannerItem.view)
         doc.set("issues", list)
         doc.set("nextNumber", nextNumber)
         doc.set("repoName", repo)

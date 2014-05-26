@@ -30,7 +30,7 @@ PluginItem {
 
     title: "Planner"
 
-    property string view: "component" // or "label" or "assignee" or "milestone" (and later, "status")
+    property string view: plugin.doc.get("plannerView", "component") // or "label" or "assignee" or "milestone" (and later, "status")
 
     property var columns: view === "component" ? componentColumns : view === "assignee" ? assigneeColumns : view === "milestone" ? milestoneColumns : []
     property var filter: view === "component" ? componentFilter : view === "assignee" ? assigneeFilter : view === "milestone" ? milestoneFilter : []
@@ -89,7 +89,7 @@ PluginItem {
     page: PluginPage {
         title: "Planner"
 
-        property int columnCount: extraWideAspect ? Math.max(1, Math.floor(width/units.gu(50))) : wideAspect ? 2 : 1
+        property int columnCount: Math.max(1, Math.floor(width/units.gu(60)))
 
 
 
@@ -106,7 +106,7 @@ PluginItem {
             anchors.fill: parent
             anchors.margins: units.gu(1)
 
-            orientation: Qt.Horizontal
+            orientation: columnCount > 1 ? Qt.Horizontal : Qt.Vertical
 
             snapMode: ListView.SnapToItem
 
@@ -117,7 +117,7 @@ PluginItem {
 
                 width: listView.width/columnCount
 
-                maxHeight: listView.height
+                maxHeight: columnCount > 1 ? listView.height : -1
 
                 property string column: modelData
 
@@ -156,6 +156,10 @@ PluginItem {
                 id: _viewPopover
                 Column {
                     width: parent.width
+
+                    ListItem.Header {
+                        text: i18n.tr("Group By")
+                    }
 
                     OverlayItemSelector {
                         id: _viewSelector
