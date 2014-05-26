@@ -68,6 +68,11 @@ Service {
                 var json = JSON.parse(response)
                 settings.set("assemblaUser", json)
             })
+
+            httpGet('/spaces.json').done(function(response) {
+                var json = JSON.parse(response)
+                settings.set("assemblaRepos", json)
+            })
         } else {
             settings.set("assemblaUser", undefined)
         }
