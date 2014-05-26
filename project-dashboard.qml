@@ -58,13 +58,14 @@ MainView {
     width: units.gu(100)
     height: units.gu(75)
 
-    //useDeprecatedToolbar: false
+    useDeprecatedToolbar: false
 
     property var colors: {
         "green": "#5cb85c",//"#59B159",//"#859a01",
         "red": "#db3131",//"#d9534f",//"#db3131",
         "yellow": "#f0ad4e",//"#b68b01",
-        "blue": "#5bc0de",
+        "blue": "#5bc0f9",
+        "orange": UbuntuColors.orange,
         "default": Theme.palette.normal.baseText,
     }
 

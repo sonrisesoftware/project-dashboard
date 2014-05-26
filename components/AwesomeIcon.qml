@@ -31,6 +31,8 @@ Item {
     property bool shadow: false
 
     property var icons: {
+        "caret-right": "",
+        "filter": "",
         "bar-chart-o": "",
         "pencil": "",
         "check-circle": "",
