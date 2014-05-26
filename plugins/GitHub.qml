@@ -98,8 +98,8 @@ Plugin {
             title: i18n.tr("Issues")
             value: openIssues.length > 0 ? openIssues.length : ""
             enabled: !isFork
-            page: IssuesPage {
-                plugin: githubPlugin
+            page: PlannerView {
+                id: issuesPage
             }
 
             action: Action {
@@ -172,10 +172,6 @@ Plugin {
             }
         },
 
-        PlannerView {
-            id: plannerItem
-        },
-
         StatsView {
             id: statsView
         }
@@ -193,7 +189,6 @@ Plugin {
             list.push(issue.toJSON())
         }
 
-        doc.set("plannerView", plannerItem.view)
         doc.set("issues", list)
         doc.set("nextNumber", nextNumber)
         doc.set("repoName", repo)
