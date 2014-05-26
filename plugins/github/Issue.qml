@@ -1,5 +1,5 @@
 import QtQuick 2.0
-import Ubuntu.Components 0.1
+import Ubuntu.Components 1.1
 import "../../ubuntu-ui-extras"
 import "../../backend/utils.js" as Utils
 
