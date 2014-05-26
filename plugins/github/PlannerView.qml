@@ -225,7 +225,7 @@ PluginPage {
     property var selectedFilter: allFilter
 
     function issueFilter(issue) {
-        return (issue.open || settings.get("showClosedTickets", false)) && selectedMilestone(issue)
+        return (issue.open || settings.get("showClosedTickets", false)) && selectedMilestone(issue) && (searchButton.opacity > 0 || (issue.title.indexOf(searchField.text) !== -1 || issue.body.indexOf(searchField.text) !== -1))
     }
 
     function selectedMilestone(issue) {
@@ -371,6 +371,15 @@ PluginPage {
         }
     ]
 
+    property bool searchActive: searchField.focus || searchField.highlighted
+
+    Keys.onPressed: {
+        if (event.text !== "" && !searchField.focus) {
+            searchField.forceActiveFocus()
+            searchField.text = event.text
+        }
+    }
+
     Rectangle {
         id: footer
         anchors {
@@ -378,8 +387,9 @@ PluginPage {
             right: sidebar.left
             bottom: parent.bottom
         }
+        clip: true
 
-        height: units.gu(9)
+        height: units.gu(8)
 
         gradient: Gradient {
             GradientStop {
@@ -388,36 +398,172 @@ PluginPage {
             }
 
             GradientStop {
-                position: 1
+                position: 0.8
                 color: mainView.backgroundColor
             }
         }
 
+        ActionButton {
+            id: searchButton
+            iconName: "search"
+            color: colors["red"]
+
+            onClicked: searchField.forceActiveFocus()
+
+            anchors {
+                left: parent.left
+                verticalCenter: parent.verticalCenter
+                margins: searchActive || parent.width > units.gu(50) ? units.gu(-4.5) : units.gu(1.5)
+
+                Behavior on margins {
+                    UbuntuNumberAnimation {}
+                }
+            }
+
+            opacity: searchActive || parent.width > units.gu(50) ? 0 : 1
+
+            Behavior on opacity {
+                UbuntuNumberAnimation {}
+            }
+        }
+
+        TextField {
+            id: searchField
+            anchors {
+                left: searchButton.right
+                verticalCenter: parent.verticalCenter
+                margins: units.gu(1.5)
+            }
+
+            Component.onCompleted: __styleInstance.backgroundColor = Qt.binding(function() {
+                return (searchField.focus || searchField.highlighted) ? Theme.palette.selected.field : Qt.rgba(1,1,1,0.8)
+            })
+
+            // hint text
+            Label {
+                id: hint
+                verticalAlignment: Text.AlignVCenter
+                anchors {
+                    left: parent.left
+                    top: parent.top
+                    bottom: parent.bottom
+                    margins: units.gu(1)
+                }
+                // hint is shown till user types something in the field
+                visible: (searchField.text == "") && !searchField.inputMethodComposing
+                color: Theme.palette.normal.overlayText
+                opacity: 0.8
+                fontSize: "medium"
+                elide: Text.ElideRight
+
+                text: i18n.tr("Search...")
+            }
+
+            opacity: searchActive || parent.width > units.gu(50) ? 1 : 0
+
+            Behavior on opacity {
+                UbuntuNumberAnimation {}
+            }
+
+            width: (searchField.focus || searchField.highlighted) ? parent.width > units.gu(60) ? units.gu(50) : parent.width - anchors.margins - cancelButton.width - units.gu(3) : units.gu(25)
+
+            Behavior on width {
+                UbuntuNumberAnimation {}
+            }
+
+            Keys.onEscapePressed: {
+                searchField.focus = false
+            }
+        }
+
         Row {
+            id: row
             anchors {
                 right: parent.right
                 verticalCenter: parent.verticalCenter
-                margins: units.gu(2)
+                margins: searchActive ? -(row.width - cancelButton.width) + units.gu(1.5) : units.gu(1.5)
+
+                Behavior on margins {
+                    UbuntuNumberAnimation {}
+                }
             }
 
             spacing: units.gu(1.5)
 
             ActionButton {
+                id: cancelButton
+                iconName: "times"
+                color: "grey"
+                onClicked: searchField.focus = false
+                opacity: searchActive ? 1 : 0
+
+                Behavior on opacity {
+                    UbuntuNumberAnimation {}
+                }
+            }
+
+            ActionButton {
                 iconName: "pencil"
                 color: colors["blue"]
                 onClicked: PopupUtils.open(Qt.resolvedUrl("NewIssuePage.qml"), plugin, {plugin: plugin})
+
+                opacity: searchActive ? 0 : 1
+
+                Behavior on opacity {
+                    UbuntuNumberAnimation {}
+                }
             }
+
+//            ActionButton {
+//                id: searchButton
+//                iconName: "search"
+//                onClicked: searchActive = !searchActive
+//            }
+
+//            TextField {
+//                id: searchField
+//                anchors {
+//                    verticalCenter: parent.verticalCenter
+//                }
+
+//                Component.onCompleted: __styleInstance.backgroundColor = Qt.binding(function() {
+//                    return (searchField.focus || searchField.highlighted) ? Theme.palette.selected.field : Theme.palette.selected.field
+//                })
+//                visible: opacity > 0
+//                opacity: searchActive ? 1 : 0
+//                width: searchActive ? units.gu(30) : 0
+
+//                Behavior on width {
+//                    UbuntuNumberAnimation {}
+//                }
+
+//                Behavior on opacity {
+//                    UbuntuNumberAnimation {}
+//                }
+//            }
 
             ActionButton {
                 iconName: "bars"
                 color: colors["orange"]
                 onClicked: PopupUtils.open(viewPopover, caller)
+
+                opacity: searchActive ? 0 : 1
+
+                Behavior on opacity {
+                    UbuntuNumberAnimation {}
+                }
             }
 
             ActionButton {
                 iconName: sidebar.expanded ? "caret-right" : "filter"
                 color: colors["green"]
                 onClicked: plugin.doc.set("sidebarExpanded", !plugin.doc.get("sidebarExpanded"), false)
+
+                opacity: searchActive ? 0 : 1
+
+                Behavior on opacity {
+                    UbuntuNumberAnimation {}
+                }
             }
         }
     }

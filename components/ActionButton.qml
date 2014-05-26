@@ -26,7 +26,7 @@ Item {
     id: button
 
     width: height
-    height: units.gu(5)
+    height: units.gu(4.5)
 
     property alias iconName: _icon.name
     signal clicked(var caller)
@@ -43,15 +43,15 @@ Item {
         }
     }
 
-    RectangularGlow {
-        id: glowEffect
+//    RectangularGlow {
+//        id: glowEffect
 
-        opacity: 0.3
-        anchors.fill: parent
-        glowRadius: width/2
-        //cornerRadius: 0
-        color: "black"
-    }
+//        opacity: 0.3
+//        anchors.fill: parent
+//        glowRadius: height/2
+//        //cornerRadius: 0
+//        color: "black"
+//    }
 
     Rectangle {
         anchors.fill: parent
@@ -71,12 +71,16 @@ Item {
             ColorAnimation { duration: UbuntuAnimation.FastDuration }
         }
 
-        border.color: Qt.darker(color, 2)
+        border.color: button.color == UbuntuColors.orange ? Qt.darker(color, 1.5) : Qt.darker(color, 2)
     }
 
     AwesomeIcon {
         id: _icon
-        size: parent.height * 2/5
-        anchors.centerIn: parent
+        size: units.gu(2)
+        anchors {
+            verticalCenter: parent.verticalCenter
+            left: parent.left
+            leftMargin: (parent.height - _icon.height)/2
+        }
     }
 }
