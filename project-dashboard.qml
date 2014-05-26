@@ -407,6 +407,10 @@ MainView {
         id: travisCI
     }
 
+    Assembla {
+        id: assembla
+    }
+
     function getIcon(name) {
         var mainView = "icons/"
         var ext = ".png"
