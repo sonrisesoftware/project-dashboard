@@ -130,7 +130,8 @@ BackgroundView {
         }
 
         ListItem.ThinDivider {
-            color: Qt.rgba(0,0,0,0.2)
+            color: theme.primary
+            height: 2
         }
 
         Column {

@@ -42,6 +42,8 @@ Item {
         "clock": "",
         "bookmark-o": "",
         "user": "",
+        "star-half-o": "",
+        "shopping-cart": "",
         "comments-o": "",
         "check": "",
         "ellipse-h": "",

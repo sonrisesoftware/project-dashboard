@@ -129,6 +129,13 @@ Item {
             type: "Events"
             title: "Events"
         }
+
+        ListElement {
+            icon: "shopping-cart"
+            name: "appstore"
+            type: "ClickAppStore"
+            title: "Ubuntu App Store"
+        }
     }
 
     property var availableServices: [github, travisCI]

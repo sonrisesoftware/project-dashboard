@@ -157,6 +157,7 @@ Page {
                 width: parent.width
 
                 property bool hide: sidebar.expanded || issue.isPullRequest
+                visible: opacity > 0
 
                 states: [
                     State {
