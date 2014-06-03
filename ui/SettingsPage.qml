@@ -20,6 +20,8 @@ import Ubuntu.Components 0.1
 import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
 
+import "../model"
+
 Page {
     id: page
     
@@ -35,12 +37,13 @@ Page {
         Repeater {
             model: backend.availableServices
             delegate: ListItem.SingleValue {
-                text: modelData.title
-                value: modelData.authenticationStatus
-                visible: modelData.authenticationRequired
+                property Service service: modelData
+
+                text: service.title
+                value: service.authenticationStatus
 
                 Button {
-                    visible: !modelData.enabled
+                    visible: !service.enabled
                     text: i18n.tr("Authenticate")
                     height: units.gu(4)
                     anchors {
@@ -49,10 +52,10 @@ Page {
                     }
 
                     onClicked: {
-                        if (!modelData.enabled)
-                            modelData.authenticate()
+                        if (!service.enabled)
+                            service.authenticate()
                         else
-                            modelData.revoke()
+                            service.revoke()
                     }
                 }
             }

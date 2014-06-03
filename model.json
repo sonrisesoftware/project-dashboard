@@ -1,0 +1,51 @@
+{
+	"objects": {
+        "Backend": {
+            "_id": "backend",
+
+			"projects": "list[Project"
+		},
+
+        "Settings": {
+            "_id": "settings",
+
+            "markdownCache": "var:{}",
+
+            "uuid": "string"
+        },
+
+        "Service": {
+
+        },
+
+        "GitHub": {
+            "_parent": "Service",
+
+            "oauthToken": "string",
+            "user": "var:undefined",
+            "repos": "var:[]"
+        },
+	
+		"Project": {
+            "plugins": "list",
+            "name": "string",
+            "inbox": "list:json"
+		},
+		
+		"Plugin": {
+			
+		},
+		
+		"NotesPlugin": {
+			"_parent": "Plugin",
+			
+            "notes": "list"
+		},
+		
+		"Note": {
+			"title": "string",
+			"contents": "string",
+			"date_created": "date"
+		}
+	}
+}

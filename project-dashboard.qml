@@ -30,6 +30,9 @@ import "ubuntu-ui-extras/httplib.js" as Http
 import Friends 0.2
 import "Markdown.Converter.js" as Markdown
 
+import "udata"
+import "model"
+
 /*!
     \brief MainView with a Label and Button elements.
 */
@@ -109,7 +112,7 @@ MainView {
                 tabs.selectedTabIndex = 1
             pageStack.push(tabs)
 
-            if (!settings.get("existingInstallation", false)) {
+            if (settings.firstRun) {
                 pageStack.push(Qt.resolvedUrl("ui/InitialWalkthrough.qml"))
             }
         }
@@ -133,7 +136,7 @@ MainView {
             }
 
             website: "http://www.sonrisesoftware.com/apps/project-dashboard"
-            reportABug: "https://github.com/iBeliever/project-dashboard/issues"
+            reportABug: "https://github.com/sonrisesoftware/project-dashboard/issues"
 
             copyright: i18n.tr("Copyright (c) 2014 Michael Spencer")
             author: "Sonrise Software"
@@ -295,32 +298,76 @@ MainView {
         id: friendsUtils
     }
 
+    Database {
+        id: storage
+        path: "project-dashboard.db"
+        modelPath: Qt.resolvedUrl("model")
+    }
+
+    Timer {
+        interval: 100
+        running: true
+        onTriggered: {
+            if (storage.listDocs().indexOf('storage') !== -1) {
+                print("Importing old data...")
+                updateDialog.show()
+
+                updateProgress.value = 0
+
+                var doc = storage.getDoc('storage')
+                var json = doc.contents
+
+                var settings = json.settings
+                var projects = json.backend.projects
+
+                updateProgress.maximumValue = 1 + projects.length
+
+                // Settings
+                {
+
+                    github.oauthToken = settings.githubToken
+                    github.repos = settings.githubRepos
+                    github.user = settings.githubUser
+
+                    updateProgress.value++
+                }
+
+                // Projects
+                for (var i = 0; i < projects.length; i++) {
+                    var project = projects[i]
+                    print(List.objectKeys(project))
+
+                    backend.importProject(project)
+
+                    updateProgress.value++
+                }
+
+                //updateDialog.hide()
+            }
+        }
+    }
+
+    Dialog {
+        id: updateDialog
+        title: i18n.tr("Updating database")
+        text: i18n.tr("Please wait. Updating database to new version of the app.")
+
+        ProgressBar {
+            id: updateProgress
+            maximumValue: 1 // Only 1 step
+            width: parent.width
+        }
+    }
+
+
     Backend {
         id: backend
+        _db: storage
     }
 
-    Database {
-        id: db
-        path: "project-dashboard.db"
-
-        onLoaded: {
-            settings.fromJSON(db.get("settings", {}))
-            backend.fromJSON(db.get("backend", {}))
-        }
-
-        onSave: {
-            print("Saving...")
-            db.set("backend", backend.toJSON())
-            db.set("settings", settings.toJSON())
-        }
-    }
-
-    Document {
+    Settings {
         id: settings
-
-        onSave: {
-            settings.set("markdownCache", markdownCache)
-        }
+        _db: storage
     }
 
 //    SyncQueue {
@@ -342,7 +389,7 @@ MainView {
 
     GitHub {
         id: github
-    }
+    }/*
 
     Launchpad {
         id: launchpad
@@ -350,7 +397,7 @@ MainView {
 
     TravisCI {
         id: travisCI
-    }
+    }*/
 
     function getIcon(name) {
         var mainView = "icons/"
@@ -372,15 +419,15 @@ MainView {
     function renderMarkdown(text, context) {
         if (typeof(text) != "string") {
             return ""
-        } if (markdownCache.hasOwnProperty(text)) {
+        } if (settings.markdownCache.hasOwnProperty(text)) {
             /// Custom color for links
-            var response = colorLinks(markdownCache[text])
+            var response = colorLinks(settings.markdownCache[text])
             return response
         } else {
             print("Calling Markdown API")
             Http.post(github.github + "/markdown", ["access_token=" + github.oauth], function(has_error, status, response) {
-                markdownCache[text] = response
-                markdownCache = markdownCache
+                settings.markdownCache[text] = response
+                settings.markdownCache = settings.markdownCache
             }, undefined, undefined, JSON.stringify({
                 "text": text,
                 "mode": context !== undefined ? "gfm" : "markdown",
@@ -401,8 +448,6 @@ MainView {
         var component = Qt.createComponent(type);
         return component.createObject(mainView, args);
     }
-
-    property var markdownCache: settings.get("markdownCache", {})
 
     function error(title, message, action) {
         PopupUtils.open(Qt.resolvedUrl("ubuntu-ui-extras/NotifyDialog.qml"), mainView,

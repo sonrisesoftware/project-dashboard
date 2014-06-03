@@ -47,7 +47,7 @@ Page {
                         webPage.token = xhr.responseText.substring(13, 53)
                         console.log("Oauth token is now : " + webPage.token)
 
-                        settings.set("githubToken", xhr.responseText.substring(13, 53))
+                        github.oauthToken = xhr.responseText.substring(13, 53)
                         pageStack.pop()
                     }
                 }
