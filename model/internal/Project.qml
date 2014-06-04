@@ -7,6 +7,9 @@ Document {
 
     _type: "Project"
 
+    property bool notificationsEnabled
+    onNotificationsEnabledChanged: _set("notificationsEnabled", notificationsEnabled)
+
     property ListModel inbox: ListModel {
         function add(item) {
             _loaded = true
@@ -49,6 +52,7 @@ Document {
     }
 
     onLoaded: {
+        notificationsEnabled = _get("notificationsEnabled", undefined)
         var list = _get("inbox", [])
         for (var i = 0; i < list.length; i++) {
             var item = _db.load(list[i], object)

@@ -29,7 +29,8 @@
 		"Project": {
             "plugins": "list",
             "name": "string",
-            "inbox": "list:json"
+            "inbox": "list:json",
+            "notificationsEnabled": "bool"
 		},
 		
 		"Plugin": {
