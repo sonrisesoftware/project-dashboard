@@ -15,11 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.Components.Popups 0.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
-import "../../qml-extras/httplib.js" as Http
+
+import Ubuntu.Components 1.1
+import Ubuntu.Components.Popups 1.0
+import Ubuntu.Components.ListItems 1.0 as ListItem
+import "../../ubuntu-ui-extras/httplib.js" as Http
 import "../../ubuntu-ui-extras"
 import ".."
 
@@ -32,6 +32,17 @@ Service {
     title: i18n.tr("GitHub")
     authenticationStatus: oauth === "" ? "" : i18n.tr("Logged in as %1").arg(user.login)
     disabledMessage: i18n.tr("Authenticate to GitHub in Settings")
+
+    description: i18n.tr("GitHub is the best place to share code with friends, co-workers, classmates, and complete strangers. Over six million people use GitHub to build amazing things together.")
+
+    accountItem: ListItem.Subtitled {
+        iconSource: user.avatar_url
+        text: user.name
+        subText: user.login
+        visible: oauth !== ""
+        progression: true
+        height: visible ? units.gu(8) : 0
+    }
 
     enabled: oauth !== ""
 
@@ -55,7 +66,7 @@ Service {
                      undefined, {"Accept":"application/vnd.github.v3+json"})
 
             Http.get(github + "/user/repos", ["access_token=" + oauth], function(has_error, status, response) {
-                print("REPOS", response)
+                //print("REPOS", response)
                 if (status !== 304)
                     settings.set("githubRepos", JSON.parse(response))
             }, undefined, {"Accept":"application/vnd.github.v3+json"})
@@ -70,7 +81,7 @@ Service {
     }
 
     function get(project, id, request, callback, options) {
-        //print("OAuth", oauth)
+        ////print("OAuth", oauth)
         if (oauth === "")
             return undefined
         if (options === undefined)
@@ -81,7 +92,7 @@ Service {
     }
 
     function post(project, id, request, options, body, message) {
-        //print("OAuth", oauth)
+        ////print("OAuth", oauth)
         if (oauth === "")
             return undefined
         if (options === undefined)
@@ -92,7 +103,7 @@ Service {
     }
 
     function put(project, id, request, options, body, message) {
-        //print("OAuth", oauth)
+        ////print("OAuth", oauth)
         if (oauth === "")
             return undefined
         if (options === undefined)

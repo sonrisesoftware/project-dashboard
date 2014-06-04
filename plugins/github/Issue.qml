@@ -1,5 +1,5 @@
 import QtQuick 2.0
-import Ubuntu.Components 0.1
+import Ubuntu.Components 1.1
 import "../../ubuntu-ui-extras"
 import "../../backend/utils.js" as Utils
 
@@ -47,6 +47,22 @@ Object {
     property var assignee: info.assignee
     property bool assignedToMe: {
         var result = issue.assignee && issue.assignee.login && issue.assignee.login === github.user.login
+        if (result === undefined)
+            return false
+        else
+            return result
+    }
+
+    property bool hasAssignee: {
+        var result = issue.assignee && issue.assignee.login
+        if (result === undefined)
+            return false
+        else
+            return result
+    }
+
+    property bool hasMilestone: {
+        var result = issue.milestone && issue.milestone.title
         if (result === undefined)
             return false
         else
@@ -135,7 +151,7 @@ Object {
             index++
         }
 
-        //print("ALL EVENTS", allEvents.length)
+        ////print("ALL EVENTS", allEvents.length)
 
         return allEvents
     }
@@ -148,7 +164,7 @@ Object {
 
                 plugin.changed = true
 
-                 //print(response)
+                 ////print(response)
                  if (JSON.parse(response)[0] === undefined) {
                      doc.set("status", "")
                      doc.set("statusDescription", "")
@@ -173,8 +189,8 @@ Object {
                 plugin.changed = true
 
                 doc.set("pull", JSON.parse(response))
-                print("MERGED:", JSON.parse(response).merged, pull.merged)
-                print("MERGEABLE:", JSON.parse(response).mergeable, pull.mergeable)
+                //print("MERGED:", JSON.parse(response).merged, pull.merged)
+                //print("MERGEABLE:", JSON.parse(response).mergeable, pull.mergeable)
             })
 
             github.getPullCommits(project, id, plugin.repo, issue, function(status, response) {

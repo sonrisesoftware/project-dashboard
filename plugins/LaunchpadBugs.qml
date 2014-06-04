@@ -16,9 +16,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.Components.Popups 0.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
+import Ubuntu.Components 1.1
+import Ubuntu.Components.Popups 1.0
+import Ubuntu.Components.ListItems 1.0 as ListItem
 import "../backend"
 import "../components"
 import "../backend/services"
@@ -79,7 +79,7 @@ Plugin {
             loading--
             if (has_error)
                 error(i18n.tr("Connection Error"), i18n.tr("Unable to download list of issues. Check your connection and/or firewall settings.\n\nError: %1").arg(status))
-            print("Launchpad Results:", JSON.stringify(response[0]))
+            //print("Launchpad Results:", JSON.stringify(response[0]))
 //            var json = JSON.parse(response)
 //            var list = []
 //            for (var i = 0; i < json.length; i++) {

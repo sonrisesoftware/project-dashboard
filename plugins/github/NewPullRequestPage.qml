@@ -16,10 +16,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.Components.Pickers 0.1
-import Ubuntu.Components.Popups 0.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
+import Ubuntu.Components 1.1
+import Ubuntu.Components.Pickers 1.0
+import Ubuntu.Components.Popups 1.0
+import Ubuntu.Components.ListItems 1.0 as ListItem
 import "../../backend/services"
 
 ComposerSheet {
@@ -82,7 +82,7 @@ ComposerSheet {
 
                 model: {
                     var list = plugin.branches
-                    print(JSON.stringify(list))
+                    //print(JSON.stringify(list))
                     for (var i = 0; i < list.length; i++) {
                         if (list[i].name === "master")
                             list.splice(i, 1)
@@ -96,9 +96,9 @@ ComposerSheet {
                 }
 
                 onHeightChanged: {
-                    print("CHANGING HEIGHT:", (branchPicker.y + branchPicker.height), flickable.height)
+                    //print("CHANGING HEIGHT:", (branchPicker.y + branchPicker.height), flickable.height)
                     if (((branchPicker.y + branchPicker.height) > flickable.height - units.gu(2))) {
-                        print("Going to expansion", flickable.height - (branchPicker.y + branchPicker.height))
+                        //print("Going to expansion", flickable.height - (branchPicker.y + branchPicker.height))
                         flickable.contentY = -(flickable.height - units.gu(1)) + branchPicker.y + branchPicker.height
                     }
                 }

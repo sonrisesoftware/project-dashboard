@@ -16,19 +16,26 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.Components.Popups 0.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
+import Ubuntu.Components 1.1
+import Ubuntu.Components.Popups 1.0
+import Ubuntu.Components.ListItems 1.0 as ListItem
 import "../ubuntu-ui-extras"
+import "../ui/project_page"
 
-TabbedPage {
+PageView {
     id: page
+
+    property var tabs: []
+    property int selectedIndex: 0
+    property var selectedTab: tabs[selectedIndex]
 
     //property string title
 
     property list<Action> actions
 
-    //property Flickable flickable
+    property Flickable flickable
+
+    clip: true
 
 //    property int loading: plugin.loading
 
@@ -57,20 +64,20 @@ TabbedPage {
 //        }
 //    }
 
-    tools: ToolbarItems {
-        opened: wideAspect
-        locked: wideAspect
+//    tools: ToolbarItems {
+//        opened: wideAspect
+//        locked: wideAspect
 
-        onLockedChanged: opened = locked
+//        onLockedChanged: opened = locked
 
-        Repeater {
-            model: page.actions
-            delegate: ToolbarButton {
-                id: toolbarButton
-                action: modelData
-                visible: action.visible
-                function trigger(value) { action.triggered(toolbarButton) }
-            }
-        }
-    }
+//        Repeater {
+//            model: page.actions
+//            delegate: ToolbarButton {
+//                id: toolbarButton
+//                action: modelData
+//                visible: action.visible
+//                function trigger(value) { action.triggered(toolbarButton) }
+//            }
+//        }
+//    }
 }

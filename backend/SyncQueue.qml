@@ -1,5 +1,5 @@
 import QtQuick 2.0
-import Ubuntu.Components 0.1
+import Ubuntu.Components 1.1
 import "../ubuntu-ui-extras/httplib.js" as Http
 
 Object {
@@ -37,7 +37,7 @@ Object {
 
     function newGroup(title) {
         var id = nextGroup++
-        //print(title)
+        ////print(title)
         groups[id] = {
             "title": title,
             "count": 0,
@@ -96,7 +96,7 @@ Object {
     }
 
     function doOperation(op) {
-        //print("Doing operation:", op.type)
+        ////print("Doing operation:", op.type)
         if (op.type === "http") {
             doHttp(op.group, op.data)
         } else if (op.type === "httpGet") {
@@ -109,7 +109,7 @@ Object {
     function doHttpGet(id, data) {
         count++
         Http.request(data.path, "GET", data.options, function(has_error, status, response) {
-            //print("Finished", id)
+            ////print("Finished", id)
             groups[id].count--
             groups = groups
             count--
@@ -126,7 +126,7 @@ Object {
             }
 
             if (groups[id].count === 0 && groups[id].errors.length === 0) {
-                //print("Deleting", id)
+                ////print("Deleting", id)
                 delete groups[id]
                 groups = groups
             }
@@ -164,7 +164,7 @@ Object {
             try {
                 doOperation(op)
             } catch(e) {
-                print(e)
+                //print(e)
             }
 
             list.splice(0, 1)

@@ -16,11 +16,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.Components.Popups 0.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
+import Ubuntu.Components 1.1
+import Ubuntu.Components.Popups 1.0
+import Ubuntu.Components.ListItems 1.0 as ListItem
 import "../backend"
 import "../ubuntu-ui-extras"
+import "../components"
 
 Page {
     id: page
@@ -37,64 +38,98 @@ Page {
             text: i18n.tr("New Project")
             iconSource: getIcon("add")
             onTriggered: PopupUtils.open(newProjectDialog, page)
-        }
+        },
 
+        Action {
+            id: inboxAction
+            text: i18n.tr("Inbox")
+            iconSource: inboxPage.count > 0 ? getIcon("bell") : getIcon("bell-o")
+            onTriggered: pageStack.push(inboxPage)
+        }
     ]
 
-    ListView {
+    onVisibleChanged: column.reEvalColumns()
+
+    Flickable {
         id: projectsList
         anchors.fill: parent
-        model: backend.projects
-        delegate: ListItem.SingleValue {
-            id: projectDelegate
-            text: project.name
-            value: project.inbox.count > 0 ? project.inbox.count : ""
-            onClicked: pageStack.push(Qt.resolvedUrl("ProjectPage.qml"), {project: project})
 
-            property Project project: modelData
+        contentWidth: width
+        contentHeight: column.contentHeight + units.gu(2)
 
-            removable: true
-            confirmRemoval: true
-
-            backgroundIndicator: ListItemBackground {
-                state: swipingState
-                iconSource: getIcon("delete-white")
-                text: "Delete"
-            }
-
-            // TODO: Nasty hack to improve the appearance of the confirm removal dialog
-            Component.onCompleted: {
-                var image = findChild(projectDelegate, "confirmRemovalDialog").children[0].children[0]
-                image.source = ""
-
-                var label = findChild(projectDelegate, "confirmRemovalDialog").children[0].children[1]
-                label.text = ""
-            }
-
-            onItemRemoved: {
-                project.remove()
-            }
-
-            function findChild(obj,objectName) {
-                var childs = new Array(0);
-                childs.push(obj)
-                while (childs.length > 0) {
-                    if (childs[0].objectName == objectName) {
-                        return childs[0]
-                    }
-                    for (var i in childs[0].data) {
-                        childs.push(childs[0].data[i])
-                    }
-                    childs.splice(0, 1);
+        Item {
+            width: projectsList.width
+            height: column.contentHeight + units.gu(2)
+            ColumnFlow {
+                id: column
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                    top: parent.top
+                    margins: units.gu(1)
                 }
-                return null;
+                repeaterCompleted: true
+                columns: extraWideAspect ? 3 : wideAspect ? 2 : 1
+
+                Timer {
+                    interval: 100
+                    running: true
+                    onTriggered: {
+                        //print("Triggered!")
+                        column.repeaterCompleted = true
+                        column.reEvalColumns()
+                    }
+                }
+
+                GridTile {
+                    title: "GitHub Projects"
+                    iconSource: "github"
+
+                    Repeater {
+                        model: backend.projects
+                        delegate: ProjectListItem {
+                            project: modelData
+                            visible: project.hasPlugin("GitHub")
+                            subText: visible ? project.getPlugin("GitHub").repo : ""
+                        }
+                    }
+
+                    onHeightChanged: column.reEvalColumns()
+                }
+
+                GridTile {
+                    title: "Launchpad Projects"
+
+                    Repeater {
+                        model: backend.projects
+                        delegate: ProjectListItem {
+                            project: modelData
+                            visible: !project.hasPlugin("GitHub") && project.hasPlugin("Launchpad")
+                        }
+                    }
+                    onHeightChanged: column.reEvalColumns()
+                }
+
+                GridTile {
+                    title: "Local Projects"
+                    iconSource: "cube"
+
+                    Repeater {
+                        model: backend.projects
+                        delegate: ProjectListItem {
+                            project: modelData
+                            visible: !project.hasPlugin("GitHub") && !project.hasPlugin("Launchpad")
+                        }
+                    }
+                    onHeightChanged: column.reEvalColumns()
+                }
             }
         }
     }
 
     Label {
         anchors.centerIn: parent
-        visible: projectsList.count === 0
+        visible: backend.projects.count === 0
         opacity: 0.5
         fontSize: "large"
         text: i18n.tr("No projects")
@@ -117,6 +152,10 @@ Page {
         }
 
         ToolbarButton {
+            action: inboxAction
+        }
+
+        ToolbarButton {
             action: settingsAction
         }
     }
@@ -130,7 +169,7 @@ Page {
             placeholderText: i18n.tr("Name")
             onAccepted: {
                 var project = backend.newProject(value)
-                pageStack.push(Qt.resolvedUrl("ProjectPage.qml"), {project: project})
+                pageStack.push(Qt.resolvedUrl("project_page/ProjectPage.qml"), {project: project})
                 notification.show(i18n.tr("Project created"))
             }
         }

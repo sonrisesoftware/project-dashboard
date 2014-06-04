@@ -16,15 +16,16 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.Components.Popups 0.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
+import Ubuntu.Components 1.1
+import Ubuntu.Components.Popups 1.0
+import Ubuntu.Components.ListItems 1.0 as ListItem
 import "../backend"
 import "../components"
 import "../backend/services"
 import "../ubuntu-ui-extras"
 import "../ubuntu-ui-extras/listutils.js" as List
 import "github"
+import "../ui/project_page"
 
 Plugin {
     id: plugin
@@ -34,6 +35,9 @@ Plugin {
     name: "github"
     canReload: false
     configuration: repo ? repo : "Not connected to a repository"
+
+    title: "GitHub"
+    icon: "github"
 
     property string repo: doc.get("repoName", "")
 
@@ -61,6 +65,32 @@ Plugin {
         return !issue.isPullRequest && issue.open
     })
 
+    property var components: {
+        var list = []
+
+        for (var i = 0; i < issues.count; i++) {
+            var issue = issues.get(i).modelData
+
+            if (!issue.open)
+                continue
+
+            var title = issue.title
+
+            if (title.match(/\[.*\].*/) !== null) {
+                var index = title.indexOf(']')
+                var component = title.substring(1, index)
+
+                print(title, component)
+
+                if (list.indexOf(component) == -1) {
+                    list.push(component)
+                }
+            }
+        }
+
+        return list
+    }
+
     items: [
         PluginItem {
             id: pluginItem
@@ -68,8 +98,8 @@ Plugin {
             title: i18n.tr("Issues")
             value: openIssues.length > 0 ? openIssues.length : ""
             enabled: !isFork
-            page: IssuesPage {
-                plugin: githubPlugin
+            page: PlannerView {
+                id: issuesPage
             }
 
             action: Action {
@@ -140,11 +170,16 @@ Plugin {
                     }
                 }
             }
+        },
+
+        StatsView {
+            id: statsView
         }
+
     ]
 
     onSave: {
-        print("Saving", project.name)
+        //print("Saving", project.name)
 
         // Save issues
         var start = new Date()
@@ -156,19 +191,23 @@ Plugin {
 
         doc.set("issues", list)
         doc.set("nextNumber", nextNumber)
+        doc.set("repoName", repo)
         var end = new Date()
-        print("Average time to save an issue is " + (end - start)/list.length + " milliseconds")
+        //print("Average time to save an issue is " + (end - start)/list.length + " milliseconds")
     }
 
     onLoaded: {
-        print("Loading!")
+        //print("Loading!")
 
         var list = doc.get("issues", [])
         for (var i = 0; i < list.length; i++) {
             var issue = issueComponent.createObject(mainView, {info: list[i].info})
             issue.fromJSON(list[i])
+
             issues.append({"modelData": issue})
         }
+
+        print(JSON.stringify(components))
 
         refresh()
     }
@@ -200,15 +239,15 @@ Plugin {
 
             plugin.changed = true
 
-            //print(response)
+            ////print(response)
             var json = JSON.parse(response)
-            //print("LENGTH:", json.length)
+            ////print("LENGTH:", json.length)
             for (var i = 0; i < json.length; i++) {
                 var found = false
                 for (var j = 0; j < issues.count; j++) {
                     var issue = issues.get(j).modelData
 
-                    //print(issues.get(j).modelData.number + " === " + json[i].number)
+                    ////print(issues.get(j).modelData.number + " === " + json[i].number)
                     if (issue.number === json[i].number) {
                         issue.info = json[i]
                         found = true
@@ -219,6 +258,7 @@ Plugin {
                 if (!found) {
                     var issue = issueComponent.createObject(mainView, {info: json[i]})
                     issue.refresh(syncId)
+
                     issues.append({"modelData": issue})
                     nextNumber = Math.max(nextNumber, issue.number + 1)
                 }
@@ -226,7 +266,7 @@ Plugin {
         }
 
         if (syncId !== -1 && project.syncQueue.groups.hasOwnProperty(syncId)) {
-            print("Deleting existing sync operation for GitHub")
+            //print("Deleting existing sync operation for GitHub")
             delete project.syncQueue.groups[syncId]
             project.syncQueue.groups = project.syncQueue.groups
         }
@@ -259,7 +299,7 @@ Plugin {
 
             var json = JSON.parse(response)
 
-            print("LENGTH:", json.length)
+            //print("LENGTH:", json.length)
             for (var i = 0; i < json.length; i++) {
                 var event = json[i]
                 var actor = event.actor.login
@@ -268,7 +308,7 @@ Plugin {
                 var payload = event.payload
 
                 // TODO: When publishing, add: || actor === github.user.login
-                print(date, lastRefreshed, type, actor)
+                //print(date, lastRefreshed, type, actor)
                 if (new Date(lastRefreshed) >= new Date(date))
                     break
 
@@ -276,7 +316,7 @@ Plugin {
                     continue
 
                 // newMessage(plugin, icon, title, message, date, data)
-                print(type)
+                //print(type)
 
                 if (type === "IssuesEvent") {
                     var issue = payload.issue
@@ -320,7 +360,7 @@ Plugin {
         github.getRepository(project, syncId, repo, function(status, response) {
             if (lastRefreshed === "")
                 project.loading--
-            //print("Info:", response)
+            ////print("Info:", response)
             var json = JSON.parse(response)
             doc.set("repo", json)
 
@@ -331,7 +371,7 @@ Plugin {
                 github.getLabels(project, syncId, repo, function(status, response) {
                     if (lastRefreshed === "")
                         project.loading--
-                    //print("Labels:", response)
+                    ////print("Labels:", response)
                     var json = JSON.parse(response)
                     doc.set("labels", json)
                 })
@@ -339,7 +379,7 @@ Plugin {
                 github.getAssignees(project, syncId, repo, function(status, response) {
                     if (lastRefreshed === "")
                         project.loading--
-                    //print("Labels:", response)
+                    ////print("Labels:", response)
                     var json = JSON.parse(response)
                     doc.set("assignees", json)
                 })
@@ -347,7 +387,7 @@ Plugin {
                 github.getMilestones(project, syncId, repo, function(status, response) {
                     if (lastRefreshed === "")
                         project.loading--
-                    //print("Labels:", response)
+                    ////print("Labels:", response)
                     var json = JSON.parse(response)
                     doc.set("milestones", json)
                 })
@@ -456,5 +496,131 @@ Plugin {
         }
 
         throw "Unable to display message: " + JSON.stringify(message)
+    }
+
+    function getPreview(message) {
+        //print("Getting preview...")
+        if (message.data.type === "issue" || message.data.type === "comment") {
+            return issuePreview
+        }
+    }
+
+    Component {
+        id: issuePreview
+
+        MessagePreview {
+            id: _preview
+            title: message.title
+
+            property Issue issue: {
+                //print("PREVIEW", JSON.stringify(message), issues)
+                for (var i = 0; i < issues.count;i++) {
+                    var issue = issues.get(i).modelData
+                    //print(issue.number, message.data.number)
+                    if (issue.number == message.data.number) {
+                        //print("FOUND ISSUE")
+                        return issue
+                    }
+                }
+            }
+
+            actions: [
+                Action {
+                    text: issue.open ? i18n.tr("Close") : i18n.tr("Reopen")
+                },
+
+                Action {
+                    text: "View"
+                    onTriggered: displayMessage(message)
+                }
+            ]
+
+            IssueItem {
+                anchors.fill: parent
+                issue: _preview.issue
+            }
+        }
+    }
+
+    configView: PluginConfigView {
+        hasSettings: true
+
+        Column {
+            anchors.fill: parent
+
+            ListItem.Standard {
+                text: "Repository"
+
+                onTriggered: _repoField.triggered(_repoField.text)
+
+                control: TextField {
+                    id: _repoField
+                    text: plugin.repo
+
+                    onTriggered: {
+                        plugin.repo = text
+                        plugin.issues.clear()
+                        plugin.doc.set("lastUpdated", "")
+                        plugin.refresh()
+                        notification.show("Repository updated")
+                    }
+                }
+            }
+
+//            ListItem.Header {
+//                text: "Issues widget"
+//            }
+
+//            SuruItemSelector {
+//                model: ["Assigned to me", "Recent", "Testable", "Don't show"]
+//                delegate: OptionSelectorDelegate {
+//                    text: modelData
+//                }
+//            }
+
+//            ListItem.Header {
+//                text: "Pull Requests widget"
+//            }
+
+//            ListItem.Standard {
+//                text: "Show in dashboard"
+
+//                control: Switch {
+//                    checked: true
+//                }
+//            }
+
+//            ListItem.Header {
+//                text: "Notifications"
+//            }
+
+//            ListItem.Standard {
+//                text: "New issues"
+//                control: Switch {
+//                    checked: true
+//                }
+//            }
+
+//            ListItem.Standard {
+//                text: "Issues assigned to me"
+//                control: Switch {
+//                    checked: true
+//                }
+//            }
+
+//            ListItem.Standard {
+//                text: "Testable issues"
+//                control: Switch {
+
+//                }
+//            }
+
+//            ListItem.Standard {
+//                text: "New pull requests"
+//                control: Switch {
+//                    checked: true
+//                }
+//            }
+        }
     }
 }

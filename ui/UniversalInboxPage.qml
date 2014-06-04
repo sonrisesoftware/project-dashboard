@@ -16,9 +16,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.Components.Popups 0.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
+import Ubuntu.Components 1.1
+import Ubuntu.Components.Popups 1.0
+import Ubuntu.Components.ListItems 1.0 as ListItem
 import "../backend"
 import "../components"
 import "../ubuntu-ui-extras"
@@ -31,7 +31,21 @@ Page {
 
     flickable: listView.contentHeight > 0 ? listView : null
 
-    property int count: List.concat(backend.projects, "inbox").length
+    property int count: List.concat(backend.projects, "inbox", function(project) { return project.notificationsEnabled }).length
+
+    actions: [
+        Action {
+            id: clearAction
+
+            iconSource: getIcon("edit-clear")
+            text: i18n.tr("Clear")
+            enabled: count > 0
+            onTriggered: {
+                backend.clearInbox()
+            }
+        }
+
+    ]
 
     ListView {
         id: listView
@@ -40,6 +54,8 @@ Page {
         delegate: Column {
             width: parent.width
             property Project project: modelData
+
+            visible: project.notificationsEnabled
 
             ListItem.Header {
                 text: project.name
@@ -152,7 +168,7 @@ Page {
     function friendlyTime(time) {
         var now = new Date()
         var seconds = (now - time)/1000;
-        //print("Difference:", now, time, now - time)
+        ////print("Difference:", now, time, now - time)
         var minutes = Math.round(seconds/60);
         if (minutes < 1)
             return i18n.tr("Now")
@@ -175,12 +191,7 @@ Page {
         onLockedChanged: opened = locked
 
         ToolbarButton {
-            iconSource: getIcon("edit-clear")
-            text: i18n.tr("Clear")
-            enabled: count > 0
-            onTriggered: {
-                backend.clearInbox()
-            }
+            action: clearAction
         }
     }
 }

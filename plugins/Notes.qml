@@ -16,9 +16,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.Components.Popups 0.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
+import Ubuntu.Components 1.1
+import Ubuntu.Components.Popups 1.0
+import Ubuntu.Components.ListItems 1.0 as ListItem
 import "../backend"
 import "../components"
 import "../ubuntu-ui-extras/listutils.js" as List
@@ -29,6 +29,8 @@ Plugin {
     id: plugin
 
     name: "notes"
+    title: "Notes"
+    icon: "pencil-square-o"
 
     property var notes: doc.get("notes", [])
 
@@ -99,30 +101,104 @@ Plugin {
                 onTriggered: PopupUtils.open(newNotePage)
             }
 
-            ListView {
+            Flickable {
                 id: listView
                 anchors.fill: parent
-                model: notes
-                delegate: SubtitledListItem {
-                    id: item
-                    text: escapeHTML(modelData.title) + " <font color=\"" + colors["green"] + "\">" + Qt.formatDate(new Date(modelData.date)) + "</font>"
-                    subText: modelData.contents
+                clip: true
 
-                    onClicked: pageStack.push(notePage, {index: index})
+                contentWidth: width
+                contentHeight: column.contentHeight + units.gu(2)
 
-                    removable: true
-                    backgroundIndicator: ListItemBackground {
-                        state: item.swipingState
-                        iconSource: getIcon("delete-white")
-                        text: i18n.tr("Delete")
-                    }
+                Item {
+                    width: listView.width
+                    height: column.contentHeight + units.gu(2)
+                    ColumnFlow {
+                        id: column
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                            top: parent.top
+                            margins: units.gu(1)
+                        }
+                        repeaterCompleted: true
+                        columns: extraWideAspect ? 3 : wideAspect ? 2 : 1
 
-                    onItemRemoved: {
-                        notes.splice(index, 1)
-                        notes = notes
+                        onVisibleChanged: {
+                            column.repeaterCompleted = true
+                            column.reEvalColumns()
+                        }
+
+                        Timer {
+                            interval: 10
+                            running: true
+                            onTriggered: {
+                                //print("Triggered!")
+                                column.repeaterCompleted = true
+                                column.reEvalColumns()
+                            }
+                        }
+
+                        Repeater {
+                            model: notes
+
+                            onCountChanged: {
+                                column.reEvalColumns()
+                            }
+
+                            delegate: GridTile {
+                                title: modelData.title
+                                value: "<font color=\"" + colors["green"] + "\">" + Qt.formatDate(new Date(modelData.date)) + "</font>"
+
+                                ListItem.Empty {
+                                    height: _desc.height + units.gu(4)
+                                    Label {
+                                        id: _desc
+                                        anchors {
+                                            verticalCenter: parent.verticalCenter
+                                            left: parent.left
+                                            right: parent.right
+                                            margins: units.gu(2)
+                                        }
+                                        text: modelData.contents
+                                        maximumLineCount: 5
+                                        elide: Text.ElideRight
+                                        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                                    }
+
+                                    showDivider: false
+
+                                    onClicked: pageStack.push(notePage, {index: index})
+                                }
+                            }
+                        }
                     }
                 }
             }
+
+//            ListView {
+//                id: listView
+//                anchors.fill: parent
+//                model: notes
+//                delegate: SubtitledListItem {
+//                    id: item
+//                    text: escapeHTML(modelData.title) + " <font color=\"" + colors["green"] + "\">" + Qt.formatDate(new Date(modelData.date)) + "</font>"
+//                    subText: modelData.contents
+
+//                    onClicked: pageStack.push(notePage, {index: index})
+
+//                    removable: true
+//                    backgroundIndicator: ListItemBackground {
+//                        state: item.swipingState
+//                        iconSource: getIcon("delete-white")
+//                        text: i18n.tr("Delete")
+//                    }
+
+//                    onItemRemoved: {
+//                        notes.splice(index, 1)
+//                        notes = notes
+//                    }
+//                }
+//            }
 
             Scrollbar {
                 flickableItem: listView

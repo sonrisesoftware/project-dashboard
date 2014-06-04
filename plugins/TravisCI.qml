@@ -16,9 +16,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.Components.Popups 0.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
+import Ubuntu.Components 1.1
+import Ubuntu.Components.Popups 1.0
+import Ubuntu.Components.ListItems 1.0 as ListItem
 import "../backend"
 import "../components"
 import "../backend/services"
@@ -29,6 +29,8 @@ Plugin {
     id: plugin
 
     name: "travis"
+    icon: "check-circle"
+    title: "Testing"
     canReload: true
 
     property var info: doc.get("repo", undefined)
@@ -62,7 +64,7 @@ Plugin {
                     return {}
                 }
 
-                repo: repo
+                repo: plugin.repo
                 message: plugin.info ? info.message ? info.message : "" : ""
                 visible: buildsExist
                 height: visible ? implicitHeight : 0
@@ -142,7 +144,7 @@ Plugin {
             project.loading += 2
 
         if (syncId !== -1 && project.syncQueue.groups.hasOwnProperty(syncId)) {
-            print("Deleting existing sync operation for Travis CI")
+            //print("Deleting existing sync operation for Travis CI")
             delete project.syncQueue.groups[syncId]
             project.syncQueue.groups = project.syncQueue.groups
         }
@@ -172,7 +174,16 @@ Plugin {
                 return
             }
 
-            doc.set("builds", JSON.parse(response))
+            var builds =  JSON.parse(response)
+            //print("BUILDS", builds.length, doc.get("builds", []).length)
+            if (builds.length > doc.get("builds", []).length) {
+                var build = builds[builds.length - 1]
+                if (build.result === 1)
+                    project.newMessage("travis", "check-circle", i18n.tr("Continous Integration failed"),
+                                       "Build %1 - %2".arg(build.number).arg(build.message), build.finished_at, build.number)
+            }
+
+            doc.set("builds", builds)
         })
 
         doc.set("lastRefreshed", new Date().toJSON())

@@ -16,10 +16,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.PerformanceMetrics 0.1
-import Ubuntu.Components.Popups 0.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
+import Ubuntu.Components 1.1
+import Ubuntu.Components.Popups 1.0
+import Ubuntu.Components.ListItems 1.0 as ListItem
 import "components"
 import "ui"
 import "backend"
@@ -62,11 +61,14 @@ MainView {
     width: units.gu(100)
     height: units.gu(75)
 
+    useDeprecatedToolbar: false
+
     property var colors: {
         "green": "#5cb85c",//"#59B159",//"#859a01",
         "red": "#db3131",//"#d9534f",//"#db3131",
         "yellow": "#f0ad4e",//"#b68b01",
-        "blue": "#5bc0de",
+        "blue": "#5bc0f9",
+        "orange": UbuntuColors.orange,
         "default": Theme.palette.normal.baseText,
     }
 
@@ -86,31 +88,19 @@ MainView {
     PageStack {
         id: pageStack
 
-        Tabs {
-            id: tabs
+        ProjectsPage {
+            id: projectsPage
+        }
 
-
-            Tab {
-                title: page.title
-                page: ProjectsPage {
-                    id: projectsPage
-                }
-            }
-
-            Tab {
-                title: page.title
-                page: UniversalInboxPage {
-                    id: inboxPage
-                }
-            }
+        UniversalInboxPage {
+            id: inboxPage
+            visible: false
         }
 
         anchors.bottomMargin: wideAspect && mainView.toolbar.opened && mainView.toolbar.locked ? -mainView.toolbar.triggerSize : 0
 
         Component.onCompleted: {
-            if (inboxPage.count > 0)
-                tabs.selectedTabIndex = 1
-            pageStack.push(tabs)
+            pageStack.push(projectsPage)
 
             if (settings.firstRun) {
                 pageStack.push(Qt.resolvedUrl("ui/InitialWalkthrough.qml"))
@@ -147,59 +137,108 @@ MainView {
     property bool syncError: List.iter(backend.projects, function(project) {
         return project.syncQueue.hasError
     }) > 0
-    property bool busy: List.iter(backend.projects, function(project) {
+    property int busyCount: List.iter(backend.projects, function(project) {
         return project.syncQueue.count
-    }) > 0
+    })
+    
+    property int busyTotal: List.iter(backend.projects, function(project) {
+        return project.syncQueue.totalCount
+    })
+
+    property int busy: busyCount > 0
 
     Notification {
         id: notification
     }
 
+//    Rectangle {
+//        anchors.fill: parent
+//        parent: header
+
+//        z: -1
+//        color: Qt.rgba(0,0,0,0.4)
+//    }
+
     Item {
         anchors.fill: parent
-        anchors.bottomMargin: header.height - header.__styleInstance.contentHeight
         parent: header
 
-        AwesomeIcon {
-            name: "exclamation-triangle"
-            color: colors["yellow"]
-            anchors.centerIn: syncIndicator
-            size: units.gu(2.6)
-            opacity: !busy && syncError ? 1 : 0
+        z: 50
+
+        Rectangle {
+            height: units.dp(1)
+            width: busyCount === 0 ? 0 : parent.width * (1 - busyCount/busyTotal)
+            color: UbuntuColors.orange
+            anchors.top: parent.bottom
+
+            Rectangle {
+                width: units.dp(4)
+                radius: width/2
+                height: width
+                color: parent.color
+
+                anchors.right: parent.right
+                //anchors.rightMargin: units.gu(0.5)
+                anchors.verticalCenter: parent.verticalCenter
+            }
+
+            Behavior on width {
+                UbuntuNumberAnimation {}
+            }
+
+            opacity: busyCount > 0
 
             Behavior on opacity {
-                UbuntuNumberAnimation {
-                    duration: UbuntuAnimation.SlowDuration
-                }
-            }
-        }
-
-        ActivityIndicator {
-            id: syncIndicator
-            anchors {
-                right: parent.right
-                verticalCenter: parent.verticalCenter
-                rightMargin: (parent.height - height)/2
-            }
-
-            height: units.gu(4)
-            width: height
-            running: opacity > 0
-            opacity: busy ? 1 : 0
-
-            Behavior on opacity {
-                UbuntuNumberAnimation {
-                    duration: UbuntuAnimation.SlowDuration
-                }
-            }
-
-            MouseArea {
-                anchors.fill: parent
-                enabled: busy || syncError
-                onClicked: PopupUtils.open(syncPopover, syncIndicator)
+                UbuntuNumberAnimation {}
             }
         }
     }
+
+//    Item {
+//        anchors.fill: parent
+//        anchors.bottomMargin: header.height - header.__styleInstance.contentHeight
+//        parent: header
+
+//        AwesomeIcon {
+//            name: "exclamation-triangle"
+//            color: colors["yellow"]
+//            anchors.centerIn: syncIndicator
+//            size: units.gu(2.6)
+//            opacity: !busy && syncError ? 1 : 0
+
+//            Behavior on opacity {
+//                UbuntuNumberAnimation {
+//                    duration: UbuntuAnimation.SlowDuration
+//                }
+//            }
+//        }
+
+//        ActivityIndicator {
+//            id: syncIndicator
+//            anchors {
+//                right: parent.right
+//                verticalCenter: parent.verticalCenter
+//                rightMargin: (parent.height - height)/2
+//            }
+
+//            height: units.gu(4)
+//            width: height
+//            running: opacity > 0
+//            opacity: busy ? 1 : 0
+
+//            Behavior on opacity {
+//                UbuntuNumberAnimation {
+//                    duration: UbuntuAnimation.SlowDuration
+//                }
+//            }
+
+//            MouseArea {
+//                anchors.fill: parent
+//                enabled: busy || syncError
+//                onClicked: PopupUtils.open(syncPopover, syncIndicator)
+//            }
+//        }
+//    }
 
     Component {
         id: syncPopover
@@ -251,7 +290,7 @@ MainView {
                                                                  : ""
 
                                 onClicked: {
-                                    print("Clicked")
+                                    //print("Clicked")
                                     error(i18n.tr("%1 Failed").arg(group.title), i18n.tr("Call: %1\n\n%2").arg(group.errors[0].call).arg(group.errors[0].response))
                                 }
 
@@ -374,7 +413,7 @@ MainView {
 //        id: queue
 
 //        onError: {
-//            print("Error", call, status, response, args)
+//            //print("Error", call, status, response, args)
 //            if (status === 0) {
 //                mainView.error(i18n.tr("Connection Error"), i18n.tr("Timeout error. Please check your internet and firewall settings:\n\n%1").arg(call))
 //            } else {
@@ -424,7 +463,7 @@ MainView {
             var response = colorLinks(settings.markdownCache[text])
             return response
         } else {
-            print("Calling Markdown API")
+            //print("Calling Markdown API")
             Http.post(github.github + "/markdown", ["access_token=" + github.oauth], function(has_error, status, response) {
                 settings.markdownCache[text] = response
                 settings.markdownCache = settings.markdownCache
@@ -441,12 +480,19 @@ MainView {
         return text.replace(/<a(.*?)>(.*?)</g, "<a $1><font color=\"" + colors["blue"] + "\">$2</font><")
     }
 
-    function newObject(type, args) {
+    function newObject(type, args, parent) {
         if (!args)
             args = {}
-        print(type)
+        if (!parent)
+            parent = mainView
+
         var component = Qt.createComponent(type);
-        return component.createObject(mainView, args);
+        if (component.status == Component.Error) {
+            // Error Handling
+            console.log("Error loading component:", component.errorString());
+        }
+
+        return component.createObject(parent, args);
     }
 
     function error(title, message, action) {

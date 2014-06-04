@@ -16,9 +16,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.Components.Popups 0.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
+import Ubuntu.Components 1.1
+import Ubuntu.Components.Popups 1.0
+import Ubuntu.Components.ListItems 1.0 as ListItem
 import "../../ubuntu-ui-extras/httplib.js" as Http
 import "../../ubuntu-ui-extras"
 import ".."
@@ -48,7 +48,7 @@ Service {
     }
 
     function userLoaded(has_error, status, response) {
-        //print("User:", response)
+        ////print("User:", response)
         var json = JSON.parse(response)
 
         if (has_error && json.hasOwnProperty("message") && json.message === "Bad credentials") {
@@ -78,7 +78,7 @@ Service {
     }
 
     function connect(project) {
-        //print("Connecting...")
+        ////print("Connecting...")
         PopupUtils.open(launchpadDialog, mainView.pageStack.currentPage, {project: project})
     }
 
