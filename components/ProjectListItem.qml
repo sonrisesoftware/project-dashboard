@@ -3,7 +3,7 @@ import Ubuntu.Components 1.1
 import Ubuntu.Components.ListItems 1.0 as ListItem
 
 import "../ubuntu-ui-extras"
-import "../backend"
+import "../model"
 
 SubtitledListItem {
     id: projectDelegate

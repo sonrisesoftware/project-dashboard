@@ -90,8 +90,6 @@ Page {
 
                     showDivider: false
                 }
-
-                visible: modelData.authenticationRequired
             }
         }
 

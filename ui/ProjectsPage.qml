@@ -168,8 +168,9 @@ Page {
             text: i18n.tr("Please enter a name for your new project.")
             placeholderText: i18n.tr("Name")
             onAccepted: {
-                var project = backend.newProject(value)
-                pageStack.push(Qt.resolvedUrl("project_page/ProjectPage.qml"), {project: project})
+                print("ADDING")
+                var project = backend.addProject(value)
+                //pageStack.push(Qt.resolvedUrl("project_page/ProjectPage.qml"), {project: project})
                 notification.show(i18n.tr("Project created"))
             }
         }

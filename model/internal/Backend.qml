@@ -23,6 +23,7 @@ Document {
                 var id = projects.get(i).modelData._id
                 list.push(id)
             }
+            print("Saving...")
             _set("projects", list)
         }
     }

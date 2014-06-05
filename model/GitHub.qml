@@ -16,10 +16,10 @@ Internal.GitHub {
     description: i18n.tr("GitHub is the best place to share code with friends, co-workers, classmates, and complete strangers. Over six million people use GitHub to build amazing things together.")
 
     accountItem: ListItem.Subtitled {
-        iconSource: user.avatar_url
-        text: user.name
-        subText: user.login
-        visible: oauth !== ""
+        iconSource: user ? user.avatar_url : ""
+        text: user ? user.name : ""
+        subText: user ? user.login : ""
+        visible: github.enabled
         progression: true
         height: visible ? units.gu(8) : 0
     }
