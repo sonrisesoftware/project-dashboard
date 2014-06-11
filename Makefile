@@ -32,3 +32,6 @@ backup:
 
 restore:
 	cp *.db ~/.local/share/com.ubuntu.developer.mdspencer.project-dashboard/
+
+build:
+	udata/build_model.py model.json

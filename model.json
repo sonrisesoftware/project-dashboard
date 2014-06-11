@@ -1,17 +1,14 @@
 {
+    "settings": {
+        "uuid": "string:undefined"
+    },
+
 	"objects": {
         "Backend": {
             "_id": "backend",
 
-			"projects": "list[Project"
-		},
-
-        "Settings": {
-            "_id": "settings",
-
-            "markdownCache": "var:{}",
-
-            "uuid": "string"
+            "projects": "list:Project",
+            "markdownCache": "var:{}"
         },
 
         "Service": {

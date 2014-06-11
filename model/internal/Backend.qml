@@ -8,6 +8,9 @@ Document {
     _id: "backend"
     _type: "Backend"
 
+    property var markdownCache
+    onMarkdownCacheChanged: _set("markdownCache", markdownCache)
+
     property ListModel projects: ListModel {
         function add(item) {
             _loaded = true
@@ -23,12 +26,12 @@ Document {
                 var id = projects.get(i).modelData._id
                 list.push(id)
             }
-            print("Saving...")
             _set("projects", list)
         }
     }
 
     onLoaded: {
+        markdownCache = _get("markdownCache", {})
         var list = _get("projects", [])
         for (var i = 0; i < list.length; i++) {
             var item = _db.load(list[i], object)

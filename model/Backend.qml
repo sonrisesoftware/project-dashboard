@@ -15,6 +15,30 @@ Internal.Backend {
         var project = addProject(json.name)
     }
 
+    /*!
+     * Render markdown using the GitHub markdown API
+     */
+    function renderMarkdown(text, context) {
+        if (typeof(text) != "string") {
+            return ""
+        } if (settings.markdownCache.hasOwnProperty(text)) {
+            /// Custom color for links
+            var response = colorLinks(settings.markdownCache[text])
+            return response
+        } else {
+            //print("Calling Markdown API")
+            Http.post(github.github + "/markdown", ["access_token=" + github.oauth], function(has_error, status, response) {
+                settings.markdownCache[text] = response
+                settings.markdownCache = settings.markdownCache
+            }, undefined, undefined, JSON.stringify({
+                "text": text,
+                "mode": context !== undefined ? "gfm" : "markdown",
+                "context": context
+              }))
+            return "Loading..."
+        }
+    }
+
     property ListModel availablePlugins: ListModel {
 
         ListElement {
