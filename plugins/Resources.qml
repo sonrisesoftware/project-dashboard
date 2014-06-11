@@ -27,6 +27,9 @@ import "../ubuntu-ui-extras"
 Plugin {
     id: plugin
 
+    title: "Resources"
+    icon: "file"
+
     property var documents: doc.get("resources", [])
 
     onSave: {

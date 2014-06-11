@@ -32,6 +32,9 @@ Plugin {
     property var events: []
     name: "events"
 
+    title: "Events"
+    icon: "calendar"
+
     onSave: {
         doc.set("events", events)
     }

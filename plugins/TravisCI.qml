@@ -29,6 +29,8 @@ Plugin {
     id: plugin
 
     name: "travis"
+    icon: "check-circle"
+    title: "Testing"
     canReload: true
 
     property var info: doc.get("repo", undefined)
@@ -172,7 +174,16 @@ Plugin {
                 return
             }
 
-            doc.set("builds", JSON.parse(response))
+            var builds =  JSON.parse(response)
+            print("BUILDS", builds.length, doc.get("builds", []).length)
+            if (builds.length > doc.get("builds", []).length) {
+                var build = builds[builds.length - 1]
+                if (build.result === 1)
+                    project.newMessage("travis", "check-circle", i18n.tr("Continous Integration failed"),
+                                       "Build %1 - %2".arg(build.number).arg(build.message), build.finished_at, build.number)
+            }
+
+            doc.set("builds", builds)
         })
 
         doc.set("lastRefreshed", new Date().toJSON())

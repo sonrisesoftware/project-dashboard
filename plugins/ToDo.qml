@@ -30,6 +30,8 @@ Plugin {
     id: plugin
 
     name: "tasks"
+    title: "Tasks"
+    icon: "check-square-o"
 
     property var tasks: doc.get("tasks", []).sort(sortFunction)
 

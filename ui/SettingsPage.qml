@@ -22,59 +22,91 @@ import Ubuntu.Components.ListItems 0.1 as ListItem
 
 import "../model"
 
+import "../ubuntu-ui-extras"
+import "../components"
+
 Page {
     id: page
     
     title: i18n.tr("Settings")
 
-    Column {
+    ColumnFlow {
+        id: column
         anchors.fill: parent
+        anchors.margins: units.gu(1)
+        columns: extraWideAspect ? 3 : wideAspect ? 2 : 1
 
-        ListItem.Header {
-            text: i18n.tr("Accounts")
+        Timer {
+            interval: 100
+            running: true
+            onTriggered: {
+                print("Triggered!")
+                column.reEvalColumns()
+            }
         }
 
         Repeater {
             model: backend.availableServices
-            delegate: ListItem.SingleValue {
-                property Service service: modelData
 
-                text: service.title
-                value: service.authenticationStatus
+            delegate: SettingsTile {
+                title: i18n.tr("%1 Account").arg(modelData.title)
+                iconSource: modelData.icon
 
-                Button {
-                    visible: !service.enabled
-                    text: i18n.tr("Authenticate")
-                    height: units.gu(4)
-                    anchors {
-                        right: parent.right
-                        verticalCenter: parent.verticalCenter
+                Loader {
+                    width: parent.width
+                    sourceComponent: modelData.accountItem
+                }
+
+                ListItem.Empty {
+                    height: _desc.height + units.gu(2)
+                    Label {
+                        id: _desc
+                        anchors {
+                            verticalCenter: parent.verticalCenter
+                            left: parent.left
+                            right: parent.right
+                            margins: units.gu(2)
+                        }
+                        text: modelData.description
+                        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                    }
+
+                    visible: !modelData.enabled
+                }
+
+                ListItem.Standard {
+                    Label {
+                       anchors.centerIn: parent
+                       text: modelData.enabled ? i18n.tr("Log out of this account") : i18n.tr("Log in to %1").arg(modelData.title)
                     }
 
                     onClicked: {
-                        if (!service.enabled)
-                            service.authenticate()
+                        if (modelData.enabled)
+                            modelData.revoke()
                         else
-                            service.revoke()
+                            modelData.authenticate()
                     }
+
+                    showDivider: false
                 }
             }
         }
 
-        ListItem.Header {
-            text: i18n.tr("Help and About")
-        }
+        SettingsTile {
+            title: "Help and About"
+            iconSource: "question-circle"
 
-        ListItem.Standard {
-            text: i18n.tr("About Project Dashboard")
-            progression: true
-            onClicked: pageStack.push(aboutPage)
-        }
+            ListItem.Standard {
+                text: i18n.tr("About Project Dashboard")
+                progression: true
+                onClicked: pageStack.push(aboutPage)
+            }
 
-        ListItem.Standard {
-            text: i18n.tr("View Tutorial")
-            progression: true
-            onClicked: pageStack.push(Qt.resolvedUrl("InitialWalkthrough.qml"), {exitable: true})
+            ListItem.Standard {
+                text: i18n.tr("View Tutorial")
+                progression: true
+                onClicked: pageStack.push(Qt.resolvedUrl("InitialWalkthrough.qml"), {exitable: true})
+            }
         }
     }
 

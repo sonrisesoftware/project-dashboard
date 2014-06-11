@@ -11,7 +11,7 @@ Rectangle {
     anchors.fill: parent
     anchors.bottomMargin: units.dp(2)
     //color: Theme.palette.normal.base;
-    color: willRemove ? colors["green"] : Qt.rgba(0.2,0.2,0.2,0.3)
+    color: willRemove ? colors["green"] : Qt.rgba(0,0,0,0.3)
     property color fontColor: Theme.palette.normal.baseText//Theme.palette.selected.backgroundText
 
     property bool willRemove: false

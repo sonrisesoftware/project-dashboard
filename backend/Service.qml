@@ -19,54 +19,25 @@ import QtQuick 2.0
 import Ubuntu.Components 0.1
 import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
-import "../components"
-import "../ubuntu-ui-extras"
 
 Item {
-    id: plugin
+    id: root
 
     property string name
-    property string type
-    property Project project
-    property string configuration
-
-    property string title
     property string icon
+    property var type: []
+    property string title
+    property string description
+    property string authenticationStatus
+    property string disabledMessage
+    property bool authenticationRequired: true
 
-    property bool canReload: false
-    property bool changed
-    function refresh() {}
-    function setup() {}
+    function isEnabled(project) {}
 
-    onChangedChanged: timer.start()
+    function connect(project) {}
+    function status(value) {}
+    function authenticate() {}
+    function revoke() {}
 
-    function displayMessage(message) {}
-
-    function toJSON() { return doc.toJSON() }
-    function fromJSON(json) { doc.fromJSON(json) }
-
-    signal save()
-    signal loaded()
-
-    property Document doc: Document {
-
-        onSave: plugin.save()
-        onLoaded: plugin.loaded()
-    }
-
-    property list<PluginItem> items
-
-//    Connections {
-//        target: project
-//        onReload: {
-//            print("Reloading" + plugin.name)
-//            plugin.reload()
-//        }
-//    }
-
-    Timer {
-        id: timer
-        interval: 10
-        onTriggered: save()
-    }
+    property Component accountItem
 }
