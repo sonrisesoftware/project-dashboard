@@ -20,23 +20,11 @@ import Ubuntu.Components 0.1
 import Ubuntu.PerformanceMetrics 0.1
 import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
-import "components"
+
 import "ui"
-import "backend"
-import "backend/services"
-import "ubuntu-ui-extras"
-import "ubuntu-ui-extras/listutils.js" as List
-import "ubuntu-ui-extras/httplib.js" as Http
-import Friends 0.2
-import "Markdown.Converter.js" as Markdown
 
 import "udata"
 import "model"
-
-/*!
-    \brief MainView with a Label and Button elements.
-*/
-
 MainView {
     id: mainView
     // objectName for functional testing purposes (autopilot-qt5)
@@ -63,9 +51,9 @@ MainView {
     height: units.gu(75)
 
     property var colors: {
-        "green": "#5cb85c",//"#59B159",//"#859a01",
-        "red": "#db3131",//"#d9534f",//"#db3131",
-        "yellow": "#f0ad4e",//"#b68b01",
+        "green": "#5cb85c",
+        "red": "#db3131",
+        "yellow": "#f0ad4e",
         "blue": "#5bc0de",
         "default": Theme.palette.normal.baseText,
     }
@@ -73,6 +61,8 @@ MainView {
     property bool wideAspect: width > units.gu(80)
     property bool extraWideAspect: width > units.gu(150)
     //property alias pageStack: pageStack
+
+    useDeprecatedToolbar: false
 
     actions: [
         Action {
@@ -86,31 +76,12 @@ MainView {
     PageStack {
         id: pageStack
 
-        Tabs {
-            id: tabs
-
-
-            Tab {
-                title: page.title
-                page: ProjectsPage {
-                    id: projectsPage
-                }
-            }
-
-            Tab {
-                title: page.title
-                page: UniversalInboxPage {
-                    id: inboxPage
-                }
-            }
+        ProjectsPage {
+            id: projectsPage
         }
 
-        anchors.bottomMargin: wideAspect && mainView.toolbar.opened && mainView.toolbar.locked ? -mainView.toolbar.triggerSize : 0
-
         Component.onCompleted: {
-            if (inboxPage.count > 0)
-                tabs.selectedTabIndex = 1
-            pageStack.push(tabs)
+            pageStack.push(projectsPage)
 
             if (settings.firstRun) {
                 pageStack.push(Qt.resolvedUrl("ui/InitialWalkthrough.qml"))
@@ -144,158 +115,8 @@ MainView {
         }
     }
 
-    property bool syncError: List.iter(backend.projects, function(project) {
-        return project.syncQueue.hasError
-    }) > 0
-    property bool busy: List.iter(backend.projects, function(project) {
-        return project.syncQueue.count
-    }) > 0
-
     Notification {
         id: notification
-    }
-
-    Item {
-        anchors.fill: parent
-        anchors.bottomMargin: header.height - header.__styleInstance.contentHeight
-        parent: header
-
-        AwesomeIcon {
-            name: "exclamation-triangle"
-            color: colors["yellow"]
-            anchors.centerIn: syncIndicator
-            size: units.gu(2.6)
-            opacity: !busy && syncError ? 1 : 0
-
-            Behavior on opacity {
-                UbuntuNumberAnimation {
-                    duration: UbuntuAnimation.SlowDuration
-                }
-            }
-        }
-
-        ActivityIndicator {
-            id: syncIndicator
-            anchors {
-                right: parent.right
-                verticalCenter: parent.verticalCenter
-                rightMargin: (parent.height - height)/2
-            }
-
-            height: units.gu(4)
-            width: height
-            running: opacity > 0
-            opacity: busy ? 1 : 0
-
-            Behavior on opacity {
-                UbuntuNumberAnimation {
-                    duration: UbuntuAnimation.SlowDuration
-                }
-            }
-
-            MouseArea {
-                anchors.fill: parent
-                enabled: busy || syncError
-                onClicked: PopupUtils.open(syncPopover, syncIndicator)
-            }
-        }
-    }
-
-    Component {
-        id: syncPopover
-
-        Popover {
-            id: popover
-            contentHeight: column.height
-
-            onContentHeightChanged: {
-                if (contentHeight == 0)
-                    PopupUtils.close(popover)
-            }
-
-            Column {
-                id: column
-                width: parent.width
-
-                Repeater {
-                    model: backend.projects
-                    delegate: Column {
-                        id: syncColumn
-                        width: parent.width
-
-                        property Project project: modelData
-
-                        visible: List.objectKeys(modelData.syncQueue.groups).length > 0
-
-                        ListItem.Header {
-                            Label {
-                                text: modelData.name
-                                anchors {
-                                    verticalCenter: parent.verticalCenter
-                                    left: parent.left
-                                    leftMargin: units.gu(1)
-                                }
-                                color: "#888888"//Theme.palette.normal.overlayText
-                            }
-                            height: List.objectKeys(modelData.syncQueue.groups).length > 0 ? units.gu(4) : 0
-                        }
-
-                        Repeater {
-                            model: List.objectKeys(modelData.syncQueue.groups)
-                            delegate: SubtitledListItem {
-                                id: item
-                                overlay: true
-                                property var group: syncColumn.project.syncQueue.groups[modelData]
-                                text: group.title
-                                subText: group.errors.length > 0 ? i18n.tr("Error: %1").arg(group.errors[0].status)
-                                                                 : ""
-
-                                onClicked: {
-                                    print("Clicked")
-                                    error(i18n.tr("%1 Failed").arg(group.title), i18n.tr("Call: %1\n\n%2").arg(group.errors[0].call).arg(group.errors[0].response))
-                                }
-
-                                ProgressBar {
-                                    anchors {
-                                        right: parent.right
-                                        verticalCenter: parent.verticalCenter
-                                        rightMargin: units.gu(2)
-                                    }
-                                    minimumValue: 0
-                                    maximumValue: group.total
-                                    value: item.group.total - item.group.count
-                                    visible: item.group.count > 0
-                                    width: units.gu(10)
-                                    height: units.gu(2.5)
-                                }
-
-                                AwesomeIcon {
-                                    name: "exclamation-triangle"
-                                    color: colors["yellow"]
-                                    anchors {
-                                        right: parent.right
-                                        verticalCenter: parent.verticalCenter
-                                        rightMargin: (parent.height - height)/2
-                                    }
-                                    size: units.gu(2.6)
-                                    opacity: item.group.errors.length > 0 ? 1 : 0
-
-                                    Behavior on opacity {
-                                        UbuntuNumberAnimation {
-                                            duration: UbuntuAnimation.SlowDuration
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    FriendsUtils {
-        id: friendsUtils
     }
 
     Database {
@@ -303,62 +124,6 @@ MainView {
         path: "project-dashboard.db"
         modelPath: Qt.resolvedUrl("model")
     }
-
-    Timer {
-        interval: 100
-        running: true
-        onTriggered: {
-            if (storage.listDocs().indexOf('storage') !== -1) {
-                print("Importing old data...")
-                updateDialog.show()
-
-                updateProgress.value = 0
-
-                var doc = storage.getDoc('storage')
-                var json = doc.contents
-
-                var settings = json.settings
-                var projects = json.backend.projects
-
-                updateProgress.maximumValue = 1 + projects.length
-
-                // Settings
-                {
-
-                    github.oauthToken = settings.githubToken
-                    github.repos = settings.githubRepos
-                    github.user = settings.githubUser
-
-                    updateProgress.value++
-                }
-
-                // Projects
-                for (var i = 0; i < projects.length; i++) {
-                    var project = projects[i]
-                    print(List.objectKeys(project))
-
-                    backend.importProject(project)
-
-                    updateProgress.value++
-                }
-
-                //updateDialog.hide()
-            }
-        }
-    }
-
-    Dialog {
-        id: updateDialog
-        title: i18n.tr("Updating database")
-        text: i18n.tr("Please wait. Updating database to new version of the app.")
-
-        ProgressBar {
-            id: updateProgress
-            maximumValue: 1 // Only 1 step
-            width: parent.width
-        }
-    }
-
 
     Backend {
         id: backend
@@ -370,34 +135,9 @@ MainView {
         _db: storage
     }
 
-//    SyncQueue {
-//        id: queue
-
-//        onError: {
-//            print("Error", call, status, response, args)
-//            if (status === 0) {
-//                mainView.error(i18n.tr("Connection Error"), i18n.tr("Timeout error. Please check your internet and firewall settings:\n\n%1").arg(call))
-//            } else {
-//                if (args) {
-//                    mainView.error(i18n.tr("Connection Error"), i18n.tr("Unable to complete action:\n\n%1").arg(args))
-//                } else {
-//                    mainView.error(i18n.tr("Connection Error"), i18n.tr("Unable to complete operation. HTTP Error: %1\n\n%2").arg(status).arg(call))
-//                }
-//            }
-//        }
-//    }
-
     GitHub {
         id: github
-    }/*
-
-    Launchpad {
-        id: launchpad
     }
-
-    TravisCI {
-        id: travisCI
-    }*/
 
     function getIcon(name) {
         var mainView = "icons/"
