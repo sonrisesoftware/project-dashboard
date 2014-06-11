@@ -22,11 +22,12 @@ import Ubuntu.Components.Popups 1.0
 import Ubuntu.Components.ListItems 1.0 as ListItem
 
 import "ui"
+import "ubuntu-ui-extras"
 
 import "udata"
 import "model"
 MainView {
-    id: mainView
+    id: app
     // objectName for functional testing purposes (autopilot-qt5)
     objectName: "mainView"
 
@@ -122,6 +123,10 @@ MainView {
 
     Notification {
         id: notification
+    }
+
+    function toast(text) {
+        notification.show(text)
     }
 
     Database {

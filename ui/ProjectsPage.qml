@@ -19,7 +19,7 @@ import QtQuick 2.0
 import Ubuntu.Components 0.1
 import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
-import "../backend"
+import "../model"
 import "../ubuntu-ui-extras"
 import "../components"
 
@@ -37,7 +37,9 @@ Page {
             id: newProjectAction
             text: i18n.tr("New Project")
             iconSource: getIcon("add")
-            onTriggered: PopupUtils.open(newProjectDialog, page)
+            onTriggered: {
+                PopupUtils.open(newProjectDialog, page)
+            }
         },
 
         Action {
@@ -168,9 +170,9 @@ Page {
             text: i18n.tr("Please enter a name for your new project.")
             placeholderText: i18n.tr("Name")
             onAccepted: {
-                var project = backend.newProject(value)
-                pageStack.push(Qt.resolvedUrl("ProjectPage.qml"), {project: project})
-                notification.show(i18n.tr("Project created"))
+                var project = backend.addProject(value)
+                //pageStack.push(Qt.resolvedUrl("ProjectPage.qml"), {project: project})
+                app.toast(i18n.tr("Project created"))
             }
         }
     }

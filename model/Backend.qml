@@ -6,7 +6,7 @@ Internal.Backend {
 
     function addProject(name) {
         var project = _db.create('Project', {name: name}, backend)
-        projects.add(backend)
+        projects.add(project)
 
         return project
     }
