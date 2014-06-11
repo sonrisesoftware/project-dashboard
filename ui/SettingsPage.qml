@@ -20,10 +20,10 @@ import Ubuntu.Components 1.1
 import Ubuntu.Components.Popups 1.0
 import Ubuntu.Components.ListItems 1.0 as ListItem
 
+import "../model"
+
 import "../ubuntu-ui-extras"
 import "../components"
-
-import "../model"
 
 Page {
     id: page
@@ -47,6 +47,7 @@ Page {
 
         Repeater {
             model: backend.availableServices
+
             delegate: GridTile {
                 property Service service: modelData
 

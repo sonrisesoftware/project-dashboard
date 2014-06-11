@@ -15,11 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import QtQuick 2.0
 
 import Ubuntu.Components 1.1
 import Ubuntu.Components.Popups 1.0
 import Ubuntu.Components.ListItems 1.0 as ListItem
-import "../../ubuntu-ui-extras/httplib.js" as Http
+
+import "../../qml-extras/httplib.js" as Http
+
 import "../../ubuntu-ui-extras"
 import ".."
 
