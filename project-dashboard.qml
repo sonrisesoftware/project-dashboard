@@ -17,7 +17,7 @@
  */
 import QtQuick 2.0
 
-import Ubuntu.Components 1.0
+import Ubuntu.Components 1.1
 import Ubuntu.Components.Popups 1.0
 import Ubuntu.Components.ListItems 1.0 as ListItem
 
@@ -56,6 +56,7 @@ MainView {
         "red": "#db3131",
         "yellow": "#f0ad4e",
         "blue": "#5bc0de",
+        "orange": UbuntuColors.orange,
         "default": Theme.palette.normal.baseText,
     }
 
@@ -174,7 +175,7 @@ MainView {
             var response = colorLinks(settings.markdownCache[text])
             return response
         } else {
-            print("Calling Markdown API")
+            //print("Calling Markdown API")
             Http.post(github.github + "/markdown", ["access_token=" + github.oauth], function(has_error, status, response) {
                 settings.markdownCache[text] = response
                 settings.markdownCache = settings.markdownCache
@@ -191,12 +192,19 @@ MainView {
         return text.replace(/<a(.*?)>(.*?)</g, "<a $1><font color=\"" + colors["blue"] + "\">$2</font><")
     }
 
-    function newObject(type, args) {
+    function newObject(type, args, parent) {
         if (!args)
             args = {}
-        print(type)
+        if (!parent)
+            parent = mainView
+
         var component = Qt.createComponent(type);
-        return component.createObject(mainView, args);
+        if (component.status == Component.Error) {
+            // Error Handling
+            console.log("Error loading component:", component.errorString());
+        }
+
+        return component.createObject(parent, args);
     }
 
     function error(title, message, action) {

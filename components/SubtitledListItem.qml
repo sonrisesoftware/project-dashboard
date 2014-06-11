@@ -16,9 +16,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.Components.Popups 0.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
+import Ubuntu.Components 1.1
+import Ubuntu.Components.Popups 1.0
+import Ubuntu.Components.ListItems 1.0 as ListItem
 
 ListItem.Standard {
     id: listItem
@@ -53,7 +53,7 @@ ListItem.Standard {
             width: parent.width
             elide: Text.ElideRight
             maximumLineCount: 1
-            color: overlay ? "#888888" : Theme.palette.selected.backgroundText
+            color: listItem.selected ? UbuntuColors.orange : overlay ? "#888888" : Theme.palette.selected.backgroundText
         }
 
         Label {
@@ -63,12 +63,12 @@ ListItem.Standard {
             height: visible ? implicitHeight: 0
             //color:  Theme.palette.normal.backgroundText
             maximumLineCount: 1
-            opacity: overlay ? 0.7 : 0.65
+            opacity: listItem.selected ? 1 : overlay ? 0.7 : 0.65
             font.weight: Font.Light
             fontSize: "small"
             visible: text !== ""
             elide: Text.ElideRight
-            color: overlay ? "#888888" : Theme.palette.selected.backgroundText
+            color: listItem.selected ? UbuntuColors.orange : overlay ? "#888888" : Theme.palette.selected.backgroundText
         }
     }
 

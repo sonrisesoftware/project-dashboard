@@ -16,9 +16,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.Components.Popups 0.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
+import Ubuntu.Components 1.1
+import Ubuntu.Components.Popups 1.0
+import Ubuntu.Components.ListItems 1.0 as ListItem
 import "../../components"
 import "../../ubuntu-ui-extras"
 import "../../ubuntu-ui-extras/listutils.js" as List
@@ -129,34 +129,6 @@ PluginPage {
         }
     }
 
-    Component {
-        id: viewMenu
-
-        Popover {
-            height: childrenRect.height
-            Column {
-                width: parent.width
-
-
-//                ListItem.ValueSelector {
-//                    text: i18n.tr("Sort By")
-//                    values: [i18n.tr("Number"), i18n.tr("Assignee"), i18n.tr("Milestone")]
-//                    selectedIndex: {
-//                        if (sort === "number") return 0
-//                        if (sort === "assignee") return 1
-//                        if (sort === "milestone") return 2
-//                    }
-
-//                    onSelectedIndexChanged: {
-//                        if (selectedIndex === 0) doc.set("sort", "number")
-//                        if (selectedIndex === 1) doc.set("sort", "assignee")
-//                        if (selectedIndex === 2) doc.set("sort", "milestone")
-//                    }
-//                }
-            }
-        }
-    }
-
     DefaultSheet {
         id: filterPopover
 
@@ -222,11 +194,6 @@ PluginPage {
                     height: units.gu(5)
                 }
 
-    //            ListItem.SingleValue {
-    //                text: i18n.tr("Mentioning you")
-    //                value: "1"
-    //            }
-
                 ListItem.Header {
                     text: i18n.tr("Milestone")
                 }
@@ -238,40 +205,9 @@ PluginPage {
                     selectedIndex: model.length - 1
 
                     delegate: OptionSelectorDelegate {
-                        text: modelData.title
+                        text: modelData.title ? modelData.title : modelData
                     }
                 }
-
-    //            ListItem.Header {
-    //                id: labelsHeader
-    //                text: i18n.tr("Labels")
-    //            }
-
-    //            Repeater {
-    //                id: labelsRepeater
-
-    //                model: plugin.availableLabels
-    //                delegate: ListItem.Standard {
-    //                    height: units.gu(5)
-    //                    Label {
-    //                        anchors {
-    //                            left: parent.left
-    //                            leftMargin: units.gu(2)
-    //                            verticalCenter: parent.verticalCenter
-    //                        }
-
-    //                        text: modelData.name
-    //                        color: "#" + modelData.color
-    //                    }
-
-    //                    control: CheckBox {
-
-    //                        //onClicked: checked = doc.sync("done", checked)
-
-    //                        style: SuruCheckBoxStyle {}
-    //                    }
-    //                }
-    //            }
             }
         }
     }

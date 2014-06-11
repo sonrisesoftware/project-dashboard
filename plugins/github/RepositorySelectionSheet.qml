@@ -16,9 +16,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.Components.Popups 0.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
+import Ubuntu.Components 1.1
+import Ubuntu.Components.Popups 1.0
+import Ubuntu.Components.ListItems 1.0 as ListItem
 import ".."
 
 DefaultSheet {
@@ -79,7 +79,7 @@ DefaultSheet {
                     enabled: textField.acceptableInput
 
                     onTriggered: {
-                        plugin.doc.set("repoName", textField.text)
+                        plugin.repo = textField.text
                         plugin.refresh()
                         PopupUtils.close(configureSheet)
                     }
@@ -96,7 +96,7 @@ DefaultSheet {
             subText: modelData.full_name
             selected: plugin.doc.get("repoName") === modelData.full_name
             onClicked: {
-                plugin.doc.set("repoName", modelData.full_name)
+                plugin.repo = modelData.full_name
                 plugin.refresh()
                 PopupUtils.close(configureSheet)
             }

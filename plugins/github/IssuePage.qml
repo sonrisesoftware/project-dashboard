@@ -16,9 +16,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.Components.Popups 0.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
+import Ubuntu.Components 1.1
+import Ubuntu.Components.Popups 1.0
+import Ubuntu.Components.ListItems 1.0 as ListItem
 import "../../ubuntu-ui-extras"
 import "../../components"
 import "../../backend/utils.js" as Utils
@@ -248,11 +248,11 @@ Page {
                     model: plugin.availableAssignees.concat(i18n.tr("No one assigned"))
                     visible: plugin.hasPushAccess
                     selectedIndex: {
-                        print("ASSIGNEE:", JSON.stringify(issue.assignee))
+                        //print("ASSIGNEE:", JSON.stringify(issue.assignee))
                         if (issue.assignee && issue.assignee.hasOwnProperty("login")) {
                             for (var i = 0; i < model.length; i++) {
                                 if (model[i].login === issue.assignee.login) {
-                                    print("Assignee Index:", i)
+                                    //print("Assignee Index:", i)
                                     return i
                                 }
                             }
@@ -616,11 +616,11 @@ Page {
                 model: plugin.availableAssignees.concat(i18n.tr("No one assigned"))
                 visible: plugin.hasPushAccess
                 selectedIndex: {
-                    //print("ASSIGNEE:", JSON.stringify(issue.assignee))
+                    ////print("ASSIGNEE:", JSON.stringify(issue.assignee))
                     if (issue.assignee && issue.assignee.hasOwnProperty("login")) {
                         for (var i = 0; i < model.length; i++) {
                             if (model[i].login === issue.assignee.login) {
-                                //print("Assignee Index:", i)
+                                ////print("Assignee Index:", i)
                                 return i
                             }
                         }

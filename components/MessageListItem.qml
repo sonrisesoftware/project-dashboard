@@ -19,45 +19,35 @@ import QtQuick 2.0
 import Ubuntu.Components 1.1
 import Ubuntu.Components.Popups 1.0
 import Ubuntu.Components.ListItems 1.0 as ListItem
-import "../ubuntu-ui-extras"
+
+import "../backend"
 import "../ubuntu-ui-extras/dateutils.js" as DateUtils
 
 ListItem.Empty {
+    id: listItem
 
-    id: root
+    property Project project
+    property var message
 
-    property alias done: doneCheckBox.checked
-    property alias text: titleLabel.text
-    property alias subText: subLabel.text
-    property color subTextColor: defaultSubTextColor
-    property color defaultSubTextColor: Theme.palette.normal.backgroundText
+    onClicked: listView.message = modelData
+    selected: listView.message === modelData
 
-    height: opacity === 0 ? 0 : units.gu(6)
-
-    Behavior on height {
-        UbuntuNumberAnimation {}
+    removable: true
+    onItemRemoved: project.removeMessage(index)
+    backgroundIndicator: ReadListItemBackground {
+        willRemove: width > (listItem.width * 0.3) && width < listItem.width
+        state: listItem.swipingState
     }
 
-    opacity: show ? 1 : 0
-
-    Behavior on opacity {
-        UbuntuNumberAnimation {}
-    }
-
-    property bool show
-
-    clip: true
-
-    CheckBox {
-        id: doneCheckBox
-
+    AwesomeIcon {
+        id: icon
+        name: message.icon
+        size: units.gu(3.5)
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
-            leftMargin: (root.implicitHeight - doneCheckBox.height)/2
+            leftMargin: units.gu(1.5)
         }
-
-        style: SuruCheckBoxStyle {}
     }
 
     Column {
@@ -67,22 +57,29 @@ ListItem.Empty {
 
         anchors {
             verticalCenter: parent.verticalCenter
-            left: doneCheckBox.visible ? doneCheckBox.right : parent.left
-            leftMargin: doneCheckBox.visible ? units.gu(1) : units.gu(2)
-            rightMargin: units.gu(1)
+            left: icon.right
+            leftMargin: units.gu(1.5)
+            rightMargin: units.gu(2)
             right: parent.right
         }
 
-        Label {
-            id: titleLabel
-
+        Item {
             width: parent.width
-            elide: Text.ElideRight
+            height: childrenRect.height
+            Label {
+                id: titleLabel
 
-            //font.bold: task.priority !== "low"
-            color: selected ? UbuntuColors.orange : /*task.priority === "low" ? */Theme.palette.selected.backgroundText/* : priorityColor(task.priority)*/
-            fontSize: "medium"
-            font.bold: text.indexOf("!") !== -1
+                width: parent.width - dateLabel.width - units.gu(1)
+                elide: Text.ElideRight
+                text: message.title
+            }
+
+            Label {
+                id: dateLabel
+                font.italic: true
+                text: DateUtils.friendlyTime(new Date(modelData.date))
+                anchors.right: parent.right
+            }
         }
 
         Label {
@@ -90,17 +87,14 @@ ListItem.Empty {
             width: parent.width
 
             height: visible ? implicitHeight: 0
+            //color:  Theme.palette.normal.backgroundText
+            maximumLineCount: 1
+            opacity: 0.65
+            font.weight: Font.Light
             fontSize: "small"
-            //font.italic: true
+            text: message.message
             visible: text !== ""
             elide: Text.ElideRight
-            color: subTextColor
         }
-    }
-
-    function formatText(text) {
-        var regex = /(\d\d?:\d\d\s*(PM|AM|pm|am))/gi
-        text = text.replace(regex, "<font color=\"" + colors["green"] + "\">$1</font>")
-        return text
     }
 }

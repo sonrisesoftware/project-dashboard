@@ -16,7 +16,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
-import Ubuntu.Components 0.1
+import Ubuntu.Components 1.1
 
 Item {
     id: widget
@@ -31,6 +31,11 @@ Item {
     property bool shadow: false
 
     property var icons: {
+        "search": "",
+        "caret-right": "",
+        "filter": "",
+        "bar-chart-o": "",
+        "pencil": "",
         "check-circle": "",
         "check-square-o": "",
         "circle": "",

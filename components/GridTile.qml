@@ -16,9 +16,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.Components.Popups 0.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
+import Ubuntu.Components 1.1
+import Ubuntu.Components.Popups 1.0
+import Ubuntu.Components.ListItems 1.0 as ListItem
 import "../components"
 import "../ubuntu-ui-extras"
 
@@ -34,13 +34,15 @@ Item {
 
     default property alias contents: column.data
 
+    property int maxHeight: -1
+
     UbuntuShape {
         id: tile
 
         anchors.fill: parent
         anchors.margins: units.gu(1)
 
-        implicitHeight: titleLabel.height + units.gu(3) + contents.height
+        implicitHeight: titleItem.height + contents.height
 
         color: Qt.rgba(0,0,0,0.25) // 0.2
 
@@ -90,20 +92,19 @@ Item {
                         right: valueLabel.left
                         top: parent.top
                         margins: units.gu(2)
-                        topMargin: units.gu(1.5)
+                        topMargin:(titleItem.height - height)/2
                     }
                 }
 
                 Label {
                     id: valueLabel
 
-                    fontSize: "large"
+                    //fontSize: "large"
 
                     anchors {
                         right: parent.right
-                        top: parent.top
+                        verticalCenter: titleLabel.verticalCenter
                         margins: units.gu(2)
-                        topMargin: units.gu(1.5)
                     }
                 }
             }
@@ -125,10 +126,19 @@ Item {
                 color: UbuntuColors.orange
             }
 
-            Column {
-                id: column
+            Flickable {
                 width: parent.width
+                height: maxHeight === -1 ? column.height : Math.min(maxHeight - titleItem.height - tile.anchors.margins, column.height)
+
                 clip: true
+                contentWidth: parent.width
+                contentHeight: column.height
+                interactive: maxHeight !== -1
+
+                Column {
+                    id: column
+                    width: parent.width
+                }
             }
         }
     }

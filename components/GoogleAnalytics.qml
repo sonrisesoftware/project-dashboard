@@ -1,5 +1,5 @@
 import QtQuick 2.0
-import Ubuntu.Components 0.1
+import Ubuntu.Components 1.1
 import "../ubuntu-ui-extras/httplib.js" as Http
 
 Object {
@@ -11,7 +11,7 @@ Object {
     property string __api: "http://www.google-analytics.com/collect"
 
     function visitScreen(screen) {
-        print("Visiting screen:", screen)
+        //print("Visiting screen:", screen)
         Http.post(__api, [
                       "v=1",
                       "tid=" + trackingID,

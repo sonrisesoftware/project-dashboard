@@ -1,6 +1,6 @@
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
+import Ubuntu.Components 1.1
+import Ubuntu.Components.ListItems 1.0 as ListItem
 
 import "../ubuntu-ui-extras"
 import "../model"
@@ -8,7 +8,7 @@ import "../model"
 SubtitledListItem {
     id: projectDelegate
     text: project.name
-    onClicked: pageStack.push(Qt.resolvedUrl("../ui/ProjectPage.qml"), {project: project})
+    onClicked: pageStack.push(Qt.resolvedUrl("../ui/project_page/ProjectPage.qml"), {project: project})
 
     property Project project
 

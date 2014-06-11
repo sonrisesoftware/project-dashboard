@@ -16,10 +16,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.Components.Popups 0.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
-import Ubuntu.Components.Pickers 0.1 as Picker
+import Ubuntu.Components 1.1
+import Ubuntu.Components.Popups 1.0
+import Ubuntu.Components.ListItems 1.0 as ListItem
+import Ubuntu.Components.Pickers 1.0 as Picker
 import "../backend"
 import "../components"
 import "../ubuntu-ui-extras"
@@ -99,7 +99,7 @@ Plugin {
 
     function refresh() {
         if (syncId !== -1 && project.syncQueue.groups.hasOwnProperty(syncId)) {
-            print("Deleting existing sync operation for ClickAppStore")
+            //print("Deleting existing sync operation for ClickAppStore")
             delete project.syncQueue.groups[syncId]
             project.syncQueue.groups = project.syncQueue.groups
         }
@@ -168,6 +168,7 @@ Plugin {
 
                 contentWidth: width
                 contentHeight: column.contentHeight + units.gu(2)
+                clip: true
 
                 Item {
                     width: reviewsList.width
@@ -183,17 +184,22 @@ Plugin {
                         repeaterCompleted: true
                         columns: extraWideAspect ? 3 : wideAspect ? 2 : 1
 
+                        onVisibleChanged: {
+                            column.repeaterCompleted = true
+                            column.reEvalColumns()
+                        }
+
                         Timer {
-                            interval: 100
+                            interval: 10
                             running: true
                             onTriggered: {
-                                print("Triggered!")
+                                //print("Triggered!")
                                 column.repeaterCompleted = true
                                 column.reEvalColumns()
                             }
                         }
 
-                        SettingsTile {
+                        GridTile {
                             title: "Overall Rating"
 
                             ListItem.SingleValue {
@@ -205,12 +211,13 @@ Plugin {
                                     font.family: "FontAwesome"
                                     text: rating
                                 }
+                                showDivider: false
                             }
                         }
 
                         Repeater {
                             model: reviews
-                            delegate: SettingsTile {
+                            delegate: GridTile {
                                 title: modelData.reviewer_displayname
                                 value: ratingString(modelData.rating, true)
 

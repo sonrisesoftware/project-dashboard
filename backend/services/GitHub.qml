@@ -16,10 +16,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.Components.Popups 0.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
+
 import "../../qml-extras/httplib.js" as Http
+
+import Ubuntu.Components 1.1
+import Ubuntu.Components.Popups 1.0
+import Ubuntu.Components.ListItems 1.0 as ListItem
+
 import "../../ubuntu-ui-extras"
 import ".."
 
@@ -66,7 +69,7 @@ Service {
                      undefined, {"Accept":"application/vnd.github.v3+json"})
 
             Http.get(github + "/user/repos", ["access_token=" + oauth], function(has_error, status, response) {
-                print("REPOS", response)
+                //print("REPOS", response)
                 if (status !== 304)
                     settings.set("githubRepos", JSON.parse(response))
             }, undefined, {"Accept":"application/vnd.github.v3+json"})
@@ -81,7 +84,7 @@ Service {
     }
 
     function get(project, id, request, callback, options) {
-        //print("OAuth", oauth)
+        ////print("OAuth", oauth)
         if (oauth === "")
             return undefined
         if (options === undefined)
@@ -92,7 +95,7 @@ Service {
     }
 
     function post(project, id, request, options, body, message) {
-        //print("OAuth", oauth)
+        ////print("OAuth", oauth)
         if (oauth === "")
             return undefined
         if (options === undefined)
@@ -103,7 +106,7 @@ Service {
     }
 
     function put(project, id, request, options, body, message) {
-        //print("OAuth", oauth)
+        ////print("OAuth", oauth)
         if (oauth === "")
             return undefined
         if (options === undefined)

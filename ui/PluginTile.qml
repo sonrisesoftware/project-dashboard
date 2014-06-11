@@ -16,9 +16,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.Components.Popups 0.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
+import Ubuntu.Components 1.1
+import Ubuntu.Components.Popups 1.0
+import Ubuntu.Components.ListItems 1.0 as ListItem
 import "../components"
 import "../ubuntu-ui-extras"
 
@@ -36,19 +36,14 @@ UbuntuShape {
     property string summary: viewAllMessage
     property string summaryValue
     property string value: summaryValue
-    property bool expanded: true
 
     signal triggered
-
-    onClicked: expanded = !expanded
 
     //opacity: unread ? 1 : 0.5
 
     height: visible ? titleItem.height + contents.height : 0
 
     default property alias contents: column.data
-
-    signal clicked()
 
     property Action action
 
@@ -71,11 +66,6 @@ UbuntuShape {
                 top: parent.top
                 left: parent.left
                 right: parent.right
-            }
-
-            MouseArea {
-                anchors.fill: parent
-                onClicked: tile.clicked()
             }
 
             AwesomeIcon {
@@ -144,37 +134,11 @@ UbuntuShape {
             clip: true
         }
 
-        ListItem.SingleValue {
-            text: expanded ? viewAllMessage : summary
-            value: expanded ? "" : summaryValue
+        ListItem.Standard {
+            text: viewAllMessage
             progression: true
             showDivider: false
             onTriggered: tile.triggered()
         }
     }
-
-    states: State {
-        when: !expanded
-
-        PropertyChanges {
-            target: column
-            restoreEntryValues: true
-
-            height: 0
-        }
-    }
-
-    transitions: [
-        Transition {
-            from: "*"
-            to: "*"
-
-            UbuntuNumberAnimation {
-                target: column
-                property: "height"
-
-                duration: UbuntuAnimation.SlowDuration
-            }
-        }
-    ]
 }

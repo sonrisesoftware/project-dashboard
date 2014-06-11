@@ -16,10 +16,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
-import Ubuntu.Components 0.1
-import Ubuntu.Components.Popups 0.1
-import Ubuntu.Components.ListItems 0.1 as ListItem
+
+import Ubuntu.Components 1.1
+import Ubuntu.Components.Popups 1.0
+import Ubuntu.Components.ListItems 1.0 as ListItem
 import "../model"
+
 import "../ubuntu-ui-extras"
 import "../components"
 
@@ -77,13 +79,13 @@ Page {
                     interval: 100
                     running: true
                     onTriggered: {
-                        print("Triggered!")
+                        //print("Triggered!")
                         column.repeaterCompleted = true
                         column.reEvalColumns()
                     }
                 }
 
-                SettingsTile {
+                GridTile {
                     title: "GitHub Projects"
                     iconSource: "github"
 
@@ -92,14 +94,14 @@ Page {
                         delegate: ProjectListItem {
                             project: modelData
                             visible: project.hasPlugin("GitHub")
-                            subText: project.getPlugin("GitHub").repo
+                            subText: visible ? project.getPlugin("GitHub").repo : ""
                         }
                     }
 
                     onHeightChanged: column.reEvalColumns()
                 }
 
-                SettingsTile {
+                GridTile {
                     title: "Launchpad Projects"
 
                     Repeater {
@@ -112,7 +114,7 @@ Page {
                     onHeightChanged: column.reEvalColumns()
                 }
 
-                SettingsTile {
+                GridTile {
                     title: "Local Projects"
                     iconSource: "cube"
 
@@ -170,6 +172,7 @@ Page {
             text: i18n.tr("Please enter a name for your new project.")
             placeholderText: i18n.tr("Name")
             onAccepted: {
+
                 var project = backend.addProject(value)
                 //pageStack.push(Qt.resolvedUrl("ProjectPage.qml"), {project: project})
                 app.toast(i18n.tr("Project created"))
