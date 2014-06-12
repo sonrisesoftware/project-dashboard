@@ -16,6 +16,7 @@
         },
 
         "GitHub": {
+            "_id": "github",
             "_parent": "Service",
 
             "oauthToken": "string",

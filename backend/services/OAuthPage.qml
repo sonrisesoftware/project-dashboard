@@ -1,6 +1,6 @@
 import QtQuick 2.0
 import Ubuntu.Components 1.1
-import Ubuntu.Components.Extras.Browser 1.1
+import Ubuntu.Components.Extras.Browser 0.2
 
 Page {
     id: webPage
@@ -31,10 +31,10 @@ Page {
                                       "?client_secret=" + client_secret +
                                       "&client_id=" + client_id
 
-        url: webPage.visible ? "https://github.com/login/oauth/authorize" +
+        url: "https://github.com/login/oauth/authorize" +
                                "?client_id=" + client_id +
                                "&scope=" + scope +
-                               "&redirect_uri=" + encodeURIComponent(redirect_uri) : ""
+                               "&redirect_uri=" + encodeURIComponent(redirect_uri)
         onUrlChanged: {
             if (url.toString().substring(0, 32) === redirect_uri + "?code=") {
                 var code = url.toString().substring(32);
@@ -56,7 +56,7 @@ Page {
         }
 
         onLoadingChanged: {
-            if (loadRequest.status === WebView.LoadFailedStatus) {
+            if (webView.lastLoadFailed) {
                 error(i18n.tr("Connection Error"), i18n.tr("Unable to authenticate to GitHub. Check your connection and/or firewall settings."), pageStack.pop)
             }
         }

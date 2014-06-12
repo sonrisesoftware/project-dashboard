@@ -5,6 +5,7 @@ import ".."
 Service {
     id: object
 
+    _id: "github"
     _type: "GitHub"
 
     property var repos

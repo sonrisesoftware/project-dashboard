@@ -37,22 +37,32 @@ Page {
     actions: [
         Action {
             id: newProjectAction
+            objectName: "newProjectAction"
+
             text: i18n.tr("New Project")
             iconSource: getIcon("add")
             onTriggered: {
-                PopupUtils.open(newProjectDialog, page)
+                if (github.enabled) {
+                    var caller = app.findChild(app.header, "newProjectAction_header_button")
+
+                    PopupUtils.open(newProjectPopover, caller)
+                } else {
+                    PopupUtils.open(newProjectDialog, page)
+                }
             }
         },
 
         Action {
             id: inboxAction
             text: i18n.tr("Inbox")
-            iconSource: inboxPage.count > 0 ? getIcon("bell") : getIcon("bell-o")
+            iconSource: getIcon("inbox")
             onTriggered: pageStack.push(inboxPage)
         }
     ]
 
     onVisibleChanged: column.reEvalColumns()
+
+    flickable: backend.projects.count > 0 ? projectsList : null
 
     Flickable {
         id: projectsList
@@ -131,12 +141,44 @@ Page {
         }
     }
 
-    Label {
+    Column {
         anchors.centerIn: parent
         visible: backend.projects.count === 0
-        opacity: 0.5
-        fontSize: "large"
-        text: i18n.tr("No projects")
+
+        AwesomeIcon {
+            name: "cube"
+            size: units.gu(10)
+            opacity: 0.8
+            anchors.horizontalCenter: parent.horizontalCenter
+        }
+
+        Item {
+            width: parent.width
+            height: units.gu(2)
+        }
+
+        Label {
+            opacity: 0.8
+            fontSize: "large"
+            font.bold: true
+            text: i18n.tr("No projects")
+            anchors.horizontalCenter: parent.horizontalCenter
+        }
+
+        Item {
+            width: parent.width
+            height: units.gu(0.5)
+        }
+
+        Label {
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: page.width - units.gu(4)
+            opacity: 0.5
+            fontSize: "medium"
+            horizontalAlignment: Text.AlignHCenter
+            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+            text: i18n.tr("Tap the plus icon in the toolbar to create a new project.")
+        }
     }
 
     Scrollbar {
@@ -175,6 +217,29 @@ Page {
                 var project = backend.addProject(value)
                 //pageStack.push(Qt.resolvedUrl("ProjectPage.qml"), {project: project})
                 app.toast(i18n.tr("Project created"))
+            }
+        }
+    }
+
+    Component {
+        id: newProjectPopover
+
+        Popover {
+            Column {
+                width: parent.width
+
+                OverlayStandard {
+                    text: i18n.tr("Create Local Project")
+                }
+
+                OverlayHeader {
+                    text: "Connect to Existing Project"
+                }
+
+                AwesomeListItem {
+                    iconName: "github"
+                    text: "GitHub"
+                }
             }
         }
     }

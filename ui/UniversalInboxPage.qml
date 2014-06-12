@@ -19,10 +19,12 @@ import QtQuick 2.0
 import Ubuntu.Components 1.1
 import Ubuntu.Components.Popups 1.0
 import Ubuntu.Components.ListItems 1.0 as ListItem
-import "../backend"
+
 import "../components"
 import "../ubuntu-ui-extras"
-import "../ubuntu-ui-extras/listutils.js" as List
+import "../model"
+
+import "../qml-extras/listutils.js" as List
 
 Page {
     id: page
@@ -157,12 +159,29 @@ Page {
         flickableItem: listView
     }
 
-    Label {
+    Column {
         anchors.centerIn: parent
-        fontSize: "large"
-        opacity: 0.5
-        text: i18n.tr("No unread messages")
         visible: listView.contentHeight == 0
+
+        AwesomeIcon {
+            name: "inbox"
+            size: units.gu(10)
+            opacity: 0.8
+            anchors.horizontalCenter: parent.horizontalCenter
+        }
+
+        Item {
+            width: parent.width
+            height: units.gu(2)
+        }
+
+        Label {
+            opacity: 0.8
+            fontSize: "large"
+            font.bold: true
+            text: i18n.tr("No unread messages")
+            anchors.horizontalCenter: parent.horizontalCenter
+        }
     }
 
     function friendlyTime(time) {

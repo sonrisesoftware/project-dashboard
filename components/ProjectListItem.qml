@@ -38,21 +38,6 @@ SubtitledListItem {
         project.remove()
     }
 
-    function findChild(obj,objectName) {
-        var childs = new Array(0);
-        childs.push(obj)
-        while (childs.length > 0) {
-            if (childs[0].objectName == objectName) {
-                return childs[0]
-            }
-            for (var i in childs[0].data) {
-                childs.push(childs[0].data[i])
-            }
-            childs.splice(0, 1);
-        }
-        return null;
-    }
-
     Rectangle {
         width: count < 10 ? units.gu(2.5) : countLabel.width + units.gu(1.2)
         height: units.gu(2.5)

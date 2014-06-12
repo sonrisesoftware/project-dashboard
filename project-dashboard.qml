@@ -148,6 +148,7 @@ MainView {
 
     GitHub {
         id: github
+        _db: storage
     }
 
     function getIcon(name) {
@@ -207,8 +208,23 @@ MainView {
         return component.createObject(parent, args);
     }
 
+function findChild(obj,objectName) {
+    var childs = new Array(0);
+    childs.push(obj)
+    while (childs.length > 0) {
+        if (childs[0].objectName == objectName) {
+            return childs[0]
+        }
+        for (var i in childs[0].data) {
+            childs.push(childs[0].data[i])
+        }
+        childs.splice(0, 1);
+    }
+    return null;
+}
+
     function error(title, message, action) {
-        PopupUtils.open(Qt.resolvedUrl("ubuntu-ui-extras/NotifyDialog.qml"), mainView,
+        PopupUtils.open(Qt.resolvedUrl("ubuntu-ui-extras/NotifyDialog.qml"), app,
                         {
                             title: title,
                             text: message,

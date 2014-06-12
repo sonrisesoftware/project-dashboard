@@ -22,7 +22,7 @@ import Ubuntu.Components.ListItems 1.0 as ListItem
 
 import "../../ubuntu-ui-extras"
 import "../../components"
-import "../../backend"
+import "../../model"
 
 PageView {
     id: root
