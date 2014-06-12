@@ -55,9 +55,13 @@ TabbedPage {
 
         Action {
             id: actionsAction
+            objectName: "actionsAction"
             text: i18n.tr("Actions")
             iconSource: getIcon("navigation-menu")
-            onTriggered: PopupUtils.open(Qt.resolvedUrl("ActionMenu.qml"), _actionsButton, {project: projectPage.project})
+            onTriggered: {
+                var caller = app.findChild(app.header, "actionsAction_header_button")
+                PopupUtils.open(Qt.resolvedUrl("ActionMenu.qml"), caller, {project: projectPage.project})
+            }
             visible: sidebar.selectedView === "pulse"
         },
 
@@ -93,18 +97,18 @@ TabbedPage {
             project: projectPage.project
         }
 
-        ConfigView {
-            visible: sidebar.selectedView === "settings"
+//        ConfigView {
+//            visible: sidebar.selectedView === "settings"
 
-            project: projectPage.project
-        }
+//            project: projectPage.project
+//        }
 
-        PluginView {
-            id: pluginView
-            visible: plugin !== null
+//        PluginView {
+//            id: pluginView
+//            visible: plugin !== null
 
-            project: projectPage.project
-        }
+//            project: projectPage.project
+//        }
     }
 
     function displayPluginItem(plugin, pluginItem) {

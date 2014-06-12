@@ -20,7 +20,7 @@ import Ubuntu.Components 1.1
 import Ubuntu.Components.Popups 1.0
 import Ubuntu.Components.ListItems 1.0 as ListItem
 
-import "../../backend"
+import "../../model"
 import "../../components"
 
 Popover {
@@ -59,7 +59,7 @@ Popover {
                 model: project.plugins
                 delegate: Repeater {
                     model: modelData.items
-                    delegate: ListItem.Standard {
+                    delegate: AwesomeListItem {
                         id: actionListItem
                         showDivider: actionListItem.y + actionListItem.height < actionsColumn.height
                         visible: modelData.action
@@ -69,59 +69,10 @@ Popover {
                             modelData.action.triggered(mainView)
                         }
 
-                        AwesomeIcon {
-                            id: icon
-                            name: modelData.icon
-                            size: units.gu(3.5)
-                            anchors {
-                                verticalCenter: parent.verticalCenter
-                                left: parent.left
-                                leftMargin: units.gu(1.5)
-                            }
-                            opacity: actionListItem.enabled ? 1 : 0.5
+                        icon: modelData.icon
 
-                            color: Theme.palette.normal.overlayText
-                        }
-
-                        Column {
-                            id: labels
-                            opacity: actionListItem.enabled ? 1 : 0.5
-
-                            spacing: units.gu(0.1)
-
-                            anchors {
-                                verticalCenter: parent.verticalCenter
-                                left: icon.right
-                                leftMargin: units.gu(1.5)
-                                rightMargin: units.gu(2)
-                                right: parent.right
-                            }
-
-                            Label {
-                                id: titleLabel
-
-                                width: parent.width
-                                elide: Text.ElideRight
-                                text: actionListItem.visible ? modelData.action.text : ""
-                                color: Theme.palette.normal.overlayText
-                            }
-
-                            Label {
-                                id: subLabel
-                                width: parent.width
-
-                                height: visible ? implicitHeight: 0
-                                //color:  Theme.palette.normal.backgroundText
-                                maximumLineCount: 1
-                                opacity: 0.75
-                                font.weight: Font.Light
-                                fontSize: "small"
-                                text: actionListItem.visible ? modelData.action.description : ""
-                                visible: text !== ""
-                                elide: Text.ElideRight
-                                color: Theme.palette.normal.overlayText
-                            }
-                        }
+                        text: actionListItem.visible ? modelData.action.text : ""
+                        subText: actionListItem.visible ? modelData.action.description : ""
                     }
                 }
             }

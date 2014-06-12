@@ -41,6 +41,7 @@ PageView {
             anchors.horizontalCenter: parent.horizontalCenter
             fontSize: "large"
             font.bold: true
+            opacity: 0.8
             text: i18n.tr("No plugins")
         }
 
@@ -48,6 +49,7 @@ PageView {
             horizontalAlignment: Text.AlignHCenter
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
             width: parent.width
+            opacity: 0.5
             text: i18n.tr("Add some plugins by tapping the settings icon in the sidebar.")
         }
     }
