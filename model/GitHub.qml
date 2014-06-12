@@ -62,4 +62,17 @@ Internal.GitHub {
     function createProject() {
         PopupUtils.open(Qt.resolvedUrl("../ui/AddGitHubProjectPage.qml"), app, {github: github})
     }
+
+
+
+    function addGitHubProject(name) {
+        app.prompt(i18n.tr("Add GitHub Project"),
+                   i18n.tr("Enter the name for your project connected to %1:").arg(name),
+                   i18n.tr("Project Name"),
+                   name).done(function (name) {
+                       var project = backend.addProject(name)
+                       //pageStack.push(Qt.resolvedUrl("ProjectPage.qml"), {project: project})
+                       app.toast(i18n.tr("Project created"))
+                   })
+    }
 }

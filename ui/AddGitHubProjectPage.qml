@@ -26,6 +26,7 @@ DefaultSheet {
     id: configureSheet
 
     property GitHub github
+    //property Backend backend
 
     title: width > units.gu(50) ? i18n.tr("Add GitHub Project") :i18n.tr("GitHub")
 
@@ -76,8 +77,8 @@ DefaultSheet {
                     enabled: textField.acceptableInput
 
                     onTriggered: {
-                        addGitHubProject(text)
                         PopupUtils.close(configureSheet)
+                        github.addGitHubProject(text)
                     }
                 }
             }
@@ -92,36 +93,13 @@ DefaultSheet {
             subText: modelData.full_name
             onClicked: {
                 PopupUtils.close(configureSheet)
-                addGitHubProject(modelData.full_name)
+                github.addGitHubProject(modelData.full_name)
             }
         }
 
         anchors {
             margins: units.gu(-1)
             fill: parent
-        }
-    }
-
-    function addGitHubProject(name) {
-        PopupUtils.open(newProjectDialog, app, {repo: name})
-    }
-
-
-    Component {
-        id: newProjectDialog
-
-        InputDialog {
-            property string repo
-
-            title: i18n.tr("Add GitHub Project")
-            text: i18n.tr("Please enter a name for your project connected to %1.").arg(repo)
-            placeholderText: i18n.tr("Name")
-            value: repo
-            onAccepted: {
-                var project = backend.addProject(value)
-                //pageStack.push(Qt.resolvedUrl("ProjectPage.qml"), {project: project})
-                app.toast(i18n.tr("Project created"))
-            }
         }
     }
 }

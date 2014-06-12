@@ -23,6 +23,7 @@ import Ubuntu.Components.ListItems 1.0 as ListItem
 
 import "ui"
 import "ubuntu-ui-extras"
+import "qml-extras/promises.js" as Promise
 
 import "udata"
 import "model"
@@ -208,20 +209,32 @@ MainView {
         return component.createObject(parent, args);
     }
 
-function findChild(obj,objectName) {
-    var childs = new Array(0);
-    childs.push(obj)
-    while (childs.length > 0) {
-        if (childs[0].objectName == objectName) {
-            return childs[0]
+    function findChild(obj,objectName) {
+        var childs = new Array(0);
+        childs.push(obj)
+        while (childs.length > 0) {
+            if (childs[0].objectName == objectName) {
+                return childs[0]
+            }
+            for (var i in childs[0].data) {
+                childs.push(childs[0].data[i])
+            }
+            childs.splice(0, 1);
         }
-        for (var i in childs[0].data) {
-            childs.push(childs[0].data[i])
-        }
-        childs.splice(0, 1);
+        return null;
     }
-    return null;
-}
+
+    function prompt(title, message, placeholder, value) {
+        inputDialog.title = title
+        inputDialog.text = message
+        inputDialog.placeholderText = placeholder
+        inputDialog.value = value
+        inputDialog.promise = new Promise.Promise()
+
+        inputDialog.show()
+
+        return inputDialog.promise
+    }
 
     function error(title, message, action) {
         PopupUtils.open(Qt.resolvedUrl("ubuntu-ui-extras/NotifyDialog.qml"), app,
@@ -230,5 +243,14 @@ function findChild(obj,objectName) {
                             text: message,
                             action:action
                         })
+    }
+
+    InputDialog {
+        id: inputDialog
+
+        property var promise
+
+        onAccepted: promise.resolve(value)
+        onRejected: promise.rejected(value)
     }
 }
