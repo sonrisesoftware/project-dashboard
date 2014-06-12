@@ -42,7 +42,7 @@ ListItem.Standard {
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
-            leftMargin: units.gu(2)
+            leftMargin: listItem.icon == undefined ? units.gu(2) : Math.min(units.gu(5), parent.height - units.gu(1)) + units.gu(4)
             rightMargin: units.gu(2)
             right: parent.right
         }

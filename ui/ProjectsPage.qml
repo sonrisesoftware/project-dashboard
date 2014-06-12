@@ -225,20 +225,36 @@ Page {
         id: newProjectPopover
 
         Popover {
+            id: _newProjectPopover
             Column {
                 width: parent.width
 
                 OverlayStandard {
                     text: i18n.tr("Create Local Project")
+                    onClicked: {
+                        PopupUtils.close(_newProjectPopover)
+                        PopupUtils.open(newProjectDialog)
+                    }
                 }
 
                 OverlayHeader {
                     text: "Connect to Existing Project"
                 }
 
-                AwesomeListItem {
-                    iconName: "github"
-                    text: "GitHub"
+                Repeater {
+                    model: backend.availableServices
+                    delegate: AwesomeListItem {
+                        property Service service: modelData
+
+                        visible: service.enabled
+                        iconName: service.icon
+                        text: service.title
+
+                        onClicked: {
+                            PopupUtils.close(_newProjectPopover)
+                            service.createProject()
+                        }
+                    }
                 }
             }
         }

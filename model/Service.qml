@@ -15,4 +15,6 @@ Internal.Service {
 
     function authenticate() {}
     function revoke() {}
+
+    function createProject() {}
 }

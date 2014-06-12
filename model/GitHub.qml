@@ -1,12 +1,17 @@
 import QtQuick 2.0
 import Ubuntu.Components 1.1
+import Ubuntu.Components.Popups 1.0
 import Ubuntu.Components.ListItems 1.0 as ListItem
 import "internal" as Internal
+
+import "../components"
 
 import "../qml-extras/httplib.js" as Http
 import "../qml-extras/utils.js" as Utils
 
 Internal.GitHub {
+    id: github
+
     type: "GitHub"
     icon: "github"
     title: i18n.tr("GitHub")
@@ -15,9 +20,9 @@ Internal.GitHub {
 
     description: i18n.tr("GitHub is the best place to share code with friends, co-workers, classmates, and complete strangers. Over six million people use GitHub to build amazing things together.")
 
-    accountItem: ListItem.Subtitled {
+    accountItem: SubtitledListItem {
         iconSource: user ? user.avatar_url : ""
-        text: user ? user.name : ""
+        text: user ? user.name : enabled ? i18n.tr("Loading user info...") : ""
         subText: user ? user.login : ""
         visible: github.enabled
         progression: true
@@ -32,9 +37,9 @@ Internal.GitHub {
                 user = JSON.parse(data)
             })
 
-            httpGet('/repos').done(function(data) {
-                list = JSON.parse(data)
-                repos = Utils.cherrypick(list, [""])
+            httpGet('/user/repos').done(function(data) {
+                var list = JSON.parse(data)
+                repos = list//Utils.cherrypick(list, [""])
             })
         }
     }
@@ -52,5 +57,9 @@ Internal.GitHub {
 
     function authenticate() {
         pageStack.push(Qt.resolvedUrl("../backend/services/OAuthPage.qml"))
+    }
+
+    function createProject() {
+        PopupUtils.open(Qt.resolvedUrl("../ui/AddGitHubProjectPage.qml"), app, {github: github})
     }
 }
