@@ -41,12 +41,12 @@ Internal.Backend {
 
     property ListModel availablePlugins: ListModel {
 
-        ListElement {
-            icon: "check-square-o"
-            name: "tasks"
-            type: "ToDo"
-            title: "Tasks"
-        }
+//        ListElement {
+//            icon: "check-square-o"
+//            name: "tasks"
+//            type: "ToDo"
+//            title: "Tasks"
+//        }
 
         ListElement {
             icon: "pencil-square-o"
@@ -61,33 +61,33 @@ Internal.Backend {
 //            title: "Drawings"
 //        }
 
-        ListElement {
-            icon: "file"
-            name: "resources"
-            type: "Resources"
-            title: "Resources"
-        }
+//        ListElement {
+//            icon: "file"
+//            name: "resources"
+//            type: "Resources"
+//            title: "Resources"
+//        }
 
-        ListElement {
-            icon: "clock"
-            name: "timer"
-            type: "Timer"
-            title: "Time Tracker"
-        }
+//        ListElement {
+//            icon: "clock"
+//            name: "timer"
+//            type: "Timer"
+//            title: "Time Tracker"
+//        }
 
-        ListElement {
-            icon: "calendar"
-            name: "events"
-            type: "Events"
-            title: "Events"
-        }
+//        ListElement {
+//            icon: "calendar"
+//            name: "events"
+//            type: "Events"
+//            title: "Events"
+//        }
 
-        ListElement {
-            icon: "shopping-cart"
-            name: "appstore"
-            type: "ClickAppStore"
-            title: "Ubuntu App Store"
-        }
+//        ListElement {
+//            icon: "shopping-cart"
+//            name: "appstore"
+//            type: "ClickAppStore"
+//            title: "Ubuntu App Store"
+//        }
     }
 
     property var availableServices: [github]

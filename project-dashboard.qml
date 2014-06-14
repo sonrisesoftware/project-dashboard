@@ -20,8 +20,10 @@ import QtQuick 2.0
 import Ubuntu.Components 1.1
 import Ubuntu.Components.Popups 1.0
 import Ubuntu.Components.ListItems 1.0 as ListItem
+import QtQuick.Window 2.0
 
 import "ui"
+import "components"
 import "ubuntu-ui-extras"
 import "qml-extras/promises.js" as Promise
 
@@ -111,6 +113,7 @@ MainView {
                 var credits = {}
                 credits[i18n.tr("Icon")] = "Sam Hewitt"
                 credits[i18n.tr("Debian Packaging")] = "Nekhelesh Ramananthan"
+                credits[i18n.tr("Pulse icon")] = colorLinks("Icon made by <a href=\"http://www.freepik.com\" alt=\"Freepik.com\" title=\"Freepik.com\">Freepik</a> from <a href=\"http://www.flaticon.com/free-icon/pulse-line_45863\" title=\"Flaticon\">www.flaticon.com</a>")
                 return credits
             }
 
@@ -129,6 +132,42 @@ MainView {
 
     function toast(text) {
         notification.show(text)
+    }
+
+    Window {
+        id: errorsWindow
+        title: "Storage Log"
+
+        width: units.gu(40)
+        height: units.gu(60)
+
+        Rectangle {
+            anchors.fill: parent
+        }
+
+        ListView {
+            anchors.fill: parent
+            model: storage.errors
+
+            onCountChanged: errorsWindow.show()
+
+            delegate: SubtitledListItem {
+                text: modelData.title
+                subText: modelData.details
+
+                overlay: true
+            }
+        }
+
+        Label {
+            anchors.centerIn: parent
+            visible: storage.errors.count == 0
+
+            text: i18n.tr("No messages")
+            color: "gray"
+            fontSize: "large"
+            opacity: 0.8
+        }
     }
 
     Database {

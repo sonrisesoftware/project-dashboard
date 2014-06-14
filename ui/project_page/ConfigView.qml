@@ -4,7 +4,7 @@ import Ubuntu.Components.ListItems 1.0 as ListItem
 import Ubuntu.Components.Popups 1.0
 
 import "../../ubuntu-ui-extras"
-import "../../backend"
+import "../../model"
 import "../../components"
 
 PageView {

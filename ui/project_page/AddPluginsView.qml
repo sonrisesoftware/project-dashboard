@@ -20,7 +20,7 @@ import Ubuntu.Components 1.1
 import Ubuntu.Components.Popups 1.0
 import Ubuntu.Components.ListItems 1.0 as ListItem
 
-import "../../backend"
+import "../../model"
 import "../../components"
 
 PageView {
@@ -167,7 +167,7 @@ PageView {
                      control: Button {
                          id: switchItem
                          text: "Add"
-                         enabled: modelData.isEnabled(project) === ""
+                         enabled: modelData.enabled
 
                          onClicked: {
                              project.addPlugin(modelData.type)
