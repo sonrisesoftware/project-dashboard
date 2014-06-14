@@ -35,6 +35,7 @@ Item {
         "search": "",
         "caret-right": "",
         "filter": "",
+        "adn": "",
         "bar-chart-o": "",
         "pencil": "",
         "check-circle": "",
