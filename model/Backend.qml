@@ -90,7 +90,7 @@ Internal.Backend {
 //        }
     }
 
-    property var availableServices: [github]
+    property var availableServices: [github, assembla]
 
     function getPlugin(name) {
         for (var i = 0; i < availablePlugins.count;i++) {

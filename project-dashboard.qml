@@ -147,7 +147,7 @@ MainView {
 
         ListView {
             anchors.fill: parent
-            model: storage.errors
+            model: storage.debugLog
 
             onCountChanged: errorsWindow.show()
 
@@ -161,7 +161,7 @@ MainView {
 
         Label {
             anchors.centerIn: parent
-            visible: storage.errors.count == 0
+            visible: storage.debugLog.count == 0
 
             text: i18n.tr("No messages")
             color: "gray"
@@ -193,6 +193,7 @@ MainView {
 
     Assembla {
         id: assembla
+        _db: storage
     }
 
     function getIcon(name) {

@@ -24,6 +24,15 @@
             "repos": "var:[]"
         },
 	
+        "Assembla": {
+            "_id": "assembla",
+            "_parent": "Service",
+
+            "oauthToken": "string",
+            "user": "var:undefined",
+            "repos": "var:[]"
+        },
+
 		"Project": {
             "plugins": "list",
             "name": "string",
@@ -32,7 +41,7 @@
 		},
 		
 		"Plugin": {
-			
+
 		},
 		
 		"NotesPlugin": {
