@@ -109,6 +109,12 @@ Page {
                 progression: true
                 onClicked: pageStack.push(Qt.resolvedUrl("InitialWalkthrough.qml"), {exitable: true})
             }
+
+            ListItem.Standard {
+                text: i18n.tr("Report a Bug")
+                progression: true
+                onClicked: Qt.openUrlExternally("https://github.com/sonrisesoftware/project-dashboard/issues")
+            }
         }
     }
 

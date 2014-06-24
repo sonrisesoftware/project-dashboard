@@ -140,7 +140,7 @@ Item {
         }
     }
 
-    property var availableServices: [github, travisCI]
+    property var availableServices: [github, travisCI, assembla]
 
     function getPlugin(name) {
         for (var i = 0; i < availablePlugins.count;i++) {

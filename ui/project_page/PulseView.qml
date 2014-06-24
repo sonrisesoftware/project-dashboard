@@ -54,12 +54,32 @@ PageView {
         }
     }
 
-    Label {
+    Column {
         anchors.centerIn: parent
-        fontSize: "large"
-        opacity: 0.5
-        text: "Nothing to show"
         visible: column.contentHeight < units.gu(1) && project.plugins.count > 0
+
+        Image {
+            source: getIcon("pulse")
+            width: units.gu(10)
+            height: width
+            opacity: 0.8
+            antialiasing: true
+            smooth: true
+            anchors.horizontalCenter: parent.horizontalCenter
+        }
+
+        Item {
+            width: parent.width
+            height: units.gu(2)
+        }
+
+        Label {
+            opacity: 0.8
+            fontSize: "large"
+            font.bold: true
+            text: i18n.tr("Nothing to show")
+            anchors.horizontalCenter: parent.horizontalCenter
+        }
     }
 
     Flickable {
