@@ -19,7 +19,7 @@ import QtQuick 2.0
 import "internal" as Internal
 
 import "../../qml-extras/httplib.js" as Http
-import "../../ubuntu-ui-extras"
+import "../ubuntu-ui-extras"
 import "../components"
 
 import "../qml-extras/promises.js" as Promise
@@ -34,14 +34,6 @@ Internal.Assembla {
     description: i18n.tr("Manage, Deliver, and Maintain Websites, Apps, and Agile Projects.")
 
     enabled: oauthToken !== ""
-
-    function isEnabled(project) {
-        if (enabled) {
-            return ""
-        } else {
-            return disabledMessage
-        }
-    }
 
     accountItem: SubtitledListItem {
         text: user ? user.name : enabled ? i18n.tr("Loading user info...") : ""

@@ -22,6 +22,7 @@ import Ubuntu.Components.ListItems 1.0 as ListItem
 
 import "../../model"
 import "../../ubuntu-ui-extras"
+import "../../qml-extras/utils.js" as Utils
 
 TabbedPage {
     id: projectPage
@@ -59,7 +60,7 @@ TabbedPage {
             text: i18n.tr("Actions")
             iconSource: getIcon("navigation-menu")
             onTriggered: {
-                var caller = app.findChild(app.header, "actionsAction_header_button")
+                var caller = Utils.findChild(app.header, "actionsAction_header_button")
                 PopupUtils.open(Qt.resolvedUrl("ActionMenu.qml"), caller, {project: projectPage.project})
             }
             visible: sidebar.selectedView === "pulse"
@@ -125,22 +126,6 @@ TabbedPage {
     }
 
     tools: ToolbarItems {
-        opened: wideAspect
-        locked: wideAspect
-
-        onLockedChanged: opened = locked
-
-        Repeater {
-            model: pluginView.visible ? pluginView.actions : []
-            delegate: ToolbarButton {
-                id: _toolbarButton
-
-                text: modelData.text
-                iconSource: modelData.iconSource
-                visible: modelData.visible
-                onTriggered: modelData.triggered(_toolbarButton)
-            }
-        }
 
         ToolbarButton {
             action: refreshAction
