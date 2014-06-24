@@ -4,6 +4,7 @@ import Ubuntu.Components.ListItems 1.0 as ListItem
 
 import "../ubuntu-ui-extras"
 import "../model"
+import "../qml-extras/utils.js" as Utils
 
 SubtitledListItem {
     id: projectDelegate
@@ -27,10 +28,10 @@ SubtitledListItem {
 
     // TODO: Nasty hack to improve the appearance of the confirm removal dialog
     Component.onCompleted: {
-        var image = findChild(projectDelegate, "confirmRemovalDialog").children[0].children[0]
+        var image = Utils.findChild(projectDelegate, "confirmRemovalDialog").children[0].children[0]
         image.source = ""
 
-        var label = findChild(projectDelegate, "confirmRemovalDialog").children[0].children[1]
+        var label = Utils.findChild(projectDelegate, "confirmRemovalDialog").children[0].children[1]
         label.text = ""
     }
 

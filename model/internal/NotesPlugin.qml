@@ -2,28 +2,17 @@ import QtQuick 2.0
 import "../../udata"
 import ".."
 
+// Automatically generated from a uData model
 Plugin {
     id: object
 
     _type: "NotesPlugin"
 
-    property ListModel notes: ListModel {
-        function add(item) {
-            _loaded = true
-            item._parent = notes
-            append({modelData: item})
-        }
+    property DocumentListModel notes: DocumentListModel {
+        type: "notes"
+    }
 
-        onCountChanged: {
-            if (!_loaded) return
-
-            var list = []
-            for (var i = 0; i < notes.count; i++) {
-                var id = notes.get(i).modelData._id
-                list.push(id)
-            }
-            _set("notes", list)
-        }
+    onCreated: {
     }
 
     onLoaded: {
@@ -34,4 +23,6 @@ Plugin {
             notes.append({modelData: item})
         }
     }
+
+    _properties: ["_type", "_version", "notes"]
 }

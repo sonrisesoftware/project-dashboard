@@ -2,6 +2,7 @@ import QtQuick 2.0
 import "../../udata"
 import ".."
 
+// Automatically generated from a uData model
 Document {
     id: object
 
@@ -11,23 +12,12 @@ Document {
     property var markdownCache
     onMarkdownCacheChanged: _set("markdownCache", markdownCache)
 
-    property ListModel projects: ListModel {
-        function add(item) {
-            _loaded = true
-            item._parent = projects
-            append({modelData: item})
-        }
+    property DocumentListModel projects: DocumentListModel {
+        type: "projects"
+    }
 
-        onCountChanged: {
-            if (!_loaded) return
-
-            var list = []
-            for (var i = 0; i < projects.count; i++) {
-                var id = projects.get(i).modelData._id
-                list.push(id)
-            }
-            _set("projects", list)
-        }
+    onCreated: {
+        _set("markdownCache", markdownCache)
     }
 
     onLoaded: {
@@ -39,4 +29,6 @@ Document {
             projects.append({modelData: item})
         }
     }
+
+    _properties: ["_type", "_version", "markdownCache", "projects"]
 }

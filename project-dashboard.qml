@@ -29,17 +29,9 @@ import "udata"
 import "model"
 MainView {
     id: app
-    // objectName for functional testing purposes (autopilot-qt5)
-    objectName: "mainView"
 
     // Note! applicationName needs to match the "name" field of the click manifest
     applicationName: "com.ubuntu.developer.mdspencer.project-dashboard"
-
-    /*
-     This property enables the application to change orientation
-     when the device is rotated. The default is false.
-    */
-    automaticOrientation: true
 
     anchorToKeyboard: true
 
@@ -52,6 +44,9 @@ MainView {
     width: units.gu(100)
     height: units.gu(75)
 
+    property bool wideAspect: width > units.gu(80)
+    property bool extraWideAspect: width > units.gu(120)
+
     property var colors: {
         "green": "#5cb85c",
         "red": "#db3131",
@@ -60,10 +55,6 @@ MainView {
         "orange": UbuntuColors.orange,
         "default": Theme.palette.normal.baseText,
     }
-
-    property bool wideAspect: width > units.gu(80)
-    property bool extraWideAspect: width > units.gu(150)
-    //property alias pageStack: pageStack
 
     useDeprecatedToolbar: false
 
@@ -194,36 +185,6 @@ MainView {
         return text.replace(/<a(.*?)>(.*?)</g, "<a $1><font color=\"" + colors["blue"] + "\">$2</font><")
     }
 
-    function newObject(type, args, parent) {
-        if (!args)
-            args = {}
-        if (!parent)
-            parent = mainView
-
-        var component = Qt.createComponent(type);
-        if (component.status == Component.Error) {
-            // Error Handling
-            console.log("Error loading component:", component.errorString());
-        }
-
-        return component.createObject(parent, args);
-    }
-
-    function findChild(obj,objectName) {
-        var childs = new Array(0);
-        childs.push(obj)
-        while (childs.length > 0) {
-            if (childs[0].objectName == objectName) {
-                return childs[0]
-            }
-            for (var i in childs[0].data) {
-                childs.push(childs[0].data[i])
-            }
-            childs.splice(0, 1);
-        }
-        return null;
-    }
-
     function prompt(title, message, placeholder, value) {
         inputDialog.title = title
         inputDialog.text = message
@@ -236,13 +197,14 @@ MainView {
         return inputDialog.promise
     }
 
-    function error(title, message, action) {
-        PopupUtils.open(Qt.resolvedUrl("ubuntu-ui-extras/NotifyDialog.qml"), app,
-                        {
-                            title: title,
-                            text: message,
-                            action:action
-                        })
+    function error(title, message) {
+        errorDialog.title = title
+        errorDialog.text = message
+        errorDialog.promise = new Promise()
+
+        errorDialog.show()
+
+        return errorDialog.promise
     }
 
     InputDialog {
@@ -252,5 +214,13 @@ MainView {
 
         onAccepted: promise.resolve(value)
         onRejected: promise.rejected(value)
+    }
+
+    NotifyDialog {
+        id: errorDialog
+
+        property var promise
+
+        onAccepted: promise.resolve()
     }
 }

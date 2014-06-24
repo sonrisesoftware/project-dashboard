@@ -97,11 +97,11 @@ TabbedPage {
             project: projectPage.project
         }
 
-//        ConfigView {
-//            visible: sidebar.selectedView === "settings"
+        ConfigView {
+            visible: sidebar.selectedView === "settings"
 
-//            project: projectPage.project
-//        }
+            project: projectPage.project
+        }
 
 //        PluginView {
 //            id: pluginView

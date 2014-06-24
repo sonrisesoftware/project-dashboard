@@ -2,6 +2,7 @@ import QtQuick 2.0
 import "../../udata"
 import ".."
 
+// Automatically generated from a uData model
 Document {
     id: object
 
@@ -10,49 +11,24 @@ Document {
     property bool notificationsEnabled
     onNotificationsEnabledChanged: _set("notificationsEnabled", notificationsEnabled)
 
-    property ListModel inbox: ListModel {
-        function add(item) {
-            _loaded = true
-            item._parent = inbox
-            append({modelData: item})
-        }
-
-        onCountChanged: {
-            if (!_loaded) return
-
-            var list = []
-            for (var i = 0; i < inbox.count; i++) {
-                var id = inbox.get(i).modelData._id
-                list.push(id)
-            }
-            _set("inbox", list)
-        }
+    property DocumentListModel inbox: DocumentListModel {
+        type: "inbox"
     }
 
     property string name
     onNameChanged: _set("name", name)
 
-    property ListModel plugins: ListModel {
-        function add(item) {
-            _loaded = true
-            item._parent = plugins
-            append({modelData: item})
-        }
+    property DocumentListModel plugins: DocumentListModel {
+        type: "plugins"
+    }
 
-        onCountChanged: {
-            if (!_loaded) return
-
-            var list = []
-            for (var i = 0; i < plugins.count; i++) {
-                var id = plugins.get(i).modelData._id
-                list.push(id)
-            }
-            _set("plugins", list)
-        }
+    onCreated: {
+        _set("notificationsEnabled", notificationsEnabled)
+        _set("name", name)
     }
 
     onLoaded: {
-        notificationsEnabled = _get("notificationsEnabled", undefined)
+        notificationsEnabled = _get("notificationsEnabled", false)
         var list = _get("inbox", [])
         for (var i = 0; i < list.length; i++) {
             var item = _db.load(list[i], object)
@@ -67,4 +43,6 @@ Document {
             plugins.append({modelData: item})
         }
     }
+
+    _properties: ["_type", "_version", "notificationsEnabled", "inbox", "name", "plugins"]
 }
