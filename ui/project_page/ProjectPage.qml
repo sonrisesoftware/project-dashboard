@@ -103,12 +103,12 @@ TabbedPage {
             project: projectPage.project
         }
 
-//        PluginView {
-//            id: pluginView
-//            visible: plugin !== null
+        PluginView {
+            id: pluginView
+            visible: plugin !== null
 
-//            project: projectPage.project
-//        }
+            project: projectPage.project
+        }
     }
 
     function displayPluginItem(plugin, pluginItem) {

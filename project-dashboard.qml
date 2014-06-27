@@ -170,6 +170,50 @@ MainView {
         }
     }
 
+    Window {
+        id: objectsWindow
+        title: "uData Objects"
+
+        width: units.gu(40)
+        height: units.gu(60)
+
+        Component.onCompleted: objectsWindow.show()
+
+        Rectangle {
+            anchors.fill: parent
+        }
+
+        ListView {
+            id: docsList
+            anchors.fill: parent
+            model: storage
+
+            delegate: SubtitledListItem {
+                text: object._type + " " + object._id
+                visible: object._type !== 'Document'
+                height: visible ? implicitHeight : 0
+
+                property Document object: Document {
+                    _id: docId
+                    _db: storage
+                    _type: _get("_type", "Document")
+                }
+
+                overlay: true
+            }
+        }
+
+        Label {
+            anchors.centerIn: parent
+            visible: docsList.count == 0
+
+            text: i18n.tr("No objects")
+            color: "gray"
+            fontSize: "large"
+            opacity: 0.8
+        }
+    }
+
     Database {
         id: storage
         path: "project-dashboard.db"

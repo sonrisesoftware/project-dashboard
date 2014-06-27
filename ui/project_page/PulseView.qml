@@ -77,7 +77,22 @@ PageView {
             opacity: 0.8
             fontSize: "large"
             font.bold: true
-            text: i18n.tr("Nothing to show")
+            text: i18n.tr("No Recent Activity")
+            anchors.horizontalCenter: parent.horizontalCenter
+        }
+
+        Item {
+            width: parent.width
+            height: units.gu(1)
+        }
+
+        Label {
+            opacity: 0.5
+            fontSize: "medium"
+            width: root.width - units.gu(4)
+            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+            horizontalAlignment: Text.AlignHCenter
+            text: i18n.tr("Upcoming todos and events, assigned bugs, and recently created content will appear here")
             anchors.horizontalCenter: parent.horizontalCenter
         }
     }
@@ -115,7 +130,7 @@ PageView {
                         id: tile
                         width: parent.width
 
-                        visible: modelData.enabled && pluginItem.pulseItem && loader.item.show
+                        //visible: modelData.enabled && pluginItem.pulseItem && loader.item.show
                         height: visible ? pluginTile.height + units.gu(2) : 0
 
                         onVisibleChanged: column.reEvalColumns()

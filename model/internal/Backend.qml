@@ -11,23 +11,8 @@ Document {
     property var markdownCache
     onMarkdownCacheChanged: _set("markdownCache", markdownCache)
 
-    property ListModel projects: ListModel {
-        function add(item) {
-            _loaded = true
-            item._parent = projects
-            append({modelData: item})
-        }
-
-        onCountChanged: {
-            if (!_loaded) return
-
-            var list = []
-            for (var i = 0; i < projects.count; i++) {
-                var id = projects.get(i).modelData._id
-                list.push(id)
-            }
-            _set("projects", list)
-        }
+    property DocumentListModel projects: DocumentListModel {
+        type: "projects"
     }
 
     onLoaded: {

@@ -36,9 +36,14 @@
 		"Project": {
             "plugins": "list",
             "name": "string",
-            "inbox": "list:json",
+            "inbox": "list:Message",
             "notificationsEnabled": "bool"
 		},
+
+        "Message": {
+            "title": "string",
+            "icon": "string"
+        },
 		
 		"Plugin": {
 
@@ -48,7 +53,7 @@
 			"_parent": "Plugin",
 			
             "notes": "list"
-		},
+        },
 		
 		"Note": {
 			"title": "string",

@@ -66,7 +66,7 @@ Popover {
                         enabled: visible ? modelData.action.enabled : false
                         onClicked: {
                             PopupUtils.close(actionsPopover)
-                            modelData.action.triggered(mainView)
+                            modelData.action.triggered(app)
                         }
 
                         icon: modelData.icon

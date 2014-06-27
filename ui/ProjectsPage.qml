@@ -112,13 +112,13 @@ Page {
                 }
 
                 GridTile {
-                    title: "Launchpad Projects"
+                    title: "Assembla Projects"
 
                     Repeater {
                         model: backend.projects
                         delegate: ProjectListItem {
                             project: modelData
-                            visible: !project.hasPlugin("GitHub") && project.hasPlugin("Launchpad")
+                            visible: !project.hasPlugin("GitHub") && project.hasPlugin("Assembla")
                         }
                     }
                     onHeightChanged: column.reEvalColumns()

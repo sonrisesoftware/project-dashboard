@@ -7,23 +7,8 @@ Plugin {
 
     _type: "NotesPlugin"
 
-    property ListModel notes: ListModel {
-        function add(item) {
-            _loaded = true
-            item._parent = notes
-            append({modelData: item})
-        }
-
-        onCountChanged: {
-            if (!_loaded) return
-
-            var list = []
-            for (var i = 0; i < notes.count; i++) {
-                var id = notes.get(i).modelData._id
-                list.push(id)
-            }
-            _set("notes", list)
-        }
+    property DocumentListModel notes: DocumentListModel {
+        type: "notes"
     }
 
     onLoaded: {
