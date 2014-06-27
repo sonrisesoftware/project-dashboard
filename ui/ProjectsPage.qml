@@ -22,6 +22,7 @@ import Ubuntu.Components.Popups 1.0
 import Ubuntu.Components.ListItems 1.0 as ListItem
 import "../model"
 
+import "../qml-extras/utils.js" as Utils
 import "../ubuntu-ui-extras"
 import "../components"
 
@@ -43,7 +44,7 @@ Page {
             iconSource: getIcon("add")
             onTriggered: {
                 if (github.enabled) {
-                    var caller = app.findChild(app.header, "newProjectAction_header_button")
+                    var caller = Utils.findChild(app.header, "newProjectAction_header_button")
 
                     PopupUtils.open(newProjectPopover, caller)
                 } else {
@@ -186,10 +187,6 @@ Page {
     }
 
     tools: ToolbarItems {
-        opened: wideAspect
-        locked: wideAspect
-
-        onLockedChanged: opened = locked
 
         ToolbarButton {
             objectName: "createProject"
