@@ -5,6 +5,7 @@ import Ubuntu.Components.ListItems 1.0 as ListItem
 import "internal" as Internal
 import "../components"
 import "../ubuntu-ui-extras"
+import "../qml-extras/utils.js" as Utils
 
 Internal.NotesPlugin {
     id: plugin
@@ -50,7 +51,7 @@ Internal.NotesPlugin {
 
                     property Note note: notes.at(index)
 
-                    text: escapeHTML(note.title) + " <font color=\"" + colors["green"] + "\">" + Qt.formatDate(new Date(note.date_created)) + "</font>"
+                    text: Utils.escapeHTML(note.title) + " <font color=\"" + colors["green"] + "\">" + Qt.formatDate(new Date(note.date_created)) + "</font>"
                     subText: note.contents
 
                     removable: true

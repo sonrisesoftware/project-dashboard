@@ -1,10 +1,10 @@
 import QtQuick 2.0
 import QtTest 1.0
 import Ubuntu.Components 1.1
-import "../../backend"
-import "../../backend/services"
+import "../../model"
+import "../../udata"
 import "../../ubuntu-ui-extras"
-import "../../ubuntu-ui-extras/listutils.js" as List
+import "../../qml-extras/listutils.js" as List
 
 // See more details @ http://qt-project.org/doc/qt-5.0/qtquick/qml-testcase.html
 
@@ -17,21 +17,12 @@ Item {
     // The objects
     Backend {
         id: backend
+        _db: db
     }
 
     Database {
         id: db
-
-        onLoaded: {
-            settings.fromJSON(db.get("settings", {}))
-            backend.fromJSON(db.get("backend", {}))
-        }
-
-        onSave: {
-            //print("Saving...")
-            db.set("backend", backend.toJSON())
-            db.set("settings", settings.toJSON())
-        }
+        modelPath: Qt.resolvedUrl("../../model")
     }
 
     Document {
@@ -46,13 +37,8 @@ Item {
         id: github
     }
 
-    TravisCI {
-        id: travisCI
-    }
-
-    function newObject(type, args) {
-        var component = Qt.createComponent(type);
-        return component.createObject(mainView, args);
+    Assembla {
+        id: assembla
     }
 
     TestCase {
@@ -86,18 +72,9 @@ Item {
 
             var orig_length = backend.projects.count
 
-            var project = backend.newProject(expected)
+            var project = backend.addProject(expected)
             compare(backend.projects.count,orig_length+1, "Project was not created correctly")
             compare(project.name,expected, "Project name is incorrect")
-
-            var json = project.toJSON()
-            compare(json.name,expected, "Project name is incorrect using a Document")
-
-            project.name = new_value
-            compare(project.name,new_value, "Project name is incorrect after renaming it via the Document")
-
-            json = project.toJSON()
-            compare(json.name,new_value, "Project name is incorrect using a Document")
         }
 
         function test_deleteProject() {

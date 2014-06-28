@@ -2,7 +2,7 @@ import QtQuick 2.0
 import QtTest 1.0
 import Ubuntu.Components 1.1
 import "../../backend/utils.js" as Utils
-import "../../ubuntu-ui-extras/listutils.js" as List
+import "../../qml-extras/listutils.js" as List
 
 // See more details @ http://qt-project.org/doc/qt-5.0/qtquick/qml-testcase.html
 

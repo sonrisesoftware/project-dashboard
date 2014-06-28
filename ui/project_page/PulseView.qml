@@ -130,7 +130,7 @@ PageView {
                         id: tile
                         width: parent.width
 
-                        //visible: modelData.enabled && pluginItem.pulseItem && loader.item.show
+                        visible: modelData.enabled && pluginItem.pulseItem && loader.item.show
                         height: visible ? pluginTile.height + units.gu(2) : 0
 
                         onVisibleChanged: column.reEvalColumns()

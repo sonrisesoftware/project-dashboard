@@ -69,7 +69,7 @@ Popover {
                             modelData.action.triggered(app)
                         }
 
-                        icon: modelData.icon
+                        iconName: modelData.icon
 
                         text: actionListItem.visible ? modelData.action.text : ""
                         subText: actionListItem.visible ? modelData.action.description : ""
