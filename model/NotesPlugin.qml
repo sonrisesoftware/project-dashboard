@@ -33,7 +33,7 @@ Internal.NotesPlugin {
         }
 
         pulseItem: PulseItem {
-            show: false//notes.length > 0
+            show: notes.count > 0
             title: i18n.tr("Recent Notes")
             viewAll: i18n.tr("View all <b>%1</b> notes").arg(notes.count)
 
