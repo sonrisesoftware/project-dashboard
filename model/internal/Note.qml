@@ -8,13 +8,13 @@ Document {
 
     _type: "Note"
 
-    property var date_created: undefined
+    property var date_created
     onDate_createdChanged: _set("date_created", date_created === undefined ? undefined : date_created.toUTCString())
 
-    property string contents: ""
+    property string contents
     onContentsChanged: _set("contents", contents)
 
-    property string title: ""
+    property string title
     onTitleChanged: _set("title", title)
 
     onCreated: {
@@ -24,9 +24,9 @@ Document {
     }
 
     onLoaded: {
-        date_created = _get("date_created") === undefined ? undefined : new Date(_get("date_created"))
-        contents = _get("contents")
-        title = _get("title")
+        date_created = _get("date_created", undefined) === undefined ? undefined : new Date(_get("date_created", undefined))
+        contents = _get("contents", "")
+        title = _get("title", "")
     }
 
     _properties: ["_type", "_version", "date_created", "contents", "title"]

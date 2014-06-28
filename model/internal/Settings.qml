@@ -9,7 +9,7 @@ Document {
     _id: "settings"
     _type: "Settings"
 
-    property string uuid: undefined
+    property string uuid
     onUuidChanged: _set("uuid", uuid)
 
     onCreated: {
@@ -17,7 +17,7 @@ Document {
     }
 
     onLoaded: {
-        uuid = _get("uuid")
+        uuid = _get("uuid", undefined)
     }
 
     _properties: ["_type", "_version", "uuid"]
