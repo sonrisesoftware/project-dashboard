@@ -8,10 +8,10 @@ Document {
 
     _type: "Message"
 
-    property string icon
+    property string icon: ""
     onIconChanged: _set("icon", icon)
 
-    property string title
+    property string title: ""
     onTitleChanged: _set("title", title)
 
     onCreated: {
@@ -20,8 +20,8 @@ Document {
     }
 
     onLoaded: {
-        icon = _get("icon", "")
-        title = _get("title", "")
+        icon = _get("icon")
+        title = _get("title")
     }
 
     _properties: ["_type", "_version", "icon", "title"]

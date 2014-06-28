@@ -9,7 +9,7 @@ Document {
     _id: "backend"
     _type: "Backend"
 
-    property var markdownCache
+    property var markdownCache: {}
     onMarkdownCacheChanged: _set("markdownCache", markdownCache)
 
     property DocumentListModel projects: DocumentListModel {
@@ -21,7 +21,7 @@ Document {
     }
 
     onLoaded: {
-        markdownCache = _get("markdownCache", {})
+        markdownCache = _get("markdownCache")
         var list = _get("projects", [])
         for (var i = 0; i < list.length; i++) {
             var item = _db.load(list[i], object)
