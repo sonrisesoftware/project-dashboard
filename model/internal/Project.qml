@@ -2,6 +2,7 @@ import QtQuick 2.0
 import "../../udata"
 import ".."
 
+// Automatically generated from a uData model
 Document {
     id: object
 
@@ -21,6 +22,11 @@ Document {
         type: "plugins"
     }
 
+    onCreated: {
+        _set("notificationsEnabled", notificationsEnabled)
+        _set("name", name)
+    }
+
     onLoaded: {
         notificationsEnabled = _get("notificationsEnabled", false)
         var list = _get("inbox", [])
@@ -37,4 +43,6 @@ Document {
             plugins.append({modelData: item})
         }
     }
+
+    _properties: ["_type", "_version", "notificationsEnabled", "inbox", "name", "plugins"]
 }

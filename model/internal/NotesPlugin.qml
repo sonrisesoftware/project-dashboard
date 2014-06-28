@@ -2,6 +2,7 @@ import QtQuick 2.0
 import "../../udata"
 import ".."
 
+// Automatically generated from a uData model
 Plugin {
     id: object
 
@@ -9,6 +10,9 @@ Plugin {
 
     property DocumentListModel notes: DocumentListModel {
         type: "notes"
+    }
+
+    onCreated: {
     }
 
     onLoaded: {
@@ -19,4 +23,6 @@ Plugin {
             notes.append({modelData: item})
         }
     }
+
+    _properties: ["_type", "_version", "notes"]
 }
