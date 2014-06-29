@@ -50,7 +50,7 @@ Item {
         Item {
             id: titleItem
             clip: true
-            height: titleLabel.height + units.gu(3)
+            height: titleLabel.height + units.gu(2.5)
             anchors {
                 top: parent.top
                 left: parent.left

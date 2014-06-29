@@ -58,8 +58,8 @@ Sidebar {
             delegate: SidebarItem {
                 iconName: modelData.icon
                 text: modelData.title
-                onClicked: selectedView = modelData.type
-                selected: selectedView === modelData.type
+                onClicked: selectedView = modelData._type
+                selected: selectedView === modelData._type
             }
         }
     }
