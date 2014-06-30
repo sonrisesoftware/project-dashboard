@@ -29,6 +29,8 @@ import "qml-extras/promises.js" as Promise
 
 import "udata"
 import "model"
+import "plugins"
+
 MainView {
     id: app
 
@@ -72,7 +74,7 @@ MainView {
     PageStack {
         id: pageStack
 
-        ProjectsPage {
+        OverviewPage {
             id: projectsPage
         }
 
@@ -214,11 +216,17 @@ MainView {
     Backend {
         id: backend
         _db: storage
+
+        availablePlugins: [notesPlugin]
     }
 
     Settings {
         id: settings
         _db: storage
+    }
+
+    NotesPlugin {
+        id: notesPlugin
     }
 
     GitHub {

@@ -22,6 +22,7 @@ import Ubuntu.Components.ListItems 1.0 as ListItem
 
 import "../../components"
 import "../../ubuntu-ui-extras"
+import "../../plugins"
 import "../../model"
 import ".."
 
@@ -124,7 +125,7 @@ PageView {
 
                     property Plugin plugin: modelData
 
-                    model: plugin.items
+                    model: plugin.pluginView.items
 
                     delegate: Item {
                         id: tile
@@ -161,6 +162,8 @@ PageView {
                                     column.reEvalColumns()
                                 }
                                 onHeightChanged: column.reEvalColumns()
+
+                                property Plugin plugin: _pluginItemsRepeater.plugin
                             }
                         }
                     }

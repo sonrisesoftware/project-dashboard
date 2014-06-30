@@ -138,6 +138,7 @@ UbuntuShape {
             text: viewAllMessage
             progression: true
             showDivider: false
+            visible: viewAllMessage != ""
             onTriggered: tile.triggered()
         }
     }
