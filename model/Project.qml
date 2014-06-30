@@ -7,7 +7,7 @@ Internal.Project {
     function getPlugin(type) {
         for (var i = 0; i < plugins.count; i++) {
             var plugin = plugins.at(i)
-            if (plugin._type === type + 'Plugin')
+            if (plugin._type === type + 'Plugin' || plugin._type === type)
                 return plugin
         }
 

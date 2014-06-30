@@ -143,7 +143,7 @@ PageView {
                         PluginTile {
                             id: pluginTile
                             iconSource: tile.pluginItem.icon
-                            title: tile.pluginItem.title
+                            title: loader.item.title
                             viewAllMessage: loader.item.viewAll
                             action: tile.pluginItem.action
                             anchors.centerIn: parent

@@ -54,7 +54,7 @@ PageView {
 
             Repeater {
                 id: _repeater
-                model: pluginView.plugin ? pluginView.plugin.items : []
+                model: pluginView.plugin ? pluginView.plugin.pluginView.items : []
                 delegate: Item {
                     height: _row.height
                     width: _tabbar.width/_repeater.count //_label.width + units.gu(3)
@@ -103,13 +103,15 @@ PageView {
             bottom: parent.bottom
         }
 
-        sourceComponent: plugin ? plugin.items[selectedIndex].page : null
+        sourceComponent: plugin ? plugin.pluginView.items[selectedIndex].page : null
 
         onItemChanged: {
             if (visible) {
                 pluginView.actions = item.actions
             }
         }
+
+        property Plugin plugin: pluginView.plugin
 
         Component.onCompleted:  {
             if (visible) {
