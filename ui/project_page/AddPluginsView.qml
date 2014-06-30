@@ -21,6 +21,7 @@ import Ubuntu.Components.Popups 1.0
 import Ubuntu.Components.ListItems 1.0 as ListItem
 
 import "../../model"
+import "../../plugins"
 import "../../components"
 
 PageView {
@@ -73,14 +74,16 @@ PageView {
                 delegate: ListItem.Standard {
                     id: listItem
 
-                    visible: !project.hasPlugin(type)
+                    property Plugin plugin: modelData
+
+                    visible: !project.hasPlugin(plugin.type)
 
                     control: Button {
                         id: switchItem
                         text: "Add"
 
                         onClicked: {
-                            project.addPlugin(type)
+                            project.addPlugin(plugin.type)
                         }
                     }
 
@@ -94,7 +97,7 @@ PageView {
 
                     AwesomeIcon {
                         id: iconItem
-                        name: model.icon
+                        name: plugin.icon
                         size: units.gu(3.5)
                         anchors {
                             verticalCenter: parent.verticalCenter
@@ -122,7 +125,7 @@ PageView {
                              width: parent.width
                              elide: Text.ElideRight
                              maximumLineCount: 1
-                             text: title
+                             text: plugin.title
                              color: overlay ? "#888888" : Theme.palette.selected.backgroundText
                          }
 
@@ -138,7 +141,7 @@ PageView {
                              fontSize: "small"
                              visible: text !== ""
                              elide: Text.ElideRight
-                             text: project.hasPlugin(type) ? project.getPlugin(type).configuration : ""
+                             text: project.hasPlugin(plugin.type) ? project.getPlugin(plugin.type).configuration : ""
                              color: overlay ? "#888888" : Theme.palette.selected.backgroundText
                          }
                      }
