@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import Ubuntu.Components 1.1
+import "../model"
 
 Item {
     property string title
@@ -14,4 +15,6 @@ Item {
     property Component pulseItem
 
     property Action action
+
+    property Service service
 }

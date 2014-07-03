@@ -7,7 +7,7 @@ import "../../ubuntu-ui-extras"
 
 PageView {
 
-    title: plugin.title
+    title: plugin.pluginView.title
 
     default property alias contents: _contents.children
 
@@ -80,7 +80,7 @@ PageView {
         acceptColor: colors["red"]
 
         onAccepted: {
-            project.removePlugin(plugin.type)
+            plugin.remove()
         }
     }
 }

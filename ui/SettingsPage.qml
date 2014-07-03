@@ -22,6 +22,7 @@ import Ubuntu.Components.ListItems 1.0 as ListItem
 
 import "../model"
 
+import "../qml-extras/listutils.js" as List
 import "../ubuntu-ui-extras"
 import "../components"
 
@@ -46,13 +47,16 @@ Page {
         }
 
         Repeater {
-            model: backend.availableServices
+            model: List.filter(backend.availablePlugins, function (plugin) {
+                return plugin.service !== null
+            })
 
             delegate: GridTile {
-                property Service service: modelData
 
-                title: i18n.tr("%1 Account").arg(service.title)
-                iconSource: service.icon
+                property Service service: modelData.service
+
+                title: i18n.tr("%1 Account").arg(modelData.title)
+                iconSource: modelData.icon
 
                 Loader {
                     width: parent.width
@@ -73,20 +77,20 @@ Page {
                         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                     }
 
-                    visible: !modelData.enabled
+                    visible: !service.enabled
                 }
 
                 ListItem.Standard {
                     Label {
                        anchors.centerIn: parent
-                       text: service.enabled ? i18n.tr("Log out of this account") : i18n.tr("Log in to %1").arg(service.title)
+                       text: service.enabled ? i18n.tr("Log out of this account") : i18n.tr("Log in to %1").arg(modelData.title)
                     }
 
                     onClicked: {
-                        if (modelData.enabled)
-                            modelData.revoke()
+                        if (service.enabled)
+                            service.revoke()
                         else
-                            modelData.authenticate()
+                            service.authenticate()
                     }
 
                     showDivider: false

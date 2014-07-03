@@ -27,8 +27,6 @@ import "../qml-extras/promises.js" as Promise
 Internal.Assembla {
     id: assembla
 
-    icon: "adn"
-    title: i18n.tr("Assembla")
     authenticationStatus: oauthToken === "" ? "" : i18n.tr("Logged in as %1").arg(user.login)
 
     description: i18n.tr("Manage, Deliver, and Maintain Websites, Apps, and Agile Projects.")

@@ -81,6 +81,7 @@ PageView {
                     control: Button {
                         id: switchItem
                         text: "Add"
+                        enabled: plugin.isEnabled(project)
 
                         onClicked: {
                             project.addPlugin(plugin.type)

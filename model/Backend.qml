@@ -41,8 +41,6 @@ Internal.Backend {
 
     property var availablePlugins
 
-    property var availableServices: [github, assembla]
-
     function getPlugin(name) {
         for (var i = 0; i < availablePlugins.count;i++) {
             var plugin = availablePlugins.get(i)

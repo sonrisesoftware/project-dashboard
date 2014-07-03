@@ -57,8 +57,8 @@ PageView {
 
             text: plugin.pluginView.title
             subText: plugin.configuration
-            selected: selection === plugin.type
-            onClicked: selection = plugin.type
+            selected: selection === plugin._type
+            onClicked: selection = plugin._type
 
             property bool overlay: false
 
@@ -172,7 +172,7 @@ PageView {
             Loader {
                 anchors.fill: parent
                 visible: item !== null
-                sourceComponent: plugin ? plugin.configView : null
+                sourceComponent: plugin ? plugin.pluginView.configView : null
 
                 property Plugin plugin: project.getPlugin(selection)
             }

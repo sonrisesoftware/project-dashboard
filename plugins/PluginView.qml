@@ -20,6 +20,8 @@ import Ubuntu.Components 0.1
 import Ubuntu.Components.Popups 0.1
 import Ubuntu.Components.ListItems 0.1 as ListItem
 import "../components"
+import "../model"
+import "../ui/project_page"
 
 Item {
     id: pluginView
@@ -27,8 +29,15 @@ Item {
     property string type
     property string title
     property string icon
+    property Service service
 
-    function isEnabled(project) {}
+    function isEnabled(project) {
+        return service ? service.enabled : true
+    }
 
     property list<PluginItem> items
+
+    property Component configView: PluginConfigView {
+
+    }
 }

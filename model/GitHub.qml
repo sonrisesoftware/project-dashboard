@@ -12,9 +12,6 @@ import "../qml-extras/utils.js" as Utils
 Internal.GitHub {
     id: github
 
-    type: "GitHub"
-    icon: "github"
-    title: i18n.tr("GitHub")
     authenticationStatus: user ? i18n.tr("Logged in as %1").arg(user.login) : ""
     enabled: oauthToken !== ""
 
@@ -45,8 +42,10 @@ Internal.GitHub {
     }
 
     function httpGet(call) {
-        return Http.get(api + call,["access_token=" + oauthToken],
-                        undefined, {"Accept":"application/vnd.github.v3+json"})
+        return Http.get(api + call,{
+                            options: ["access_token=" + oauthToken],
+                            headers: {"Accept":"application/vnd.github.v3+json"}
+                        })
     }
 
     function revoke() {
@@ -56,7 +55,7 @@ Internal.GitHub {
     }
 
     function authenticate() {
-        pageStack.push(Qt.resolvedUrl("../backend/services/OAuthPage.qml"))
+        pageStack.push(Qt.resolvedUrl("../backend/services/OAuthPage.qml"), {github: github})
     }
 
     function createProject() {

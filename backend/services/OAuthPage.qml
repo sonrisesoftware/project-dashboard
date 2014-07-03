@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import Ubuntu.Components 1.1
 import Ubuntu.Components.Extras.Browser 0.2
+import "../../model"
 
 Page {
     id: webPage
@@ -10,7 +11,7 @@ Page {
     property string token: ""
     property string firstGet: "?access_token=" + token
     property string otherGet: "&access_token=" + token
-
+    property GitHub github
 
     UbuntuWebView {
         id: webView
