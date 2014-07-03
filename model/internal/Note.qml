@@ -9,7 +9,7 @@ Document {
     _type: "Note"
 
     property var date_created
-    onDate_createdChanged: _set("date_created", date_created === undefined ? undefined : date_created.toUTCString())
+    onDate_createdChanged: _set("date_created", date_created === undefined ? undefined : date_created.toISOString())
 
     property string contents
     onContentsChanged: _set("contents", contents)
@@ -18,7 +18,7 @@ Document {
     onTitleChanged: _set("title", title)
 
     onCreated: {
-        _set("date_created", date_created === undefined ? undefined : date_created.toUTCString())
+        _set("date_created", date_created === undefined ? undefined : date_created.toISOString())
         _set("contents", contents)
         _set("title", title)
     }
