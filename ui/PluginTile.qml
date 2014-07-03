@@ -107,7 +107,7 @@ UbuntuShape {
                 }
 
                 text: tile.action ? tile.action.text : ""
-                onClicked: tile.action.triggered(actionButton)
+                onClicked: tile.action.triggered(plugin)
             }
         }
     }

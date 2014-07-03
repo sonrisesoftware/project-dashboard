@@ -41,7 +41,12 @@ PluginView {
 
             page: NotesPage {}
 
-
+            action: Action {
+                text: i18n.tr("Add Note")
+                description: i18n.tr("Add a new note to your project")
+                iconSource: getIcon("add")
+                onTriggered: pageStack.push(Qt.resolvedUrl("notes/NewNotePage.qml"), {plugin: value})
+            }
 
             Component {
                 id: notePage

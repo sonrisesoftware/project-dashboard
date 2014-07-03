@@ -58,7 +58,9 @@ Popover {
             Repeater {
                 model: project.plugins
                 delegate: Repeater {
-                    model: modelData.items
+                    property Plugin plugin: modelData
+
+                    model: plugin.pluginView.items
                     delegate: AwesomeListItem {
                         id: actionListItem
                         showDivider: actionListItem.y + actionListItem.height < actionsColumn.height
@@ -66,7 +68,7 @@ Popover {
                         enabled: visible ? modelData.action.enabled : false
                         onClicked: {
                             PopupUtils.close(actionsPopover)
-                            modelData.action.triggered(app)
+                            modelData.action.triggered(plugin)
                         }
 
                         iconName: modelData.icon

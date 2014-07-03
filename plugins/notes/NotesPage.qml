@@ -126,54 +126,7 @@ PluginPage {
 
         iconName: "pencil"
         onClicked: {
-            print("CLicked!")
-            PopupUtils.open(newNotePage)
-        }
-    }
-
-    Component {
-        id: newNotePage
-
-        ComposerSheet {
-            id: sheet
-
-            title: i18n.tr("New Note")
-            contentsHeight: wideAspect ? units.gu(40) : mainView.height
-
-            onConfirmClicked: plugin.newNote(nameField.text, descriptionField.text)
-
-            Component.onCompleted: {
-                sheet.__leftButton.text = i18n.tr("Cancel")
-                sheet.__leftButton.color = "gray"
-                sheet.__rightButton.text = i18n.tr("Create")
-                sheet.__rightButton.color = sheet.__rightButton.__styleInstance.defaultColor
-                sheet.__foreground.style = Theme.createStyleComponent(Qt.resolvedUrl("../../ubuntu-ui-extras/SuruSheetStyle.qml"), sheet)
-            }
-
-            TextField {
-                id: nameField
-                placeholderText: i18n.tr("Title")
-                anchors {
-                    left: parent.left
-                    top: parent.top
-                    right: parent.right
-                }
-
-                Keys.onTabPressed: descriptionField.forceActiveFocus()
-            }
-
-            TextArea {
-                id: descriptionField
-                placeholderText: i18n.tr("Contents")
-
-                anchors {
-                    left: parent.left
-                    right: parent.right
-                    top: nameField.bottom
-                    bottom: parent.bottom
-                    topMargin: units.gu(2)
-                }
-            }
+            pageStack.push(Qt.resolvedUrl("NewNotePage.qml"), {plugin: plugin})
         }
     }
 }

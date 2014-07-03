@@ -122,7 +122,6 @@ Page {
                                 iconSource: tile.pluginItem.icon
                                 title: loader.item.title
                                 viewAllMessage: loader.item.viewAll
-                                action: tile.pluginItem.action
                                 anchors.centerIn: parent
                                 width: parent.width - units.gu(2)
 
