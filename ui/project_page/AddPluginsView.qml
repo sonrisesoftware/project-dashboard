@@ -74,7 +74,7 @@ PageView {
                 delegate: ListItem.Standard {
                     id: listItem
 
-                    property Plugin plugin: modelData
+                    property PluginView plugin: modelData
 
                     visible: !project.hasPlugin(plugin.type)
 

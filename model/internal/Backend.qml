@@ -25,8 +25,7 @@ Document {
         var list = _get("projects", [])
         for (var i = 0; i < list.length; i++) {
             var item = _db.load(list[i], object)
-            item._parent = projects
-            projects.append({modelData: item})
+            projects.add(item)
         }
     }
 

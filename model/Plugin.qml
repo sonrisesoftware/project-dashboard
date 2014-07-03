@@ -4,5 +4,7 @@ import "../ui/project_page"
 import "../plugins"
 
 Internal.Plugin {
-    property Plugin pluginView
+    property PluginView pluginView
+
+    property string configuration
 }

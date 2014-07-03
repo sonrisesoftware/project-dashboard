@@ -67,7 +67,7 @@ PulseItem {
             property Note note: List.getItem(notes, index)
 
             text: Utils.escapeHTML(note.title) + " <font color=\"" + colors["green"] + "\">" + Qt.formatDate(new Date(note.date_created)) + "</font>"
-            subText: note.contents
+            subText: plugin ? note.contents : note.parent.parent.name
 
             onClicked: pageStack.push(notePage, {note: note})
 

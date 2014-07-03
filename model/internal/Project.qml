@@ -32,15 +32,13 @@ Document {
         var list = _get("inbox", [])
         for (var i = 0; i < list.length; i++) {
             var item = _db.load(list[i], object)
-            item._parent = inbox
-            inbox.append({modelData: item})
+            inbox.add(item)
         }
         name = _get("name", "")
         var list = _get("plugins", [])
         for (var i = 0; i < list.length; i++) {
             var item = _db.load(list[i], object)
-            item._parent = plugins
-            plugins.append({modelData: item})
+            plugins.add(item)
         }
     }
 

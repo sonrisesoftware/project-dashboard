@@ -55,7 +55,7 @@ PageView {
 
             property Plugin plugin: modelData
 
-            text: plugin.title
+            text: plugin.pluginView.title
             subText: plugin.configuration
             selected: selection === plugin.type
             onClicked: selection = plugin.type

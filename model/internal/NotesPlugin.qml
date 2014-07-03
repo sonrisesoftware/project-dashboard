@@ -19,8 +19,7 @@ Plugin {
         var list = _get("notes", [])
         for (var i = 0; i < list.length; i++) {
             var item = _db.load(list[i], object)
-            item._parent = notes
-            notes.append({modelData: item})
+            notes.add(item)
         }
     }
 

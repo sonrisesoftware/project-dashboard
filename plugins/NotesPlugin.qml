@@ -26,7 +26,7 @@ import "../ubuntu-ui-extras"
 import "../model"
 import "."
 
-Plugin {
+PluginView {
     id: notesPlugin
 
     type: "Notes"
