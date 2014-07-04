@@ -85,7 +85,8 @@
 
             "name": "string",
             "repo": "var",
-            "issues": "list:Issue"
+            "issues": "list:Issue",
+            "showClosedTickets": "bool:false"
         },
 
         "Issue": {

@@ -22,28 +22,14 @@ import Ubuntu.Components.ListItems 1.0 as ListItem
 import "../model"
 import "../ubuntu-ui-extras"
 
-DefaultSheet {
-    id: configureSheet
-
-    property GitHub github
-    //property Backend backend
-
-    title: width > units.gu(50) ? i18n.tr("Add GitHub Project") :i18n.tr("GitHub")
-
-    contentsHeight: __foreground.width !== app.width ? (units.gu(6) + units.dp(2)) * 9 : app.height
-
-    Component.onCompleted: {
-        configureSheet.__leftButton.text = i18n.tr("Cancel")
-        configureSheet.__leftButton.color = "gray"
-        //configureSheet.__rightButton.text = i18n.tr("Confirm")
-        //configureSheet.__rightButton.color = configureSheet.__rightButton.__styleInstance.defaultColor
-        configureSheet.__foreground.style = Theme.createStyleComponent(Qt.resolvedUrl("../../ubuntu-ui-extras/SuruSheetStyle.qml"), configureSheet)
-    }
+Page {
+    title: i18n.tr("Add GitHub Project")
 
     ListView {
         id: repos
-        model: github.repos
-        clip: true
+        model: githubPlugin.service.repos
+
+        anchors.fill: parent
 
         header: Column {
             width: parent.width
@@ -77,8 +63,8 @@ DefaultSheet {
                     enabled: textField.acceptableInput
 
                     onTriggered: {
-                        PopupUtils.close(configureSheet)
-                        github.addGitHubProject(text)
+                        pageStack.pop()
+                        githubPlugin.addGitHubProject(text)
                     }
                 }
             }
@@ -92,14 +78,9 @@ DefaultSheet {
             text: modelData.description
             subText: modelData.full_name
             onClicked: {
-                PopupUtils.close(configureSheet)
-                github.addGitHubProject(modelData.full_name)
+                pageStack.pop()
+                githubPlugin.addGitHubProject(modelData.full_name)
             }
-        }
-
-        anchors {
-            margins: units.gu(-1)
-            fill: parent
         }
     }
 }

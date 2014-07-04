@@ -21,7 +21,7 @@ import Ubuntu.Components.Popups 1.0
 import Ubuntu.Components.ListItems 1.0 as ListItem
 import "../../components"
 import "../../ubuntu-ui-extras"
-import "../../ubuntu-ui-extras/listutils.js" as List
+import "../../qml-extras/listutils.js" as List
 import ".."
 
 PluginPage {

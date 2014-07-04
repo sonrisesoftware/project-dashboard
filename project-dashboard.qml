@@ -18,6 +18,7 @@
 import QtQuick 2.0
 
 import Ubuntu.Components 1.1
+import Ubuntu.PerformanceMetrics 1.0
 import Ubuntu.Components.Popups 1.0
 import Ubuntu.Components.ListItems 1.0 as ListItem
 import QtQuick.Window 2.0
@@ -38,6 +39,8 @@ MainView {
     applicationName: "com.ubuntu.developer.mdspencer.project-dashboard"
 
     anchorToKeyboard: true
+
+    automaticOrientation: true
 
     backgroundColor: Qt.rgba(0.3,0.3,0.3,1)
 
@@ -127,85 +130,85 @@ MainView {
         notification.show(text)
     }
 
-    Window {
-        id: errorsWindow
-        title: "Storage Log"
+//    Window {
+//        id: errorsWindow
+//        title: "Storage Log"
 
-        width: units.gu(40)
-        height: units.gu(60)
+//        width: units.gu(40)
+//        height: units.gu(60)
 
-        Rectangle {
-            anchors.fill: parent
-        }
+//        Rectangle {
+//            anchors.fill: parent
+//        }
 
-        ListView {
-            anchors.fill: parent
-            model: storage.debugLog
+//        ListView {
+//            anchors.fill: parent
+//            model: storage.debugLog
 
-            onCountChanged: errorsWindow.show()
+//            onCountChanged: errorsWindow.show()
 
-            delegate: SubtitledListItem {
-                text: modelData.title
-                subText: modelData.details
+//            delegate: SubtitledListItem {
+//                text: modelData.title
+//                subText: modelData.details
 
-                overlay: true
-            }
-        }
+//                overlay: true
+//            }
+//        }
 
-        Label {
-            anchors.centerIn: parent
-            visible: storage.debugLog.count == 0
+//        Label {
+//            anchors.centerIn: parent
+//            visible: storage.debugLog.count == 0
 
-            text: i18n.tr("No messages")
-            color: "gray"
-            fontSize: "large"
-            opacity: 0.8
-        }
-    }
+//            text: i18n.tr("No messages")
+//            color: "gray"
+//            fontSize: "large"
+//            opacity: 0.8
+//        }
+//    }
 
-    Window {
-        id: objectsWindow
-        title: "uData Objects"
+//    Window {
+//        id: objectsWindow
+//        title: "uData Objects"
 
-        width: units.gu(40)
-        height: units.gu(60)
+//        width: units.gu(40)
+//        height: units.gu(60)
 
-        Component.onCompleted: objectsWindow.show()
+//        Component.onCompleted: objectsWindow.show()
 
-        Rectangle {
-            anchors.fill: parent
-        }
+//        Rectangle {
+//            anchors.fill: parent
+//        }
 
-        ListView {
-            id: docsList
-            anchors.fill: parent
-            model: storage
+//        ListView {
+//            id: docsList
+//            anchors.fill: parent
+//            model: storage
 
-            delegate: SubtitledListItem {
-                text: object._type + " " + object._id
-                visible: object._type !== 'Document'
-                height: visible ? implicitHeight : 0
+//            delegate: SubtitledListItem {
+//                text: object._type + " " + object._id
+//                visible: object._type !== 'Document'
+//                height: visible ? implicitHeight : 0
 
-                property Document object: Document {
-                    _id: docId
-                    _db: storage
-                    _type: _get("_type", "Document")
-                }
+//                property Document object: Document {
+//                    _id: docId
+//                    _db: storage
+//                    _type: _get("_type", "Document")
+//                }
 
-                overlay: true
-            }
-        }
+//                overlay: true
+//            }
+//        }
 
-        Label {
-            anchors.centerIn: parent
-            visible: docsList.count == 0
+//        Label {
+//            anchors.centerIn: parent
+//            visible: docsList.count == 0
 
-            text: i18n.tr("No objects")
-            color: "gray"
-            fontSize: "large"
-            opacity: 0.8
-        }
-    }
+//            text: i18n.tr("No objects")
+//            color: "gray"
+//            fontSize: "large"
+//            opacity: 0.8
+//        }
+//    }
 
     Database {
         id: storage
@@ -239,11 +242,6 @@ MainView {
 
     GithubPlugin {
         id: githubPlugin
-    }
-
-    Assembla {
-        id: assembla
-        _db: storage
     }
 
     function getIcon(name) {
@@ -325,5 +323,9 @@ MainView {
         property var promise
 
         onAccepted: promise.resolve()
+    }
+
+    PerformanceOverlay {
+        visible: true
     }
 }

@@ -11,6 +11,9 @@ Plugin {
     property var repo: undefined
     onRepoChanged: _set("repo", repo)
 
+    property bool showClosedTickets: false
+    onShowClosedTicketsChanged: _set("showClosedTickets", showClosedTickets)
+
     property string name: ""
     onNameChanged: _set("name", name)
 
@@ -20,6 +23,7 @@ Plugin {
 
     onCreated: {
         _set("repo", repo)
+        _set("showClosedTickets", showClosedTickets)
         _set("name", name)
         _loaded = true
         _created = true
@@ -27,6 +31,7 @@ Plugin {
 
     onLoaded: {
         repo = _get("repo")
+        showClosedTickets = _get("showClosedTickets", false)
         name = _get("name")
         var list = _get("issues", [])
         for (var i = 0; i < list.length; i++) {
@@ -35,5 +40,5 @@ Plugin {
         }
     }
 
-    _properties: ["_type", "_version", "repo", "name", "issues"]
+    _properties: ["_type", "_version", "repo", "showClosedTickets", "name", "issues"]
 }

@@ -60,7 +60,6 @@ ListItem.SingleValue {
             id: subLabel
             width: parent.width
 
-            height: visible ? implicitHeight: 0
             //color:  Theme.palette.normal.backgroundText
             maximumLineCount: 1
             opacity: listItem.selected ? 1 : overlay ? 0.7 : 0.65

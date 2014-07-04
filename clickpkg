@@ -1,6 +1,6 @@
 VERSION=$1
-RELEASE_DIR=../releases/project-dashboard/v$VERSION
-mkdir -p ../releases/project-dashboard
+RELEASE_DIR=~/Programs/releases/project-dashboard/v$VERSION
+mkdir -p ~/Programs/releases/project-dashboard
 
 cp . $RELEASE_DIR -r
 cd $RELEASE_DIR
@@ -10,5 +10,14 @@ sudo rm .git* -r
 rm ubuntu-ui-extras -r
 cp ../../../ubuntu-ui-extras . -r
 sudo rm ubuntu-ui-extras/.git* -r
+
+rm qml-extras -r
+cp ../../../qml-extras . -r
+sudo rm qml-extras/.git* -r
+
+rm udata -r
+cp ../../../udata . -r
+sudo rm udata/.git* -r
+
 cd ..
 click build v$VERSION

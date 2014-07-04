@@ -261,17 +261,17 @@ Page {
                 }
 
                 Repeater {
-                    model: backend.availableServices
+                    model: backend.availablePlugins
                     delegate: AwesomeListItem {
-                        property Service service: modelData
+                        property Service service: modelData.service
 
-                        visible: service.enabled
-                        iconName: service.icon
-                        text: service.title
+                        visible: service && service.enabled
+                        iconName: modelData.icon
+                        text: modelData.title
 
                         onClicked: {
                             PopupUtils.close(_newProjectPopover)
-                            service.createProject()
+                            modelData.createProject()
                         }
                     }
                 }

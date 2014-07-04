@@ -25,13 +25,19 @@ Internal.Project {
         return getPlugin(type) !== null
     }
 
-    function addPlugin(type) {
+    function addPlugin(type, args) {
         if (hasPlugin(type))
             throw "Plugin already added"
 
-        var plugin = _db.create(type + "Plugin", {project: project}, project)
-        plugin.setup()
-        plugins.add(plugin)
+        if (args) {
+            args.project = project
+            var plugin = _db.create(type + "Plugin", args, project)
+            plugins.add(plugin)
+        } else {
+            var plugin = _db.create(type + "Plugin", {project: project}, project)
+            plugin.setup()
+            plugins.add(plugin)
+        }
 
         return plugin
     }

@@ -25,7 +25,7 @@ PluginView {
 
             pulseItem: IssuesPulseItem {}
 
-            //page: IssuesPage {}
+            page: PlannerView {}
 
 //            action: Action {
 //                text: i18n.tr("Add Note")
@@ -36,4 +36,20 @@ PluginView {
         }
 
     ]
+
+    function addGitHubProject(name) {
+        app.prompt(i18n.tr("Add GitHub Project"),
+                   i18n.tr("Enter the name for your project connected to %1:").arg(name),
+                   i18n.tr("Project Name"),
+                   name).done(function (name) {
+                       var project = backend.addProject(name)
+                       project.addPlugin('GitHub', {name: name})
+                       pageStack.push(Qt.resolvedUrl("../ui/project_page/ProjectPage.qml"), {project: project})
+                       app.toast(i18n.tr("Project created"))
+                   })
+    }
+
+    function createProject() {
+        pageStack.push(Qt.resolvedUrl("../ui/AddGitHubProjectPage.qml"))
+    }
 }

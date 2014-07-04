@@ -22,7 +22,7 @@ import Ubuntu.Components.ListItems 1.0 as ListItem
 
 import "../../components"
 import "../../backend"
-import "../../ubuntu-ui-extras/listutils.js" as List
+import "../../qml-extras/listutils.js" as List
 import "../../ubuntu-ui-extras"
 
 PluginPage {
@@ -33,7 +33,9 @@ PluginPage {
         doc.set("plannerView", plannerView.view)
     }
 
-    property string view: plugin.doc.get("plannerView", "component") // or "label" or "assignee" or "milestone" (and later, "status")
+    property bool expanded: false
+
+    property string view: "component" // or "label" or "assignee" or "milestone" (and later, "status")
 
     property int columnCount: Math.max(1, Math.floor(width/units.gu(60)))
 
@@ -41,7 +43,7 @@ PluginPage {
     property var filter: view === "component" ? componentFilter : view === "assignee" ? assigneeFilter : view === "milestone" ? milestoneFilter : []
 
     property var allIssues: List.filter(plugin.issues, function(issue) {
-        return !issue.isPullRequest
+        return true//!issue.isPullRequest
     }).sort(function(a, b) { return b.number - a.number })
 
     // Component view
@@ -225,7 +227,7 @@ PluginPage {
     property var selectedFilter: allFilter
 
     function issueFilter(issue) {
-        return (issue.open || settings.get("showClosedTickets", false)) && selectedMilestone(issue) && (searchButton.opacity > 0 || (issue.title.indexOf(searchField.text) !== -1 || issue.body.indexOf(searchField.text) !== -1))
+        return (issue.open || plugin.showClosedTickets) && selectedMilestone(issue) && (searchButton.opacity > 0 || (issue.title.indexOf(searchField.text) !== -1 || issue.body.indexOf(searchField.text) !== -1))
     }
 
     function selectedMilestone(issue) {
@@ -246,13 +248,13 @@ PluginPage {
     }
 
     property var createdFilter: function(issue) {
-        return issue.user && issue.user.login === github.user.login && issueFilter(issue) ? true : false
+        return issue.user && issue.user.login === githubPlugin.user.login && issueFilter(issue) ? true : false
     }
 
     Sidebar {
         id: sidebar
         width: units.gu(30)
-        expanded: wideAspect && plugin.doc.get("sidebarExpanded", false)
+        expanded: wideAspect && plannerView.expanded
         mode: "right"
         color: Qt.rgba(0.22,0.22,0.22,0.97)
         Item {
@@ -273,7 +275,7 @@ PluginPage {
             filterPopover.__foreground.style = Theme.createStyleComponent(Qt.resolvedUrl("../../ubuntu-ui-extras/SuruSheetStyle.qml"), filterPopover)
         }
 
-        contentsHeight: mainView.height
+        contentsHeight: app.height
         Item {
             anchors.fill: parent
             anchors.margins: -units.gu(1)
@@ -299,8 +301,10 @@ PluginPage {
                         }
 
                         style: SuruCheckBoxStyle {}
-                        checked: settings.get("showClosedTickets", false)
-                        onTriggered: checked = settings.sync("showClosedTickets", checked)
+                        checked: plugin.showClosedTickets
+                        onTriggered: {
+                            plugin.showClosedTickets = checked
+                        }
                     }
                 }
 
@@ -399,7 +403,7 @@ PluginPage {
 
             GradientStop {
                 position: 0.8
-                color: mainView.backgroundColor
+                color: app.backgroundColor
             }
         }
 
@@ -557,7 +561,7 @@ PluginPage {
             ActionButton {
                 iconName: sidebar.expanded ? "caret-right" : "filter"
                 color: colors["green"]
-                onClicked: plugin.doc.set("sidebarExpanded", !plugin.doc.get("sidebarExpanded"), false)
+                onClicked: expanded = !expanded
 
                 opacity: searchActive ? 0 : 1
 

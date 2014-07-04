@@ -22,13 +22,44 @@ Internal.GitHubPlugin {
 
     property bool isFork: repo ? repo.fork : false
 
-    property string owner: name ? name.split('/', 1) : ""
+    property string owner: name ? name.split('/', 1)[0] : ""
 
     property int nextNumber: 1
 
-    onCreated: {
-        name = "iBeliever/test"
-        refresh()
+    property var milestones: []
+    property var availableAssignees: []
+
+    property var components: {
+        var list = []
+
+        for (var i = 0; i < issues.count; i++) {
+            var issue = issues.get(i).modelData
+
+            if (!issue.open)
+                continue
+
+            var title = issue.title
+
+            if (title.match(/\[.*\].*/) !== null) {
+                var index = title.indexOf(']')
+                var component = title.substring(1, index)
+
+                print(title, component)
+
+                if (list.indexOf(component) == -1) {
+                    list.push(component)
+                }
+            }
+        }
+
+        return list
+    }
+
+    function setup() {
+        app.prompt(i18n.tr("GitHub"), i18n.tr("Enter the name of a GitHub repository:"), "user/repo", "").done(function (name) {
+            plugin.name = name
+            refresh()
+        })
     }
 
     onLoaded: refresh()
