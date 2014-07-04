@@ -3,6 +3,7 @@ import "internal" as Internal
 import "../qml-extras/utils.js" as Utils
 
 Internal.Settings {
+
     property bool firstRun
 
     onLoaded: {

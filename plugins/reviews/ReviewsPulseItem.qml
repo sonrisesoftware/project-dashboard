@@ -53,6 +53,10 @@ PulseItem {
                 }
             }
 
+            reviews = reviews.sort(function (a, b) {
+                return new Date(b.date_created) - new Date(b=a.date_created)
+            })
+
             return reviews
         }
     }

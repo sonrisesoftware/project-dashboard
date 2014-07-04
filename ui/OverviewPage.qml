@@ -30,7 +30,7 @@ import "../plugins"
 Page {
     id: page
 
-    title: i18n.tr("Projects")
+    title: i18n.tr("Overview")
     objectName: "projectsPage"
 
     // Needs custom property to show up in autopilot tests
@@ -176,14 +176,14 @@ Page {
                 }
 
                 GridTile {
-                    title: "Local Projects"
+                    title: "Starred Projects"
                     iconSource: "cube"
 
                     Repeater {
                         model: backend.projects
                         delegate: ProjectListItem {
                             project: modelData
-                            visible: !project.hasPlugin("GitHub") && !project.hasPlugin("Launchpad")
+                            visible: project.starred
                         }
                     }
                     onHeightChanged: column.reEvalColumns()

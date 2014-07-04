@@ -36,6 +36,7 @@
 		"Project": {
             "plugins": "list",
             "name": "string",
+            "starred": "bool:true",
             "inbox": "list:Message",
             "notificationsEnabled": "bool"
 		},
@@ -66,6 +67,17 @@
 
             "appId": "string",
             "reviews": "var:[]"
+        },
+
+        "EventsPlugin": {
+            "_parent": "Plugin",
+
+            "events": "list:Event"
+        },
+
+        "Event": {
+            "text": "string",
+            "date": "date"
         },
 
         "GitHubPlugin": {
