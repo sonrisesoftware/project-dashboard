@@ -39,6 +39,8 @@ PluginView {
             title: i18n.tr("Reviews")
             icon: "star-half-o"
             pulseItem: ReviewsPulseItem {}
+
+            page: ReviewsPage {}
         }
     ]
 
