@@ -39,7 +39,7 @@ MainView {
 
     anchorToKeyboard: true
 
-    //backgroundColor: Qt.rgba(0.3,0.3,0.3,1)
+    backgroundColor: Qt.rgba(0.3,0.3,0.3,1)
 
     // The size of the Nexus 4
     //width: units.gu(42)
@@ -58,7 +58,6 @@ MainView {
         "blue": "#5bc0de",
         "orange": UbuntuColors.orange,
         "default": Theme.palette.normal.baseText,
-        "white": "#F3F3E7"
     }
 
     useDeprecatedToolbar: false
