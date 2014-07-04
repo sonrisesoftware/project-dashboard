@@ -8,14 +8,20 @@ Plugin {
 
     _type: "GitHubPlugin"
 
-    property var repo: undefined
+    property var repo
     onRepoChanged: _set("repo", repo)
+
+    property var milestones: []
+    onMilestonesChanged: _set("milestones", milestones)
+
+    property string name
+    onNameChanged: _set("name", name)
+
+    property var availableAssignees: []
+    onAvailableAssigneesChanged: _set("availableAssignees", availableAssignees)
 
     property bool showClosedTickets: false
     onShowClosedTicketsChanged: _set("showClosedTickets", showClosedTickets)
-
-    property string name: ""
-    onNameChanged: _set("name", name)
 
     property DocumentListModel issues: DocumentListModel {
         type: "issues"
@@ -23,22 +29,22 @@ Plugin {
 
     onCreated: {
         _set("repo", repo)
-        _set("showClosedTickets", showClosedTickets)
+        _set("milestones", milestones)
         _set("name", name)
+        _set("availableAssignees", availableAssignees)
+        _set("showClosedTickets", showClosedTickets)
         _loaded = true
         _created = true
     }
 
     onLoaded: {
-        repo = _get("repo")
+        repo = _get("repo", undefined)
+        milestones = _get("milestones", [])
+        name = _get("name", "")
+        availableAssignees = _get("availableAssignees", [])
         showClosedTickets = _get("showClosedTickets", false)
-        name = _get("name")
-        var list = _get("issues", [])
-        for (var i = 0; i < list.length; i++) {
-            var item = _db.load(list[i], object)
-            issues.add(item)
-        }
+        issues.load()
     }
 
-    _properties: ["_type", "_version", "repo", "showClosedTickets", "name", "issues"]
+    _properties: ["_type", "_version", "repo", "milestones", "name", "availableAssignees", "showClosedTickets", "issues"]
 }

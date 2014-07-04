@@ -18,11 +18,7 @@ Plugin {
     }
 
     onLoaded: {
-        var list = _get("events", [])
-        for (var i = 0; i < list.length; i++) {
-            var item = _db.load(list[i], object)
-            events.add(item)
-        }
+        events.load()
     }
 
     _properties: ["_type", "_version", "events"]

@@ -18,11 +18,7 @@ Plugin {
     }
 
     onLoaded: {
-        var list = _get("notes", [])
-        for (var i = 0; i < list.length; i++) {
-            var item = _db.load(list[i], object)
-            notes.add(item)
-        }
+        notes.load()
     }
 
     _properties: ["_type", "_version", "notes"]

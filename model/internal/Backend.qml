@@ -24,12 +24,8 @@ Document {
     }
 
     onLoaded: {
-        markdownCache = _get("markdownCache")
-        var list = _get("projects", [])
-        for (var i = 0; i < list.length; i++) {
-            var item = _db.load(list[i], object)
-            projects.add(item)
-        }
+        markdownCache = _get("markdownCache", {})
+        projects.load()
     }
 
     _properties: ["_type", "_version", "markdownCache", "projects"]

@@ -42,6 +42,8 @@
 		},
 
         "Message": {
+            "_parent": "Struct",
+
             "title": "string",
             "icon": "string"
         },
@@ -57,6 +59,8 @@
         },
 		
 		"Note": {
+            "_parent": "Struct",
+
 			"title": "string",
 			"contents": "string",
 			"date_created": "date"
@@ -76,6 +80,8 @@
         },
 
         "Event": {
+            "_parent": "Struct",
+
             "text": "string",
             "date": "date"
         },
@@ -86,10 +92,14 @@
             "name": "string",
             "repo": "var",
             "issues": "list:Issue",
+            "milestones": "var:[]",
+            "availableAssignees": "var:[]",
             "showClosedTickets": "bool:false"
         },
 
         "Issue": {
+            "_parent": "Struct",
+
             "info": "var"
         }
 	}

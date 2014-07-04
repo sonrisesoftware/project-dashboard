@@ -3,12 +3,12 @@ import "../../udata"
 import ".."
 
 // Automatically generated from a uData model
-Document {
+Struct {
     id: object
 
     _type: "Issue"
 
-    property var info: undefined
+    property var info
     onInfoChanged: _set("info", info)
 
     onCreated: {
@@ -18,7 +18,7 @@ Document {
     }
 
     onLoaded: {
-        info = _get("info")
+        info = _get("info", undefined)
     }
 
     _properties: ["_type", "_version", "info"]

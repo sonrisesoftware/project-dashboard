@@ -11,7 +11,7 @@ Plugin {
     property var reviews: []
     onReviewsChanged: _set("reviews", reviews)
 
-    property string appId: ""
+    property string appId
     onAppIdChanged: _set("appId", appId)
 
     onCreated: {
@@ -22,8 +22,8 @@ Plugin {
     }
 
     onLoaded: {
-        reviews = _get("reviews")
-        appId = _get("appId")
+        reviews = _get("reviews", [])
+        appId = _get("appId", "")
     }
 
     _properties: ["_type", "_version", "reviews", "appId"]

@@ -3,28 +3,28 @@ import "../../udata"
 import ".."
 
 // Automatically generated from a uData model
-Document {
+Struct {
     id: object
 
     _type: "Event"
 
-    property var date: undefined
-    onDateChanged: _set("date", date === undefined ? undefined : date.toISOString())
-
-    property string text: ""
+    property string text
     onTextChanged: _set("text", text)
 
+    property var date
+    onDateChanged: _set("date", date === undefined ? undefined : date.toISOString())
+
     onCreated: {
-        _set("date", date === undefined ? undefined : date.toISOString())
         _set("text", text)
+        _set("date", date === undefined ? undefined : date.toISOString())
         _loaded = true
         _created = true
     }
 
     onLoaded: {
-        date = _get("date") === undefined ? undefined : new Date(_get("date"))
-        text = _get("text")
+        text = _get("text", "")
+        date = _get("date", undefined) === undefined ? undefined : new Date(_get("date", undefined))
     }
 
-    _properties: ["_type", "_version", "date", "text"]
+    _properties: ["_type", "_version", "text", "date"]
 }

@@ -20,7 +20,7 @@ Document {
     }
 
     onLoaded: {
-        uuid = _get("uuid")
+        uuid = _get("uuid", undefined)
     }
 
     _properties: ["_type", "_version", "uuid"]
