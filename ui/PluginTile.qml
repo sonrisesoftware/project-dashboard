@@ -25,7 +25,7 @@ import "../ubuntu-ui-extras"
 UbuntuShape {
     id: tile
 
-    color: Qt.rgba(0,0,0,0.25) // 0.2
+    color: Qt.rgba(0,0,0,0.045) // 0.2
 
     radius: "medium"
 
@@ -59,7 +59,7 @@ UbuntuShape {
 
         UbuntuShape {
             radius: "medium"
-            color: Qt.rgba(0,0,0,0.3) //0.2
+            color: Qt.rgba(0,0,0,0.55) //0.2
             height: tile.height
 
             anchors {
@@ -93,6 +93,7 @@ UbuntuShape {
                     top: parent.top
                     topMargin: (titleItem.height - titleLabel.height)/2
                 }
+                color: colors["white"]
                 //color: unread ? "#77ddff" : Theme.palette.normal.baseText
             }
 

@@ -25,7 +25,7 @@ ListItem.Standard {
             bottomMargin: anchor === Qt.TopEdge ? -1 : 0
         }
 
-        color: selected ? "#202020" : mouseOver ? "#2a2a2a" : "#333"
+        color: selected ? "#333" : mouseOver ? "#2a2a2a" : "#333"
         opacity: selected || mouseOver ? 1 : 0
 
         Behavior on opacity {
@@ -70,6 +70,7 @@ ListItem.Standard {
             name: sidebarItem.iconName
             size: label.visible ? parent.width - units.gu(4) : parent.width - units.gu(3)
             shadow: true
+            color: label.color
         }
 
         Label {
@@ -79,6 +80,7 @@ ListItem.Standard {
             font.pixelSize: units.gu(1.6)
             anchors.horizontalCenter: parent.horizontalCenter
             style: Text.Raised
+            color: colors["white"]
             styleColor: Qt.rgba(0,0,0,0.7)
         }
     }
@@ -88,7 +90,7 @@ ListItem.Standard {
         anchors.bottom: anchor == Qt.BottomEdge ? parent.bottom : undefined
         anchors.top: anchor == Qt.TopEdge ? parent.top : undefined
         height: 2
-        color: Qt.rgba(0,0,0,0.7)
+        color: "#333"
     }
 
     Rectangle {
@@ -97,7 +99,7 @@ ListItem.Standard {
         anchors.top: anchor == Qt.TopEdge ? parent.top : undefined
         anchors.topMargin: 1
         height: 1
-        color: Qt.rgba(0.5,0.5,0.5,0.5)
+        color: "#666"
     }
 
     Rectangle {

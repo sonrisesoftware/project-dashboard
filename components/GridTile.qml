@@ -44,7 +44,7 @@ Item {
 
         implicitHeight: titleItem.height + contents.height
 
-        color: Qt.rgba(0,0,0,0.25) // 0.2
+        color: Qt.rgba(0,0,0,0.045) // 0.2
 
         radius: "medium"
         Item {
@@ -59,7 +59,7 @@ Item {
 
             UbuntuShape {
                 radius: "medium"
-                color: Qt.rgba(0,0,0,0.3) //0.2
+                color: Qt.rgba(0,0,0,0.55) //0.2
                 height: tile.height
 
                 anchors {
@@ -86,6 +86,7 @@ Item {
 
                     fontSize: "large"
                     elide: Text.ElideRight
+                    color: colors["white"]
 
                     anchors {
                         left: iconSource === "" ? parent.left : iconImage.right
@@ -100,6 +101,8 @@ Item {
                     id: valueLabel
 
                     //fontSize: "large"
+
+                    color: colors["white"]
 
                     anchors {
                         right: parent.right

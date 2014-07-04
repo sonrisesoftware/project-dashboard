@@ -27,8 +27,8 @@ Sidebar {
     id: sidebar
     expanded: wideAspect
     width: Math.min(units.gu(8), height/(project.plugins.count + 4))
-    color: Qt.rgba(0,0,0,0.4)
-    dividerColor: Qt.rgba(0,0,0,0.4)
+    color: Qt.rgba(0,0,0, 0.65)
+    dividerColor: "#333"
 
     autoFlick: false
 
