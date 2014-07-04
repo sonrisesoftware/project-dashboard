@@ -40,7 +40,7 @@ PageView {
     Rectangle {
         anchors.fill: _tabbar
         anchors.bottomMargin: units.dp(2)
-        color: Qt.rgba(0,0,0,0.35)
+        //color: Qt.rgba(0,0,0,0.35)
     }
 
     ListItem.Empty {
@@ -72,16 +72,9 @@ PageView {
                     }
 
                     Rectangle {
-                        visible: index < _repeater.count - 1
-                        width: units.dp(1)
-                        height: parent.height
-                        color: Qt.rgba(0.5,0.5,0.5,0.2)
-                        anchors.right: parent.right
-                    }
-
-                    Rectangle {
                         height: units.dp(2)
-                        width: parent.width
+                        width: _label.width + units.gu(3)
+                        anchors.horizontalCenter: parent.horizontalCenter
                         anchors.bottom: parent.bottom
 
                         color: UbuntuColors.orange

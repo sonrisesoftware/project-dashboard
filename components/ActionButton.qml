@@ -43,15 +43,17 @@ Item {
         }
     }
 
-//    RectangularGlow {
-//        id: glowEffect
+    RectangularGlow {
+        id: glowEffect
 
-//        opacity: 0.3
-//        anchors.fill: parent
-//        glowRadius: height/2
-//        //cornerRadius: 0
-//        color: "black"
-//    }
+        opacity: 0.3
+        anchors.fill: parent
+        anchors.horizontalCenterOffset: units.gu(4)
+        anchors.verticalCenterOffset: units.gu(4)
+        glowRadius: units.dp(2)
+        cornerRadius: 10
+        color: "black"
+    }
 
     Rectangle {
         anchors.fill: parent
@@ -71,12 +73,13 @@ Item {
             ColorAnimation { duration: UbuntuAnimation.FastDuration }
         }
 
-        border.color: button.color == UbuntuColors.orange ? Qt.darker(color, 1.5) : Qt.darker(color, 2)
+        //border.color: colors["white"]//button.color == UbuntuColors.orange ? Qt.darker(color, 1.5) : Qt.darker(color, 2)
     }
 
     AwesomeIcon {
         id: _icon
         size: units.gu(2)
+        color: colors["white"]
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
