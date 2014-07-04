@@ -70,7 +70,7 @@ PulseItem {
 
     Repeater {
         id: repeater
-        model: Math.min(reviews.length, 3)
+        model: Math.min(reviews.length, maxItems)
         delegate: SubtitledListItem {
             property var modelData: reviews[index]
 

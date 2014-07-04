@@ -8,7 +8,7 @@ Document {
 
     _type: "Issue"
 
-    property var info: {}
+    property var info: undefined
     onInfoChanged: _set("info", info)
 
     onCreated: {

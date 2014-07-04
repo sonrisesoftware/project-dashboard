@@ -28,10 +28,10 @@ import "../../qml-extras/utils.js" as Utils
 PulseItem {
     id: pulseItem
 
-    show: true//List.length(issues) > 0
+    show: List.length(issues) > 0
     title: i18n.tr("Assigned Issues")
 
-    viewAll: plugin ? i18n.tr("View all <b>%1</b> issues").arg(List.length(issues)) : ""
+    viewAll: plugin ? i18n.tr("View all <b>%1</b> issues").arg(List.length(plugin.openIssues)) : ""
 
     property var issues: {
         if (plugin) {
@@ -44,7 +44,8 @@ PulseItem {
                 var p = project.getPlugin('GitHub')
 
                 if (p) {
-                    issues = issues.concat(List.toList(p.assignedIssues))
+                    print("ISSUES", p.assignedIssues.length)
+                    issues = issues.concat(p.assignedIssues)
                 }
             }
 
@@ -59,14 +60,12 @@ PulseItem {
         height: visible ? implicitHeight : 0
     }
 
-    ListItem.Standard {
-        text: JSON.stringify(plugin.repoInfo)
-    }
-
     Repeater {
         model: issues
         delegate: IssueListItem {
             issue: modelData
+            showProject: true
+            showAssignee: false
         }
     }
 }

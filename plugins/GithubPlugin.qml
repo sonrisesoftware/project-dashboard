@@ -10,6 +10,8 @@ PluginView {
     title: i18n.tr("GitHub")
     icon: "github"
 
+    property var user: service.user
+
     service: GitHub {
         _db: storage
     }
@@ -19,6 +21,7 @@ PluginView {
             id: issuesItem
 
             title: i18n.tr("Issues")
+            icon: "bug"
 
             pulseItem: IssuesPulseItem {}
 

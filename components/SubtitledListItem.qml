@@ -20,7 +20,7 @@ import Ubuntu.Components 1.1
 import Ubuntu.Components.Popups 1.0
 import Ubuntu.Components.ListItems 1.0 as ListItem
 
-ListItem.Standard {
+ListItem.SingleValue {
     id: listItem
 
     property alias text: titleLabel.text
@@ -42,7 +42,7 @@ ListItem.Standard {
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
-            leftMargin: listItem.icon == undefined ? units.gu(2) : Math.min(units.gu(5), parent.height - units.gu(1)) + units.gu(4)
+            leftMargin: listItem.icon == undefined ? 0 : Math.min(units.gu(5), parent.height - units.gu(1)) + units.gu(2)
             rightMargin: units.gu(2)
             right: parent.right
         }

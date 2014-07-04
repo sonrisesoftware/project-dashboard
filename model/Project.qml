@@ -4,6 +4,13 @@ import "internal" as Internal
 Internal.Project {
     id: project
 
+    property string configuration: {
+        if (hasPlugin('GitHub'))
+            return getPlugin('GitHub').name
+        else
+            return ""
+    }
+
     function getPlugin(type) {
         for (var i = 0; i < plugins.count; i++) {
             var plugin = plugins.at(i)

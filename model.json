@@ -83,13 +83,13 @@
         "GitHubPlugin": {
             "_parent": "Plugin",
 
-            "repo": "string",
-            "repoInfo": "var: {}",
+            "name": "string",
+            "repo": "var",
             "issues": "list:Issue"
         },
 
         "Issue": {
-            "info": "var:{}"
+            "info": "var"
         }
 	}
 }

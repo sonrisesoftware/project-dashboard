@@ -35,7 +35,7 @@ PulseItem {
 
     property var events: {
         if (plugin) {
-            return plugin.events
+            return plugin.upcomingEvents
         } else {
             var events = []
 
@@ -44,7 +44,7 @@ PulseItem {
                 var p = project.getPlugin('Events')
 
                 if (p) {
-                    events = events.concat(List.toList(p.events))
+                    events = events.concat(p.upcomingEvents)
                 }
             }
 
@@ -66,11 +66,12 @@ PulseItem {
     Repeater {
         id: repeater
 
-        model: Math.min(List.length(events), 3)
-        delegate: ListItem.SingleValue {
+        model: Math.min(List.length(events), maxItems)
+        delegate: SubtitledListItem {
             property Event event: List.getItem(events,index)
 
             text: event.text
+            subText: plugin ? "" : event.parent.parent.name
             value: DateUtils.isToday(event.date) ? i18n.tr("Today") : DateUtils.daysUntilDate(event.date) + " days"
 
             showDivider: index < repeater.count - 1 || showFooter

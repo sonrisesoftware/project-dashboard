@@ -9,6 +9,7 @@ import "../qml-extras/utils.js" as Utils
 SubtitledListItem {
     id: projectDelegate
     text: project.name
+    subText: project.configuration
     onClicked: pageStack.push(Qt.resolvedUrl("../ui/project_page/ProjectPage.qml"), {project: project})
 
     property Project project

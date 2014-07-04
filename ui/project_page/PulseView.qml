@@ -118,7 +118,7 @@ PageView {
                 height: contentHeight
                 anchors.centerIn: parent
                 model: project.plugins
-                columns: extraWideAspect ? 3 : wideAspect ? 2 : 1
+                columns: extraWideAspect ? width/units.gu(45) : wideAspect ? 2 : 1
                 //spacing: units.gu(2)
                 delegate: Repeater {
                     id: _pluginItemsRepeater
@@ -164,6 +164,8 @@ PageView {
                                 onHeightChanged: column.reEvalColumns()
 
                                 property Plugin plugin: _pluginItemsRepeater.plugin
+
+                                property int maxPulseItems: column.columns * 2 - 1
                             }
                         }
                     }

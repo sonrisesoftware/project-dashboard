@@ -140,39 +140,11 @@ Page {
                                     onHeightChanged: column.reEvalColumns()
 
                                     property Plugin plugin: null
+                                    property int maxPulseItems: column.columns * 2 - 1
                                 }
                             }
                         }
                     }
-                }
-
-                GridTile {
-                    title: "GitHub Projects"
-                    iconSource: "github"
-
-                    Repeater {
-                        model: backend.projects
-                        delegate: ProjectListItem {
-                            project: modelData
-                            visible: project.hasPlugin("GitHub")
-                            subText: visible ? project.getPlugin("GitHub").repo : ""
-                        }
-                    }
-
-                    onHeightChanged: column.reEvalColumns()
-                }
-
-                GridTile {
-                    title: "Assembla Projects"
-
-                    Repeater {
-                        model: backend.projects
-                        delegate: ProjectListItem {
-                            project: modelData
-                            visible: !project.hasPlugin("GitHub") && project.hasPlugin("Assembla")
-                        }
-                    }
-                    onHeightChanged: column.reEvalColumns()
                 }
 
                 GridTile {

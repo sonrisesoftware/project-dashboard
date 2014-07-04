@@ -66,7 +66,7 @@ PulseItem {
 
     Repeater {
         id: repeater
-        model: Math.min(List.length(notes), 3)// project.maxRecent)
+        model: Math.min(List.length(notes), maxItems)
         delegate: SubtitledListItem {
             id: item
 

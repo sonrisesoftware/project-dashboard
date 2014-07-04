@@ -20,6 +20,7 @@ import Ubuntu.Components 1.1
 import Ubuntu.Components.Popups 1.0
 import Ubuntu.Components.ListItems 1.0 as ListItem
 import "../../model"
+import "../../qml-extras/dateutils.js" as DateUtils
 
 ListItem.Standard {
     id: listItem
@@ -28,6 +29,8 @@ ListItem.Standard {
     property bool showAssignee: true
 
     property bool isPullRequest: issue.isPullRequest
+
+    property bool showProject: false
 
     // Property to set the width of the pull request status icon if visible so that the title gets truncated properly.
     property double iconWidth: 0
@@ -76,10 +79,12 @@ ListItem.Standard {
             fontSize: "small"
             //font.italic: true
             text: {
-                if (issue.isPullRequest) {
-                    return i18n.tr("%1 opened this pull request %2").arg(issue.user.login).arg(friendsUtils.createTimeString(issue.created_at))
+                if (showProject) {
+                    return issue.parent.parent.name
+                } else if (issue.isPullRequest) {
+                    return i18n.tr("%1 opened this pull request %2").arg(issue.user.login).arg(DateUtils.friendlyTime(issue.created_at))
                 } else {
-                    var text = i18n.tr("%1 opened this issue %2").arg(issue.user.login).arg(friendsUtils.createTimeString(issue.created_at))
+                    var text = i18n.tr("%1 opened this issue %2").arg(issue.user.login).arg(DateUtils.friendlyTime(issue.created_at))
                     if (issue.labels.length > 0) {
                         text += " | "
                         for (var i = 0; i < issue.labels.length; i++) {

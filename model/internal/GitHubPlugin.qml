@@ -8,32 +8,32 @@ Plugin {
 
     _type: "GitHubPlugin"
 
-    property string repo: ""
+    property var repo: undefined
     onRepoChanged: _set("repo", repo)
+
+    property string name: ""
+    onNameChanged: _set("name", name)
 
     property DocumentListModel issues: DocumentListModel {
         type: "issues"
     }
 
-    property var repoInfo:  {}
-    onRepoInfoChanged: _set("repoInfo", repoInfo)
-
     onCreated: {
         _set("repo", repo)
-        _set("repoInfo", repoInfo)
+        _set("name", name)
         _loaded = true
         _created = true
     }
 
     onLoaded: {
         repo = _get("repo")
+        name = _get("name")
         var list = _get("issues", [])
         for (var i = 0; i < list.length; i++) {
             var item = _db.load(list[i], object)
             issues.add(item)
         }
-        repoInfo = _get("repoInfo")
     }
 
-    _properties: ["_type", "_version", "repo", "issues", "repoInfo"]
+    _properties: ["_type", "_version", "repo", "name", "issues"]
 }
