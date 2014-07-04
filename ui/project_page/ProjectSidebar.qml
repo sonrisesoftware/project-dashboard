@@ -57,7 +57,7 @@ Sidebar {
             model: project.plugins
             delegate: SidebarItem {
                 iconName: modelData.pluginView.icon
-                text: modelData.pluginView.title
+                text: modelData.pluginView.shortTitle
                 onClicked: selectedView = modelData._type
                 selected: selectedView === modelData._type
             }

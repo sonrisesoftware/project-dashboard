@@ -23,6 +23,7 @@ Internal.Project {
             throw "Plugin already added"
 
         var plugin = _db.create(type + "Plugin", {project: project}, project)
+        plugin.setup()
         plugins.add(plugin)
 
         return plugin

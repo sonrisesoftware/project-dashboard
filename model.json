@@ -59,6 +59,25 @@
 			"title": "string",
 			"contents": "string",
 			"date_created": "date"
-		}
+        },
+
+        "ClickStorePlugin": {
+            "_parent": "Plugin",
+
+            "appId": "string",
+            "reviews": "var:[]"
+        },
+
+        "GitHubPlugin": {
+            "_parent": "Plugin",
+
+            "repo": "string",
+            "repoInfo": "var: {}",
+            "issues": "list:Issue"
+        },
+
+        "Issue": {
+            "info": "var:{}"
+        }
 	}
 }

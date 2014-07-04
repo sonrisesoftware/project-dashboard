@@ -7,4 +7,6 @@ Internal.Plugin {
     property PluginView pluginView
 
     property string configuration
+
+    function setup() {}
 }

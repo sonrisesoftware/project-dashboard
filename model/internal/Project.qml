@@ -35,6 +35,7 @@ Document {
             inbox.add(item)
         }
         name = _get("name", "")
+        print(name, JSON.stringify(_get("plugins")))
         var list = _get("plugins", [])
         for (var i = 0; i < list.length; i++) {
             var item = _db.load(list[i], object)

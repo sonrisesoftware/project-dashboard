@@ -217,7 +217,7 @@ MainView {
         id: backend
         _db: storage
 
-        availablePlugins: [notesPlugin, github]
+        availablePlugins: [notesPlugin, clickPlugin, githubPlugin]
     }
 
     Settings {
@@ -229,8 +229,12 @@ MainView {
         id: notesPlugin
     }
 
+    ClickStorePlugin {
+        id: clickPlugin
+    }
+
     GithubPlugin {
-        id: github
+        id: githubPlugin
     }
 
     Assembla {
