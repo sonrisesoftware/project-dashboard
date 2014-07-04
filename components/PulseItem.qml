@@ -13,6 +13,7 @@ Column {
     property string viewAll
     property bool show: title !== ""
     property bool showAnyway: wideAspect && title !== ""
+    property bool showFooter: plugin !== null
 
     states: State {
         when: !(show || showAnyway)

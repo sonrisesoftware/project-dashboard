@@ -64,12 +64,16 @@ PulseItem {
     }
 
     Repeater {
+        id: repeater
+
         model: Math.min(List.length(events), 3)
         delegate: ListItem.SingleValue {
             property Event event: List.getItem(events,index)
 
             text: event.text
             value: DateUtils.isToday(event.date) ? i18n.tr("Today") : DateUtils.daysUntilDate(event.date) + " days"
+
+            showDivider: index < repeater.count - 1 || showFooter
         }
     }
 }

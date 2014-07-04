@@ -60,6 +60,7 @@ PulseItem {
     }
 
     Repeater {
+        id: repeater
         model: Math.min(List.length(notes), 3)// project.maxRecent)
         delegate: SubtitledListItem {
             id: item
@@ -72,6 +73,7 @@ PulseItem {
             onClicked: pageStack.push(notePage, {note: note})
 
             removable: true
+            showDivider: index < repeater.count - 1 || showFooter
             backgroundIndicator: ListItemBackground {
                 state: item.swipingState
                 iconSource: getIcon("delete-white")

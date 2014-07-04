@@ -69,6 +69,7 @@ PulseItem {
     }
 
     Repeater {
+        id: repeater
         model: Math.min(reviews.length, 3)
         delegate: SubtitledListItem {
             property var modelData: reviews[index]
@@ -82,6 +83,8 @@ PulseItem {
                 font.family: "FontAwesome"
                 text: ratingString(modelData.rating)
             }
+
+            showDivider: index < repeater.count - 1 || showFooter
 
             onClicked: pageStack.push(Qt.resolvedUrl("ReviewPage.qml"), {review: modelData, plugin: plugin})
         }
