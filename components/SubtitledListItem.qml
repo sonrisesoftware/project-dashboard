@@ -42,7 +42,7 @@ ListItem.SingleValue {
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
-            leftMargin: listItem.icon == undefined ? 0 : Math.min(units.gu(5), parent.height - units.gu(1)) + units.gu(2)
+            leftMargin: 0
             rightMargin: units.gu(2)
             right: parent.right
         }

@@ -26,28 +26,10 @@ import "../model"
 
 import "../qml-extras/listutils.js" as List
 
-Page {
+Item {
     id: page
 
-    title: i18n.tr("Inbox")
-
-    flickable: listView.contentHeight > 0 ? listView : null
-
     property int count: List.concat(backend.projects, "inbox", function(project) { return project.notificationsEnabled }).length
-
-    actions: [
-        Action {
-            id: clearAction
-
-            iconSource: getIcon("edit-clear")
-            text: i18n.tr("Clear")
-            enabled: count > 0
-            onTriggered: {
-                backend.clearInbox()
-            }
-        }
-
-    ]
 
     ListView {
         id: listView
@@ -159,29 +141,14 @@ Page {
         flickableItem: listView
     }
 
-    Column {
+    Label {
+        opacity: 0.5
+        fontSize: "large"
+        text: i18n.tr("No unread messages")
         anchors.centerIn: parent
+
         visible: listView.contentHeight == 0
 
-        AwesomeIcon {
-            name: "inbox"
-            size: units.gu(10)
-            opacity: 0.8
-            anchors.horizontalCenter: parent.horizontalCenter
-        }
-
-        Item {
-            width: parent.width
-            height: units.gu(2)
-        }
-
-        Label {
-            opacity: 0.8
-            fontSize: "large"
-            font.bold: true
-            text: i18n.tr("No unread messages")
-            anchors.horizontalCenter: parent.horizontalCenter
-        }
     }
 
     function friendlyTime(time) {
@@ -201,12 +168,5 @@ Page {
         else if (hours < 24)
             return i18n.tr("%1 hours ago").arg(hours)
         return Qt.formatDate(time)
-    }
-
-    tools: ToolbarItems {
-
-        ToolbarButton {
-            action: clearAction
-        }
     }
 }

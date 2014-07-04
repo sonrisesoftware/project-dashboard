@@ -22,7 +22,7 @@ import Ubuntu.Components.ListItems 1.0 as ListItem
 import "../../ubuntu-ui-extras"
 import "../../components"
 import "../../backend/utils.js" as Utils
-import "../../backend/"
+import "../../model/"
 
 Page {
     id: page
@@ -34,8 +34,9 @@ Page {
     property string typeCap: issue.isPullRequest ? "Pull request" : "Issue"
     property string typeTitle: issue.isPullRequest ? "Pull Request" : "Issue"
 
-    property Plugin plugin
     property var request
+
+    property GitHubPlugin plugin: issue.parent
 
     property Issue issue
 

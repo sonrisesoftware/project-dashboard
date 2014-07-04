@@ -37,13 +37,13 @@ PluginView {
 
     ]
 
-    function addGitHubProject(name) {
+    function addGitHubProject(repo) {
         app.prompt(i18n.tr("Add GitHub Project"),
-                   i18n.tr("Enter the name for your project connected to %1:").arg(name),
+                   i18n.tr("Enter the name for your project connected to %1:").arg(repo),
                    i18n.tr("Project Name"),
-                   name).done(function (name) {
+                   repo).done(function (name) {
                        var project = backend.addProject(name)
-                       project.addPlugin('GitHub', {name: name})
+                       project.addPlugin('GitHub', {name: repo})
                        pageStack.push(Qt.resolvedUrl("../ui/project_page/ProjectPage.qml"), {project: project})
                        app.toast(i18n.tr("Project created"))
                    })

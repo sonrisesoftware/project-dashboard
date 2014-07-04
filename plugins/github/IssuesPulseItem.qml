@@ -44,10 +44,14 @@ PulseItem {
                 var p = project.getPlugin('GitHub')
 
                 if (p) {
-                    print("ISSUES", p.assignedIssues.length)
+                    //print("ISSUES", p.assignedIssues.length)
                     issues = issues.concat(p.assignedIssues)
                 }
             }
+
+            issues = issues.sort(function (a, b) {
+                return b.created_at - a.created_at
+            })
 
             return issues
         }

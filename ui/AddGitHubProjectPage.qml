@@ -64,7 +64,7 @@ Page {
 
                     onTriggered: {
                         pageStack.pop()
-                        githubPlugin.addGitHubProject(text)
+                        githubPlugin.addGitHubProject(textField.text)
                     }
                 }
             }

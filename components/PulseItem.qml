@@ -15,7 +15,7 @@ Column {
     property bool showAnyway: wideAspect && title !== ""
     property bool showFooter: plugin !== null
 
-    property int maxItems: maxPulseItems
+    property int maxItems: Math.max(3, maxPulseItems)
 
     states: State {
         when: !(show || showAnyway)

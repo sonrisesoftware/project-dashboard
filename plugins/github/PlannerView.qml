@@ -29,10 +29,6 @@ PluginPage {
     id: plannerView
     title: "Issues"
 
-    Component.onDestruction: {
-        doc.set("plannerView", plannerView.view)
-    }
-
     property bool expanded: false
 
     property string view: "component" // or "label" or "assignee" or "milestone" (and later, "status")

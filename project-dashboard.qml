@@ -81,11 +81,6 @@ MainView {
             id: projectsPage
         }
 
-        UniversalInboxPage {
-            id: inboxPage
-            visible: false
-        }
-
         Component.onCompleted: {
             pageStack.push(projectsPage)
 

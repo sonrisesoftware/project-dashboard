@@ -58,17 +58,41 @@ Page {
             id: inboxAction
             text: i18n.tr("Inbox")
             iconSource: getIcon("inbox")
-            onTriggered: pageStack.push(inboxPage)
+            onTriggered: sidebar.expanded = !sidebar.expanded
         }
     ]
 
     onVisibleChanged: column.reEvalColumns()
 
-    flickable: backend.projects.count > 0 ? projectsList : null
+    flickable: backend.projects.count > 0 && !sidebar.expanded ? projectsList : null
+
+    onFlickableChanged: if (!flickable) projectsList.topMargin = 0
+
+    Sidebar {
+        id: sidebar
+        mode: "right"
+
+        expanded: false
+        autoFlick: false
+        width: extraWideAspect ? units.gu(35) : units.gu(30)
+        //color: "#F5F5F5"
+        z: 1
+
+        InboxView {
+            anchors.fill: parent
+        }
+    }
 
     Flickable {
         id: projectsList
-        anchors.fill: parent
+        anchors {
+            left: parent.left
+            right: sidebar.left//.right
+            top: parent.top
+            bottom: parent.bottom
+        }
+
+        clip: true
 
         contentWidth: width
         contentHeight: column.contentHeight + units.gu(2)
@@ -85,7 +109,7 @@ Page {
                     margins: units.gu(1)
                 }
                 repeaterCompleted: true
-                columns: extraWideAspect ? width/units.gu(45) : wideAspect ? 2 : 1
+                columns: width/units.gu(45)
 
                 Timer {
                     interval: 100
