@@ -13,6 +13,8 @@ Plugin {
     }
 
     onCreated: {
+        _loaded = true
+        _created = true
     }
 
     onLoaded: {

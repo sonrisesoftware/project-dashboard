@@ -7,17 +7,20 @@ Document {
     id: object
 
     _id: "settings"
+    _created: true
     _type: "Settings"
 
-    property string uuid
+    property string uuid: undefined
     onUuidChanged: _set("uuid", uuid)
 
     onCreated: {
         _set("uuid", uuid)
+        _loaded = true
+        _created = true
     }
 
     onLoaded: {
-        uuid = _get("uuid", undefined)
+        uuid = _get("uuid")
     }
 
     _properties: ["_type", "_version", "uuid"]

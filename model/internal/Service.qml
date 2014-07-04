@@ -9,6 +9,8 @@ Document {
     _type: "Service"
 
     onCreated: {
+        _loaded = true
+        _created = true
     }
 
     onLoaded: {

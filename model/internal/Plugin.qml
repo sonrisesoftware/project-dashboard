@@ -9,6 +9,8 @@ Document {
     _type: "Plugin"
 
     onCreated: {
+        _loaded = true
+        _created = true
     }
 
     onLoaded: {

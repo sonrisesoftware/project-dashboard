@@ -8,14 +8,17 @@ Document {
 
     _type: "Project"
 
-    property bool notificationsEnabled
+    property bool starred: true
+    onStarredChanged: _set("starred", starred)
+
+    property bool notificationsEnabled: false
     onNotificationsEnabledChanged: _set("notificationsEnabled", notificationsEnabled)
 
     property DocumentListModel inbox: DocumentListModel {
         type: "inbox"
     }
 
-    property string name
+    property string name: ""
     onNameChanged: _set("name", name)
 
     property DocumentListModel plugins: DocumentListModel {
@@ -23,19 +26,22 @@ Document {
     }
 
     onCreated: {
+        _set("starred", starred)
         _set("notificationsEnabled", notificationsEnabled)
         _set("name", name)
+        _loaded = true
+        _created = true
     }
 
     onLoaded: {
-        notificationsEnabled = _get("notificationsEnabled", false)
+        starred = _get("starred")
+        notificationsEnabled = _get("notificationsEnabled")
         var list = _get("inbox", [])
         for (var i = 0; i < list.length; i++) {
             var item = _db.load(list[i], object)
             inbox.add(item)
         }
-        name = _get("name", "")
-        print(name, JSON.stringify(_get("plugins")))
+        name = _get("name")
         var list = _get("plugins", [])
         for (var i = 0; i < list.length; i++) {
             var item = _db.load(list[i], object)
@@ -43,5 +49,5 @@ Document {
         }
     }
 
-    _properties: ["_type", "_version", "notificationsEnabled", "inbox", "name", "plugins"]
+    _properties: ["_type", "_version", "starred", "notificationsEnabled", "inbox", "name", "plugins"]
 }
