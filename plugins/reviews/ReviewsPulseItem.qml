@@ -79,7 +79,7 @@ PulseItem {
                 text: ratingString(modelData.rating)
             }
 
-            onClicked: PopupUtils.open(reviewSheet, null, {review: modelData})
+            onClicked: pageStack.push(Qt.resolvedUrl("ReviewPage.qml"), {review: modelData, plugin: plugin})
         }
     }
 }
