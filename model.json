@@ -86,6 +86,20 @@
             "date": "date"
         },
 
+        "ActionsPlugin": {
+            "_parent": "Plugin",
+
+            "actions": "list:ActionItem"
+        },
+
+        "ActionItem": {
+            "_parent": "Struct",
+
+            "text": "string",
+            "action": "string",
+            "click_count": "int"
+        },
+
         "GitHubPlugin": {
             "_parent": "Plugin",
 
