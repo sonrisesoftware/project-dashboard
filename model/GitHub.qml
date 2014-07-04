@@ -31,12 +31,12 @@ Internal.GitHub {
     onOauthTokenChanged: {
         if (oauthToken !== "") {
             httpGet('/user').done(function(data) {
-                user = JSON.parse(data)
+                user = Utils.cherrypick(JSON.parse(data), ['name', 'login', 'avatar_url'])
             })
 
             httpGet('/user/repos').done(function(data) {
                 var list = JSON.parse(data)
-                repos = list//Utils.cherrypick(list, [""])
+                repos = Utils.cherrypick(list, ['full_name', 'description'])
             })
         }
     }

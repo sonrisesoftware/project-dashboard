@@ -28,7 +28,7 @@ import "../../qml-extras/utils.js" as Utils
 PulseItem {
     id: pulseItem
 
-    show: List.length(issues) > 0
+    show: true//List.length(issues) > 0
     title: i18n.tr("Assigned Issues")
 
     viewAll: plugin ? i18n.tr("View all <b>%1</b> issues").arg(List.length(issues)) : ""

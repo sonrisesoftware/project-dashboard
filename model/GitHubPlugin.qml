@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import "internal" as Internal
+import "../qml-extras/utils.js" as Utils
 
 Internal.GitHubPlugin {
     pluginView: githubPlugin
@@ -16,15 +17,14 @@ Internal.GitHubPlugin {
     onLoaded: refresh()
 
     function refresh() {
+        print("REFRESHING")
         httpGet('/repos/%1'.arg(repo)).done(function (data) {
-            repoInfo = JSON.parse(data)
+            repoInfo = Utils.cherrypick(JSON.parse(data), ['name', 'full_name', 'description', 'fork'])
+            print("RESPONSE:", JSON.stringify(repoInfo))
         })
     }
 
     function httpGet(call) {
-        return Http.get(api + call,{
-                            options: ["access_token=" + oauthToken],
-                            headers: {"Accept":"application/vnd.github.v3+json"}
-                        })
+        return githubPlugin.service.httpGet(call)
     }
 }
