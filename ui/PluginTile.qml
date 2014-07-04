@@ -139,6 +139,7 @@ UbuntuShape {
             progression: true
             showDivider: false
             visible: viewAllMessage != ""
+            height: units.gu(5)
             onTriggered: tile.triggered()
         }
     }

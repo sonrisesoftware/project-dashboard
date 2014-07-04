@@ -217,7 +217,7 @@ MainView {
         id: backend
         _db: storage
 
-        availablePlugins: [notesPlugin, clickPlugin, githubPlugin]
+        availablePlugins: [notesPlugin, eventsPlugin, clickPlugin, githubPlugin]
     }
 
     Settings {
@@ -231,6 +231,10 @@ MainView {
 
     ClickStorePlugin {
         id: clickPlugin
+    }
+
+    EventsPlugin {
+        id: eventsPlugin
     }
 
     GithubPlugin {
