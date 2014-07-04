@@ -40,7 +40,7 @@ PageView {
     Rectangle {
         anchors.fill: _tabbar
         anchors.bottomMargin: units.dp(2)
-        //color: Qt.rgba(0,0,0,0.35)
+        color: Qt.rgba(0,0,0,0.35)
     }
 
     ListItem.Empty {

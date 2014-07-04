@@ -44,15 +44,15 @@ Item {
     }
 
     RectangularGlow {
-        id: glowEffect
-
-        opacity: 0.3
-        anchors.fill: parent
-        anchors.horizontalCenterOffset: units.gu(4)
-        anchors.verticalCenterOffset: units.gu(4)
-        glowRadius: units.dp(2)
-        cornerRadius: 10
+        anchors.centerIn: parent
+        width: parent.width
+        height: parent.height
+        anchors.verticalCenterOffset: 1
+        glowRadius: 5
+        opacity: 0.7
+        spread: 0.2
         color: "black"
+        cornerRadius: width/2 + glowRadius
     }
 
     Rectangle {
@@ -79,11 +79,9 @@ Item {
     AwesomeIcon {
         id: _icon
         size: units.gu(2)
-        color: colors["white"]
         anchors {
-            verticalCenter: parent.verticalCenter
-            left: parent.left
-            leftMargin: (parent.height - _icon.height)/2
+            centerIn: parent
+            horizontalCenterOffset: _icon.name == "plus" ? units.dp(-0.5) : 0
         }
     }
 }
