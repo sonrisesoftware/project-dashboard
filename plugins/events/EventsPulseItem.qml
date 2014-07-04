@@ -49,7 +49,7 @@ PulseItem {
             }
 
             events = events.sort(function (a, b) {
-                return new Date(b.date) - new Date(b=a.date)
+                return new Date(a.date) - new Date(b.date)
             })
 
             return events

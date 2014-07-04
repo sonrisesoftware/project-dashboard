@@ -40,6 +40,8 @@ PluginView {
             icon: "calendar"
             pulseItem: EventsPulseItem {}
 
+            page: EventsPage {}
+
             action: Action {
                 id: addAction
                 text: i18n.tr("Add Event")
