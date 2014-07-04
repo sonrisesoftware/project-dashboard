@@ -1,6 +1,6 @@
 {
     "settings": {
-        "uuid": "string:undefined"
+        "uuid": "string"
     },
 
 	"objects": {
@@ -114,7 +114,13 @@
         "Issue": {
             "_parent": "Struct",
 
-            "info": "var"
+            "info": "var",
+            "pull": "var",
+            "events": "var",
+            "comments": "var",
+            "commits": "var",
+            "status": "var",
+            "statusDescription": "var"
         }
 	}
 }
