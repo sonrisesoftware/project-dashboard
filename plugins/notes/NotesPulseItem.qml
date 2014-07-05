@@ -48,6 +48,11 @@ PulseItem {
                 }
             }
 
+
+            notes = notes.sort(function (a, b) {
+                return new Date(b.date_created) - new Date(a.date_created)
+            })
+
             return notes
         }
     }
