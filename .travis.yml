@@ -9,6 +9,6 @@ install:
 - git clone https://github.com/iBeliever/ubuntu-ui-extras.git
 
 script:
-- make unit_test_check
-- make python_check
-- make autopilot
+- xvfb-run make unit_test_check
+- xvfb-run make python_check
+- xvfb-run make autopilot
