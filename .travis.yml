@@ -1,6 +1,7 @@
 before_install:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
+  xvfb :1 &
   - rm -f -r ubuntu-ui-extras udata qml-extras
 
 install:
