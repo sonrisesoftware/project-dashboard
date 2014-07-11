@@ -61,6 +61,8 @@ MainView {
         "blue": "#5bc0de",
         "orange": UbuntuColors.orange,
         "default": Theme.palette.normal.baseText,
+        "white": "#F5F5F5",
+        "overlay": "#666"
     }
 
     useDeprecatedToolbar: false
