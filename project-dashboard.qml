@@ -27,8 +27,7 @@ import "backend/services"
 import "ubuntu-ui-extras"
 import "ubuntu-ui-extras/listutils.js" as List
 import "ubuntu-ui-extras/httplib.js" as Http
-import Friends 0.2
-import "Markdown.Converter.js" as Markdown
+import "qml-extras/dateutils.js" as DateUtils
 
 /*!
     \brief MainView with a Label and Button elements.
@@ -291,8 +290,12 @@ MainView {
         }
     }
 
-    FriendsUtils {
+    QtObject {
         id: friendsUtils
+
+        function createTimeString(date) {
+            return DateUtils.friendlyTime(new Date(date), false)
+        }
     }
 
     Backend {
