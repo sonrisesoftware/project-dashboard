@@ -22,6 +22,7 @@ import Ubuntu.Components.ListItems 1.0 as ListItem
 
 import "../../model"
 import "../../qml-extras/listutils.js" as List
+import "../../ubuntu-ui-extras"
 
 PageView {
     id: pluginView
@@ -37,78 +38,44 @@ PageView {
         selectedIndex = List.indexOf(plugin.items, pluginItem)
     }
 
-    Rectangle {
-        anchors.fill: _tabbar
-        anchors.bottomMargin: units.dp(2)
-        color: Qt.rgba(0,0,0,0.35)
-    }
+    property var tabs: {
+        if (!plugin) return []
 
-    ListItem.Empty {
-        id: _tabbar
-        height: units.gu(4.2) //_repeater.count > 1 ? units.gu(4.2) : 0
-
-        Row {
-            id: _row
-            anchors.centerIn: parent
-            height: parent.height - units.dp(2)
-
-            Repeater {
-                id: _repeater
-                model: pluginView.plugin ? pluginView.plugin.pluginView.items : []
-                delegate: Item {
-                    height: _row.height
-                    width: _tabbar.width/_repeater.count //_label.width + units.gu(3)
-
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: pluginView.selectedIndex = index
-                    }
-
-                    Label {
-                        id: _label
-                        font.pixelSize: units.dp(17)
-                        anchors.centerIn: parent
-                        text: modelData.title
-                    }
-
-                    Rectangle {
-                        height: units.dp(2)
-                        width: _label.width + units.gu(3)
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        anchors.bottom: parent.bottom
-
-                        color: UbuntuColors.orange
-                        opacity: index === pluginView.selectedIndex ? 1 : 0
-                    }
-                }
-            }
+        var list = []
+        for (var i = 0; i < pluginView.plugin.pluginView.items.length; i++) {
+            list.push(pluginView.plugin.pluginView.items[i].title)
         }
+        return list
     }
-
 
     property Plugin plugin: project.getPlugin(sidebar.selectedView)
 
-    Loader {
-        anchors {
-            left: parent.left
-            right: parent.right
-            top: _tabbar.bottom
-            bottom: parent.bottom
-        }
+    TabView {
+        id: tabView
+        anchors.fill: parent
 
-        sourceComponent: plugin ? plugin.pluginView.items[selectedIndex].page : null
+        model: plugin.pluginView.items
+        currentIndex: projectPage.selectedIndex
 
-        onItemChanged: {
-            if (visible) {
-                pluginView.actions = item.actions
+
+        delegate: Loader {
+            width: tabView.width
+            height: tabView.height
+
+            sourceComponent: modelData.page
+
+            onItemChanged: {
+                if (visible) {
+                    pluginView.actions = item.actions
+                }
             }
-        }
 
-        property Plugin plugin: pluginView.plugin
+            property Plugin plugin: pluginView.plugin
 
-        Component.onCompleted:  {
-            if (visible) {
-                pluginView.actions = item.actions
+            Component.onCompleted:  {
+                if (visible) {
+                    pluginView.actions = item.actions
+                }
             }
         }
     }

@@ -34,7 +34,11 @@ TabbedPage {
     title: project.name
 
     // TODO: Could these be better named?
-    tabs: wideAspect ? [] : [i18n.tr("Pulse"), i18n.tr("Overview")]
+    tabs: wideAspect ? pluginView.tabs : [i18n.tr("Pulse"), i18n.tr("Overview")]
+
+    onTabsChanged: selectedIndex = 0
+
+    showTabs: tabs.length > 0
 
     actions: [
         Action {
