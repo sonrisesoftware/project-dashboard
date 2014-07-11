@@ -9,11 +9,11 @@ replace '@APP_VERSION@' $VERSION manifest.json
 replace '@APP_VERSION@' $VERSION project-dashboard.qml
 sudo rm .git* -r
 rm ubuntu-ui-extras -r
-cp $SRC_DIR/ubuntu-ui-extras . -r
+cp -L $SRC_DIR/ubuntu-ui-extras . -r
 sudo rm ubuntu-ui-extras/.git* -r
 
 rm qml-extras -r
-cp $SRC_DIR/qml-extras . -r
+cp -L $SRC_DIR/qml-extras . -r
 sudo rm qml-extras/.git* -r
 
 cd ..
