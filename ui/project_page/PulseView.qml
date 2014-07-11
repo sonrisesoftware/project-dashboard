@@ -143,8 +143,8 @@ PageView {
                         PluginTile {
                             id: pluginTile
                             iconSource: tile.pluginItem.icon
-                            title: loader.item.title
-                            viewAllMessage: loader.item.viewAll
+                            title: loader.item ? loader.item.title : ""
+                            viewAllMessage: loader.item ? loader.item.viewAll : ""
                             action: tile.pluginItem.action
                             anchors.centerIn: parent
                             width: parent.width - units.gu(2)

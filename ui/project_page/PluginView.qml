@@ -54,7 +54,7 @@ PageView {
         id: tabView
         anchors.fill: parent
 
-        model: plugin.pluginView.items
+        model: plugin ? plugin.pluginView.items : []
         currentIndex: projectPage.selectedIndex
 
 

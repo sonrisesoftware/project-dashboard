@@ -8,7 +8,9 @@ Internal.ClickStorePlugin {
 
     property string path: "https://reviews.ubuntu.com/click/api/1.0/reviews/?package_name=" + appId
 
-    onPathChanged: {
+    onPathChanged: if (appId) refresh()
+
+    function refresh() {
         Http.get(path).done(function(response) {
             var json = JSON.parse(response)
 

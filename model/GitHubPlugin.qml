@@ -18,9 +18,9 @@ Internal.GitHubPlugin {
 
     property string api: "https://api.github.com"
 
-    property string description: repo ? repo.description : ""
+    property string description: repo.description ? repo.description : ""
 
-    property bool isFork: repo ? repo.fork : false
+    property bool isFork: repo.fork ? repo.fork : false
 
     property string owner: name ? name.split('/', 1)[0] : ""
 
