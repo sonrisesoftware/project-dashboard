@@ -109,7 +109,10 @@ Internal.GitHubPlugin {
 
         httpGet('/repos/%1/assignees'.arg(name)).done(function (data) {
             availableAssignees = Utils.cherrypick(JSON.parse(data), ['login'])
-            print('ASSIGNEES:', JSON.stringify(availableAssignees))
+        })
+
+        httpGet('/repos/%1/milestones'.arg(name)).done(function (data) {
+            milestones = Utils.cherrypick(JSON.parse(data), ['number', 'state', 'title', 'description', 'creator', 'due_on'])
         })
     }
 
