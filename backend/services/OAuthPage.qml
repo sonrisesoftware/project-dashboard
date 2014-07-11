@@ -1,6 +1,6 @@
 import QtQuick 2.0
 import Ubuntu.Components 0.1
-import Ubuntu.Components.Extras.Browser 0.1
+import Ubuntu.Web 0.2
 
 Page {
     id: webPage
@@ -12,7 +12,7 @@ Page {
     property string otherGet: "&access_token=" + token
 
 
-    UbuntuWebView {
+    WebView {
         id: webView
         //the webview is bugged, anchors.fill: parent doesn't work
         anchors.bottom: parent.bottom

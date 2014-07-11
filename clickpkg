@@ -1,4 +1,5 @@
 VERSION=$1
+SRC_DIR=`pwd`
 RELEASE_DIR=../releases/project-dashboard/v$VERSION
 mkdir -p ../releases/project-dashboard
 
@@ -8,7 +9,12 @@ replace '@APP_VERSION@' $VERSION manifest.json
 replace '@APP_VERSION@' $VERSION project-dashboard.qml
 sudo rm .git* -r
 rm ubuntu-ui-extras -r
-cp ../../../ubuntu-ui-extras . -r
+cp $SRC_DIR/ubuntu-ui-extras . -r
 sudo rm ubuntu-ui-extras/.git* -r
+
+rm qml-extras -r
+cp $SRC_DIR/qml-extras . -r
+sudo rm qml-extras/.git* -r
+
 cd ..
 click build v$VERSION
