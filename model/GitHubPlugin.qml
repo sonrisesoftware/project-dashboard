@@ -103,7 +103,13 @@ Internal.GitHubPlugin {
             repo = Utils.cherrypick(JSON.parse(data), ['name', 'full_name', 'description', 'fork', 'permissions'])
             print("RESPONSE:", JSON.stringify(repo))
 
-            httpGet('/repos/%1/issues?state=all'.arg(name)).done(handler)
+            if (!isFork)
+                httpGet('/repos/%1/issues?state=all'.arg(name)).done(handler)
+        })
+
+        httpGet('/repos/%1/assignees'.arg(name)).done(function (data) {
+            availableAssignees = Utils.cherrypick(JSON.parse(data), ['login'])
+            print('ASSIGNEES:', JSON.stringify(availableAssignees))
         })
     }
 
