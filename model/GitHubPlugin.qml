@@ -182,8 +182,6 @@ Internal.GitHubPlugin {
             cacheInfo = {}
         cacheInfo[id] = info.headers['etag']
         cacheInfo = cacheInfo
-
-        app.rateLimit = info.headers['x-ratelimit-remaining'] + "/" + info.headers['x-ratelimit-limit']
     }
 
     /*

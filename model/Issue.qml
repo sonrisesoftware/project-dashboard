@@ -45,7 +45,10 @@ Internal.Issue {
             return result
     }
 
-    Component.onCompleted: parent.nextNumber = Math.max(parent.nextNumber, issue.number + 1)
+    onLoaded: {
+        refresh()
+        parent.nextNumber = Math.max(parent.nextNumber, issue.number + 1)
+    }
 
     property var milestone: info.milestone
     property string title: info.title
@@ -127,8 +130,11 @@ Internal.Issue {
     }
 
     function refresh(id) {
+        print(parent.name, issue.number, isPullRequest, info._links)
         if (isPullRequest && info._links) {
-            githubPlugin.httpGet(info._links.statuses.href).done(function (dresponse) {
+            print('Calling')
+            parent.httpGet(info._links.statuses.href).done(function (response, info) {
+                if (info.status == 304) return
 
                  ////print(response)
                  if (JSON.parse(response)[0] === undefined) {
@@ -136,6 +142,7 @@ Internal.Issue {
                      statusDescription = ""
                  } else {
                      status = JSON.parse(response)[0].state
+                     print('ISSUE', parent.name, issue.number, issue.status)
                      statusDescription= JSON.parse(response)[0].description
                  }
              })

@@ -329,12 +329,4 @@ MainView {
     PerformanceOverlay {
         visible: true
     }
-
-    property alias rateLimit: label.text
-
-    Label {
-        id: label
-        anchors.centerIn: parent
-        fontSize: "x-large"
-    }
 }

@@ -68,8 +68,6 @@ Internal.GitHub {
             cacheInfo = {}
         cacheInfo[id] = info.headers['etag']
         cacheInfo = cacheInfo
-
-        app.rateLimit = info.headers['x-ratelimit-remaining'] + '/' + info.headers['x-ratelimit-limit']
     }
 
     function httpGet(call, options) {
@@ -84,8 +82,8 @@ Internal.GitHub {
 
         if (call.indexOf('http') !== 0) {
             call = api + call
-            options.options.push("access_token="+oauthToken)
         }
+        options.options.push("access_token="+oauthToken)
 
         return Http.get(call, options).error(function (data, info) {
             print('GITHUB ERROR:', info.status, info.headers['x-ratelimit-remaining'])

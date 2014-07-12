@@ -24,7 +24,7 @@ import "../../components"
 IssueListItem {
     id: listItem
 
-    property string status: issue.status
+    property var status: issue.status
 
     iconWidth: icon.visible ? icon.width : 0
 

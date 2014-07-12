@@ -44,6 +44,8 @@ ListItem.Standard {
     }
 
     property Issue issue
+    property alias text: titleLabel.text
+    property alias subText: subLabel.text
 
     Column {
         id: labels
