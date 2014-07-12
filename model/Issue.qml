@@ -19,6 +19,8 @@ Internal.Issue {
     property bool open: info.state === "open"
     property var assignee: info.assignee
 
+    property bool ready
+
     property bool assignedToMe: {
         var result = issue.assignee && issue.assignee.login && issue.assignee.login === githubPlugin.user.login
         if (result === undefined)
@@ -74,7 +76,7 @@ Internal.Issue {
     }
 
     property var allEvents: {
-        if (!loaded)
+        if (!ready)
             return []
 
         // Turn the list of commits into events
@@ -139,7 +141,7 @@ Internal.Issue {
     }
 
     function load() {
-        loaded = true
+        ready = true
 
         if (isPullRequest) {
             github.getPullRequest(project, id, plugin.repo, number, function(status, response) {

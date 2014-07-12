@@ -28,30 +28,69 @@ Internal.GitHub {
 
     property string api: "https://api.github.com"
 
-    onOauthTokenChanged: {
+    onLoaded: {
         if (oauthToken !== "") {
-            httpGet('/user').done(function(data) {
-                user = Utils.cherrypick(JSON.parse(data), ['name', 'login', 'avatar_url'])
+            httpCachedGet('/user').done(function(data, info) {
+                if (info.status !== 304) {
+                    user = Utils.cherrypick(JSON.parse(data), ['name', 'login', 'avatar_url'])
+                    httpDone('user', info)
+                }
             })
 
-            httpGet('/user/repos').done(function(data) {
-                var list = JSON.parse(data)
-                repos = Utils.cherrypick(list, ['full_name', 'description'])
+            httpCachedGet('/user/repos').done(function(data, info) {
+                if (info.status !== 304) {
+                    var list = JSON.parse(data)
+                    repos = Utils.cherrypick(list, ['full_name', 'description'])
+                    httpDone('repos', info)
+                }
             })
         }
     }
 
-    function httpGet(call) {
-        return Http.get(api + call,{
-                            options: ["access_token=" + oauthToken],
-                            headers: {"Accept":"application/vnd.github.v3+json"}
-                        })
+    function httpCachedGet(call, options) {
+        if (cacheInfo && cacheInfo[call]) {
+            if (!options) options = []
+            if (!options.headers) options.headers = {}
+
+            options.headers['If-None-Match'] = cacheInfo[call]
+        }
+
+        print(JSON.stringify(cacheInfo))
+
+        return httpGet(call, options).then(function (data, info) {
+            httpDone(call, info)
+            return data
+        })
     }
 
-    function httpGetPage(call) {
-        return Http.get(call,{
-                            headers: {"Accept":"application/vnd.github.v3+json"}
-                        })
+    function httpDone(id, info) {
+        if (!cacheInfo)
+            cacheInfo = {}
+        cacheInfo[id] = info.headers['etag']
+        cacheInfo = cacheInfo
+
+        app.rateLimit = info.headers['x-ratelimit-remaining'] + '/' + info.headers['x-ratelimit-limit']
+    }
+
+    function httpGet(call, options) {
+        if (!options)
+            options = {}
+        if (!options.options)
+            options.options = []
+        if (!options.headers)
+            options.headers = {}
+
+        options.headers['Accept'] = "application/vnd.github.v3+json"
+
+        if (call.indexOf('http') !== 0) {
+            call = api + call
+            options.options.push("access_token="+oauthToken)
+        }
+
+        return Http.get(call, options).error(function (data, info) {
+            print('GITHUB ERROR:', info.status, info.headers['x-ratelimit-remaining'])
+            print(data)
+        })
     }
 
     function revoke() {

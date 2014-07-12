@@ -21,7 +21,8 @@
 
             "oauthToken": "string",
             "user": "var:undefined",
-            "repos": "var:[]"
+            "repos": "var:[]",
+            "cacheInfo": "var:{}"
         },
 	
         "Assembla": {
@@ -108,7 +109,8 @@
             "issues": "list:Issue",
             "milestones": "var:[]",
             "availableAssignees": "var:[]",
-            "showClosedTickets": "bool:false"
+            "showClosedTickets": "bool:false",
+            "cacheInfo": "var:{}"
         },
 
         "Issue": {

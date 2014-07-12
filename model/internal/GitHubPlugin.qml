@@ -27,12 +27,16 @@ Plugin {
         type: "issues"
     }
 
+    property var cacheInfo: {}
+    onCacheInfoChanged: _set("cacheInfo", cacheInfo)
+
     onCreated: {
         _set("repo", repo)
         _set("milestones", milestones)
         _set("name", name)
         _set("availableAssignees", availableAssignees)
         _set("showClosedTickets", showClosedTickets)
+        _set("cacheInfo", cacheInfo)
         _loaded = true
         _created = true
     }
@@ -44,7 +48,8 @@ Plugin {
         availableAssignees = _get("availableAssignees", [])
         showClosedTickets = _get("showClosedTickets", false)
         issues.load()
+        cacheInfo = _get("cacheInfo", {})
     }
 
-    _properties: ["_type", "_version", "repo", "milestones", "name", "availableAssignees", "showClosedTickets", "issues"]
+    _properties: ["_type", "_version", "repo", "milestones", "name", "availableAssignees", "showClosedTickets", "issues", "cacheInfo"]
 }

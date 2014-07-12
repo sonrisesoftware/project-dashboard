@@ -32,6 +32,7 @@ Internal.Project {
         if (args) {
             args.project = project
             var plugin = _db.create(type + "Plugin", args, project)
+            plugin.refresh()
             plugins.add(plugin)
         } else {
             var plugin = _db.create(type + "Plugin", {project: project}, project)

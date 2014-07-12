@@ -70,6 +70,11 @@ Internal.GitHubPlugin {
 
     function refresh() {
         var handler = function(data, info) {
+            if (info.status === 304) {
+                reloadComponents()
+                return
+            }
+
             var json = JSON.parse(data)
 
             issues.busy = true
@@ -100,36 +105,57 @@ Internal.GitHubPlugin {
             var links = parse_link_header(info.headers['link'])
 
             if (links.next) {
-                httpGetPage(links.next).done(handler)
+                httpGet(links.next, 'issues').done(handler)
             } else {
                 reloadComponents()
             }
         }
 
 
-        httpGet('/repos/%1'.arg(name)).done(function (data) {
-            repo = Utils.cherrypick(JSON.parse(data), ['name', 'full_name', 'description', 'fork', 'permissions'])
-            print("RESPONSE:", JSON.stringify(repo))
+        httpGet('/repos/%1'.arg(name)).done(function (data, info) {
+            if (info.status !== 304) {
+                repo = Utils.cherrypick(JSON.parse(data), ['name', 'full_name', 'description', 'fork', 'permissions'])
+                print("RESPONSE:", JSON.stringify(repo))
+            }
 
             if (!isFork)
                 httpGet('/repos/%1/issues?state=all'.arg(name)).done(handler)
         })
 
-        httpGet('/repos/%1/assignees'.arg(name)).done(function (data) {
-            availableAssignees = Utils.cherrypick(JSON.parse(data), ['login'])
+        httpGet('/repos/%1/assignees'.arg(name)).done(function (data, info) {
+            if (info.status !== 304) {
+                availableAssignees = Utils.cherrypick(JSON.parse(data), ['login'])
+            }
         })
 
-        httpGet('/repos/%1/milestones'.arg(name)).done(function (data) {
-            milestones = Utils.cherrypick(JSON.parse(data), ['number', 'state', 'title', 'description', 'creator', 'due_on'])
+        httpGet('/repos/%1/milestones'.arg(name)).done(function (data, info) {
+            if (info.status !== 304) {
+                milestones = Utils.cherrypick(JSON.parse(data), ['number', 'state', 'title', 'description', 'creator', 'due_on'])
+            }
         })
     }
 
-    function httpGet(call) {
-        return githubPlugin.service.httpGet(call)
+    function httpGet(call, options) {
+        if (cacheInfo && cacheInfo[call]) {
+            if (!options) options = []
+            if (!options.headers) options.headers = {}
+
+            options.headers['If-None-Match'] = cacheInfo[call]
+        }
+
+        return githubPlugin.service.httpGet(call, options).then(function(data, info) {
+            httpDone(call, info)
+            return data
+        })
     }
 
-    function httpGetPage(call) {
-        return githubPlugin.service.httpGetPage(call)
+    function httpDone(id, info) {
+        if (!cacheInfo)
+            cacheInfo = {}
+        cacheInfo[id] = info.headers['etag']
+        cacheInfo = cacheInfo
+
+        app.rateLimit = info.headers['x-ratelimit-remaining'] + "/" + info.headers['x-ratelimit-limit']
     }
 
     /*
@@ -139,8 +165,8 @@ Internal.GitHubPlugin {
     * http://developer.github.com/v3/#pagination
     */
     function parse_link_header(header) {
-        if (header.length === 0) {
-            throw "input must not be of zero length"
+        if (!header || header.length === 0) {
+            return {}
         }
 
         // Split parts by comma

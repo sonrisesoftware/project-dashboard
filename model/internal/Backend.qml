@@ -24,8 +24,12 @@ Document {
     }
 
     onLoaded: {
+        var start = new Date()
         markdownCache = _get("markdownCache", {})
         projects.load()
+        var end = new Date()
+
+        print("Loaded in ", (end-start)/1000, 'seconds')
     }
 
     _properties: ["_type", "_version", "markdownCache", "projects"]
