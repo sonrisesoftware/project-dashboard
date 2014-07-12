@@ -48,6 +48,12 @@ Internal.GitHub {
                         })
     }
 
+    function httpGetPage(call) {
+        return Http.get(call,{
+                            headers: {"Accept":"application/vnd.github.v3+json"}
+                        })
+    }
+
     function revoke() {
         oauthToken = ""
         user = undefined

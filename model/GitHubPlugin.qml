@@ -69,7 +69,7 @@ Internal.GitHubPlugin {
     onLoaded: refresh()
 
     function refresh() {
-        var handler = function(data) {
+        var handler = function(data, info) {
             var json = JSON.parse(data)
 
             issues.busy = true
@@ -95,7 +95,15 @@ Internal.GitHubPlugin {
             }
             issues.busy = false
 
-            reloadComponents()
+            //print('Headers', JSON.stringify(info.headers))
+
+            var links = parse_link_header(info.headers['link'])
+
+            if (links.next) {
+                httpGetPage(links.next).done(handler)
+            } else {
+                reloadComponents()
+            }
         }
 
 
@@ -118,5 +126,37 @@ Internal.GitHubPlugin {
 
     function httpGet(call) {
         return githubPlugin.service.httpGet(call)
+    }
+
+    function httpGetPage(call) {
+        return githubPlugin.service.httpGetPage(call)
+    }
+
+    /*
+    * parse_link_header()
+    *
+    * Parse the Github Link HTTP header used for pageination
+    * http://developer.github.com/v3/#pagination
+    */
+    function parse_link_header(header) {
+        if (header.length === 0) {
+            throw "input must not be of zero length"
+        }
+
+        // Split parts by comma
+        var parts = header.split(',');
+        var links = {};
+        // Parse each part into a named link
+        parts.forEach(function(p) {
+            var section = p.split(';');
+            if (section.length != 2) {
+                throw "section could not be split on ';'"
+            }
+            var url = section[0].replace(/<(.*)>/, '$1').trim();
+            var name = section[1].replace(/rel="(.*)"/, '$1').trim();
+            links[name] = url;
+        });
+
+        return links;
     }
 }
