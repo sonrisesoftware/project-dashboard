@@ -45,6 +45,8 @@ Internal.Issue {
             return result
     }
 
+    Component.onCompleted: parent.nextNumber = Math.max(parent.nextNumber, issue.number + 1)
+
     property var milestone: info.milestone
     property string title: info.title
     property var labels: info.labels

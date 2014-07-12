@@ -29,16 +29,15 @@ PulseItem {
     id: pulseItem
 
     show: List.length(issues) > 0
-    title: i18n.tr("Assigned Issues")
+    title: i18n.tr("Recent Pull Requests")
 
-    viewAll: plugin ? i18n.tr("View all <b>%1</b> issues").arg(List.length(plugin.openIssues)) : ""
+    viewAll: plugin ? i18n.tr("View all <b>%1</b> pull requests").arg(List.length(plugin.openPulls)) : ""
 
     property var issues: {
-        var issues
         if (plugin) {
-            issues = plugin.assignedIssues
+            return plugin.openPulls
         } else {
-            issues = []
+            var issues = []
 
             for (var i = 0; i < backend.projects.count; i++) {
                 var project = backend.projects.at(i)
@@ -46,31 +45,30 @@ PulseItem {
 
                 if (p) {
                     //print("ISSUES", p.assignedIssues.length)
-                    issues = issues.concat(p.assignedIssues)
+                    issues = issues.concat(p.openPulls)
                 }
             }
+
+            issues = issues.sort(function (a, b) {
+                return b.number - a.number
+            })
+
+            return issues
         }
-
-        issues = issues.sort(function (a, b) {
-            return b.number - a.number
-        })
-
-        return issues
     }
 
     ListItem.Standard {
-        text: i18n.tr("No assigned issues")
+        text: i18n.tr("No open pull requests")
         enabled: false
         visible: List.length(issues) === 0
         height: visible ? implicitHeight : 0
     }
 
     Repeater {
-        model: issues
-        delegate: IssueListItem {
-            issue: modelData
+        model: Math.min(issues.length, maxItems)
+        delegate: PullRequestListItem {
+            issue: List.getItem(issues, index)
             showProject: true
-            showAssignee: false
         }
     }
 }

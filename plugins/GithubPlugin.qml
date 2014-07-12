@@ -33,6 +33,15 @@ PluginView {
 //                iconSource: getIcon("add")
 //                onTriggered: pageStack.push(Qt.resolvedUrl("notes/NewNotePage.qml"), {plugin: value})
 //            }
+        },
+
+        PluginItem {
+            id: pullsItem
+
+            title: i18n.tr("Pull Requests")
+            icon: "code-fork"
+
+            pulseItem: PullsPulseItem {}
         }
 
     ]

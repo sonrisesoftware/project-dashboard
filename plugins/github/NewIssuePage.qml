@@ -21,24 +21,13 @@ import Ubuntu.Components.Popups 1.0
 import Ubuntu.Components.ListItems 1.0 as ListItem
 import "../../backend/services"
 
-ComposerSheet {
+Page {
     id: sheet
 
     title: i18n.tr("New Issue")
-    contentsHeight: wideAspect ? units.gu(40) : mainView.height
 
-    Component.onCompleted: {
-        sheet.__leftButton.text = i18n.tr("Cancel")
-        sheet.__leftButton.color = "gray"
-        sheet.__rightButton.text = i18n.tr("Create")
-        sheet.__rightButton.color = sheet.__rightButton.__styleInstance.defaultColor
-        sheet.__foreground.style = Theme.createStyleComponent(Qt.resolvedUrl("../../ubuntu-ui-extras/SuruSheetStyle.qml"), sheet)
-    }
-
-    property string repo: plugin.repo
+    property string repo: plugin.name
     property var plugin
-
-    onConfirmClicked: plugin.newIssue(nameField.text, descriptionField.text)
 
     TextField {
         id: nameField
@@ -47,6 +36,7 @@ ComposerSheet {
             left: parent.left
             top: parent.top
             right: parent.right
+            margins: units.gu(2)
         }
         color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
 
@@ -62,8 +52,58 @@ ComposerSheet {
             left: parent.left
             right: parent.right
             top: nameField.bottom
-            bottom: parent.bottom
+            bottom: buttonsRow.top
+            margins: units.gu(2)
             topMargin: units.gu(1)
+        }
+    }
+
+    Item {
+        id: buttonsRow
+        width: parent.width
+        height: childrenRect.height
+
+        anchors {
+            left: parent.left
+            right: parent.right
+            bottom: parent.bottom
+            margins: units.gu(2)
+        }
+
+        Button {
+            objectName: "cancelButton"
+            text: i18n.tr("Cancel")
+
+            anchors {
+                left: parent.left
+                right: parent.horizontalCenter
+                rightMargin: units.gu(1)
+            }
+
+            color: "gray"
+
+            onTriggered: {
+                pageStack.pop()
+            }
+        }
+
+        Button {
+            id: okButton
+            objectName: "okButton"
+
+            anchors {
+                left: parent.horizontalCenter
+                right: parent.right
+                leftMargin: units.gu(1)
+            }
+
+            text: i18n.tr("Ok")
+            enabled: nameField.text !== "" && descriptionField.text !== ""
+
+            onTriggered: {
+                pageStack.pop()
+                plugin.newIssue(nameField.text, descriptionField.text)
+            }
         }
     }
 }

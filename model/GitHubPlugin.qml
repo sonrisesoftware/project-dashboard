@@ -9,11 +9,15 @@ Internal.GitHubPlugin {
     pluginView: githubPlugin
 
     property var assignedIssues: List.filter(issues, function(issue) {
-        return issue.assignedToMe && issue.open
+        return issue.assignedToMe && issue.open && !issue.isPullRequest
     })
 
     property var openIssues: List.filter(issues, function(issue) {
-        return issue.open
+        return issue.open && !issue.isPullRequest
+    })
+
+    property var openPulls: List.filter(issues, function(issue) {
+        return issue.open && issue.isPullRequest
     })
 
     property string api: "https://api.github.com"
@@ -66,6 +70,26 @@ Internal.GitHubPlugin {
         })
     }
 
+    function newIssue(title, description) {
+        var number = nextNumber++
+        var json = {
+            "state": "open",
+            "number": number,
+            "title": title,
+            "body": description,
+            "user": githubPlugin.service.user,
+            "labels": [],
+            "created_at": new Date().toJSON()
+        }
+
+        var issue = _db.create('Issue', {info: json}, plugin)
+        issues.add(issue)
+        app.toast(i18n.tr("Issue created"))
+        httpPost('/repos/%1/issues'.arg(name), {
+                     body: JSON.stringify({ "title": title, "body": description })
+                 })
+    }
+
     onLoaded: refresh()
 
     function refresh() {
@@ -94,8 +118,6 @@ Internal.GitHubPlugin {
                     var issue = _db.create('Issue', {info: json[i]}, plugin)
                     issues.add(issue)
                     //issue.refresh(syncId)
-
-                    nextNumber = Math.max(nextNumber, issue.number + 1)
                 }
             }
             issues.busy = false
@@ -133,6 +155,12 @@ Internal.GitHubPlugin {
                 milestones = Utils.cherrypick(JSON.parse(data), ['number', 'state', 'title', 'description', 'creator', 'due_on'])
             }
         })
+
+        httpGet('/repos/%1/pulls?state=all'.arg(name)).done(handler)
+    }
+
+    function httpPost(call, options) {
+        return githubPlugin.service.httpPost(call, options)
     }
 
     function httpGet(call, options) {

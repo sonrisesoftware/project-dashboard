@@ -33,14 +33,42 @@ PluginPage {
 
     property string view: "component" // or "label" or "assignee" or "milestone" (and later, "status")
 
+    Component.onCompleted: reload()
+
     property int columnCount: Math.max(1, Math.floor(width/units.gu(60)))
 
     property var columns: view === "component" ? componentColumns : view === "assignee" ? assigneeColumns : view === "milestone" ? milestoneColumns : []
     property var filter: view === "component" ? componentFilter : view === "assignee" ? assigneeFilter : view === "milestone" ? milestoneFilter : []
 
+    onFilterChanged: reload()
+
+    property int issuesCount: plugin.issues.count
+
+    onIssuesCountChanged: reload()
+
     property var allIssues: List.filter(plugin.issues, function(issue) {
         return true//!issue.isPullRequest
     }).sort(function(a, b) { return b.number - a.number })
+
+    property var groupedIssues: { return {} }
+
+    function reload() {
+        var issues = {}
+        for (var i = 0; i < plugin.issues.count; i++) {
+            var issue = plugin.issues.at(i)
+            var column = filter(issue)
+
+            if (column) {
+                if (!issues[column])
+                    issues[column] = []
+                issues[column].push(issue)
+            }
+        }
+        columns.forEach(function (column) {
+            issues[column].sort(function(a,b) { return b.number - a.number})
+        })
+        groupedIssues = issues
+    }
 
     // Component view
 
@@ -51,10 +79,17 @@ PluginPage {
         return list
     }
 
-    function componentFilter(column) {
-        return List.filter(plugin.issues, function(issue) {
-                            return selectedFilter(issue) && !issue.isPullRequest && ((column === "Uncategorized" && issue.title.match(/\[.*\].*/) === null) || issue.title.indexOf("[" + column + "]") == 0)
-                        }).sort(function(a, b) { return b.number - a.number })
+    function componentFilter(issue) {
+        if (selectedFilter && !selectedFilter(issue))
+            return undefined
+        else if (issue.title.match(/\[.*\].*/) === null)
+            return "Uncategorized"
+        else {
+            var title = issue.title
+            var index = title.indexOf(']')
+            var component = title.substring(1, index)
+            return component
+        }
     }
 
     // Milestone view
@@ -132,7 +167,7 @@ PluginPage {
 
             value: issues.length === 1 ? i18n.tr("<b>1</b> issue") : i18n.tr("<b>%1</b> issues").arg(issues.length)
 
-            property var issues: filter(_tile.column)
+            property var issues: groupedIssues[_tile.column]
 
             Repeater {
                 model: _tile.issues
@@ -146,7 +181,7 @@ PluginPage {
                 visible: _tile.issues.length === 0
                 enabled: false
 
-                text: i18n.tr("No issues")
+                text: i18n.tr("No issues match the selected filter")
                 showDivider: true
             }
         }
@@ -223,7 +258,7 @@ PluginPage {
     property var selectedFilter: allFilter
 
     function issueFilter(issue) {
-        return (issue.open || plugin.showClosedTickets) && selectedMilestone(issue) && (searchButton.opacity > 0 || (issue.title.indexOf(searchField.text) !== -1 || issue.body.indexOf(searchField.text) !== -1))
+        return !issue.isPullRequest && (issue.open || plugin.showClosedTickets) && selectedMilestone(issue) && (searchButton.opacity > 0 || (issue.title.indexOf(searchField.text) !== -1 || issue.body.indexOf(searchField.text) !== -1))
     }
 
     function selectedMilestone(issue) {
@@ -505,7 +540,7 @@ PluginPage {
             ActionButton {
                 iconName: "pencil"
                 color: colors["blue"]
-                onClicked: PopupUtils.open(Qt.resolvedUrl("NewIssuePage.qml"), plugin, {plugin: plugin})
+                onClicked: pageStack.push(Qt.resolvedUrl("NewIssuePage.qml"), {plugin: plugin})
 
                 opacity: searchActive ? 0 : 1
 

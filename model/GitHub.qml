@@ -93,6 +93,27 @@ Internal.GitHub {
         })
     }
 
+    function httpPost(call, options) {
+        if (!options)
+            options = {}
+        if (!options.options)
+            options.options = []
+        if (!options.headers)
+            options.headers = {}
+
+        options.headers['Accept'] = "application/vnd.github.v3+json"
+
+        if (call.indexOf('http') !== 0) {
+            call = api + call
+            options.options.push("access_token="+oauthToken)
+        }
+
+        return Http.post(call, options).error(function (data, info) {
+            print('GITHUB ERROR:', info.status, info.headers['x-ratelimit-remaining'])
+            print(data)
+        })
+    }
+
     function revoke() {
         oauthToken = ""
         user = undefined

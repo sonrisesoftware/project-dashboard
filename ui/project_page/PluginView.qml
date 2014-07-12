@@ -58,23 +58,55 @@ PageView {
         currentIndex: projectPage.selectedIndex
 
 
-        delegate: Loader {
+        delegate: Item {
             width: tabView.width
             height: tabView.height
 
-            sourceComponent: modelData.page
+            Column {
+                anchors.centerIn: parent
 
-            onItemChanged: {
-                if (visible) {
-                    pluginView.actions = item.actions
+                visible: loader.opacity == 0
+                spacing: units.gu(1)
+
+                ActivityIndicator {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    visible: loader.opacity == 0
+                    running: visible
+                    width: units.gu(4)
+                    height: width
+                }
+
+                Label {
+                    fontSize: "large"
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: i18n.tr("Loading...")
                 }
             }
 
-            property Plugin plugin: pluginView.plugin
+            Loader {
+                id: loader
+                anchors.fill: parent
 
-            Component.onCompleted:  {
-                if (visible) {
-                    pluginView.actions = item.actions
+                sourceComponent: modelData.page
+                asynchronous: true
+                opacity: status != Loader.Loading ? 1 : 0
+
+                Behavior on opacity {
+                    UbuntuNumberAnimation {}
+                }
+
+                onItemChanged: {
+                    if (visible) {
+                        pluginView.actions = item.actions
+                    }
+                }
+
+                property Plugin plugin: pluginView.plugin
+
+                Component.onCompleted:  {
+                    if (visible) {
+                        pluginView.actions = item.actions
+                    }
                 }
             }
         }
