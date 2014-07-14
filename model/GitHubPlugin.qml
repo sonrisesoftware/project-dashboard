@@ -127,7 +127,7 @@ Internal.GitHubPlugin {
             var links = parse_link_header(info.headers['link'])
 
             if (links.next) {
-                httpGet(links.next, 'issues').done(handler)
+                httpGet(links.next).done(handler)
             } else {
                 reloadComponents()
             }

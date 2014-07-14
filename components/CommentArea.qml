@@ -69,10 +69,10 @@ UbuntuShape {
                 rightMargin: units.gu(1)
             }
 
-            property bool owner: plugin.info ? plugin.info.owner.login === author : false
+            property bool owner: repository.repo ? repository.repo.owner.login === author : false
             property bool contributor: {
-                for (var i = 0; i < plugin.availableAssignees.length; i++) {
-                    if (plugin.availableAssignees[i].login === author)
+                for (var i = 0; i < repository.availableAssignees.length; i++) {
+                    if (repository.availableAssignees[i].login === author)
                         return true
                 }
 

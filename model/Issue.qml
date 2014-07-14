@@ -19,6 +19,8 @@ Internal.Issue {
     property bool open: info.state === "open"
     property var assignee: info.assignee
 
+    property var plugin: parent
+
     property bool ready
 
     property bool assignedToMe: {
@@ -46,6 +48,11 @@ Internal.Issue {
     }
 
     onLoaded: {
+        refresh()
+        parent.nextNumber = Math.max(parent.nextNumber, issue.number + 1)
+    }
+
+    onCreated: {
         refresh()
         parent.nextNumber = Math.max(parent.nextNumber, issue.number + 1)
     }
@@ -129,21 +136,21 @@ Internal.Issue {
         return allEvents
     }
 
-    function refresh(id) {
+    function refresh() {
         print(parent.name, issue.number, isPullRequest, info._links)
         if (isPullRequest && info._links) {
             print('Calling')
-            parent.httpGet(info._links.statuses.href).done(function (response, info) {
+            parent.httpGet(info._links.statuses.href).done(function (data, info) {
                 if (info.status == 304) return
 
-                 ////print(response)
-                 if (JSON.parse(response)[0] === undefined) {
+                 ////print(data)
+                 if (JSON.parse(data)[0] === undefined) {
                      status = ""
                      statusDescription = ""
                  } else {
-                     status = JSON.parse(response)[0].state
+                     status = JSON.parse(data)[0].state
                      print('ISSUE', parent.name, issue.number, issue.status)
-                     statusDescription= JSON.parse(response)[0].description
+                     statusDescription= JSON.parse(data)[0].description
                  }
              })
         }
@@ -153,35 +160,33 @@ Internal.Issue {
         ready = true
 
         if (isPullRequest) {
-            github.getPullRequest(project, id, plugin.repo, number, function(status, response) {
-                if (status === 304)
+            plugin.httpGet('/repos/%1/pulls/%2'.arg(plugin.name).arg(issue.number)).done(function (data, info) {
+                if (info.status === 304)
                     return
 
-                pull = JSON.parse(response)
-                //print("MERGED:", JSON.parse(response).merged, pull.merged)
-                //print("MERGEABLE:", JSON.parse(response).mergeable, pull.mergeable)
+                pull = JSON.parse(data)
             })
 
-            github.getPullCommits(project, id, plugin.repo, issue, function(status, response) {
-                if (status === 304)
+            plugin.httpGet('/repos/%1/pulls/%2/commits'.arg(plugin.name).arg(issue.number)).done(function (data, info) {
+                if (info.status === 304)
                     return
 
-                commits = JSON.parse(response)
+                commits = JSON.parse(data)
             })
         }
 
-        github.getIssueComments(project, id, plugin.repo, issue, function(status, response) {
-            if (status === 304)
+        plugin.httpGet('/repos/%1/issues/%2/comments'.arg(plugin.name).arg(issue.number)).done(function (data, info) {
+            if (info.status === 304)
                 return
 
-            comments = JSON.parse(response)
+            comments = JSON.parse(data)
         })
 
-        github.getIssueEvents(project, id, plugin.repo, issue, function(status, response) {
-            if (status === 304)
+        plugin.httpGet('/repos/%1/issues/%2/events'.arg(plugin.name).arg(issue.number)).done(function (data, info) {
+            if (info.status === 304)
                 return
 
-            events = JSON.parse(response)
+            events = JSON.parse(data)
         })
     }
 

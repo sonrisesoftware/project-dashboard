@@ -68,7 +68,7 @@ PulseItem {
         model: Math.min(issues.length, maxItems)
         delegate: PullRequestListItem {
             issue: List.getItem(issues, index)
-            showProject: true
+            showProject: plugin === null
         }
     }
 }

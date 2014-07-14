@@ -78,12 +78,23 @@ Internal.GitHub {
         if (!options.headers)
             options.headers = {}
 
-        options.headers['Accept'] = "application/vnd.github.v3+json"
+        try {
+            options.headers['Accept'] = "application/vnd.github.v3+json"
+        } catch (e) {
+            print('Error:', e)
+            print(e.stack)
+        }
 
         if (call.indexOf('http') !== 0) {
             call = api + call
         }
-        options.options.push("access_token="+oauthToken)
+
+        try {
+            options.options.push("access_token="+oauthToken)
+        } catch (e) {
+            print('Error:', e)
+            print(e.stack)
+        }
 
         return Http.get(call, options).error(function (data, info) {
             print('GITHUB ERROR:', info.status, info.headers['x-ratelimit-remaining'])

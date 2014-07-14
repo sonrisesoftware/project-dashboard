@@ -118,9 +118,9 @@
 
             "info": "var",
             "pull": "var",
-            "events": "var",
-            "comments": "var",
-            "commits": "var",
+            "events": "var:[]",
+            "comments": "var:[]",
+            "commits": "var:[]",
             "status": "var",
             "statusDescription": "var"
         }

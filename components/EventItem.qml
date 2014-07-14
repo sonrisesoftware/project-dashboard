@@ -33,7 +33,7 @@ Item {
                                              : event.status == "failure" ? colors["red"]
                                                                    : event.status == "error" ? colors["yellow"] : "white"
             if (color === "white")
-                return event.statusDescription
+                return event.statusDescription ? event.statusDescription : ""
             else
                 return "<font color=\"" + color + "\">" + event.statusDescription + "</font>"
         } else {
@@ -61,7 +61,7 @@ Item {
                                              : event.status == "failure" ? colors["red"]
                                                                    : event.status == "error" ? colors["yellow"] : "white"
             if (color === "white")
-                return event.statusDescription
+                 return event.statusDescription ? event.statusDescription : ""
             else
                 return "<font color=\"" + color + "\">" + event.statusDescription + "</font>"
         } else {
@@ -225,9 +225,10 @@ Item {
                     Label {
                         id: msgLabel
                         text: " • " + modelData.commit.message
-                        font.family: "Monospaced"
+                        //font.family: "Monospaced"
                         width: commitsColumn.wide ? 0.8 * parent.width : commitsColumn.width
                         anchors.verticalCenter: parent.verticalCenter
+                        maximumLineCount: 1
                         elide: Text.ElideRight
                     }
 
@@ -238,7 +239,7 @@ Item {
                         width: 0.2 * parent.width
                         anchors.verticalCenter: parent.verticalCenter
                         anchors.right: parent.right
-                        color: Theme.palette.normal.backgroundText
+                        opacity: 0.65
                         horizontalAlignment: Text.AlignRight
                         visible: commitsColumn.wide
                     }

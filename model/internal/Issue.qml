@@ -14,10 +14,10 @@ Struct {
     property var pull
     onPullChanged: _set("pull", pull)
 
-    property var commits
+    property var commits: []
     onCommitsChanged: _set("commits", commits)
 
-    property var comments
+    property var comments: []
     onCommentsChanged: _set("comments", comments)
 
     property var statusDescription
@@ -26,7 +26,7 @@ Struct {
     property var status
     onStatusChanged: _set("status", status)
 
-    property var events
+    property var events: []
     onEventsChanged: _set("events", events)
 
     onCreated: {
@@ -44,11 +44,11 @@ Struct {
     onLoaded: {
         info = _get("info", undefined)
         pull = _get("pull", undefined)
-        commits = _get("commits", undefined)
-        comments = _get("comments", undefined)
+        commits = _get("commits", [])
+        comments = _get("comments", [])
         statusDescription = _get("statusDescription", undefined)
         status = _get("status", undefined)
-        events = _get("events", undefined)
+        events = _get("events", [])
     }
 
     _properties: ["_type", "_version", "info", "pull", "commits", "comments", "statusDescription", "status", "events"]

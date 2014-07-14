@@ -38,7 +38,7 @@ IssueListItem {
 
         color: status === "pending" ? "gray" : "white"
         name: "circle"
-        visible: status != ""
+        visible: status !== undefined
     }
 
     Rectangle {

@@ -36,7 +36,7 @@ Page {
 
     property var request
 
-    property GitHubPlugin plugin: issue.parent
+    property GitHubPlugin repository: issue.parent
 
     property Issue issue
 
@@ -58,7 +58,7 @@ Page {
             id: editAction
             text: i18n.tr("Edit")
             iconSource: getIcon("edit")
-            enabled: plugin.hasPushAccess
+            enabled: repository.hasPushAccess
             onTriggered: PopupUtils.open(editSheet, page)
         },
 
@@ -66,7 +66,7 @@ Page {
             id: mergeAction
             text: i18n.tr("Merge")
             iconSource: getIcon("code-fork")
-            enabled: plugin.hasPushAccess && issue.isPullRequest && !issue.merged && issue.mergeable
+            enabled: repository.hasPushAccess && issue.isPullRequest && !issue.merged && issue.mergeable
             onTriggered: mergeDialog.show()
         },
 
@@ -74,7 +74,7 @@ Page {
             id: closeAction
             text: issue.open ? i18n.tr("Close") : i18n.tr("Reopen")
             iconSource: issue.open ? getIcon("close") : getIcon("reset")
-            enabled: !issue.merged && plugin.hasPushAccess
+            enabled: !issue.merged && repository.hasPushAccess
             onTriggered: {
                 issue.closeOrReopen()
             }
@@ -206,14 +206,14 @@ Page {
 
                 ListItem.Standard {
                     text: issue.milestone && issue.milestone.hasOwnProperty("number") ? issue.milestone.title : i18n.tr("No milestone")
-                    visible: !plugin.hasPushAccess
+                    visible: !repository.hasPushAccess
                     height: units.gu(5)
                 }
 
                 SuruItemSelector {
-                    model: plugin.milestones.concat(i18n.tr("No milestone"))
+                    model: repository.milestones.concat(i18n.tr("No milestone"))
 
-                    visible: plugin.hasPushAccess
+                    visible: repository.hasPushAccess
                     selectedIndex: {
                         if (issue.milestone && issue.milestone.hasOwnProperty("number")) {
                             for (var i = 0; i < model.length; i++) {
@@ -227,7 +227,7 @@ Page {
                     }
 
                     delegate: OptionSelectorDelegate {
-                        text: modelData.title
+                        text: modelData.title ? modelData.title : modelData
                     }
 
                     onSelectedIndexChanged: {
@@ -241,13 +241,13 @@ Page {
 
                 ListItem.Standard {
                     text: issue.assignee && issue.assignee.hasOwnProperty("login") ? issue.assignee.login : i18n.tr("No one assigned")
-                    visible: !plugin.hasPushAccess
+                    visible: !repository.hasPushAccess
                     height: units.gu(5)
                 }
 
                 SuruItemSelector {
-                    model: plugin.availableAssignees.concat(i18n.tr("No one assigned"))
-                    visible: plugin.hasPushAccess
+                    model: repository.availableAssignees.concat(i18n.tr("No one assigned"))
+                    visible: repository.hasPushAccess
                     selectedIndex: {
                         //print("ASSIGNEE:", JSON.stringify(issue.assignee))
                         if (issue.assignee && issue.assignee.hasOwnProperty("login")) {
@@ -265,7 +265,7 @@ Page {
                     }
 
                     delegate: OptionSelectorDelegate {
-                        text: modelData.login
+                        text: modelData.login ? modelData.login : modelData
                     }
 
                     onSelectedIndexChanged: {
@@ -283,7 +283,7 @@ Page {
                     text: issue.labels.length > 0 ? "" : i18n.tr("No labels")
 
                     height: issue.labels.length > 0 ? units.gu(5) : labelFlowSmall.height + units.gu(2)
-                    progression: plugin.hasPushAccess
+                    progression: repository.hasPushAccess
                     onClicked: if (progression) PopupUtils.open(labelsPopover, labelsItemSmall)
 
                     Flow {
@@ -295,7 +295,7 @@ Page {
                             left: parent.left
                             right: parent.right
                             margins: units.gu(2)
-                            rightMargin: progression ? units.gu(4) : units.gu(2)
+                            rightMargin: labelsItemSmall.progression ? units.gu(4) : units.gu(2)
                         }
 
                         Repeater {
@@ -384,16 +384,16 @@ Page {
                         var index = null
                         var linkIssue
 
-                        for (var i = 0; i < plugin.issues.count;i++) {
-                            if (bugNumber == plugin.issues.get(i).modelData.number)
+                        for (var i = 0; i < repository.issues.count;i++) {
+                            if (bugNumber == repository.issues.get(i).modelData.number)
                                 index = i
                         }
 
                         if (index == null)
                             console.log("Bug not found")
                         else {
-                            linkIssue = plugin.issues.get(index).modelData
-                            pageStack.push(Qt.resolvedUrl("IssuePage.qml"), {issue: linkIssue, plugin:plugin})
+                            linkIssue = repository.issues.get(index).modelData
+                            pageStack.push(Qt.resolvedUrl("IssuePage.qml"), {issue: linkIssue, plugin:repository})
                         }
                     }
                 }
@@ -440,7 +440,7 @@ Page {
                                 "status": issue.status
                     }
                     last: true
-                    visible: issue.status !== ""
+                    visible: issue.status !== undefined
                 }
             }
 
@@ -572,13 +572,13 @@ Page {
 
             ListItem.Standard {
                 text: issue.milestone && issue.milestone.hasOwnProperty("number") ? issue.milestone.title : i18n.tr("No milestone")
-                visible: !plugin.hasPushAccess
+                visible: !repository.hasPushAccess
             }
 
             SuruItemSelector {
-                model: plugin.milestones.concat(i18n.tr("No milestone"))
+                model: repository.milestones.concat(i18n.tr("No milestone"))
 
-                visible: plugin.hasPushAccess
+                visible: repository.hasPushAccess
                 selectedIndex: {
                     if (issue.milestone && issue.milestone.hasOwnProperty("number")) {
                         for (var i = 0; i < model.length; i++) {
@@ -592,7 +592,7 @@ Page {
                 }
 
                 delegate: OptionSelectorDelegate {
-                    text: modelData.title
+                    text: modelData.title ? modelData.title : modelData
                 }
 
                 onSelectedIndexChanged: {
@@ -610,12 +610,12 @@ Page {
 
             ListItem.Standard {
                 text: issue.assignee && issue.assignee.hasOwnProperty("login") ? issue.assignee.login : i18n.tr("No one assigned")
-                visible: !plugin.hasPushAccess
+                visible: !repository.hasPushAccess
             }
 
             SuruItemSelector {
-                model: plugin.availableAssignees.concat(i18n.tr("No one assigned"))
-                visible: plugin.hasPushAccess
+                model: repository.availableAssignees.concat(i18n.tr("No one assigned"))
+                visible: repository.hasPushAccess
                 selectedIndex: {
                     ////print("ASSIGNEE:", JSON.stringify(issue.assignee))
                     if (issue.assignee && issue.assignee.hasOwnProperty("login")) {
@@ -721,7 +721,7 @@ Page {
 
             ListItem.Standard {
                 text: i18n.tr("Edit...")
-                visible: plugin.hasPushAccess
+                visible: repository.hasPushAccess
                 onClicked: PopupUtils.open(labelsPopover, labelsHeader)
             }
         }
@@ -806,7 +806,7 @@ Page {
                 }
             }
 
-            model: plugin.availableLabels
+            model: repository.availableLabels
             delegate: ListItem.Standard {
                 height: units.gu(5)
 

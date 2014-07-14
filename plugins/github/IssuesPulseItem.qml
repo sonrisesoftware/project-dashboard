@@ -69,7 +69,7 @@ PulseItem {
         model: issues
         delegate: IssueListItem {
             issue: modelData
-            showProject: true
+            showProject: plugin === null
             showAssignee: false
         }
     }
