@@ -27,6 +27,7 @@ import "ui"
 import "components"
 import "ubuntu-ui-extras"
 import "qml-extras/promises.js" as Promise
+import "qml-extras/dateutils.js" as DateUtils
 
 import "udata"
 import "model"
@@ -163,6 +164,14 @@ MainView {
 //        }
 //    }
 
+    QtObject {
+        id: friendsUtils
+
+        function createTimeString(date) {
+            return DateUtils.friendlyTime(new Date(date), false)
+        }
+    }
+
 //    Window {
 //        id: objectsWindow
 //        title: "uData Objects"
@@ -265,20 +274,24 @@ MainView {
     function renderMarkdown(text, context) {
         if (typeof(text) != "string") {
             return ""
-        } if (settings.markdownCache.hasOwnProperty(text)) {
+        } if (backend.markdownCache && backend.markdownCache.hasOwnProperty(text)) {
             /// Custom color for links
-            var response = colorLinks(settings.markdownCache[text])
+            var response = colorLinks(backend.markdownCache[text])
             return response
         } else {
             //print("Calling Markdown API")
-            Http.post(github.github + "/markdown", ["access_token=" + github.oauth], function(has_error, status, response) {
-                settings.markdownCache[text] = response
-                settings.markdownCache = settings.markdownCache
-            }, undefined, undefined, JSON.stringify({
-                "text": text,
-                "mode": context !== undefined ? "gfm" : "markdown",
-                "context": context
-              }))
+            githubPlugin.service.httpPost("/markdown", {
+                          body: JSON.stringify({
+                              "text": text,
+                              "mode": context !== undefined ? "gfm" : "markdown",
+                              "context": context
+                          })
+                      }).done(function(response, info) {
+                if (!backend.markdownCache)
+                    backend.markdownCache = {}
+                backend.markdownCache[text] = response
+                backend.markdownCache = backend.markdownCache
+            })
             return "Loading..."
         }
     }
