@@ -54,12 +54,12 @@ Column {
 
     ListItem.Standard {
         text: issue.milestone && issue.milestone.hasOwnProperty("number") ? issue.milestone.title : i18n.tr("No milestone")
-        visible: !plugin.hasPushAccess
+        visible: !repository.hasPushAccess
     }
 
     ListItem.ItemSelector {
-        model: plugin.milestones.concat(i18n.tr("No milestone"))
-        visible: plugin.hasPushAccess
+        model: repository.milestones.concat(i18n.tr("No milestone"))
+        visible: repository.hasPushAccess
         selectedIndex: {
             if (issue.milestone && issue.milestone.hasOwnProperty("number")) {
                 for (var i = 0; i < model.length; i++) {
@@ -93,13 +93,13 @@ Column {
 
             busyDialog.show()
 
-            request = github.editIssue(plugin.repo, issue.number, {"milestone": number}, function(response) {
+            request = github.editIssue(repository.repo, issue.number, {"milestone": number}, function(response) {
                 busyDialog.hide()
                 if (response === -1) {
                     error(i18n.tr("Connection Error"), i18n.tr("Unable to change milestone. Check your connection and/or firewall settings."))
                 } else {
                     issue = issue
-                    plugin.reload()
+                    repository.reload()
                 }
             })
         }
@@ -111,12 +111,12 @@ Column {
 
     ListItem.Standard {
         text: issue.assignee && issue.assignee.hasOwnProperty("login") ? issue.assignee.login : i18n.tr("No one assigned")
-        visible: !plugin.hasPushAccess
+        visible: !repository.hasPushAccess
     }
 
     ListItem.ItemSelector {
-        model: plugin.availableAssignees.concat(i18n.tr("No one assigned"))
-        visible: plugin.hasPushAccess
+        model: repository.availableAssignees.concat(i18n.tr("No one assigned"))
+        visible: repository.hasPushAccess
         selectedIndex: {
             if (issue.assignee && issue.assignee.hasOwnProperty("login")) {
                 for (var i = 0; i < model.length; i++) {
@@ -150,13 +150,13 @@ Column {
 
             busyDialog.show()
 
-            request = github.editIssue(plugin.repo, issue.number, {"assignee": login}, function(response) {
+            request = github.editIssue(repository.repo, issue.number, {"assignee": login}, function(response) {
                 busyDialog.hide()
                 if (response === -1) {
                     error(i18n.tr("Connection Error"), i18n.tr("Unable to change assignee. Check your connection and/or firewall settings."))
                 } else {
                     issue = issue
-                    plugin.reload()
+                    repository.reload()
                 }
             })
         }
