@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import Ubuntu.Components 0.1
 import Ubuntu.Components.Extras.Browser 0.2
+import "../../qml-extras/httplib.js" as Http
 
 Page {
     id: webPage
@@ -44,10 +45,11 @@ Page {
                     if (xhr.readyState === XMLHttpRequest.DONE) {
                         print(xhr.responseText)
                         var json = JSON.parse(xhr.responseText)
-                        webPage.token = json.access_token
-                        console.log("Oauth token is now : " + webPage.token)
+                        print("JSON RESPONSE IS", xhr.responseText)
 
-                        assembla.oauthToken = webPage.token
+                        assemblaPlugin.service.oauthToken = json.access_token
+                        assemblaPlugin.service.refreshToken = json.refresh_token
+
                         pageStack.pop()
                     }
                 }

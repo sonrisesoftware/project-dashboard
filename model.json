@@ -30,6 +30,7 @@
             "_parent": "Service",
 
             "oauthToken": "string",
+            "refreshToken": "string",
             "user": "var:undefined",
             "repos": "var:[]"
         },
@@ -99,6 +100,17 @@
             "text": "string",
             "action": "string",
             "click_count": "int"
+        },
+
+        "AssemblaPlugin": {
+            "_parent": "Plugin",
+
+            "name": "string",
+            "issues": "list:Issue",
+            "milestones": "var:[]",
+            "availableAssignees": "var:[]",
+            "showClosedTickets": "bool:false",
+            "usersInfo": "var:{}"
         },
 
         "GitHubPlugin": {

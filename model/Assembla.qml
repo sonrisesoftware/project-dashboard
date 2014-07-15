@@ -49,8 +49,19 @@ Internal.Assembla {
                 print("ASSEMBLA RESPONSE")
                 var json = JSON.parse(response)
                 user = json
-            }).error(function(error) {
+            }).error(function(error, info) {
                 print("ERROR" + error)
+
+                if (info.status == 401) {
+                    Http.post('https://%1:%2@api.assembla.com/token?client_id=%3&grant_type=refresh_token&refresh_token=%4'
+                              .arg('dcsqOS5hyr44kZacwqjQXA')
+                              .arg('0661da1c5ffe98abcabab0644f24fd47')
+                              .arg('dcsqOS5hyr44kZacwqjQXA')
+                              .arg(refreshToken)).done(function (data, info) {
+                        print('UPDATE RESPONSE', data)
+                        oauthToken = JSON.parse(data).access_token
+                    })
+                }
             })
 
             httpGet('/spaces.json').done(function(response) {
@@ -69,8 +80,9 @@ Internal.Assembla {
     }
 
     function httpGet(endpoint, args) {
-        return Http.get(api + endpoint,[],
-                        undefined, {"Authorization": "Bearer " + oauthToken})
+        return Http.get(api + endpoint, {
+                            headers: {"Authorization": "Bearer " + oauthToken}
+                        })
     }
 
     function expand(string, args) {
@@ -81,5 +93,9 @@ Internal.Assembla {
         }
 
         return string
+    }
+
+    function revoke() {
+        oauthToken = ""
     }
 }

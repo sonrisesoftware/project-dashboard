@@ -36,7 +36,7 @@ Page {
 
     property var request
 
-    property GitHubPlugin repository: issue.parent
+    property Plugin repository: issue.parent
 
     property Issue issue
 
@@ -571,7 +571,7 @@ Page {
             }
 
             ListItem.Standard {
-                text: issue.milestone && issue.milestone.hasOwnProperty("number") ? issue.milestone.title : i18n.tr("No milestone")
+                text: issue.milestone && issue.milestone.title ? issue.milestone.title : i18n.tr("No milestone")
                 visible: !repository.hasPushAccess
             }
 

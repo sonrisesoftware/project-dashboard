@@ -6,7 +6,7 @@ Item {
     id: root
     property var event
     property string type: event.hasOwnProperty("event") ? event.event : "comment"
-    visible: (title !== "" || type === "comment") && (wideAspect ? true: bodyText !== "")
+    visible: type === "-" || ((title !== "" || type === "comment") && (wideAspect ? true: bodyText !== ""))
     property string author: type === "comment" ? event.user.login : event.actor.login
     property string date: event.created_at ? event.created_at : ""
 
@@ -28,6 +28,8 @@ Item {
                 return i18n.tr("<b>%1</b> pushed 1 commit %2").arg(author).arg(friendsUtils.createTimeString(date))
             else
                 return i18n.tr("<b>%1</b> pushed %3 commits %2").arg(author).arg(friendsUtils.createTimeString(date)).arg(event.commits.length)
+        } else if (type == "status") {
+            return i18n.tr("Status changed to <b>%1</b> %2").arg(event.status).arg(friendsUtils.createTimeString(date))
         } else if (type == "testing") {
             var color =  event.status == "success" ? colors["green"]
                                              : event.status == "failure" ? colors["red"]
@@ -84,6 +86,8 @@ Item {
             return "code"
         } else if (type === "comment") {
             return "comments-o"
+        } else if (type === "status") {
+            return "flag"
         } else if (type === "testing") {
             return wideAspect ? "check" : "check-circle"
         } else {
@@ -92,7 +96,7 @@ Item {
     }
 
     width: parent ? parent.width : 0
-    height: comment.visible ? comment.height : wideAspect ? wideLayout.height: smallLayout.height
+    height: type === "-" ? units.dp(1) : comment.visible ? comment.height : wideAspect ? wideLayout.height: smallLayout.height
 
     CommentArea {
         id: comment
@@ -103,7 +107,7 @@ Item {
 
     ListItem.Empty {
         id: smallLayout
-        visible: !wideAspect
+        visible: !wideAspect && type !== "-"
         height: row.height + body.height + body.anchors.topMargin + row.anchors.topMargin * 2
 
         Row {
@@ -168,11 +172,21 @@ Item {
         color: Qt.rgba(0.6,0.6,0.6,1)
     }
 
+    Rectangle {
+        width: parent.width - x
+        visible: wideAspect && type == "-"
+        height: units.dp(1)
+        x: units.gu(1.5)
+        y: -units.gu(0.3)
+        z: -100
+        color: Qt.rgba(0.6,0.6,0.6,0.3)
+    }
+
     Item {
         id: wideLayout
         width: parent.width
         height: eventItem.height + commitsColumn.anchors.topMargin + commitsColumn.height
-        visible: wideAspect
+        visible: wideAspect && type !== "-"
 
         Row {
             id: eventItem

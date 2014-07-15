@@ -226,7 +226,7 @@ MainView {
         id: backend
         _db: storage
 
-        availablePlugins: [notesPlugin, eventsPlugin, actionsPlugin, clickPlugin, githubPlugin]
+        availablePlugins: [notesPlugin, eventsPlugin, actionsPlugin, clickPlugin, githubPlugin, assemblaPlugin]
     }
 
     Settings {
@@ -252,6 +252,10 @@ MainView {
 
     GithubPlugin {
         id: githubPlugin
+    }
+
+    AssemblaPlugin {
+        id: assemblaPlugin
     }
 
     function getIcon(name) {

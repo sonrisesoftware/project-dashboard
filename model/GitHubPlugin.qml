@@ -37,6 +37,10 @@ Internal.GitHubPlugin {
 
     property var components: []
 
+    function getUserName(id) {
+        return id.login
+    }
+
     function reloadComponents() {
         var list = []
 

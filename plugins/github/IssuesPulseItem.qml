@@ -28,10 +28,13 @@ import "../../qml-extras/utils.js" as Utils
 PulseItem {
     id: pulseItem
 
+    property string pluginType: "GitHub"
+    property string type: "issues"
+
     show: List.length(issues) > 0
     title: i18n.tr("Assigned Issues")
 
-    viewAll: plugin ? i18n.tr("View all <b>%1</b> issues").arg(List.length(plugin.openIssues)) : ""
+    viewAll: plugin ? i18n.tr("View all <b>%1</b> %2").arg(List.length(plugin.openIssues)).arg(type) : ""
 
     property var issues: {
         var issues
@@ -42,7 +45,7 @@ PulseItem {
 
             for (var i = 0; i < backend.projects.count; i++) {
                 var project = backend.projects.at(i)
-                var p = project.getPlugin('GitHub')
+                var p = project.getPlugin(pluginType)
 
                 if (p) {
                     //print("ISSUES", p.assignedIssues.length)
@@ -59,7 +62,7 @@ PulseItem {
     }
 
     ListItem.Standard {
-        text: i18n.tr("No assigned issues")
+        text: i18n.tr("No assigned %1").arg(type)
         enabled: false
         visible: List.length(issues) === 0
         height: visible ? implicitHeight : 0
