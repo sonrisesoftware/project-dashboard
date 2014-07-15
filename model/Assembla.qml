@@ -79,8 +79,12 @@ Internal.Assembla {
         pageStack.push(Qt.resolvedUrl("../backend/services/AssemblaOAuth.qml"))
     }
 
-    function httpGet(endpoint, args) {
-        return Http.get(api + endpoint, {
+    function httpGet(call, args) {
+        if (call.indexOf('http') !== 0) {
+            call = api + call
+        }
+
+        return Http.get(call, {
                             headers: {"Authorization": "Bearer " + oauthToken}
                         })
     }

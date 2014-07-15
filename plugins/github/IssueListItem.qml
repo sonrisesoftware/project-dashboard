@@ -21,6 +21,7 @@ import Ubuntu.Components.Popups 1.0
 import Ubuntu.Components.ListItems 1.0 as ListItem
 import "../../model"
 import "../../qml-extras/dateutils.js" as DateUtils
+import "../../components"
 
 ListItem.Standard {
     id: listItem
@@ -56,8 +57,8 @@ ListItem.Standard {
             verticalCenter: parent.verticalCenter
             left: parent.left
             leftMargin: units.gu(2)
-            rightMargin: assigneeIndicator.visible ? units.gu(1) : units.gu(2)
-            right: assigneeIndicator.visible ? assigneeIndicator.left : parent.right
+            rightMargin: indicators.width > 0 ? units.gu(1) : units.gu(2)
+            right: indicators.left
         }
 
         Label {
@@ -86,18 +87,7 @@ ListItem.Standard {
                 } else if (issue.isPullRequest) {
                     return i18n.tr("%1 opened this pull request %2").arg(issue.user.login).arg(DateUtils.friendlyTime(issue.created_at))
                 } else {
-                    var text = i18n.tr("%1 opened this issue %2").arg(issue.user.login).arg(DateUtils.friendlyTime(issue.created_at))
-                    if (issue.labels.length > 0) {
-                        text += " | "
-                        for (var i = 0; i < issue.labels.length; i++) {
-                            var label = issue.labels[i]
-                            text += '<font color="#' + label.color + '">' + label.name + '</font>'
-                            if (i < issue.labels.length - 1)
-                                text += ', '
-                        }
-                    }
-
-                    return text
+                    return issue.summary
                 }
             }
             visible: text !== ""
@@ -105,32 +95,48 @@ ListItem.Standard {
         }
     }
 
-    Item {
-        id: assigneeIndicator
+    Row {
+        id: indicators
+
         anchors {
             right: parent.right
             rightMargin: units.gu(2)
             verticalCenter: parent.verticalCenter
         }
 
-        width: units.gu(4)
-        height: width
-        visible: issue.hasOwnProperty("assignee") && issue.assignee != undefined && issue.assignee.hasOwnProperty("login") && issue.assignee !== "" && showAssignee
+        spacing: units.gu(1)
 
-        UbuntuShape {
-            anchors.fill: parent
+        AwesomeIcon {
+            size: units.gu(3)
+            anchors.verticalCenter: parent.verticalCenter
 
-            image: Image {
-                source: getIcon("user")
-            }
+            name: issue.state === "In Progress" ? "dot-circle-o" : issue.state === "Test" ? "check-circle" : issue.state === "Invalid" ? "ban" : ""
+            visible: name !== ""
         }
 
-        UbuntuShape {
-            visible: image.status === Image.Ready
-            anchors.fill: parent
+        Item {
+            id: assigneeIndicator
 
-            image: Image {
-                source: assigneeIndicator.visible ? issue.assignee.avatar_url : ""
+            anchors.verticalCenter: parent.verticalCenter
+            width: visible ? units.gu(4) : 0
+            height: width
+            visible: issue.hasOwnProperty("assignee") && issue.assignee != undefined && issue.assignee.hasOwnProperty("login") && issue.assignee !== "" && showAssignee
+
+            UbuntuShape {
+                anchors.fill: parent
+
+                image: Image {
+                    source: getIcon("user")
+                }
+            }
+
+            UbuntuShape {
+                visible: image.status === Image.Ready
+                anchors.fill: parent
+
+                image: Image {
+                    source: assigneeIndicator.visible ? issue.assignee.avatar_url : ""
+                }
             }
         }
     }

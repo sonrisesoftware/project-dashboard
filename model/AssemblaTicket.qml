@@ -19,7 +19,15 @@ Issue {
     mergeable: isPullRequest ? pull && pull.mergeable ? pull.mergeable : false
                                            : false
     open: info.state === 1
-    assignee: parent.getUser(info.assigned_to_id)
+    assignee: info.assigned_to_id ? parent.getUser(info.assigned_to_id) : undefined
+
+    summary: {
+        var text = i18n.tr("%1 opened this issue %2").arg(issue.user.login).arg(DateUtils.friendlyTime(issue.created_at))
+
+        return text
+    }
+
+    state: info.status === "Accepted" ? "In Progress" : info.status
 
     property bool assignedToMe: {
         return issue.assignee.login == assemblaPlugin.service.user.login
@@ -56,34 +64,31 @@ Issue {
     property var allEvents: {
         var list = []
         comments.forEach(function(comment) {
+            var user = parent.getUser(comment.user_id)
+            var created_at = comment.created_on
+
+            var body = comment.comment ? comment.comment : ""
 
             if (comment.ticket_changes) {
                 var array = parseEvent(comment.ticket_changes)
 
                 array.forEach(function(item) {
                     if (item.event === 'assigned_to_id') {
-                        list.push({
-                                      "event": "assigned",
-                                      "actor": parent.getUser(item.to),
-                                      "created_at": comment.created_on
-                                  })
+                        body += "\n\n* Assigned to <b>%1</b>".arg(item.to)
                     } else if (item.event === 'status') {
-                        list.push({
-                                      "event": "status",
-                                      "status": item.to,
-                                      "created_at": comment.created_on
-                                  })
+                        body += "\n\n* Changed status to <b>%1</b>".arg(item.to)
                     }
                 })
             }
 
-            if (comment.comment) {
+            body = body.trim()
+
+            if (body !== "")
                 list.push({
-                              "user": parent.getUser(comment.user_id),
-                              "body": comment.comment,
-                              "created_at": comment.created_on
+                              "user":user,
+                              "body": body,
+                              "created_at": created_at
                           })
-            }
         })
 
         list.sort(function (a, b) {
@@ -92,7 +97,8 @@ Issue {
 
         var i = 0
         while (i < list.length - 1) {
-            if (!DateUtils.datesEqual(new Date(list[i].created_at), new Date(list[i + 1].created_at))) {
+            if (!DateUtils.datesEqual(new Date(list[i].created_at), new Date(list[i + 1].created_at)) &&
+                    list[i].hasOwnProperty("actor") && list[i + 1].hasOwnProperty("actor")) {
                 list.splice(i + 1, 0, {"event": "-", "actor": "", "created_at": ""})
                 i++
             }

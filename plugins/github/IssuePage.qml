@@ -433,14 +433,14 @@ Page {
                 EventItem {
                     event: {
                         "event": "testing",
-                                "actor": {
+                        "actor": {
                             "login": i18n.tr("Continous Integration")
                         },
                         "statusDescription": issue.statusDescription,
                                 "status": issue.status
                     }
                     last: true
-                    visible: issue.status !== undefined
+                    visible: issue.status !== "" && issue.status !== undefined
                 }
             }
 

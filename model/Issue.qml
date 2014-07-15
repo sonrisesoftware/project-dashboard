@@ -23,6 +23,8 @@ Internal.Issue {
 
     property bool ready
 
+    property string state: open ? hasAssignee ? "In Progress" : "New" : "Fixed"
+
     property bool assignedToMe: {
         var result = issue.assignee && issue.assignee.login && issue.assignee.login === githubPlugin.user.login
         if (result === undefined)
@@ -85,6 +87,21 @@ Internal.Issue {
         comments = comments
         plugin.changed = true
         notification.show(i18n.tr("Comment posted"))
+    }
+
+    property string summary: {
+        var text = i18n.tr("%1 opened this issue %2").arg(issue.user.login).arg(DateUtils.friendlyTime(issue.created_at))
+        if (issue.labels.length > 0) {
+            text += " | "
+            for (var i = 0; i < issue.labels.length; i++) {
+                var label = issue.labels[i]
+                text += '<font color="#' + label.color + '">' + label.name + '</font>'
+                if (i < issue.labels.length - 1)
+                    text += ', '
+            }
+        }
+
+        return text
     }
 
     property var allEvents: {

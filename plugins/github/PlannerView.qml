@@ -31,11 +31,11 @@ PluginPage {
 
     property bool expanded: false
 
-    property string view: "component" // or "label" or "assignee" or "milestone" (and later, "status")
+    property string view: componentColumns.length > 1 ? "component" : "milestone" // or "label" or "assignee" or "milestone" (and later, "status")
 
     Component.onCompleted: reload()
 
-    property int columnCount: Math.max(1, Math.floor(width/units.gu(60)))
+    property int columnCount: Math.max(1, Math.floor(width/units.gu(50)))
 
     property var columns: view === "component" ? componentColumns : view === "assignee" ? assigneeColumns : view === "milestone" ? milestoneColumns : []
     property var filter: view === "component" ? componentFilter : view === "assignee" ? assigneeFilter : view === "milestone" ? milestoneFilter : []
@@ -53,6 +53,7 @@ PluginPage {
     property var groupedIssues: { return {} }
 
     function reload() {
+        var columns = view === "component" ? componentColumns : view === "assignee" ? assigneeColumns : view === "milestone" ? milestoneColumns : []
         var issues = {}
         for (var i = 0; i < plugin.issues.count; i++) {
             var issue = plugin.issues.at(i)
@@ -65,7 +66,8 @@ PluginPage {
             }
         }
         columns.forEach(function (column) {
-            issues[column].sort(function(a,b) { return b.number - a.number})
+            if (issues[column])
+                issues[column].sort(function(a,b) { return b.number - a.number})
         })
         groupedIssues = issues
     }
@@ -104,10 +106,15 @@ PluginPage {
         return list
     }
 
-    function milestoneFilter(column) {
-        return List.filter(plugin.issues, function(issue) {
-                            return selectedFilter(issue) && !issue.isPullRequest && ((column === i18n.tr("No Milestone") && !issue.hasMilestone) || issue.hasMilestone && issue.milestone.title == column)
-                        }).sort(function(a, b) { return b.number - a.number })
+    function milestoneFilter(issue) {
+        print(issue.number, " ", JSON.stringify(issue.milestone))
+        if (selectedFilter && !selectedFilter(issue))
+            return undefined
+        else if (issue.milestone === undefined)
+            return "No milestone"
+        else {
+            return issue.milestone.title
+        }
     }
 
     // Assignee view
@@ -157,13 +164,13 @@ PluginPage {
             id: _tile
             title: modelData
 
-            width: listView.width/columnCount
+            width: visible ? listView.width/columnCount : 0
 
             maxHeight: columnCount > 1 ? listView.height : -1
 
             property string column: modelData
 
-            visible: true
+            visible: issues !== undefined && issues.length > 0
 
             value: issues.length === 1 ? i18n.tr("<b>1</b> issue") : i18n.tr("<b>%1</b> issues").arg(issues.length)
 

@@ -75,43 +75,83 @@ Internal.AssemblaPlugin {
                 milestones = milestones.concat(json)
             }
 
-            var promise = httpGet('/spaces/%1/milestones/all.json?&per_page=50&page=%2'.arg(name).arg(info.page + 1)).done(milestonesHandler)
+            var promise = httpGet('/spaces/%1/milestones/upcoming.json?&per_page=50&page=%2'.arg(name).arg(info.page + 1)).done(milestonesHandler)
             promise.info.page = info.page + 1
         }
 
-        promise = httpGet('/spaces/%1/milestones/all.json?&per_page=50'.arg(name)).done(milestonesHandler)
+        promise = httpGet('/spaces/%1/milestones/upcoming.json?&per_page=50'.arg(name)).done(milestonesHandler)
         promise.info.page = 1
 
-        httpGet('/spaces/%1/user_roles.json'.arg(name)).done(function (data) {
+        httpGet('/spaces/%1/users.json'.arg(name)).done(function (data) {
             print("USER ROLES:", data)
             availableAssignees = JSON.parse(data)
+
+            //availableAssignees.forEach(function (user) {
+                //availableAssignees[i].avatar_url = pluginView.service.api + '/users' + user.id + '/picture'
+                //                httpGet('http://www.google.fr/images/srpr/logo3w.png').done(function (picture, info) {
+//                    for (var i = 0; i < availableAssignees.length; i++) {
+//                        if (availableAssignees[i].login === user.login) {
+//                            print('Saving avatar for', user.login)
+//                            print("Length", info.headers["content-length"], picture.length)
+//                            picture = base64Encode(picture)
+
+//                            availableAssignees[i].avatar_url = "data:" + info.headers["content-type"] + ";base64,"+ picture
+//                            availableAssignees = availableAssignees
+//                            return
+//                        }
+//                    }
+//                })
+            //})
+            //availableAssignees = availableAssignees
         })
+    }
+
+    function base64Encode(str) {
+        var CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+        var out = "", i = 0, len = str.length, c1, c2, c3;
+        while (i < len) {
+            c1 = str.charCodeAt(i++) & 0xff;
+            if (i == len) {
+                out += CHARS.charAt(c1 >> 2);
+                out += CHARS.charAt((c1 & 0x3) << 4);
+                out += "==";
+                break;
+            }
+            c2 = str.charCodeAt(i++);
+            if (i == len) {
+                out += CHARS.charAt(c1 >> 2);
+                out += CHARS.charAt(((c1 & 0x3)<< 4) | ((c2 & 0xF0) >> 4));
+                out += CHARS.charAt((c2 & 0xF) << 2);
+                out += "=";
+                break;
+            }
+            c3 = str.charCodeAt(i++);
+            out += CHARS.charAt(c1 >> 2);
+            out += CHARS.charAt(((c1 & 0x3) << 4) | ((c2 & 0xF0) >> 4));
+            out += CHARS.charAt(((c2 & 0xF) << 2) | ((c3 & 0xC0) >> 6));
+            out += CHARS.charAt(c3 & 0x3F);
+        }
+        return out;
     }
 
     function getMilestone(id) {
         for (var i = 0; i < milestones.length; i++) {
-            if (milestones[i].id === id)
+            if (milestones[i].id === id) {
+                print(JSON.stringify(milestones[i]))
                 return milestones[i]
+            }
         }
 
         return undefined
     }
 
     function getUser(id) {
-        if (typeof(id) != "string") {
-            return ""
-        } if (usersInfo && usersInfo.hasOwnProperty(id)) {
-            return usersInfo[id]
-        } else {
-            httpGet("/users/%1.json".arg(id)).done(function(response, info) {
-                if (!usersInfo)
-                    usersInfo = {}
-                usersInfo[id] = JSON.parse(response)
-                usersInfo = usersInfo
-            })
-            print("Calling", id)
-            return {"login":"unknown"}
+        for (var i = 0; i < availableAssignees.length; i++) {
+            if (availableAssignees[i].id == id)
+                return availableAssignees[i]
         }
+
+        return {"login": "unknown"}
     }
 
     function httpGet(call) {

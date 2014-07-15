@@ -31,6 +31,10 @@ Item {
     property bool shadow: false
 
     property var icons: {
+        "shield": "",
+        "ban": "",
+        "dot-circle-o": "",
+        "rotate-right": "",
         "flag": "",
         "paper-plane":"",
         "cubes": "",
