@@ -2,7 +2,7 @@ import QtQuick 2.0
 import "internal" as Internal
 import "../qml-extras/dateutils.js" as DateUtils
 
-Issue {
+Ticket {
     id: issue
 
     _type: "AssemblaTicket"
@@ -13,53 +13,23 @@ Issue {
 
     number: info.number
 
-    isPullRequest: false
-    merged: isPullRequest ? pull && pull.merged  ? pull.merged : false
-                                        : false
-    mergeable: isPullRequest ? pull && pull.mergeable ? pull.mergeable : false
-                                           : false
     open: info.state === 1
     assignee: info.assigned_to_id ? parent.getUser(info.assigned_to_id) : undefined
 
     summary: {
-        var text = i18n.tr("%1 opened this issue %2").arg(issue.user.login).arg(DateUtils.friendlyTime(issue.created_at))
+        var text = i18n.tr("%1 opened this issue %2").arg(issue.author.login).arg(DateUtils.friendlyTime(issue.created_at))
 
         return text
     }
 
     state: info.status === "Accepted" ? "In Progress" : info.status
 
-    property bool assignedToMe: {
-        return issue.assignee.login == assemblaPlugin.service.user.login
-    }
-
-    property bool hasAssignee: {
-        var result = issue.assignee && issue.assignee.length > 0
-        print("ASSIGNEE:", assignee)
-        if (result === undefined)
-            return false
-        else
-            return result
-    }
-
-    property bool hasMilestone: {
-        var result = issue.milestone && issue.milestone.title
-        if (result === undefined)
-            return false
-        else
-            return result
-    }
-
     milestone: parent.getMilestone(info.milestone_id)
     title: info.summary
-    labels: []//info.tags
-    user: parent.getUser(info.reporter_id)
+    tags: []//info.tags
+    author: parent.getUser(info.reporter_id)
     created_at: info.created_on
     body: info.description
-
-    function renderBody() {
-        return body
-    }
 
     property var allEvents: {
         var list = []
@@ -116,7 +86,7 @@ Issue {
     function load() {
         ready = true
 
-        plugin.httpGet('/spaces/%1/tickets/%2/ticket_comments.json'.arg(plugin.name).arg(issue.number)).done(function (data, info) {
+        parent.httpGet('/spaces/%1/tickets/%2/ticket_comments.json'.arg(parent.name).arg(issue.number)).done(function (data, info) {
             comments = JSON.parse(data)
             print(data)
         })

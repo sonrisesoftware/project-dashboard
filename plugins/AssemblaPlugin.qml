@@ -1,7 +1,9 @@
 import QtQuick 2.0
+import "../ui/project_page"
+import "."
 import "../model"
-
 import "github"
+import Ubuntu.Components 1.1
 
 PluginView {
     id: assemblaPlugin
@@ -9,6 +11,8 @@ PluginView {
     type: "Assembla"
     title: i18n.tr("Assembla")
     icon: "adn"
+    genericIcon: "code"
+    genericTitle: i18n.tr("Code")
 
     property var user: service.user
 
@@ -40,6 +44,29 @@ PluginView {
         }
 
     ]
+
+    configView: PluginConfigView {
+        hasSettings: true
+
+        Column {
+            anchors.fill: parent
+            anchors.margins: units.gu(2)
+            spacing: units.gu(1)
+            Label {
+                text: "Component function (JavaScript):"
+            }
+
+            TextArea {
+                width: parent.width
+                height: units.gu(20)
+
+                text: plugin.componentFunction
+                onTextChanged: plugin.componentFunction = text
+
+                color: focus ? Theme.palette.normal.overlayText : Theme.palette.normal.baseText
+            }
+        }
+    }
 
     function createProject() {
     }

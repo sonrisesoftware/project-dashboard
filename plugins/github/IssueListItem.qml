@@ -29,7 +29,7 @@ ListItem.Standard {
     property int number: issue.number
     property bool showAssignee: true
 
-    property bool isPullRequest: issue.isPullRequest
+    property bool isPullRequest: false//issue.isPullRequest
 
     property bool showProject: false
 
@@ -44,7 +44,7 @@ ListItem.Standard {
         UbuntuNumberAnimation {}
     }
 
-    property Issue issue
+    property Ticket issue
     property alias text: titleLabel.text
     property alias subText: subLabel.text
 
@@ -135,7 +135,7 @@ ListItem.Standard {
                 anchors.fill: parent
 
                 image: Image {
-                    source: assigneeIndicator.visible ? issue.assignee.avatar_url : ""
+                    source: assigneeIndicator.visible && issue.assignee.avatar_url ? issue.assignee.avatar_url : ""
                 }
             }
         }

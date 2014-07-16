@@ -31,33 +31,73 @@ PluginPage {
 
     property bool expanded: false
 
-    property string view: componentColumns.length > 1 ? "component" : "milestone" // or "label" or "assignee" or "milestone" (and later, "status")
-
     Component.onCompleted: reload()
 
-    property int columnCount: Math.max(1, Math.floor(width/units.gu(50)))
+    property int columnCount: Math.max(1, Math.floor(width/units.gu(60)))
 
-    property var columns: view === "component" ? componentColumns : view === "assignee" ? assigneeColumns : view === "milestone" ? milestoneColumns : []
-    property var filter: view === "component" ? componentFilter : view === "assignee" ? assigneeFilter : view === "milestone" ? milestoneFilter : []
-
-    onFilterChanged: reload()
+    property var columns: []
 
     property int issuesCount: plugin.issues.count
 
     onIssuesCountChanged: reload()
 
-    property var allIssues: List.filter(plugin.issues, function(issue) {
-        return true//!issue.isPullRequest
-    }).sort(function(a, b) { return b.number - a.number })
+    property var allIssues: []
+
+    property int everyonesIssues: 0
+    property int assignedIssues: 0
 
     property var groupedIssues: { return {} }
 
+    property var filter: defaultFilters[0]
+
+    onFilterChanged: reload()
+
+    property var defaultFilters: [
+        {
+            'title': 'Android Tickets',
+
+            'columns': ['Michael Spencer', 'Arni Maack', 'Jean Sconyers', 'Sarah Hightower'],
+            'group': 'assignee.name',
+            'default': 'Not assigned',
+
+            'filter': {'state':['New','In Progress', 'Test'], 'title': 'android'},
+            'sort': 'state'
+        },
+        {
+            'title': 'Grouped by component',
+
+            'columns': ['Uncategorized'],
+            'group': 'component',
+            'default': 'Uncategorized',
+
+            'filter': {'open':'true'},
+            'sort': 'state'
+        }
+    ]
+
     function reload() {
-        var columns = view === "component" ? componentColumns : view === "assignee" ? assigneeColumns : view === "milestone" ? milestoneColumns : []
         var issues = {}
+        allIssues = []
+        everyonesIssues = 0
+        assignedIssues = 0
+
         for (var i = 0; i < plugin.issues.count; i++) {
             var issue = plugin.issues.at(i)
-            var column = filter(issue)
+            var column = issue.get(filter.group)
+
+            if (!column)
+                column = filter['default']
+
+            if (!issue.matches(filter.filter))
+                continue
+
+            if (issue.open && !issue.isPullRequest) {
+                allIssues.push(issue)
+                everyonesIssues++
+
+                if (issue.assignedToMe)
+                    assignedIssues++
+            }
 
             if (column) {
                 if (!issues[column])
@@ -65,82 +105,27 @@ PluginPage {
                 issues[column].push(issue)
             }
         }
-        columns.forEach(function (column) {
+
+        for (column in issues) {
             if (issues[column])
-                issues[column].sort(function(a,b) { return b.number - a.number})
+                issues[column].sort(function(a,b) { return b.number - a.number })
+        }
+
+        var list = List.objectKeys(issues)
+        list.sort(function (b, a) {
+            if (filter.columns.indexOf(a) !== -1 && filter.columns.indexOf(b) !== -1)
+                return filter.columns.indexOf(b) - filter.columns.indexOf(a)
+            else if (filter.columns.indexOf(a) !== -1)
+                return 1
+            else if (filter.columns.indexOf(b) !== -1)
+                return -1
+            else
+                return 0
         })
+
+        columns = list
+
         groupedIssues = issues
-    }
-
-    // Component view
-
-    property var componentColumns: {
-        var list = JSON.parse(JSON.stringify(plugin.components))
-        list.sort()
-        list.splice(0, 0, "Uncategorized")
-        return list
-    }
-
-    function componentFilter(issue) {
-        if (selectedFilter && !selectedFilter(issue))
-            return undefined
-        else if (issue.title.match(/\[.*\].*/) === null)
-            return "Uncategorized"
-        else {
-            var title = issue.title
-            var index = title.indexOf(']')
-            var component = title.substring(1, index)
-            return component
-        }
-    }
-
-    // Milestone view
-
-    property var milestoneColumns: {
-        var list = [i18n.tr("No Milestone")]
-
-        for (var i = 0; i < plugin.milestones.length; i++) {
-            list.push(plugin.milestones[i].title)
-        }
-
-        return list
-    }
-
-    function milestoneFilter(issue) {
-        print(issue.number, " ", JSON.stringify(issue.milestone))
-        if (selectedFilter && !selectedFilter(issue))
-            return undefined
-        else if (issue.milestone === undefined)
-            return "No milestone"
-        else {
-            return issue.milestone.title
-        }
-    }
-
-    // Assignee view
-
-    property var assigneeColumns: {
-        var list = [i18n.tr("No Assignee")]
-
-        for (var i = 0; i < plugin.availableAssignees.length; i++) {
-            list.push(plugin.availableAssignees[i].login)
-        }
-
-        return list
-    }
-
-    function assigneeFilter(column) {
-        return List.filter(plugin.issues, function(issue) {
-                            return selectedFilter(issue) && !issue.isPullRequest && ((column === i18n.tr("No Assignee") && !issue.hasAssignee) || issue.hasAssignee && issue.assignee.login == column)
-                        }).sort(function(a, b) { return b.number - a.number })
-    }
-
-    actions: Action {
-        text: i18n.tr("View")
-        iconSource: getIcon("navigation-menu")
-        onTriggered: {
-            PopupUtils.open(viewPopover, value)
-        }
     }
 
     ListView {
@@ -208,7 +193,7 @@ PluginPage {
 
                 ListItem.Header {
                     Label {
-                        text: i18n.tr("Group By")
+                        text: i18n.tr("Saved Filters")
                         anchors {
                             verticalCenter: parent.verticalCenter
                             left: parent.left
@@ -222,32 +207,12 @@ PluginPage {
                 OverlayItemSelector {
                     id: _viewSelector
                     expanded: true
-                    model: [
-                        {
-                            title: i18n.tr("Component"),
-                            name: "component"
-                        },
-                        {
-                            title: i18n.tr("Milestone"),
-                            name: "milestone"
-                        },
-                        {
-                            title: i18n.tr("Assignee"),
-                            name: "assignee"
-                        }
-                    ]
+                    model: defaultFilters
 
-                    selectedIndex: {
-                        for (var i = 0; i < model.length; i++) {
-                            if (model[i].name == plannerView.view)
-                                return i
-                        }
-
-                        return 0
-                    }
+                    selectedIndex: 0
 
                     onSelectedIndexChanged: {
-                        plannerView.view = model[selectedIndex].name
+                        filter = defaultFilters[selectedIndex]
                     }
 
                     delegate: OverlayItemSelectorDelegate {
@@ -260,33 +225,6 @@ PluginPage {
                 }
             }
         }
-    }
-
-    property var selectedFilter: allFilter
-
-    function issueFilter(issue) {
-        return !issue.isPullRequest && (issue.open || plugin.showClosedTickets) && selectedMilestone(issue) && (searchButton.opacity > 0 || (issue.title.indexOf(searchField.text) !== -1 || issue.body.indexOf(searchField.text) !== -1))
-    }
-
-    function selectedMilestone(issue) {
-        if (milestoneSelector.selectedIndex < milestoneSelector.model.length - 2)
-            return issue.milestone && issue.milestone.number === milestoneSelector.model[milestoneSelector.selectedIndex].number
-        else if (milestoneSelector.selectedIndex == milestoneSelector.model.length - 2)
-            return !issue.milestone || !issue.milestone.hasOwnProperty("number")
-        else
-            return true
-    }
-
-    property var allFilter: function(issue) {
-        return issueFilter(issue) ? true : false
-    }
-
-    property var assignedFilter: function(issue) {
-        return issue.assignedToMe && issueFilter(issue) ? true : false
-    }
-
-    property var createdFilter: function(issue) {
-        return issue.user && issue.user.login === githubPlugin.user.login && issueFilter(issue) ? true : false
     }
 
     Sidebar {
@@ -350,18 +288,18 @@ PluginPage {
                     text: i18n.tr("Everyone's Issues")
                     selected: allFilter === selectedFilter
                     onClicked: selectedFilter = allFilter
-                    value: List.filteredCount(allIssues, allFilter)
+                    value: everyonesIssues
                     height: units.gu(5)
-                    visible: plannerView.view !== "assignee"
+                    visible: plannerView.group !== "assignee"
                 }
 
                 ListItem.SingleValue {
                     text: i18n.tr("Assigned to you")
                     selected: assignedFilter === selectedFilter
                     onClicked: selectedFilter = assignedFilter
-                    value: List.filteredCount(allIssues, assignedFilter)
+                    value: assignedIssues
                     height: units.gu(5)
-                    visible: plannerView.view !== "assignee"
+                    visible: plannerView.group !== "assignee"
                 }
 
                 ListItem.SingleValue {
@@ -370,23 +308,63 @@ PluginPage {
                     onClicked: selectedFilter = createdFilter
                     value: List.filteredCount(allIssues, createdFilter)
                     height: units.gu(5)
-                    visible: plannerView.view !== "assignee"
+                    visible: plannerView.group !== "assignee"
                 }
 
                 ListItem.Header {
                     text: i18n.tr("Milestone")
-                    visible: plannerView.view !== "milestone"
+                    visible: plannerView.group !== "milestone"
                 }
 
                 SuruItemSelector {
                     id: milestoneSelector
-                    visible: plannerView.view !== "milestone"
+                    visible: plannerView.group !== "milestone"
                     model: plugin.milestones.concat(i18n.tr("No milestone")).concat(i18n.tr("Any milestone"))
 
                     selectedIndex: model.length - 1
 
                     delegate: OptionSelectorDelegate {
                         text: modelData.title ? modelData.title : modelData
+                    }
+                }
+
+                ListItem.Header {
+                    text: i18n.tr("Group By")
+                }
+
+                SuruItemSelector {
+                    id: groupSelector
+
+                    model: [
+                        {
+                            title: i18n.tr("Component"),
+                            name: "component"
+                        },
+                        {
+                            title: i18n.tr("Milestone"),
+                            name: "milestone"
+                        },
+                        {
+                            title: i18n.tr("Assignee"),
+                            name: "assignee"
+                        }
+                    ]
+
+                    selectedIndex: {
+                        for (var i = 0; i < model.length; i++) {
+                            if (model[i].name == plannerView.group)
+                                return i
+                        }
+
+                        return 0
+                    }
+
+                    onSelectedIndexChanged: {
+                        plannerView.group = model[selectedIndex].name
+                    }
+
+                    delegate: OptionSelectorDelegate {
+                        text: modelData.title
                     }
                 }
             }

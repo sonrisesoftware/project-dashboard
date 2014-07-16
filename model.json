@@ -110,7 +110,8 @@
             "milestones": "var:[]",
             "availableAssignees": "var:[]",
             "showClosedTickets": "bool:false",
-            "usersInfo": "var:{}"
+            "usersInfo": "var:{}",
+            "componentFunction": "string"
         },
 
         "GitHubPlugin": {
@@ -125,7 +126,7 @@
             "cacheInfo": "var:{}"
         },
 
-        "Issue": {
+        "Ticket": {
             "_parent": "Struct",
 
             "info": "var",

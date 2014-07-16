@@ -56,8 +56,8 @@ Sidebar {
         Repeater {
             model: project.plugins
             delegate: SidebarItem {
-                iconName: modelData.pluginView.icon
-                text: modelData.pluginView.shortTitle
+                iconName: modelData.pluginView.genericIcon
+                text: modelData.pluginView.genericTitle
                 onClicked: selectedView = modelData._type
                 selected: selectedView === modelData._type
             }

@@ -6,7 +6,7 @@ import ".."
 Struct {
     id: object
 
-    _type: "Issue"
+    _type: "Ticket"
 
     property var info
     onInfoChanged: _set("info", info)

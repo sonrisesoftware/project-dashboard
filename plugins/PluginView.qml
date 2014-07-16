@@ -26,6 +26,9 @@ import "../ui/project_page"
 Item {
     id: pluginView
 
+    property string genericIcon: icon
+    property string genericTitle: shortTitle
+
     property string type
     property string title
     property string shortTitle: title

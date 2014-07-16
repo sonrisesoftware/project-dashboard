@@ -56,6 +56,7 @@ Internal.AssemblaPlugin {
                 }
             }
             issues.busy = false
+            reloadComponents()
 
             print("ASSEMBLA:", issues.count)
 
@@ -156,5 +157,51 @@ Internal.AssemblaPlugin {
 
     function httpGet(call) {
         return assemblaPlugin.service.httpGet(call)
+    }
+
+    property var components: []
+
+    function reloadComponents() {
+        var list = []
+
+        for (var i = 0; i < issues.count; i++) {
+            var issue = issues.get(i).modelData
+
+            if (!issue.open)
+                continue
+
+            var component = getComponent(issue)
+            if (component !== undefined && list.indexOf(component) == -1)
+                list.push(component)
+        }
+
+        components = list
+    }
+
+    onComponentFunctionChanged: reloadComponents()
+
+    function iosComp(issue) {
+        if (issue.title.match(/android/i))
+            return "Android";
+        else if (issue.title.match(/ios/i))
+            return "iOS";
+        else return undefined;
+    }
+
+    function getComponent(issue) {
+        if (componentFunction !== "") {
+            return eval(componentFunction)(issue)
+        } else {
+            var title = issue.title
+
+            if (title.match(/\[.*\].*/) !== null) {
+                var index = title.indexOf(']')
+                var component = title.substring(1, index)
+
+                return component
+            } else {
+                return undefined
+            }
+        }
     }
 }

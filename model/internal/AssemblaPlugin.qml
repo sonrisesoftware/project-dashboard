@@ -11,6 +11,9 @@ Plugin {
     property var milestones: []
     onMilestonesChanged: _set("milestones", milestones)
 
+    property string componentFunction
+    onComponentFunctionChanged: _set("componentFunction", componentFunction)
+
     property string name
     onNameChanged: _set("name", name)
 
@@ -29,6 +32,7 @@ Plugin {
 
     onCreated: {
         _set("milestones", milestones)
+        _set("componentFunction", componentFunction)
         _set("name", name)
         _set("usersInfo", usersInfo)
         _set("availableAssignees", availableAssignees)
@@ -39,6 +43,7 @@ Plugin {
 
     onLoaded: {
         milestones = _get("milestones", [])
+        componentFunction = _get("componentFunction", "")
         name = _get("name", "")
         usersInfo = _get("usersInfo", {})
         availableAssignees = _get("availableAssignees", [])
@@ -46,5 +51,5 @@ Plugin {
         issues.load()
     }
 
-    _properties: ["_type", "_version", "milestones", "name", "usersInfo", "availableAssignees", "showClosedTickets", "issues"]
+    _properties: ["_type", "_version", "milestones", "componentFunction", "name", "usersInfo", "availableAssignees", "showClosedTickets", "issues"]
 }

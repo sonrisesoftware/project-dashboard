@@ -38,7 +38,7 @@ Page {
 
     property Plugin repository: issue.parent
 
-    property Issue issue
+    property Ticket issue
 
     Component.onCompleted: issue.load()
 
@@ -643,6 +643,14 @@ Page {
 
                     issue.setAssignee(assignee)
                 }
+            }
+
+            ListItem.Header {
+                text: i18n.tr("Status")
+            }
+
+            ListItem.Standard {
+                text: issue.state
             }
 
             ListItem.Header {
