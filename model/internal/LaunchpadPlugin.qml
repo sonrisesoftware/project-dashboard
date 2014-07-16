@@ -6,7 +6,7 @@ import ".."
 CodePlugin {
     id: object
 
-    _type: "GitHubPlugin"
+    _type: "LaunchpadPlugin"
 
     onCreated: {
         _loaded = true

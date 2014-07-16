@@ -8,18 +8,6 @@ Internal.GitHubPlugin {
 
     pluginView: githubPlugin
 
-    property var assignedIssues: List.filter(issues, function(issue) {
-        return issue.assignedToMe && issue.open && !issue.isPullRequest
-    })
-
-    property var openIssues: List.filter(issues, function(issue) {
-        return issue.open && !issue.isPullRequest
-    })
-
-    property var openPulls: List.filter(issues, function(issue) {
-        return issue.open && issue.isPullRequest
-    })
-
     property string api: "https://api.github.com"
 
     property string description: repo.description ? repo.description : ""
@@ -30,12 +18,6 @@ Internal.GitHubPlugin {
 
     property bool hasPushAccess: repo.permissions ? repo.permissions.push : false
 
-    property int nextNumber: 1
-
-    property var milestones: []
-    property var availableAssignees: []
-
-    property var components: []
 
     function getUserName(id) {
         return id.login

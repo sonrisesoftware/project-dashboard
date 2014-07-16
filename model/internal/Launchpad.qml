@@ -3,10 +3,12 @@ import "../../udata"
 import ".."
 
 // Automatically generated from a uData model
-CodePlugin {
+Service {
     id: object
 
-    _type: "GitHubPlugin"
+    _id: "launchpad"
+    _created: true
+    _type: "Launchpad"
 
     onCreated: {
         _loaded = true

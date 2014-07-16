@@ -226,7 +226,7 @@ MainView {
         id: backend
         _db: storage
 
-        availablePlugins: [notesPlugin, eventsPlugin, actionsPlugin, clickPlugin, githubPlugin, assemblaPlugin]
+        availablePlugins: [notesPlugin, eventsPlugin, actionsPlugin, clickPlugin, githubPlugin, launchpadPlugin, assemblaPlugin]
     }
 
     Settings {
@@ -252,6 +252,10 @@ MainView {
 
     GithubPlugin {
         id: githubPlugin
+    }
+
+    LaunchpadPlugin {
+        id: launchpadPlugin
     }
 
     AssemblaPlugin {

@@ -35,6 +35,11 @@
             "repos": "var:[]"
         },
 
+        "Launchpad": {
+            "_id": "launchpad",
+            "_parent": "Service"
+        },
+
 		"Project": {
             "plugins": "list",
             "name": "string",
@@ -102,7 +107,7 @@
             "click_count": "int"
         },
 
-        "AssemblaPlugin": {
+        "CodePlugin": {
             "_parent": "Plugin",
 
             "name": "string",
@@ -114,16 +119,16 @@
             "componentFunction": "string"
         },
 
-        "GitHubPlugin": {
-            "_parent": "Plugin",
+        "AssemblaPlugin": {
+            "_parent": "CodePlugin"
+        },
 
-            "name": "string",
-            "repo": "var",
-            "issues": "list:Issue",
-            "milestones": "var:[]",
-            "availableAssignees": "var:[]",
-            "showClosedTickets": "bool:false",
-            "cacheInfo": "var:{}"
+        "GitHubPlugin": {
+            "_parent": "CodePlugin"
+        },
+
+        "LaunchpadPlugin": {
+            "_parent": "CodePlugin"
         },
 
         "Ticket": {
