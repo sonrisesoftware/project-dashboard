@@ -6,7 +6,11 @@ Internal.Project {
 
     property string configuration: {
         if (hasPlugin('GitHub'))
-            return getPlugin('GitHub').name
+            return awesomeIcon("github") + " " + getPlugin('GitHub').name
+        else if (hasPlugin('Launchpad'))
+            return awesomeIcon("empire") + " lp:" + getPlugin('Launchpad').name
+        else if (hasPlugin('Assembla'))
+            return awesomeIcon("adn") + " " + getPlugin('Assembla').name
         else
             return ""
     }

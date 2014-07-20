@@ -60,7 +60,7 @@ PluginPage {
             'group': 'assignee.name',
             'default': 'Not assigned',
 
-            'filter': {'state':['New','In Progress', 'Test'], 'title': 'android'},
+            'filter': {'state':['New','In Progress', 'Test'], 'title': ['android', '!unit']},
             'sort': 'state'
         },
         {
@@ -72,6 +72,16 @@ PluginPage {
 
             'filter': {'open':'true'},
             'sort': 'state'
+        },
+        {
+            'title': 'Grouped by assignee',
+
+            'columns': ['Not assigned'],
+            'group': 'assignee.name',
+            'default': 'Not assigned',
+
+            'filter': {'open':'true','state':['New', 'Triaged', 'In Progress']},
+            'sort': 'state'
         }
     ]
 
@@ -80,6 +90,8 @@ PluginPage {
         allIssues = []
         everyonesIssues = 0
         assignedIssues = 0
+
+        var start = new Date()
 
         for (var i = 0; i < plugin.issues.count; i++) {
             var issue = plugin.issues.at(i)
@@ -123,9 +135,14 @@ PluginPage {
                 return 0
         })
 
+        var end = new Date()
+        print("Took", (end - start)/1000, "seconds")
+
         columns = list
+        print("Columns took", (new Date() - end)/1000, "seconds")
 
         groupedIssues = issues
+        print("Grouped issues took", (new Date() - end)/1000, "seconds")
     }
 
     ListView {
@@ -145,7 +162,7 @@ PluginPage {
         snapMode: columnCount > 1 ? ListView.SnapToItem : ListView.NoSnap
 
         model: columns
-        delegate: GridTile {
+        delegate: GridModelTile {
             id: _tile
             title: modelData
 
@@ -155,27 +172,17 @@ PluginPage {
 
             property string column: modelData
 
-            visible: issues !== undefined && issues.length > 0
+            visible: model !== undefined && model.length > 0
 
-            value: issues.length === 1 ? i18n.tr("<b>1</b> issue") : i18n.tr("<b>%1</b> issues").arg(issues.length)
+            value: model.length === 1 ? i18n.tr("<b>1</b> issue") : i18n.tr("<b>%1</b> issues").arg(model.length)
 
-            property var issues: groupedIssues[_tile.column]
-
-            Repeater {
-                model: _tile.issues
-                delegate: IssueListItem {
-                    issue: modelData
-                    showDivider: index < _tile.issues.length - 1
-                }
+            model: groupedIssues[_tile.column]
+            delegate: IssueListItem {
+                issue: modelData
+                showDivider: index < _tile.model.length - 1
             }
 
-            ListItem.Standard {
-                visible: _tile.issues.length === 0
-                enabled: false
-
-                text: i18n.tr("No issues match the selected filter")
-                showDivider: true
-            }
+            noneText: i18n.tr("No issues match the selected filter")
         }
     }
 
@@ -306,7 +313,7 @@ PluginPage {
                     text: i18n.tr("Created by you")
                     selected: createdFilter === selectedFilter
                     onClicked: selectedFilter = createdFilter
-                    value: List.filteredCount(allIssues, createdFilter)
+                    //value: List.filteredCount(allIssues, createdFilter)
                     height: units.gu(5)
                     visible: plannerView.group !== "assignee"
                 }

@@ -30,7 +30,7 @@ PluginView {
             pulseItem: IssuesPulseItem {
                 title: i18n.tr("Assigned Tickets")
                 type: "tickets"
-                pluginType: "Assembla"
+                showAllAssignedIssues: true
             }
 
             page: PlannerView {}

@@ -18,7 +18,7 @@
 import QtQuick 2.0
 import "internal" as Internal
 
-import "../../qml-extras/httplib.js" as Http
+import "../qml-extras/httplib.js" as Http
 import "../ubuntu-ui-extras"
 import "../components"
 
@@ -46,7 +46,6 @@ Internal.Assembla {
     onOauthTokenChanged: {
         if (oauthToken !== "") {
             httpGet('/user.json').done(function(response) {
-                print("ASSEMBLA RESPONSE")
                 var json = JSON.parse(response)
                 user = json
             }).error(function(error, info) {
@@ -58,7 +57,6 @@ Internal.Assembla {
                               .arg('0661da1c5ffe98abcabab0644f24fd47')
                               .arg('dcsqOS5hyr44kZacwqjQXA')
                               .arg(refreshToken)).done(function (data, info) {
-                        print('UPDATE RESPONSE', data)
                         oauthToken = JSON.parse(data).access_token
                     })
                 }

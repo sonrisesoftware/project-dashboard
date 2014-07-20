@@ -34,7 +34,7 @@ TabbedPage {
     title: project.name
 
     // TODO: Could these be better named?
-    tabs: wideAspect ? pluginView.tabs : [i18n.tr("Pulse"), i18n.tr("Overview")]
+    tabs: sidebar.expanded ? pluginView.tabs : [i18n.tr("Pulse"), i18n.tr("Overview")]
 
     onTabsChanged: selectedIndex = 0
 
@@ -46,7 +46,7 @@ TabbedPage {
             text: i18n.tr("Edit")
             iconSource: getIcon("edit")
             onTriggered: pushPageView(Qt.resolvedUrl("ConfigView.qml"), {project: projectPage.project})
-            visible: !wideAspect
+            visible: !sidebar.expanded
         },
 
         Action {
@@ -55,7 +55,7 @@ TabbedPage {
             iconSource: enabled ? getIcon("bell") : getIcon("bell-o")
             enabled: project.inbox.count > 0
             onTriggered: selectedView = "inbox"
-            visible: !wideAspect
+            visible: !sidebar.expanded
         },
 
         Action {

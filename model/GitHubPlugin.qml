@@ -16,7 +16,7 @@ Internal.GitHubPlugin {
 
     property string owner: name ? name.split('/', 1)[0] : ""
 
-    property bool hasPushAccess: repo.permissions ? repo.permissions.push : false
+    hasPushAccess: repo.permissions ? repo.permissions.push : false
 
 
     function getUserName(id) {

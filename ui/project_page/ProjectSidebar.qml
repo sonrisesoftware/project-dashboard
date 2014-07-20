@@ -25,7 +25,7 @@ import "../../components"
 
 Sidebar {
     id: sidebar
-    expanded: wideAspect
+    expanded: parent.width > units.gu(60)
     width: Math.min(units.gu(8), height/(project.plugins.count + 4))
     color: Qt.rgba(0,0,0,0.4)
     dividerColor: Qt.rgba(0,0,0,0.4)

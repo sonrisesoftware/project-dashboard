@@ -5,6 +5,7 @@ Internal.LaunchpadPlugin {
     id: plugin
 
     pluginView: launchpadPlugin
+    configuration: "lp:" + name
 
     function setup() {
         app.prompt(i18n.tr("Launchpad"), i18n.tr("Enter the name of a Launchpad project:"), "Project name", "").done(function (name) {
@@ -18,30 +19,46 @@ Internal.LaunchpadPlugin {
     function refresh() {
         var ticketsHandler = function (data, info) {
             var json = JSON.parse(data).entries
-            print("RESPONSE", data)
+            //print("RESPONSE", data)
+
+            var remaining = json.length
+            var bugs = []
 
             for (var i = 0; i < json.length; i++) {
                 var task = json[i]
-                httpGet(json[i].bug_link).done(function(data, info) {
+                var promise = httpGet(json[i].bug_link).done(function(data, info) {
                     var found = false
                     var json = JSON.parse(data)
-                    json.task = task
+                    json.task = info.task
+                    bugs.push(json)
 
-                    for (var j = 0; j < issues.count; j++) {
-                        var issue = issues.at(j)
+                    remaining--
 
-                        if (issue.number === json.id) {
-                            issue.info = json
-                            found = true
-                            break
+                    if (remaining == 0) {
+                        issues.busy = true
+
+                        for (var k = 0; k < bugs.length; k++) {
+                            var bug = bugs[k]
+                            for (var j = 0; j < issues.count; j++) {
+                                var issue = issues.at(j)
+
+                                if (issue.number === bug.id) {
+                                    issue.info = bug
+                                    found = true
+                                    break
+                                }
+                            }
+
+                            if (!found) {
+                                var issue = _db.create('LaunchpadBug', {info: bug}, plugin)
+                                issues.add(issue)
+                            }
                         }
-                    }
 
-                    if (!found) {
-                        var issue = _db.create('LaunchpadBug', {info: json}, plugin)
-                        issues.add(issue)
+                        issues.busy = false
                     }
                 })
+                promise.info.task = task
             }
             //reloadComponents()
 
@@ -51,8 +68,28 @@ Internal.LaunchpadPlugin {
         var promise = httpGet('/%1?ws.op=searchTasks'.arg(name)).done(ticketsHandler)
     }
 
-    function getUser(id) {
-        var list = id.split('/')
-        return {"login": list[list.length - 1]}
+    function getUser(link) {
+        if (typeof(link) != "string") {
+            return undefined
+        } if (usersInfo && usersInfo.hasOwnProperty(link)) {
+            /// Custom color for links
+            var response = usersInfo[link]
+            print("USER", JSON.stringify(response))
+            return response
+        } else {
+            //print("Calling Markdown API")
+            httpGet(link).done(function(data, info) {
+                if (!usersInfo)
+                    usersInfo = {}
+                var json = JSON.parse(data)
+                usersInfo[link] = {
+                    'login': json.name,
+                    'name': json.display_name,
+                    'avatar_url': json.logo_link
+                }
+                usersInfo = usersInfo
+            })
+            return {"login": "unknown"}
+        }
     }
 }

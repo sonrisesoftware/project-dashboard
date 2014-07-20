@@ -28,7 +28,7 @@ import "../../qml-extras/utils.js" as Utils
 PulseItem {
     id: pulseItem
 
-    property string pluginType: "GitHub"
+    property bool showAllAssignedIssues
     property string type: "issues"
 
     show: List.length(issues) > 0
@@ -43,20 +43,27 @@ PulseItem {
         } else {
             issues = []
 
+            if (!showAllAssignedIssues)
+                return []
+
             for (var i = 0; i < backend.projects.count; i++) {
                 var project = backend.projects.at(i)
-                var p = project.getPlugin(pluginType)
+                var p = project.getPlugin('GitHub')
+                if (p) issues = issues.concat(p.assignedIssues)
 
-                if (p) {
-                    //print("ISSUES", p.assignedIssues.length)
-                    issues = issues.concat(p.assignedIssues)
-                }
+                var p = project.getPlugin('Assembla')
+                if (p) issues = issues.concat(p.assignedIssues)
+
+                var p = project.getPlugin('Launchpad')
+                if (p) issues = issues.concat(p.assignedIssues)
             }
         }
 
         issues = issues.sort(function (a, b) {
-            return b.number - a.number
+            return new Date(b.created_at) - new Date(a.created_at)
         })
+
+        print("ASSIGNED ISSUES:", issues.length)
 
         return issues
     }

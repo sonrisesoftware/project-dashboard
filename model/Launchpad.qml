@@ -12,7 +12,7 @@ Internal.Launchpad {
     authenticationStatus: "Not signed in"//user ? i18n.tr("Logged in as %1").arg(user.login) : ""
     enabled: true//oauthToken !== ""
 
-    description: i18n.tr("GitHub is the best place to share code with friends, co-workers, classmates, and complete strangers. Over six million people use GitHub to build amazing things together.")
+    description: i18n.tr("Launchpad is an open source suite of tools that help people and teams to work together on software projects.")
 
     accountItem: SubtitledListItem {
         iconSource: user ? user.avatar_url : ""
@@ -71,7 +71,7 @@ Internal.Launchpad {
         if (call.indexOf('http') !== 0) {
             call = api + call
         }
-        print("Getting", call)
+        //print("Getting", call)
         return Http.get(call, options).error(function (data, info) {
             print('LAUNCHPAD ERROR:', info.status)
             print(data)

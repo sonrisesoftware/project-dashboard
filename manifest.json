@@ -11,5 +11,5 @@
     "maintainer": "Michael Spencer <sonrisesoftware@gmail.com>",
     "name": "com.ubuntu.developer.mdspencer.project-dashboard",
     "title": "Project Dashboard",
-    "version": "@APP_VERSION@"
+    "version": "1.0"
 }

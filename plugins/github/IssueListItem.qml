@@ -52,91 +52,135 @@ ListItem.Standard {
         id: labels
 
         spacing: units.gu(0.1)
+        width: (issue.isPullRequest ? parent.width - iconWidth : parent.width) - units.gu(4)
+
 
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
             leftMargin: units.gu(2)
-            rightMargin: indicators.width > 0 ? units.gu(1) : units.gu(2)
-            right: indicators.left
-        }
-
-        Label {
-            id: titleLabel
-
-            width: issue.isPullRequest ? parent.width - iconWidth : parent.width
-            elide: Text.ElideRight
-            text: i18n.tr("<b>#%1</b> - %2").arg(issue.number).arg(issue.title)
-
-            font.strikeout: !issue.open
-        }
-
-        Label {
-            id: subLabel
-            width: parent.width
-
-            //height: visible ? implicitHeight: 0
-            //color:  Theme.palette.normal.backgroundText
-            opacity: 0.65
-            font.weight: Font.Light
-            fontSize: "small"
-            //font.italic: true
-            text: {
-                if (showProject) {
-                    return issue.parent.parent.name
-                } else if (issue.isPullRequest) {
-                    return i18n.tr("%1 opened this pull request %2").arg(issue.user.login).arg(DateUtils.friendlyTime(issue.created_at))
-                } else {
-                    return issue.summary
-                }
-            }
-            visible: text !== ""
-            elide: Text.ElideRight
-        }
-    }
-
-    Row {
-        id: indicators
-
-        anchors {
-            right: parent.right
-            rightMargin: units.gu(2)
-            verticalCenter: parent.verticalCenter
-        }
-
-        spacing: units.gu(1)
-
-        AwesomeIcon {
-            size: units.gu(3)
-            anchors.verticalCenter: parent.verticalCenter
-
-            name: issue.state === "In Progress" ? "dot-circle-o" : issue.state === "Test" ? "check-circle" : issue.state === "Invalid" ? "ban" : ""
-            visible: name !== ""
         }
 
         Item {
-            id: assigneeIndicator
+            width: parent.width
+            height: titleLabel.height
 
-            anchors.verticalCenter: parent.verticalCenter
-            width: visible ? units.gu(4) : 0
-            height: width
-            visible: issue.hasOwnProperty("assignee") && issue.assignee != undefined && issue.assignee.hasOwnProperty("login") && issue.assignee !== "" && showAssignee
 
-            UbuntuShape {
-                anchors.fill: parent
+            Label {
+                id: titleLabel
 
-                image: Image {
-                    source: getIcon("user")
+                anchors {
+                    left: parent.left
+                    right: indicators.left
+                    rightMargin: units.gu(1)
                 }
+
+                elide: Text.ElideRight
+                text: i18n.tr("<b>#%1</b> - %2").arg(issue.number).arg(issue.title)
+
+                font.strikeout: !issue.open
             }
 
-            UbuntuShape {
-                visible: image.status === Image.Ready
-                anchors.fill: parent
+            Row {
+                id: indicators
 
-                image: Image {
-                    source: assigneeIndicator.visible && issue.assignee.avatar_url ? issue.assignee.avatar_url : ""
+                anchors {
+                    right: parent.right
+                    verticalCenter: parent.verticalCenter
                 }
+
+                spacing: units.gu(1)
+
+                AwesomeIcon {
+                    size: titleLabel.height
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    name: issue.state === "In Progress" ? "dot-circle-o" : issue.state === "Test" ? "check-circle" : issue.state === "Invalid" ? "ban" : ""
+                    visible: name !== ""
+                }
+
+                Item {
+                    id: assigneeIndicator
+
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: visible ? titleLabel.height : 0
+                    height: width
+                    visible: issue.hasOwnProperty("assignee") && issue.assignee != undefined && issue.assignee.hasOwnProperty("login") && issue.assignee !== "" && showAssignee
+
+                    UbuntuShape {
+                        anchors.fill: parent
+
+                        image: Image {
+                            source: getIcon("user")
+                        }
+                    }
+
+                    UbuntuShape {
+                        visible: image.status === Image.Ready
+                        anchors.fill: parent
+
+                        image: Image {
+                            source: assigneeIndicator.visible && issue.assignee.avatar_url ? issue.assignee.avatar_url : ""
+                        }
+                    }
+                }
+            }
+        }
+
+        Item {
+            width: parent.width
+            height: subLabel.height
+
+            Label {
+                id: subLabel
+
+                anchors {
+                    left: parent.left
+                    right: commentsLabel.left
+                    rightMargin: units.gu(1)
+                }
+
+                //height: visible ? implicitHeight: 0
+                //color:  Theme.palette.normal.backgroundText
+                opacity: 0.65
+                font.weight: Font.Light
+                fontSize: "small"
+                //font.italic: true
+                text: {
+                    if (showProject) {
+                        return issue.parent.parent.name
+                    } else if (issue.isPullRequest) {
+                        return i18n.tr("%1 opened this pull request %2").arg(issue.user.login).arg(DateUtils.friendlyTime(issue.created_at))
+                    } else {
+                        return issue.summary
+                    }
+                }
+                visible: text !== ""
+                elide: Text.ElideRight
+            }
+
+            Label {
+                id: commentsLabel
+
+                anchors.right: parent.right
+
+                //height: visible ? implicitHeight: 0
+                //color:  Theme.palette.normal.backgroundText
+                opacity: 0.65
+                font.weight: Font.Light
+                fontSize: "small"
+                //font.italic: true
+                text: {
+                    if (showProject) {
+                        return ""
+                    } else if (issue.commentCount > 0) {
+                        return "%1 %2".arg(issue.commentCount).arg(awesomeIcon("comment"))
+                    } else {
+                        return ""
+                    }
+                }
+                visible: text !== ""
+                elide: Text.ElideRight
             }
         }
     }

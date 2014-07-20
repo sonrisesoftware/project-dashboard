@@ -22,6 +22,7 @@ import Ubuntu.Components.ListItems 1.0 as ListItem
 import "../../ubuntu-ui-extras"
 import "../../components"
 import "../../backend/utils.js" as Utils
+import "../../qml-extras/dateutils.js" as DateUtils
 import "../../model/"
 
 Page {
@@ -154,7 +155,7 @@ Page {
                     Label {
                         text: issue.isPullRequest ? issue.merged ? i18n.tr("<b>%1</b> merged %2 commits").arg(issue.user.login).arg(issue.commits.length)
                                                                  : i18n.tr("<b>%1</b> wants to merge %2 commits").arg(issue.user.login).arg(issue.commits.length)
-                        : i18n.tr("<b>%1</b> opened this issue %2").arg(issue.user.login).arg(friendsUtils.createTimeString(issue.created_at))
+                        : i18n.tr("<b>%1</b> opened this issue %2").arg(issue.author.name).arg(DateUtils.friendlyTime(issue.created_at))
                         anchors.verticalCenter: parent.verticalCenter
                         width: parent.width - stateShape.width - parent.spacing
                         wrapMode: Text.WrapAtWordBoundaryOrAnywhere

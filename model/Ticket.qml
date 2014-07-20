@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import "internal" as Internal
+import "../qml-extras/dateutils.js" as DateUtils
 
 Internal.Ticket {
     id: issue
@@ -16,9 +17,11 @@ Internal.Ticket {
     property string body
     property bool isPullRequest: false
     property string component: parent.getComponent(issue)
+    property int commentCount: 0
 
     property string summary: {
-        var text = i18n.tr("%1 opened this issue %2").arg(issue.author.login).arg(DateUtils.friendlyTime(issue.created_at))
+        var text = i18n.tr("Opened by %1 %2").arg(issue.author.name).arg(DateUtils.friendlyTime(issue.created_at))
+
         return text
     }
 
@@ -81,18 +84,31 @@ Internal.Ticket {
             var value = get(prop)
             var item = filter[prop]
             var matches = false
-            print('Testing', prop, value, '??', item, typeof(value), typeof(item))
 
             if (typeof(value) == 'boolean') {
                 matches = value ? item == "true" : item == "false"
-                print(value, '==', item, matches)
             } else if (typeof(item) == 'string') {
-                matches = value !== undefined && value.match(new RegExp(item, "i"))
-                print(value, '==', item, matches)
+                var invert = false
+                if (item.indexOf('!') == 0) {
+                    invert = true
+                    item = item.substring(1)
+                }
+                matches = value !== undefined && value.toLowerCase().indexOf(item.toLowerCase()) !== -1
+                if (invert) matches = !matches
             } else if (item instanceof Array) {
                 item.forEach(function (subItem) {
-                    matches = matches || (value !== undefined && value.match(new RegExp(subItem, "i")))
-                    print(value, '==', item, matches)
+                    var invert = false
+                    if (subItem.indexOf('!') == 0) {
+                        invert = true
+                        subItem = subItem.substring(1)
+                    }
+
+                    var subMatch = value !== undefined && value.toLowerCase().indexOf(subItem.toLowerCase()) !== -1
+                    if (invert) {
+                        matches = matches && !subMatch
+                    } else {
+                        matches = matches || subMatch
+                    }
                 })
             }
 

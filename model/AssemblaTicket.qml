@@ -14,22 +14,17 @@ Ticket {
     number: info.number
 
     open: info.state === 1
-    assignee: info.assigned_to_id ? parent.getUser(info.assigned_to_id) : undefined
-
-    summary: {
-        var text = i18n.tr("%1 opened this issue %2").arg(issue.author.login).arg(DateUtils.friendlyTime(issue.created_at))
-
-        return text
-    }
 
     state: info.status === "Accepted" ? "In Progress" : info.status
 
     milestone: parent.getMilestone(info.milestone_id)
     title: info.summary
     tags: []//info.tags
+    assignee: parent.getUser(info.assigned_to_id)
     author: parent.getUser(info.reporter_id)
     created_at: info.created_on
     body: info.description
+    commentCount: allEvents.length
 
     property var allEvents: {
         var list = []
@@ -88,7 +83,7 @@ Ticket {
 
         parent.httpGet('/spaces/%1/tickets/%2/ticket_comments.json'.arg(parent.name).arg(issue.number)).done(function (data, info) {
             comments = JSON.parse(data)
-            print(data)
+            //print(data)
         })
     }
 
@@ -100,11 +95,9 @@ Ticket {
             var item = array[i]
             if (item.indexOf("- - ") == 0) {
                 var type = item.substring(4)
-                print('Type:', type, item)
                 var first = array[i + 1].substring(4)
                 if (array.length > i + 2 && array[i + 2].indexOf('  - ') == 0) {
                     var second = array[i + 2].substring(4)
-                    print('2  ', first, second)
                     events.push({
                                     event: type,
                                     from: first,
@@ -112,7 +105,6 @@ Ticket {
                                 })
                     i += 2
                 } else {
-                    print('1  ', first)
                     events.push({
                                     event: type,
                                     to: first

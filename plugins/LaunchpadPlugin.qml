@@ -8,7 +8,7 @@ PluginView {
 
     type: "Launchpad"
     title: i18n.tr("Launchpad")
-    icon: "code"
+    icon: "empire"
     genericIcon: "code"
     genericTitle: i18n.tr("Code")
 
@@ -28,7 +28,6 @@ PluginView {
             pulseItem: IssuesPulseItem {
                 title: i18n.tr("Assigned Bugs")
                 type: "bugs"
-                pluginType: "Launchpad"
             }
 
             page: PlannerView {}

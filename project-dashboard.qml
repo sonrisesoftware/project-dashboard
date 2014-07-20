@@ -128,42 +128,6 @@ MainView {
         notification.show(text)
     }
 
-//    Window {
-//        id: errorsWindow
-//        title: "Storage Log"
-
-//        width: units.gu(40)
-//        height: units.gu(60)
-
-//        Rectangle {
-//            anchors.fill: parent
-//        }
-
-//        ListView {
-//            anchors.fill: parent
-//            model: storage.debugLog
-
-//            onCountChanged: errorsWindow.show()
-
-//            delegate: SubtitledListItem {
-//                text: modelData.title
-//                subText: modelData.details
-
-//                overlay: true
-//            }
-//        }
-
-//        Label {
-//            anchors.centerIn: parent
-//            visible: storage.debugLog.count == 0
-
-//            text: i18n.tr("No messages")
-//            color: "gray"
-//            fontSize: "large"
-//            opacity: 0.8
-//        }
-//    }
-
     QtObject {
         id: friendsUtils
 
@@ -172,54 +136,14 @@ MainView {
         }
     }
 
-//    Window {
-//        id: objectsWindow
-//        title: "uData Objects"
-
-//        width: units.gu(40)
-//        height: units.gu(60)
-
-//        Component.onCompleted: objectsWindow.show()
-
-//        Rectangle {
-//            anchors.fill: parent
-//        }
-
-//        ListView {
-//            id: docsList
-//            anchors.fill: parent
-//            model: storage
-
-//            delegate: SubtitledListItem {
-//                text: object._type + " " + object._id
-//                visible: object._type !== 'Document'
-//                height: visible ? implicitHeight : 0
-
-//                property Document object: Document {
-//                    _id: docId
-//                    _db: storage
-//                    _type: _get("_type", "Document")
-//                }
-
-//                overlay: true
-//            }
-//        }
-
-//        Label {
-//            anchors.centerIn: parent
-//            visible: docsList.count == 0
-
-//            text: i18n.tr("No objects")
-//            color: "gray"
-//            fontSize: "large"
-//            opacity: 0.8
-//        }
-//    }
-
     Database {
         id: storage
         path: "project-dashboard.db"
         modelPath: Qt.resolvedUrl("model")
+
+        watchList: {
+            "AssemblaPlugin": ["assignees"]
+        }
     }
 
     Backend {
@@ -260,6 +184,16 @@ MainView {
 
     AssemblaPlugin {
         id: assemblaPlugin
+    }
+
+    AwesomeIcon {
+        id: staticAwesomeIcon
+
+        visible: false
+    }
+
+    function awesomeIcon(icon) {
+        return '<font face="FontAwesome">%1</font>'.arg(staticAwesomeIcon.icons[icon])
     }
 
     function getIcon(name) {
@@ -309,6 +243,7 @@ MainView {
     }
 
     function prompt(title, message, placeholder, value) {
+        print("Showing...")
         inputDialog.title = title
         inputDialog.text = message
         inputDialog.placeholderText = placeholder

@@ -7,22 +7,9 @@ Internal.AssemblaPlugin {
     id: plugin
 
     pluginView: assemblaPlugin
-
-    property var assignedIssues: List.filter(issues, function(issue) {
-        return issue.assignedToMe && issue.open && !issue.isPullRequest
-    })
-
-    property var openIssues: List.filter(issues, function(issue) {
-        return issue.open && !issue.isPullRequest
-    })
-
-    property var openPulls: List.filter(issues, function(issue) {
-        return issue.open && issue.isPullRequest
-    })
+    configuration: name
 
     property bool hasPushAccess: false
-
-    property int nextNumber: 1
 
     function setup() {
         app.prompt(i18n.tr("Assembla"), i18n.tr("Enter the name of an Assembla space:"), "Space name", "").done(function (name) {
@@ -38,6 +25,7 @@ Internal.AssemblaPlugin {
             var json = JSON.parse(data)
 
             issues.busy = true
+
             for (var i = 0; i < json.length; i++) {
                 var found = false
                 for (var j = 0; j < issues.count; j++) {
@@ -56,9 +44,6 @@ Internal.AssemblaPlugin {
                 }
             }
             issues.busy = false
-            reloadComponents()
-
-            print("ASSEMBLA:", issues.count)
 
             var promise = httpGet('/spaces/%1/tickets.json?report=0&per_page=50&page=%2'.arg(name).arg(info.page + 1)).done(ticketsHandler)
             promise.info.page = info.page + 1
@@ -84,7 +69,6 @@ Internal.AssemblaPlugin {
         promise.info.page = 1
 
         httpGet('/spaces/%1/users.json'.arg(name)).done(function (data) {
-            print("USER ROLES:", data)
             availableAssignees = JSON.parse(data)
 
             //availableAssignees.forEach(function (user) {
@@ -138,7 +122,7 @@ Internal.AssemblaPlugin {
     function getMilestone(id) {
         for (var i = 0; i < milestones.length; i++) {
             if (milestones[i].id === id) {
-                print(JSON.stringify(milestones[i]))
+                //print(JSON.stringify(milestones[i]))
                 return milestones[i]
             }
         }
@@ -159,49 +143,11 @@ Internal.AssemblaPlugin {
         return assemblaPlugin.service.httpGet(call)
     }
 
-    property var components: []
-
-    function reloadComponents() {
-        var list = []
-
-        for (var i = 0; i < issues.count; i++) {
-            var issue = issues.get(i).modelData
-
-            if (!issue.open)
-                continue
-
-            var component = getComponent(issue)
-            if (component !== undefined && list.indexOf(component) == -1)
-                list.push(component)
-        }
-
-        components = list
-    }
-
-    onComponentFunctionChanged: reloadComponents()
-
     function iosComp(issue) {
         if (issue.title.match(/android/i))
             return "Android";
         else if (issue.title.match(/ios/i))
             return "iOS";
         else return undefined;
-    }
-
-    function getComponent(issue) {
-        if (componentFunction !== "") {
-            return eval(componentFunction)(issue)
-        } else {
-            var title = issue.title
-
-            if (title.match(/\[.*\].*/) !== null) {
-                var index = title.indexOf(']')
-                var component = title.substring(1, index)
-
-                return component
-            } else {
-                return undefined
-            }
-        }
     }
 }

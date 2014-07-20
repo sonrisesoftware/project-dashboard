@@ -44,7 +44,7 @@ Page {
             text: i18n.tr("New Project")
             iconSource: getIcon("add")
             onTriggered: {
-                if (githubPlugin.service.enabled) {
+                if (githubPlugin.service.enabled || assemblaPlugin.service.enabled || launchpadPlugin.service.enabled) {
                     var caller = Utils.findChild(app.header, "newProjectAction_header_button")
 
                     PopupUtils.open(newProjectPopover, caller)
