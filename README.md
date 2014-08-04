@@ -7,6 +7,10 @@ Manage everything about your projects in one app
 
 Developed by Michael Spencer
 
+### In-Development Version ###
+
+This is the in-development version of Project Dashboard. If you're looking for the existing, stable code, check out the `stable` branch.
+
 ### Setting up and Running ###
 
 Project Dashboard requires a repository of mine called Ubuntu UI Extras, which must be available in the root directory of the repository. You can either clone it from the project's root directory or if you have my very helpful [devutils](http://github.com/iBeliever/devutils) project in your `$PATH `, you can simply run:
