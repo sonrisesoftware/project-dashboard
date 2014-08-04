@@ -35,7 +35,7 @@ Page {
     // Needs custom property to show up in autopilot tests
     property bool test: true
 
-    actions: [
+    head.actions: [
         Action {
             id: newProjectAction
             objectName: "newProjectAction"
@@ -58,6 +58,13 @@ Page {
             text: i18n.tr("Inbox")
             iconSource: getIcon("inbox")
             onTriggered: pageStack.push(inboxPage)
+        },
+
+        Action {
+            id: settingsAction
+            text: i18n.tr("Settings")
+            iconSource: getIcon("settings")
+            onTriggered: pageStack.push(Qt.resolvedUrl("ui/SettingsPage.qml"))
         }
     ]
 
@@ -184,23 +191,6 @@ Page {
 
     Scrollbar {
         flickableItem: projectsList
-    }
-
-    tools: ToolbarItems {
-
-        ToolbarButton {
-            objectName: "createProject"
-            action: newProjectAction
-            width: units.gu(8)
-        }
-
-        ToolbarButton {
-            action: inboxAction
-        }
-
-        ToolbarButton {
-            action: settingsAction
-        }
     }
 
     Component {

@@ -40,22 +40,12 @@ TabbedPage {
 
     showTabs: tabs.length > 0
 
-    actions: [
+    head.actions: [
         Action {
-            id: configAction
-            text: i18n.tr("Edit")
-            iconSource: getIcon("edit")
-            onTriggered: pushPageView(Qt.resolvedUrl("ConfigView.qml"), {project: projectPage.project})
-            visible: !sidebar.expanded
-        },
-
-        Action {
-            id: inboxAction
-            text: i18n.tr("Inbox")
-            iconSource: enabled ? getIcon("bell") : getIcon("bell-o")
-            enabled: project.inbox.count > 0
-            onTriggered: selectedView = "inbox"
-            visible: !sidebar.expanded
+            id: refreshAction
+            text: i18n.tr("Refresh")
+            iconSource: getIcon("reload")
+            onTriggered: project.refresh()
         },
 
         Action {
@@ -71,10 +61,20 @@ TabbedPage {
         },
 
         Action {
-            id: refreshAction
-            text: i18n.tr("Refresh")
-            iconSource: getIcon("reload")
-            onTriggered: project.refresh()
+            id: inboxAction
+            text: i18n.tr("Inbox")
+            iconSource: enabled ? getIcon("bell") : getIcon("bell-o")
+            enabled: project.inbox.count > 0
+            onTriggered: selectedView = "inbox"
+            visible: !sidebar.expanded
+        },
+
+        Action {
+            id: configAction
+            text: i18n.tr("Edit")
+            iconSource: getIcon("edit")
+            onTriggered: pushPageView(Qt.resolvedUrl("ConfigView.qml"), {project: projectPage.project})
+            visible: !sidebar.expanded
         }
     ]
 
@@ -127,29 +127,6 @@ TabbedPage {
 
     function pushPageView(pageView) {
         pageStack.push(pluginPage, {view: pageView})
-    }
-
-    tools: ToolbarItems {
-
-        ToolbarButton {
-            action: refreshAction
-        }
-
-        ToolbarButton {
-            id: _actionsButton
-            action: actionsAction
-            visible: action.visible
-        }
-
-        ToolbarButton {
-            action: inboxAction
-            visible: action.visible
-        }
-
-        ToolbarButton {
-            action: configAction
-            visible: action.visible
-        }
     }
 
     Component {

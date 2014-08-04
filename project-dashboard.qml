@@ -68,15 +68,6 @@ MainView {
 
     useDeprecatedToolbar: false
 
-    actions: [
-        Action {
-            id: settingsAction
-            text: i18n.tr("Settings")
-            iconSource: getIcon("settings")
-            onTriggered: pageStack.push(Qt.resolvedUrl("ui/SettingsPage.qml"))
-        }
-    ]
-
     PageStack {
         id: pageStack
 
